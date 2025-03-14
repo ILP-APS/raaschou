@@ -18,6 +18,7 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
 import {
   Sheet,
   SheetClose,
@@ -204,11 +205,12 @@ export function TaskList() {
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="name">Name</Label>
-                <Input 
+                <Textarea 
                   id="name" 
                   value={editedTitle}
                   onChange={(e) => setEditedTitle(e.target.value)}
-                  className="w-full"
+                  className="min-h-[80px] w-full"
+                  placeholder="Type your task name here."
                 />
               </div>
               <div className="grid gap-2">
