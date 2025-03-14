@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   Table, 
@@ -14,7 +13,9 @@ import {
   Circle, 
   CheckCircle, 
   Ban,
-  MoreVertical 
+  MoreVertical,
+  Save,
+  X
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -31,7 +32,6 @@ import {
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
 
-// Define types for our task data
 type TaskStatus = "In Progress" | "Backlog" | "Todo" | "Done" | "Canceled";
 type TaskType = "Documentation" | "Bug" | "Feature";
 
@@ -42,7 +42,6 @@ interface Task {
   status: TaskStatus;
 }
 
-// Sample task data based on the image
 const initialTasks: Task[] = [
   {
     id: "TASK-8782",
@@ -100,7 +99,6 @@ const initialTasks: Task[] = [
   }
 ];
 
-// Helper function to render status icon
 const StatusIcon = ({ status }: { status: TaskStatus }) => {
   switch (status) {
     case "In Progress":
@@ -197,7 +195,6 @@ export function TaskList() {
         </Table>
       </div>
       
-      {/* Edit Task Sheet */}
       {selectedTask && (
         <Sheet open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
           <SheetContent>
@@ -245,9 +242,15 @@ export function TaskList() {
             </div>
             <SheetFooter>
               <SheetClose asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button variant="outline" size="sm">
+                  <X className="mr-2 h-4 w-4" />
+                  Cancel
+                </Button>
               </SheetClose>
-              <Button type="submit" onClick={handleSaveTask}>Save changes</Button>
+              <Button type="submit" onClick={handleSaveTask} size="sm">
+                <Save className="mr-2 h-4 w-4" />
+                Save changes
+              </Button>
             </SheetFooter>
           </SheetContent>
         </Sheet>
