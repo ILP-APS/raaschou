@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { 
   Table, 
   TableBody, 
@@ -17,6 +17,19 @@ import {
   MoreVertical 
 } from "lucide-react";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { toast } from "sonner";
 
 // Define types for our task data
 type TaskStatus = "In Progress" | "Backlog" | "Todo" | "Done" | "Canceled";
@@ -30,7 +43,7 @@ interface Task {
 }
 
 // Sample task data based on the image
-const tasks: Task[] = [
+const initialTasks: Task[] = [
   {
     id: "TASK-8782",
     type: "Documentation",
@@ -106,6 +119,34 @@ const StatusIcon = ({ status }: { status: TaskStatus }) => {
 };
 
 export function TaskList() {
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [editedTitle, setEditedTitle] = useState("");
+  const [editedStatus, setEditedStatus] = useState<TaskStatus>("Todo");
+  
+  const openEditSheet = (task: Task) => {
+    setSelectedTask(task);
+    setEditedTitle(task.title);
+    setEditedStatus(task.status);
+  };
+  
+  const handleSaveTask = () => {
+    if (!selectedTask) return;
+    
+    const updatedTasks = tasks.map(task => 
+      task.id === selectedTask.id 
+        ? { ...task, title: editedTitle, status: editedStatus } 
+        : task
+    );
+    
+    setTasks(updatedTasks);
+    setSelectedTask(null);
+    
+    toast("Task updated successfully", {
+      description: `Task ${selectedTask.id} has been updated.`,
+    });
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -124,7 +165,11 @@ export function TaskList() {
           </TableHeader>
           <TableBody>
             {tasks.map((task) => (
-              <TableRow key={task.id}>
+              <TableRow 
+                key={task.id} 
+                className="cursor-pointer"
+                onClick={() => openEditSheet(task)}
+              >
                 <TableCell>
                   <span className="line-clamp-1">{task.title}</span>
                 </TableCell>
@@ -135,7 +180,14 @@ export function TaskList() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Button variant="ghost" size="icon">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditSheet(task);
+                    }}
+                  >
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </TableCell>
@@ -144,6 +196,62 @@ export function TaskList() {
           </TableBody>
         </Table>
       </div>
+      
+      {/* Edit Task Sheet */}
+      {selectedTask && (
+        <Sheet open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
+          <SheetContent>
+            <SheetHeader>
+              <SheetTitle>Edit Task {selectedTask.id}</SheetTitle>
+              <SheetDescription>
+                Make changes to your task here. Click save when you're done.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="title">Title</Label>
+                <Input 
+                  id="title" 
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="status">Status</Label>
+                <select
+                  id="status"
+                  value={editedStatus}
+                  onChange={(e) => setEditedStatus(e.target.value as TaskStatus)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="Todo">Todo</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Backlog">Backlog</option>
+                  <option value="Done">Done</option>
+                  <option value="Canceled">Canceled</option>
+                </select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="type">Type</Label>
+                <Input
+                  id="type"
+                  value={selectedTask.type}
+                  readOnly
+                  disabled
+                  className="w-full"
+                />
+              </div>
+            </div>
+            <SheetFooter>
+              <SheetClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </SheetClose>
+              <Button type="submit" onClick={handleSaveTask}>Save changes</Button>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
+      )}
     </div>
   );
 }
