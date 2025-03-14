@@ -107,9 +107,4 @@
   .sidebar-item-active {
     @apply bg-sidebar-accent text-sidebar-accent-foreground;
   }
-
-  .sidebar-item-active::before {
-    content: '';
-    @apply absolute left-0 top-1/2 h-3/5 w-1 -translate-y-1/2 rounded-r-sm bg-sidebar-primary;
-  }
 }
