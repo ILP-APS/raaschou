@@ -9,7 +9,7 @@ import { CheckSquare } from "lucide-react";
 const data = {
   versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
   navMain: [{
-    title: "Main Menu",
+    title: "Operations",
     url: "#",
     items: [{
       title: "Tasks",
