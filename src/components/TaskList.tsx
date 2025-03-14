@@ -13,14 +13,11 @@ import {
   Circle, 
   CheckCircle, 
   Ban,
-  MoreVertical,
-  Save,
-  X
+  MoreVertical
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
 import {
   Sheet,
   SheetClose,
@@ -199,56 +196,33 @@ export function TaskList() {
         <Sheet open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
           <SheetContent>
             <SheetHeader>
-              <SheetTitle>Edit Task {selectedTask.id}</SheetTitle>
+              <SheetTitle>Edit profile</SheetTitle>
               <SheetDescription>
-                Make changes to your task here. Click save when you're done.
+                Make changes to your profile here. Click save when you're done.
               </SheetDescription>
             </SheetHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="title">Title</Label>
+                <Label htmlFor="name">Name</Label>
                 <Input 
-                  id="title" 
+                  id="name" 
                   value={editedTitle}
                   onChange={(e) => setEditedTitle(e.target.value)}
                   className="w-full"
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="status">Status</Label>
-                <select
-                  id="status"
-                  value={editedStatus}
-                  onChange={(e) => setEditedStatus(e.target.value as TaskStatus)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                >
-                  <option value="Todo">Todo</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Backlog">Backlog</option>
-                  <option value="Done">Done</option>
-                  <option value="Canceled">Canceled</option>
-                </select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="type">Type</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
-                  id="type"
-                  value={selectedTask.type}
+                  id="username"
+                  value={selectedTask.id}
                   readOnly
-                  disabled
                   className="w-full"
                 />
               </div>
             </div>
-            <SheetFooter>
-              <SheetClose asChild>
-                <Button variant="outline" size="sm">
-                  <X className="mr-2 h-4 w-4" />
-                  Cancel
-                </Button>
-              </SheetClose>
-              <Button type="submit" onClick={handleSaveTask} size="sm">
-                <Save className="mr-2 h-4 w-4" />
+            <SheetFooter className="mt-auto">
+              <Button type="submit" onClick={handleSaveTask} className="w-full sm:w-auto">
                 Save changes
               </Button>
             </SheetFooter>
