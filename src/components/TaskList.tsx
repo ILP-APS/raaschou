@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTasks } from "@/api/taskApi";
 import { useTaskOperations } from "@/hooks/useTaskOperations";
@@ -7,6 +7,8 @@ import { TaskHeader } from "./task/TaskHeader";
 import { TaskTable } from "./task/TaskTable";
 import { TaskEditSheet } from "./task/TaskEditSheet";
 import { TaskCreateSheet } from "./task/TaskCreateSheet";
+import { TaskFilter } from "./task/TaskFilter";
+import { Task } from "@/types/task";
 
 export function TaskList() {
   const {
@@ -32,9 +34,19 @@ export function TaskList() {
     handleCreateTask
   } = useTaskOperations();
   
-  const { data: tasks = [], isLoading, error } = useQuery({
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  
+  const { data: allTasks = [], isLoading, error } = useQuery({
     queryKey: ['tasks'],
     queryFn: fetchTasks
+  });
+  
+  // Apply filters
+  const tasks = allTasks.filter((task: Task) => {
+    const matchesStatus = statusFilter === "all" || task.status === statusFilter;
+    const matchesType = typeFilter === "all" || task.type === typeFilter;
+    return matchesStatus && matchesType;
   });
   
   if (isLoading) {
@@ -48,6 +60,13 @@ export function TaskList() {
   return (
     <div className="flex flex-col gap-4">
       <TaskHeader openCreateSheet={() => setIsCreateOpen(true)} />
+      
+      <TaskFilter 
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        typeFilter={typeFilter}
+        setTypeFilter={setTypeFilter}
+      />
       
       <TaskTable tasks={tasks} openEditSheet={openEditSheet} />
       
