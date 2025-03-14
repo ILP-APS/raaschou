@@ -109,6 +109,7 @@ export const TaskEditSheet = ({
                 <SelectItem value="Nordic Bilsyn">Nordic Bilsyn</SelectItem>
                 <SelectItem value="Nordens Forsikringshus">Nordens Forsikringshus</SelectItem>
                 <SelectItem value="AutoTorvet">AutoTorvet</SelectItem>
+                <SelectItem value="Generel">Generel</SelectItem>
               </SelectContent>
             </Select>
           </div>

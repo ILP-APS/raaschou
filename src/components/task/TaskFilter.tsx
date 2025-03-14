@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { Check, ChevronsUpDown, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -6,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { TaskStatus, TaskType } from "@/types/task";
+
 interface FilterOption {
   value: string;
   label: string;
 }
+
 const statusOptions: FilterOption[] = [{
   value: "all",
   label: "All Statuses"
@@ -29,6 +30,7 @@ const statusOptions: FilterOption[] = [{
   value: "Canceled",
   label: "Canceled"
 }];
+
 const typeOptions: FilterOption[] = [{
   value: "all",
   label: "All Customers"
@@ -41,13 +43,18 @@ const typeOptions: FilterOption[] = [{
 }, {
   value: "AutoTorvet",
   label: "AutoTorvet"
+}, {
+  value: "Generel",
+  label: "Generel"
 }];
+
 interface TaskFilterProps {
   statusFilter: string;
   setStatusFilter: (value: string) => void;
   typeFilter: string;
   setTypeFilter: (value: string) => void;
 }
+
 export function TaskFilter({
   statusFilter,
   setStatusFilter,
