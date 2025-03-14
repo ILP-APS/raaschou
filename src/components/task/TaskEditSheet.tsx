@@ -113,10 +113,18 @@ export const TaskEditSheet = ({
           </div>
         </div>
         <SheetFooter className="mt-auto">
-          <Button variant="destructive" onClick={handleDeleteTask} className="mr-auto">
+          <Button 
+            variant="destructive" 
+            onClick={handleDeleteTask} 
+            className="mr-auto"
+          >
             Delete
           </Button>
-          <Button type="submit" onClick={handleSaveTask}>
+          <Button 
+            type="submit" 
+            variant="default" 
+            onClick={handleSaveTask}
+          >
             Save changes
           </Button>
         </SheetFooter>

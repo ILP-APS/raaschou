@@ -16,7 +16,8 @@ export const TaskHeader = ({ openCreateSheet }: TaskHeaderProps) => {
       </div>
       <Button 
         onClick={openCreateSheet}
-        className="bg-blue-500 hover:bg-blue-600 text-white rounded-full"
+        variant="default"
+        className="rounded-full"
       >
         <Plus className="h-4 w-4 mr-2" />
         Add Task

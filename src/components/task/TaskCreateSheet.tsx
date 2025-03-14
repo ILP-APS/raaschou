@@ -99,7 +99,11 @@ export const TaskCreateSheet = ({
           </div>
         </div>
         <SheetFooter>
-          <Button type="submit" onClick={handleCreateTask}>
+          <Button 
+            type="submit" 
+            variant="default" 
+            onClick={handleCreateTask}
+          >
             Create Task
           </Button>
         </SheetFooter>
