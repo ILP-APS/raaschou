@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Clock, HelpCircle, Circle, CheckCircle, Ban } from "lucide-react";
+import { Clock, HelpCircle, Circle, CheckCircle, Ban, Bug } from "lucide-react";
 import { TaskStatus } from "@/types/task";
 
 export const StatusIcon = ({ status }: { status: TaskStatus }) => {
@@ -15,6 +15,8 @@ export const StatusIcon = ({ status }: { status: TaskStatus }) => {
       return <CheckCircle className="h-4 w-4 text-green-500" />;
     case "Canceled":
       return <Ban className="h-4 w-4 text-gray-500" />;
+    case "Bugs":
+      return <Bug className="h-4 w-4 text-red-500" />;
     default:
       return null;
   }

@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Task, TaskStatus, TaskType } from "@/types/task";
 import { Trash2 } from "lucide-react";
+
 interface TaskEditSheetProps {
   selectedTask: Task | null;
   editedTitle: string;
@@ -19,6 +20,7 @@ interface TaskEditSheetProps {
   handleSaveTask: () => void;
   handleDeleteTask: () => void;
 }
+
 export const TaskEditSheet = ({
   selectedTask,
   editedTitle,
@@ -61,6 +63,7 @@ export const TaskEditSheet = ({
                 <SelectItem value="Backlog">Backlog</SelectItem>
                 <SelectItem value="Done">Done</SelectItem>
                 <SelectItem value="Canceled">Canceled</SelectItem>
+                <SelectItem value="Bugs">Bugs</SelectItem>
               </SelectContent>
             </Select>
           </div>

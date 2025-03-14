@@ -78,6 +78,7 @@ export const TaskCreateSheet = ({
                 <SelectItem value="Backlog">Backlog</SelectItem>
                 <SelectItem value="Done">Done</SelectItem>
                 <SelectItem value="Canceled">Canceled</SelectItem>
+                <SelectItem value="Bugs">Bugs</SelectItem>
               </SelectContent>
             </Select>
           </div>

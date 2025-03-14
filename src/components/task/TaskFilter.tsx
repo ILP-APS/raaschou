@@ -29,6 +29,9 @@ const statusOptions: FilterOption[] = [{
 }, {
   value: "Canceled",
   label: "Canceled"
+}, {
+  value: "Bugs",
+  label: "Bugs"
 }];
 
 const typeOptions: FilterOption[] = [{
