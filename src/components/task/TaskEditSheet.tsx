@@ -20,6 +20,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Task, TaskStatus, TaskType } from "@/types/task";
+import { Trash2 } from "lucide-react";
 
 interface TaskEditSheetProps {
   selectedTask: Task | null;
@@ -114,10 +115,11 @@ export const TaskEditSheet = ({
         </div>
         <SheetFooter className="mt-auto">
           <Button 
-            variant="destructive" 
+            variant="secondary" 
             onClick={handleDeleteTask} 
-            className="mr-auto"
+            className="mr-auto gap-2"
           >
+            <Trash2 className="h-4 w-4" />
             Delete
           </Button>
           <Button 
