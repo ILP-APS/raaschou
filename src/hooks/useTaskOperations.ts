@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Task, TaskStatus, TaskType } from "@/types/task";
@@ -10,11 +9,11 @@ export const useTaskOperations = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedStatus, setEditedStatus] = useState<TaskStatus>("Todo");
-  const [editedType, setEditedType] = useState<TaskType>("Bug");
+  const [editedType, setEditedType] = useState<TaskType>("Nordic Bilsyn");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskStatus, setNewTaskStatus] = useState<TaskStatus>("Todo");
-  const [newTaskType, setNewTaskType] = useState<TaskType>("Bug");
+  const [newTaskType, setNewTaskType] = useState<TaskType>("Nordic Bilsyn");
   
   const createMutation = useMutation({
     mutationFn: async (newTask: { task_id: string, title: string, status: TaskStatus, type: TaskType }) => {

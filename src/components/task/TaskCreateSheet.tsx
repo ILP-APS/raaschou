@@ -82,18 +82,18 @@ export const TaskCreateSheet = ({
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="new-type">Type</Label>
+            <Label htmlFor="new-type">Customer</Label>
             <Select
               value={newTaskType}
               onValueChange={(value) => setNewTaskType(value as TaskType)}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select type" />
+                <SelectValue placeholder="Select customer" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Bug">Bug</SelectItem>
-                <SelectItem value="Feature">Feature</SelectItem>
-                <SelectItem value="Documentation">Documentation</SelectItem>
+                <SelectItem value="Nordic Bilsyn">Nordic Bilsyn</SelectItem>
+                <SelectItem value="Nordens Forsikringshus">Nordens Forsikringshus</SelectItem>
+                <SelectItem value="AutoTorvet">AutoTorvet</SelectItem>
               </SelectContent>
             </Select>
           </div>

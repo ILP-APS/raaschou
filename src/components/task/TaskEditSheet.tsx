@@ -97,18 +97,18 @@ export const TaskEditSheet = ({
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="type">Type</Label>
+            <Label htmlFor="type">Customer</Label>
             <Select
               value={editedType}
               onValueChange={(value) => setEditedType(value as TaskType)}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select type" />
+                <SelectValue placeholder="Select customer" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Bug">Bug</SelectItem>
-                <SelectItem value="Feature">Feature</SelectItem>
-                <SelectItem value="Documentation">Documentation</SelectItem>
+                <SelectItem value="Nordic Bilsyn">Nordic Bilsyn</SelectItem>
+                <SelectItem value="Nordens Forsikringshus">Nordens Forsikringshus</SelectItem>
+                <SelectItem value="AutoTorvet">AutoTorvet</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { Check, ChevronsUpDown, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -30,16 +31,16 @@ const statusOptions: FilterOption[] = [{
 }];
 const typeOptions: FilterOption[] = [{
   value: "all",
-  label: "All Types"
+  label: "All Customers"
 }, {
-  value: "Documentation",
-  label: "Documentation"
+  value: "Nordic Bilsyn",
+  label: "Nordic Bilsyn"
 }, {
-  value: "Bug",
-  label: "Bug"
+  value: "Nordens Forsikringshus",
+  label: "Nordens Forsikringshus"
 }, {
-  value: "Feature",
-  label: "Feature"
+  value: "AutoTorvet",
+  label: "AutoTorvet"
 }];
 interface TaskFilterProps {
   statusFilter: string;
@@ -86,13 +87,16 @@ export function TaskFilter({
 
       <Popover open={typeOpen} onOpenChange={setTypeOpen}>
         <PopoverTrigger asChild>
-          
+          <Button variant="outline" role="combobox" aria-expanded={typeOpen} className="w-[220px] justify-between">
+            {typeFilter !== "all" ? typeOptions.find(option => option.value === typeFilter)?.label : "Customer"}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[160px] p-0">
+        <PopoverContent className="w-[220px] p-0">
           <Command>
-            <CommandInput placeholder="Search type..." className="h-9" />
+            <CommandInput placeholder="Search customer..." className="h-9" />
             <CommandList>
-              <CommandEmpty>No type found.</CommandEmpty>
+              <CommandEmpty>No customer found.</CommandEmpty>
               <CommandGroup>
                 {typeOptions.map(option => <CommandItem key={option.value} value={option.value} onSelect={currentValue => {
                 setTypeFilter(currentValue);
