@@ -16,7 +16,7 @@ export function DashboardCard({
   return (
     <div
       className={cn(
-        "dashboard-card animate-fade-in",
+        "dashboard-card animate-fade-in font-geist",
         className
       )}
       {...props}

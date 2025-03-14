@@ -90,14 +90,14 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-geist;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
 @layer components {
   .dashboard-card {
-    @apply overflow-hidden rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100 transition-all duration-300 hover:shadow-md;
+    @apply overflow-hidden rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100 transition-all duration-300 hover:shadow-md font-geist;
   }
 
   .sidebar-item {
