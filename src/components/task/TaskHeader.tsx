@@ -16,10 +16,10 @@ export const TaskHeader = ({ openCreateSheet }: TaskHeaderProps) => {
       </div>
       <Button 
         onClick={openCreateSheet}
-        variant="default"
-        className="rounded-full"
+        variant="blue"
+        size="pill"
       >
-        <Plus className="h-4 w-4 mr-2" />
+        <Plus className="h-4 w-4" />
         Add Task
       </Button>
     </div>
