@@ -1,10 +1,11 @@
+
 import * as React from "react";
-import { Check, ChevronsUpDown, Filter } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { TaskStatus, TaskType } from "@/types/task";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface FilterOption {
   value: string;
@@ -66,17 +67,18 @@ export function TaskFilter({
 }: TaskFilterProps) {
   const [statusOpen, setStatusOpen] = React.useState(false);
   const [typeOpen, setTypeOpen] = React.useState(false);
-  return <div className="flex gap-2 items-center mb-4">
-      
-
+  const isMobile = useIsMobile();
+  
+  return (
+    <div className={`flex ${isMobile ? 'flex-col' : ''} gap-2 items-${isMobile ? 'stretch' : 'center'} mb-4`}>
       <Popover open={statusOpen} onOpenChange={setStatusOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" role="combobox" aria-expanded={statusOpen} className="w-[160px] justify-between">
+          <Button variant="outline" role="combobox" aria-expanded={statusOpen} className={`${isMobile ? 'w-full' : 'w-[160px]'} justify-between`}>
             {statusFilter !== "all" ? statusOptions.find(option => option.value === statusFilter)?.label : "Status"}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[160px] p-0">
+        <PopoverContent className={`${isMobile ? 'w-[calc(100vw-2rem)]' : 'w-[160px]'} p-0`}>
           <Command>
             <CommandInput placeholder="Search status..." className="h-9" />
             <CommandList>
@@ -97,12 +99,12 @@ export function TaskFilter({
 
       <Popover open={typeOpen} onOpenChange={setTypeOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" role="combobox" aria-expanded={typeOpen} className="w-[220px] justify-between">
+          <Button variant="outline" role="combobox" aria-expanded={typeOpen} className={`${isMobile ? 'w-full' : 'w-[220px]'} justify-between`}>
             {typeFilter !== "all" ? typeOptions.find(option => option.value === typeFilter)?.label : "Customer"}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[220px] p-0">
+        <PopoverContent className={`${isMobile ? 'w-[calc(100vw-2rem)]' : 'w-[220px]'} p-0`}>
           <Command>
             <CommandInput placeholder="Search customer..." className="h-9" />
             <CommandList>
@@ -120,7 +122,6 @@ export function TaskFilter({
           </Command>
         </PopoverContent>
       </Popover>
-
-      
-    </div>;
+    </div>
+  );
 }

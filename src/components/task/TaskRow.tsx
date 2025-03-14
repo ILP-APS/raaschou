@@ -9,9 +9,10 @@ import { StatusIcon } from "./StatusIcon";
 interface TaskRowProps {
   task: Task;
   openEditSheet: (task: Task) => void;
+  isMobile: boolean;
 }
 
-export const TaskRow = ({ task, openEditSheet }: TaskRowProps) => {
+export const TaskRow = ({ task, openEditSheet, isMobile }: TaskRowProps) => {
   return (
     <TableRow 
       key={task.id} 
@@ -19,7 +20,10 @@ export const TaskRow = ({ task, openEditSheet }: TaskRowProps) => {
       onClick={() => openEditSheet(task)}
     >
       <TableCell>
-        <span className="line-clamp-1">{task.title}</span>
+        <div className="flex flex-col">
+          <span className="line-clamp-1 font-medium">{task.title}</span>
+          {isMobile && <span className="text-xs text-muted-foreground mt-1">{task.type}</span>}
+        </div>
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
@@ -27,9 +31,11 @@ export const TaskRow = ({ task, openEditSheet }: TaskRowProps) => {
           <span>{task.status}</span>
         </div>
       </TableCell>
-      <TableCell>
-        <span>{task.type}</span>
-      </TableCell>
+      {!isMobile && (
+        <TableCell>
+          <span>{task.type}</span>
+        </TableCell>
+      )}
       <TableCell>
         <Button 
           variant="ghost" 

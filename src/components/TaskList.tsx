@@ -9,6 +9,7 @@ import { TaskEditSheet } from "./task/TaskEditSheet";
 import { TaskCreateSheet } from "./task/TaskCreateSheet";
 import { TaskFilter } from "./task/TaskFilter";
 import { Task } from "@/types/task";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function TaskList() {
   const {
@@ -36,6 +37,7 @@ export function TaskList() {
   
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const isMobile = useIsMobile();
   
   const { data: allTasks = [], isLoading, error } = useQuery({
     queryKey: ['tasks'],
@@ -50,15 +52,15 @@ export function TaskList() {
   });
   
   if (isLoading) {
-    return <div>Loading tasks...</div>;
+    return <div className="flex justify-center p-4">Loading tasks...</div>;
   }
   
   if (error) {
-    return <div>Error loading tasks: {(error as Error).message}</div>;
+    return <div className="flex justify-center p-4 text-destructive">Error loading tasks: {(error as Error).message}</div>;
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 w-full">
       <TaskHeader openCreateSheet={() => setIsCreateOpen(true)} />
       
       <TaskFilter 
