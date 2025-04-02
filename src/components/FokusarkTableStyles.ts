@@ -9,8 +9,6 @@ export const tableContainerStyles = `
     position: relative; /* Create a stacking context */
     z-index: 1; /* Ensure proper stacking */
     border-radius: 0 0 0.5rem 0.5rem; /* Match the bottom corners with the container */
-    padding-right: 0 !important;
-    margin-right: 0 !important;
   }
 
   /* Hide scrollbar when not hovering */
@@ -141,8 +139,6 @@ export const tableContainerStyles = `
   tr td:last-child,
   tr th:last-child {
     border-right: 1px solid hsl(var(--border));
-    padding-right: 0 !important;
-    margin-right: 0 !important;
   }
   
   /* Specifically target the Mont 2 column to ensure no space after it */
@@ -154,7 +150,6 @@ export const tableContainerStyles = `
   /* Fix table width issues */
   .table-scroll-container table {
     table-layout: fixed;
-    width: max-content;
+    width: max-content !important; /* Allow table to take necessary width */
   }
 `;
-
