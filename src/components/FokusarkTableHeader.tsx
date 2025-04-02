@@ -50,27 +50,49 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
     return null;
   };
 
+  // Get column width based on index for proper alignment
+  const getColumnWidth = (index: number): string => {
+    if (index === 0) return "100px"; // Nr. column
+    if (index === 1) return "200px"; // Navn column
+    return "auto";
+  };
+
   // Generate column groups for the first header row
   const renderColumnGroups = () => {
     const groups = [];
     let currentIndex = 0;
+    let leftPosition = 0;
 
     while (currentIndex < columnCount) {
       const group = getColumnGroup(currentIndex);
       
       if (group) {
+        // Calculate sticky positioning for the Aftale group
+        let style: React.CSSProperties = {};
+        if (currentIndex === 0) {
+          style = { 
+            position: 'sticky',
+            left: 0,
+            zIndex: 30,
+            backgroundColor: 'white'
+          };
+        }
+        
         // Add a grouped header cell
         groups.push(
           <th 
             key={`group-${currentIndex}`} 
             colSpan={group.colSpan}
-            className={`px-4 py-2 text-center text-sm font-medium text-foreground uppercase tracking-wider whitespace-nowrap bg-muted/30 border-b 
-              ${currentIndex === 0 ? 'sticky left-0 z-20 bg-white' : ''}`}
+            className="px-4 py-2 text-center text-sm font-medium text-foreground uppercase tracking-wider whitespace-nowrap bg-muted/30 border-b"
+            style={style}
           >
             {group.name}
           </th>
         );
+        
+        // Update for next iteration
         currentIndex += group.colSpan;
+        leftPosition += group.colSpan * 100; // Approximate width calculation
       } else {
         // Add an empty header cell
         groups.push(
@@ -82,6 +104,7 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
           </th>
         );
         currentIndex += 1;
+        leftPosition += 100; // Approximate width
       }
     }
     
@@ -100,6 +123,7 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
           <th 
             key={index} 
             className={getColumnClass(index)}
+            style={{ minWidth: getColumnWidth(index) }}
           >
             {getColumnName(index)}
           </th>

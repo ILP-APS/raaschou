@@ -85,16 +85,31 @@ export const tableContainerStyles = `
     min-width: 200px; /* Width for Navn column */
   }
   
-  /* Make sure column groups are properly aligned with their columns */
+  /* Make sure column groups stay aligned with their columns */
   thead tr:first-child th {
     border-bottom: 1px solid hsl(var(--border));
   }
   
-  /* Ensure the grouped headers stay fixed when scrolling */
+  /* IMPORTANT: Ensure column groups align precisely with their columns below */
   thead tr:first-child th[colspan="3"]:first-child {
     position: sticky;
     left: 0;
     z-index: 30;
     background-color: white;
+  }
+
+  /* Remove any weird stacking/overlap issues between header rows */
+  thead tr {
+    white-space: nowrap;
+  }
+  
+  /* Ensure column group headers have solid background to hide content underneath */
+  thead tr:first-child th {
+    background-color: white;
+  }
+  
+  /* Ensure column groups visually align with their columns */
+  thead tr:first-child th[colspan] {
+    box-sizing: content-box;
   }
 `;
