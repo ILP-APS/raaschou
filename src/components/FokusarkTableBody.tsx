@@ -6,6 +6,25 @@ interface FokusarkTableBodyProps {
 }
 
 const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data }) => {
+  // Function to get cell class based on column index
+  const getCellClass = (index: number, isSubAppointment: boolean): string => {
+    let classes = "px-4 py-3 whitespace-nowrap text-sm";
+    
+    // Add indentation for sub-appointments first column
+    if (isSubAppointment && index === 0) {
+      classes += " pl-8";
+    }
+    
+    // Add sticky left positioning for first two columns
+    if (index === 0) {
+      classes += " sticky left-0 z-10 bg-background";
+    } else if (index === 1) {
+      classes += " sticky left-[100px] z-10 bg-background";
+    }
+    
+    return classes;
+  };
+
   return (
     <tbody className="bg-background divide-y divide-border">
       {data.map((row, rowIndex) => {
@@ -24,9 +43,7 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data }) => {
             {displayRow.map((cell, cellIndex) => (
               <td 
                 key={cellIndex} 
-                className={`px-4 py-3 whitespace-nowrap text-sm ${
-                  isSubAppointment && cellIndex === 0 ? 'pl-8' : ''
-                }`}
+                className={getCellClass(cellIndex, isSubAppointment)}
               >
                 {cell}
               </td>

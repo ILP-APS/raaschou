@@ -57,4 +57,22 @@ export const tableContainerStyles = `
     overflow-x: hidden !important;
     max-width: 100vw;
   }
+  
+  /* Ensure sticky columns work correctly with appropriate shadows */
+  tr:hover td.sticky {
+    background-color: hsla(var(--muted)/0.5) !important;
+  }
+  
+  /* Add shadow to the right of sticky columns */
+  td.sticky:after,
+  th.sticky:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(90deg, rgba(0,0,0,0.1), transparent);
+    pointer-events: none;
+  }
 `;
