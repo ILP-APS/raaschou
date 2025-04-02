@@ -1,3 +1,4 @@
+
 import React from "react";
 
 interface FokusarkTableHeaderProps {
@@ -84,21 +85,21 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
   // Function to get column group information
   const getColumnGroup = (index: number): { name: string, colSpan: number } | null => {
     if (index === 0) {
-      return { name: "Aftale", colSpan: 2 }; // Reduced to 2 - only cover Nr and Navn
+      return { name: "Aftale", colSpan: 2 }; // Covers Nr and Navn
     } else if (index === 2) {
       return { name: "Ansvarlig", colSpan: 1 }; // Separate group for Ansvarlig
     } else if (index === 3) {
       return { name: "TILBUD", colSpan: 5 }; // Group for Tilbud, Montage, Underleverandør, Column 7, Column 8
     } else if (index === 8) {
-      return { name: "Estimeret", colSpan: 5 }; // Group for Est 1-5
-    } else if (index === 13) {
-      return { name: "Realiseret", colSpan: 5 }; // Group for Real 1-5
-    } else if (index === 18) {
+      return { name: "Estimeret", colSpan: 4 }; // Changed from 5 to 4 columns
+    } else if (index === 12) {
+      return { name: "Realiseret", colSpan: 4 }; // Changed from 5 to 4 columns
+    } else if (index === 16) {
       return { name: "Timer tilbage", colSpan: 1 }; // Group for Timer tilbage
-    } else if (index === 19) {
-      return { name: "Produktion", colSpan: 6 }; // Group for Prod 1-6
-    } else if (index === 25) {
-      return { name: "Montage", colSpan: 2 }; // Group for Mont 1-2
+    } else if (index === 17) {
+      return { name: "Produktion", colSpan: 5 }; // Changed from 6 to 5 columns
+    } else if (index === 22) {
+      return { name: "Montage", colSpan: 2 }; // Keep Montage with 2 columns
     }
     return null;
   };
