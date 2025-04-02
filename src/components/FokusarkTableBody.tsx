@@ -30,27 +30,6 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data }) => {
     return classes;
   };
 
-  // Function to ensure all rows have the same number of columns
-  const normalizeRow = (row: string[], expectedLength: number): string[] => {
-    const displayRow = row.slice(0, row.length - 1); // Remove the row type indicator
-    const rowType = row[row.length - 1];
-    
-    // Create a new array with the right length, filling in empty cells with placeholder data
-    const normalizedRow = Array(expectedLength).fill('');
-    
-    // Copy values from the original row
-    displayRow.forEach((value, index) => {
-      if (index < expectedLength) {
-        normalizedRow[index] = value;
-      }
-    });
-    
-    // Add the row type indicator back
-    normalizedRow.push(rowType);
-    
-    return normalizedRow;
-  };
-
   // Determine the expected number of columns (excluding the row type indicator)
   const expectedColumns = 25; // Keep at 25 to include Mont 2
 
@@ -61,18 +40,25 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data }) => {
         const rowType = row[row.length - 1];
         const isSubAppointment = rowType === 'sub-appointment';
         
-        // Normalize the row to ensure it has the expected number of columns
-        const normalizedRow = normalizeRow(row, expectedColumns);
+        // Get actual display data (without the row type indicator)
+        const displayRow = row.slice(0, row.length - 1);
         
-        // Remove the row type indicator before rendering
-        const displayRow = normalizedRow.slice(0, normalizedRow.length - 1);
+        // Create an array of the right length if needed
+        const normalizedRow = Array(expectedColumns).fill('');
+        
+        // Fill in the row with actual data where available
+        displayRow.forEach((value, index) => {
+          if (index < expectedColumns) {
+            normalizedRow[index] = value;
+          }
+        });
         
         return (
           <tr 
             key={rowIndex} 
             className={`hover:bg-muted/50 ${isSubAppointment ? 'pl-4 bg-muted/20' : ''}`}
           >
-            {displayRow.map((cell, cellIndex) => (
+            {normalizedRow.map((cell, cellIndex) => (
               <td 
                 key={cellIndex} 
                 className={getCellClass(cellIndex, isSubAppointment)}
