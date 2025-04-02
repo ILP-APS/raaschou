@@ -1,6 +1,6 @@
 
 import React from "react";
-import { AppSidebar } from "@/components/AppSidebar";
+import { AppSidebar } from "@/components/ui/AppSidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -37,7 +37,7 @@ export default function FokusarkPage() {
       <AppSidebar />
       <SidebarInset>
         <div className="flex flex-col h-screen overflow-hidden">
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 z-10 bg-background">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumb>
@@ -64,37 +64,35 @@ export default function FokusarkPage() {
 
             <div className="rounded-md border w-full overflow-hidden">
               <div className="h-[600px] overflow-y-auto">
-                <div className="overflow-x-hidden hover:overflow-x-auto transition-all duration-300 max-w-full">
-                  <div className="w-max min-w-full">
-                    <table className="w-full divide-y divide-border">
-                      <thead className="bg-muted/50">
-                        <tr>
-                          {Array.from({ length: 24 }, (_, index) => (
-                            <th 
-                              key={index} 
-                              className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap sticky top-0 bg-background border-b"
+                <div className="max-w-full max-h-[600px] overflow-x-hidden hover:overflow-x-auto overscroll-x-contain transition-all duration-300">
+                  <table className="min-w-full divide-y divide-border">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        {Array.from({ length: 24 }, (_, index) => (
+                          <th 
+                            key={index} 
+                            className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap sticky top-0 bg-background border-b"
+                          >
+                            Column {index + 1}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="bg-background divide-y divide-border">
+                      {tableData.map((row, rowIndex) => (
+                        <tr key={rowIndex} className="hover:bg-muted/50">
+                          {row.map((cell, cellIndex) => (
+                            <td 
+                              key={cellIndex} 
+                              className="px-4 py-3 whitespace-nowrap text-sm"
                             >
-                              Column {index + 1}
-                            </th>
+                              {cell}
+                            </td>
                           ))}
                         </tr>
-                      </thead>
-                      <tbody className="bg-background divide-y divide-border">
-                        {tableData.map((row, rowIndex) => (
-                          <tr key={rowIndex} className="hover:bg-muted/50">
-                            {row.map((cell, cellIndex) => (
-                              <td 
-                                key={cellIndex} 
-                                className="px-4 py-3 whitespace-nowrap text-sm"
-                              >
-                                {cell}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
