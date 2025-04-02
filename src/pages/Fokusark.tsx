@@ -45,58 +45,60 @@ export default function FokusarkPage() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="#">
-                  Operations
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Fokusark</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 md:p-6">
-          <div className="flex flex-col gap-4">
-            <h2 className="text-2xl font-semibold tracking-tight">Fokusark Table</h2>
-            <p className="text-sm text-muted-foreground">
-              This table contains 24 columns and 50 rows with scrollable content.
-            </p>
-          </div>
+        <div className="flex flex-col h-screen overflow-hidden">
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="#">
+                    Operations
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Fokusark</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </header>
+          <div className="flex flex-col gap-4 p-4 md:p-6 overflow-y-auto">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-2xl font-semibold tracking-tight">Fokusark Table</h2>
+              <p className="text-sm text-muted-foreground">
+                This table contains 24 columns and 50 rows with scrollable content.
+              </p>
+            </div>
 
-          <div className="rounded-md border">
-            <ScrollArea className="h-[600px]">
-              <div className="overflow-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      {Array.from({ length: 24 }, (_, index) => (
-                        <TableHead key={index} className="whitespace-nowrap">
-                          Column {index + 1}
-                        </TableHead>
-                      ))}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {tableData.map((row, rowIndex) => (
-                      <TableRow key={rowIndex}>
-                        {row.map((cell, cellIndex) => (
-                          <TableCell key={cellIndex} className="whitespace-nowrap">
-                            {cell}
-                          </TableCell>
+            <div className="rounded-md border">
+              <ScrollArea className="h-[600px]">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        {Array.from({ length: 24 }, (_, index) => (
+                          <TableHead key={index} className="whitespace-nowrap">
+                            Column {index + 1}
+                          </TableHead>
                         ))}
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </ScrollArea>
+                    </TableHeader>
+                    <TableBody>
+                      {tableData.map((row, rowIndex) => (
+                        <TableRow key={rowIndex}>
+                          {row.map((cell, cellIndex) => (
+                            <TableCell key={cellIndex} className="whitespace-nowrap">
+                              {cell}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </ScrollArea>
+            </div>
           </div>
         </div>
       </SidebarInset>
