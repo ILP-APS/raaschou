@@ -30,11 +30,13 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
   const getColumnClass = (index: number): string => {
     let classes = "px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap sticky top-0 bg-background border-b";
     
-    // Add sticky left positioning for first two columns
+    // Add sticky left positioning for first three columns
     if (index === 0) {
       classes += " sticky left-0 z-20 bg-background"; // Higher z-index to appear above other cells
     } else if (index === 1) {
       classes += " sticky left-[100px] z-20 bg-background"; // Adjust left position based on first column width
+    } else if (index === 2) {
+      classes += " sticky left-[300px] z-20 bg-background"; // Keep Ansvarlig column visible
     }
     
     return classes;

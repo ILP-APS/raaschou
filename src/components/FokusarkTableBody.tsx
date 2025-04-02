@@ -15,11 +15,13 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data }) => {
       classes += " pl-8";
     }
     
-    // Add sticky left positioning for first two columns
+    // Add sticky left positioning for first three columns
     if (index === 0) {
       classes += " sticky left-0 z-10 bg-background";
     } else if (index === 1) {
       classes += " sticky left-[100px] z-10 bg-background";
+    } else if (index === 2) {
+      classes += " sticky left-[300px] z-10 bg-background"; // Keep Ansvarlig column visible
     }
     
     return classes;

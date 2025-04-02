@@ -75,4 +75,17 @@ export const tableContainerStyles = `
     background: linear-gradient(90deg, rgba(0,0,0,0.1), transparent);
     pointer-events: none;
   }
+  
+  /* Adjust the column widths to ensure proper display */
+  table th:nth-child(1) {
+    min-width: 100px; /* Width for Nr. column */
+  }
+  
+  table th:nth-child(2) {
+    min-width: 200px; /* Width for Navn column */
+  }
+  
+  table th:nth-child(3) {
+    min-width: 150px; /* Width for Ansvarlig column */
+  }
 `;
