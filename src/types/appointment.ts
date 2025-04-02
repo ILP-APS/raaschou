@@ -37,3 +37,26 @@ export interface Appointment {
   shippingAddress: ShippingAddress | null;
   appointmentNumber: string;
 }
+
+export interface AppointmentDetail {
+  hnAppointmentID: number;
+  hnShippingAddressID: number | null;
+  appointmentNumber: string;
+  customerAccountNumber: string;
+  responsibleHnUserID: number;
+  subject: string;
+  project: string | null;
+  description: string;
+  startDate: string;
+  endDate: string;
+  hnAppointmentCategoryID: number;
+  hnBudgetID: number | null;
+  hnMainAppointmentID: number | null;
+  blocked: boolean;
+  tags: string[];
+  customerRef: string;
+  notes: string;
+  done: boolean;
+  doneDate: string | null;
+  created: string;
+}

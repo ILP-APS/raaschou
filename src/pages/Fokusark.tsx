@@ -17,9 +17,9 @@ import {
 } from "@/components/ui/sidebar";
 import FokusarkTable from "@/components/FokusarkTable";
 import { generateTableData } from "@/utils/tableData";
-import { fetchOpenAppointments } from "@/utils/apiUtils";
+import { fetchOpenAppointments, fetchAppointmentDetail } from "@/utils/apiUtils";
 import { useToast } from "@/hooks/use-toast";
-import { Appointment } from "@/types/appointment";
+import { Appointment, AppointmentDetail } from "@/types/appointment";
 
 export default function FokusarkPage() {
   const [tableData, setTableData] = useState<string[][]>([]);
@@ -33,21 +33,43 @@ export default function FokusarkPage() {
         // Fetch appointments from the API
         const appointments = await fetchOpenAppointments();
         
-        // Process the appointment data to match our table format
-        const processedData = appointments.map((appointment: Appointment, index: number) => {
-          // Create a row with the appointment number and customer name in first two columns
-          const row = [
-            appointment.appointmentNumber || `${index + 1}`, 
-            appointment.customerAddress.name || 'N/A'
-          ];
-          
-          // Add remaining columns with placeholder data to match the 24 column structure
-          for (let i = 2; i < 24; i++) {
-            row.push(`R${index + 1}C${i + 1}`);
+        // Create an array to hold the processed data
+        const processedData: string[][] = [];
+        
+        // For each appointment, fetch the details to get the subject
+        for (const appointment of appointments) {
+          try {
+            // Fetch the appointment details
+            const details = await fetchAppointmentDetail(appointment.hnAppointmentID);
+            
+            // Create a row with the appointment number and subject in first two columns
+            const row = [
+              appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
+              details.subject || 'N/A'
+            ];
+            
+            // Add remaining columns with placeholder data to match the 24 column structure
+            for (let i = 2; i < 24; i++) {
+              row.push(`R${processedData.length + 1}C${i + 1}`);
+            }
+            
+            processedData.push(row);
+          } catch (error) {
+            console.error(`Error fetching details for appointment ${appointment.hnAppointmentID}:`, error);
+            // Add a row with error information
+            const errorRow = [
+              appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
+              `Error: Could not fetch details`
+            ];
+            
+            // Add remaining columns with placeholder data
+            for (let i = 2; i < 24; i++) {
+              errorRow.push(`-`);
+            }
+            
+            processedData.push(errorRow);
           }
-          
-          return row;
-        });
+        }
         
         // If no appointments, use sample data
         if (processedData.length === 0) {
@@ -108,7 +130,7 @@ export default function FokusarkPage() {
             <div className="flex flex-col gap-4 content-wrapper">
               <h2 className="text-2xl font-semibold tracking-tight">Fokusark Table</h2>
               <p className="text-sm text-muted-foreground mb-6">
-                This table displays open appointments from e-regnskab with Nr. and Name in the first two columns.
+                This table displays open appointments from e-regnskab with Nr. and Subject in the first two columns.
               </p>
             </div>
             
