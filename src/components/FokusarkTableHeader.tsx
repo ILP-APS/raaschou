@@ -75,7 +75,7 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
             left: 0,
             zIndex: 30,
             backgroundColor: 'white',
-            width: '300px' // Explicitly set width to match Nr(100px) + Navn(200px) columns
+            minWidth: '300px' // Min width to match Nr(100px) + Navn(200px) columns
           };
         }
         

@@ -96,7 +96,8 @@ export const tableContainerStyles = `
     left: 0;
     z-index: 30;
     background-color: white;
-    width: 300px !important; /* Match exact width of Nr. + Navn columns (100px + 200px) */
+    min-width: 300px; /* Minimum width to match Nr. + Navn columns (100px + 200px) */
+    width: auto; /* Allow it to expand with all three columns */
   }
 
   /* Remove any weird stacking/overlap issues between header rows */
