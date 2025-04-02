@@ -8,6 +8,7 @@ export const tableContainerStyles = `
     overflow-y: hidden;
     position: relative; /* Create a stacking context */
     z-index: 1; /* Ensure proper stacking */
+    border-radius: 0 0 0.5rem 0.5rem; /* Match the bottom corners with the container */
   }
 
   /* Hide scrollbar when not hovering */
@@ -113,5 +114,29 @@ export const tableContainerStyles = `
     z-index: 30;
     background-color: white;
     width: 300px; /* Combined width of Nr. and Navn columns */
+  }
+  
+  /* Fix the table end appearance */
+  .table-scroll-container table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: max-content;
+    min-width: 100%;
+  }
+  
+  /* Ensure the table has proper right border */
+  .table-scroll-container {
+    border-right: 1px solid hsl(var(--border));
+  }
+  
+  /* Make the bottom border of the last row visible */
+  tbody tr:last-child td {
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  
+  /* Add right border to the last cell in each row */
+  tr td:last-child,
+  tr th:last-child {
+    border-right: 1px solid hsl(var(--border));
   }
 `;
