@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import {
   Breadcrumb,
@@ -17,10 +17,66 @@ import {
 } from "@/components/ui/sidebar";
 import FokusarkTable from "@/components/FokusarkTable";
 import { generateTableData } from "@/utils/tableData";
+import { fetchOpenAppointments } from "@/utils/apiUtils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function FokusarkPage() {
-  // Generate table data for the Fokusark table
-  const tableData = generateTableData();
+  const [tableData, setTableData] = useState<string[][]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        // Fetch appointments from the API
+        const appointments = await fetchOpenAppointments();
+        
+        // Process the appointment data to match our table format
+        const processedData = appointments.map((appointment: any, index: number) => {
+          // Create a row with the appointment number and name in first two columns
+          const row = [`${index + 1}`, appointment.name || 'N/A'];
+          
+          // Add remaining columns with placeholder data to match the 24 column structure
+          for (let i = 2; i < 24; i++) {
+            row.push(`R${index + 1}C${i + 1}`);
+          }
+          
+          return row;
+        });
+        
+        // If no appointments, use sample data
+        if (processedData.length === 0) {
+          setTableData(generateTableData());
+          toast({
+            title: "No appointments found",
+            description: "Using sample data instead.",
+            variant: "default",
+          });
+        } else {
+          setTableData(processedData);
+          toast({
+            title: "Data loaded",
+            description: `Loaded ${processedData.length} appointments.`,
+            variant: "default",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching appointments:", error);
+        // Use generated data as fallback
+        setTableData(generateTableData());
+        toast({
+          title: "Error loading data",
+          description: "Failed to fetch appointments. Using sample data instead.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+  }, [toast]);
   
   return (
     <SidebarProvider>
@@ -48,12 +104,17 @@ export default function FokusarkPage() {
             <div className="flex flex-col gap-4 content-wrapper">
               <h2 className="text-2xl font-semibold tracking-tight">Fokusark Table</h2>
               <p className="text-sm text-muted-foreground mb-6">
-                This table contains 24 columns and 50 rows with scrollable content. Hover over the table to scroll horizontally.
+                This table displays open appointments from e-regnskab with Nr. and Name in the first two columns.
               </p>
             </div>
             
-            {/* Now using the dedicated FokusarkTable component */}
-            <FokusarkTable data={tableData} />
+            {isLoading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+              </div>
+            ) : (
+              <FokusarkTable data={tableData} />
+            )}
           </div>
         </div>
       </SidebarInset>
