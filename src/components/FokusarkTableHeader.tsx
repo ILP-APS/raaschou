@@ -13,6 +13,8 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
         return "Nr.";
       case 1:
         return "Navn";
+      case 2:
+        return "Ansvarlig";
       default:
         return `Column ${index + 1}`;
     }
