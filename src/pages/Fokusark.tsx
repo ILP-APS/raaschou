@@ -47,7 +47,7 @@ export default function FokusarkPage() {
           <div className="flex flex-col gap-4 p-4 md:p-6 overflow-y-auto content-wrapper">
             <div className="flex flex-col gap-4 content-wrapper">
               <h2 className="text-2xl font-semibold tracking-tight">Fokusark Table</h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mb-6">
                 This table contains 24 columns and 50 rows with scrollable content. Hover over the table to scroll horizontally.
               </p>
             </div>
