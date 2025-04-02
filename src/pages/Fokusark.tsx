@@ -72,28 +72,30 @@ export default function FokusarkPage() {
 
           <div className="rounded-md border">
             <ScrollArea className="h-[600px]">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {Array.from({ length: 24 }, (_, index) => (
-                      <TableHead key={index} className="whitespace-nowrap">
-                        Column {index + 1}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tableData.map((row, rowIndex) => (
-                    <TableRow key={rowIndex}>
-                      {row.map((cell, cellIndex) => (
-                        <TableCell key={cellIndex} className="whitespace-nowrap">
-                          {cell}
-                        </TableCell>
+              <div className="overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {Array.from({ length: 24 }, (_, index) => (
+                        <TableHead key={index} className="whitespace-nowrap">
+                          Column {index + 1}
+                        </TableHead>
                       ))}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {tableData.map((row, rowIndex) => (
+                      <TableRow key={rowIndex}>
+                        {row.map((cell, cellIndex) => (
+                          <TableCell key={cellIndex} className="whitespace-nowrap">
+                            {cell}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </ScrollArea>
           </div>
         </div>
