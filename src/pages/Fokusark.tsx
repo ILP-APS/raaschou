@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import FokusarkTable from "@/components/FokusarkTable";
 import { generateTableData } from "@/utils/tableData";
-import { fetchOpenAppointments, fetchAppointmentDetail } from "@/utils/apiUtils";
+import { fetchOpenAppointments, fetchAppointmentDetail, sortAndGroupAppointments } from "@/utils/apiUtils";
 import { useToast } from "@/hooks/use-toast";
 import { Appointment, AppointmentDetail } from "@/types/appointment";
 
@@ -33,11 +33,14 @@ export default function FokusarkPage() {
         // Fetch appointments from the API
         const appointments = await fetchOpenAppointments();
         
+        // Sort and group the appointments by their IDs
+        const sortedAppointments = sortAndGroupAppointments(appointments);
+        
         // Create an array to hold the processed data
         const processedData: string[][] = [];
         
         // For each appointment, fetch the details to get the subject
-        for (const appointment of appointments) {
+        for (const appointment of sortedAppointments) {
           try {
             // Fetch the appointment details
             const details = await fetchAppointmentDetail(appointment.hnAppointmentID);
@@ -48,9 +51,21 @@ export default function FokusarkPage() {
               details.subject || 'N/A'
             ];
             
+            // Determine if this is a sub-appointment
+            const isSubAppointment = appointment.appointmentNumber && appointment.appointmentNumber.includes('-');
+            
             // Add remaining columns with placeholder data to match the 24 column structure
             for (let i = 2; i < 24; i++) {
               row.push(`R${processedData.length + 1}C${i + 1}`);
+            }
+            
+            // Add visual indication for sub-appointments by adding a class or style
+            if (isSubAppointment) {
+              // We'll handle the visual styling in the table components
+              // Here we just add the data
+              row.push('sub-appointment'); // This extra element will be used to identify sub-appointments
+            } else {
+              row.push('parent-appointment');
             }
             
             processedData.push(row);
@@ -66,6 +81,10 @@ export default function FokusarkPage() {
             for (let i = 2; i < 24; i++) {
               errorRow.push(`-`);
             }
+            
+            // Add row type
+            const isSubAppointment = appointment.appointmentNumber && appointment.appointmentNumber.includes('-');
+            errorRow.push(isSubAppointment ? 'sub-appointment' : 'parent-appointment');
             
             processedData.push(errorRow);
           }
@@ -131,6 +150,7 @@ export default function FokusarkPage() {
               <h2 className="text-2xl font-semibold tracking-tight">Fokusark Table</h2>
               <p className="text-sm text-muted-foreground mb-6">
                 This table displays open appointments from e-regnskab with Nr. and Subject in the first two columns.
+                Sub-appointments are grouped with their parent appointments.
               </p>
             </div>
             
