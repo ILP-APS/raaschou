@@ -65,8 +65,9 @@ export default function FokusarkPage() {
             // Get the responsible user name from the map
             const responsibleUserName = userMap.get(details.responsibleHnUserID) || 'Unknown';
             
-            // Initialize offer total
+            // Initialize offer total and montage total
             let offerTotal = '0';
+            let montageTotal = '0';
             
             // If there's an offer ID, fetch the line items
             if (details.hnOfferID) {
@@ -78,25 +79,34 @@ export default function FokusarkPage() {
                 
                 // Format the total as a string with thousands separator
                 offerTotal = total.toLocaleString('da-DK');
+                
+                // Calculate the total for montage line items
+                const montageItems = lineItems.filter(item => item.itemNumber === "Montage");
+                const montageSum = montageItems.reduce((sum, item) => sum + item.totalPriceStandardCurrency, 0);
+                
+                // Format the montage total as a string with thousands separator
+                montageTotal = montageSum > 0 ? montageSum.toLocaleString('da-DK') : '0';
               } catch (error) {
                 console.error(`Error fetching offer line items for offer ID ${details.hnOfferID}:`, error);
                 offerTotal = 'Error';
+                montageTotal = 'Error';
               }
             }
             
-            // Create a row with the appointment number, subject, responsible user name, and offer total
+            // Create a row with the appointment number, subject, responsible user name, offer total, and montage total
             const row = [
               appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
               details.subject || 'N/A',
               responsibleUserName,
               offerTotal,  // Offer total in the 'Tilbud' column
+              montageTotal, // Montage total in the 'Montage' column
             ];
             
             // Determine if this is a sub-appointment
             const isSubAppointment = appointment.appointmentNumber && appointment.appointmentNumber.includes('-');
             
             // Add remaining columns with placeholder data to match the 24 column structure
-            for (let i = 4; i < 24; i++) {
+            for (let i = 5; i < 24; i++) {
               row.push(`R${processedData.length + 1}C${i + 1}`);
             }
             
@@ -118,10 +128,11 @@ export default function FokusarkPage() {
               `Error: Could not fetch details`,
               'Unknown',
               '0',  // Default offer total for error rows
+              '0',  // Default montage total for error rows
             ];
             
             // Add remaining columns with placeholder data
-            for (let i = 4; i < 24; i++) {
+            for (let i = 5; i < 24; i++) {
               errorRow.push(`-`);
             }
             
