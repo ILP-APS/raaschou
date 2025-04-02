@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import {
   Breadcrumb,
@@ -32,26 +32,43 @@ export default function FokusarkPage() {
   
   const tableData = generateTableData();
   const tableContainerRef = useRef<HTMLDivElement>(null);
-  const [isHovering, setIsHovering] = useState(false);
   
-  // Add passive wheel event listener to prevent page scrolling
+  // Use direct DOM event listeners instead of React state for more reliable hover tracking
   useEffect(() => {
     const tableContainer = tableContainerRef.current;
     if (!tableContainer) return;
     
+    // Track hover state internally instead of using React state
+    let isHovering = false;
+    
+    const handleMouseEnter = () => {
+      isHovering = true;
+    };
+    
+    const handleMouseLeave = () => {
+      isHovering = false;
+    };
+    
     const handleWheelEvent = (e: WheelEvent) => {
+      // Only activate horizontal scrolling when hovering directly over the table
       if (isHovering) {
         e.preventDefault();
         tableContainer.scrollLeft += e.deltaY;
       }
     };
     
+    // Add all event listeners directly to the container element
+    tableContainer.addEventListener('mouseenter', handleMouseEnter);
+    tableContainer.addEventListener('mouseleave', handleMouseLeave);
     tableContainer.addEventListener('wheel', handleWheelEvent, { passive: false });
     
     return () => {
+      // Clean up all event listeners
+      tableContainer.removeEventListener('mouseenter', handleMouseEnter);
+      tableContainer.removeEventListener('mouseleave', handleMouseLeave);
       tableContainer.removeEventListener('wheel', handleWheelEvent);
     };
-  }, [isHovering]);
+  }, []);
 
   return (
     <SidebarProvider>
@@ -88,11 +105,9 @@ export default function FokusarkPage() {
                   ref={tableContainerRef}
                   className="w-full"
                   style={{
-                    overflowX: isHovering ? 'auto' : 'hidden',
+                    overflowX: 'auto',
                     scrollbarWidth: 'thin'
                   }}
-                  onMouseEnter={() => setIsHovering(true)}
-                  onMouseLeave={() => setIsHovering(false)}
                 >
                   <table className="min-w-[1600px] table-auto border-collapse divide-y divide-border">
                     <thead className="bg-muted/50">
