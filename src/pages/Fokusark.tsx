@@ -16,34 +16,41 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-// Add CSS styles for table container - with more specific selectors
+// Add CSS styles for table container - focused on fixing the horizontal scroll
 const tableContainerStyles = `
-  /* Custom table container with horizontal scroll only */
-  .custom-table-container {
+  /* The parent container that holds the table */
+  .table-scroll-container {
     width: 100%;
-    overflow-x: auto; /* Allow horizontal scrolling */
-    overflow-y: hidden; /* Prevent vertical scrolling in this container */
-    scrollbar-width: thin;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 
   /* Hide scrollbar when not hovering */
-  .custom-table-container:not(:hover)::-webkit-scrollbar {
+  .table-scroll-container:not(:hover)::-webkit-scrollbar {
+    height: 0;
     display: none;
   }
-
-  .custom-table-container:not(:hover) {
-    scrollbar-width: none; /* Firefox */
+  
+  .table-scroll-container:not(:hover) {
+    scrollbar-width: none;
   }
-
+  
   /* Show scrollbar on hover */
-  .custom-table-container:hover::-webkit-scrollbar {
+  .table-scroll-container:hover::-webkit-scrollbar {
     display: block;
     height: 6px;
   }
-
-  .custom-table-container:hover::-webkit-scrollbar-thumb {
+  
+  .table-scroll-container:hover::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.2);
     border-radius: 3px;
+  }
+  
+  /* Ensure vertical scroll container works correctly */
+  .table-vertical-scroll {
+    height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 `;
 
@@ -62,37 +69,30 @@ export default function FokusarkPage() {
   };
   
   const tableData = generateTableData();
-  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const tableScrollRef = useRef<HTMLDivElement>(null);
   
-  // Set up event handling for horizontal scrolling only within the table
+  // Set up wheel event handling for horizontal scrolling
   useEffect(() => {
-    const tableContainer = tableContainerRef.current;
-    if (!tableContainer) return;
+    const tableScroll = tableScrollRef.current;
+    if (!tableScroll) return;
     
-    // Function to handle wheel events specifically for horizontal scrolling
     const handleWheel = (e: WheelEvent) => {
-      // Only convert vertical scroll to horizontal when directly over the table
-      // and when there is no horizontal component to the scroll
+      // Only handle vertical wheel movements when no horizontal component exists
       if (e.deltaX === 0 && e.deltaY !== 0) {
-        // Prevent the default scroll behavior
         e.preventDefault();
-        // Apply the scroll delta to the container's horizontal scroll
-        tableContainer.scrollLeft += e.deltaY;
+        tableScroll.scrollLeft += e.deltaY;
       }
     };
     
-    // Add event listener directly to the table container element
-    tableContainer.addEventListener('wheel', handleWheel, { passive: false });
+    tableScroll.addEventListener('wheel', handleWheel, { passive: false });
     
     return () => {
-      // Clean up
-      tableContainer.removeEventListener('wheel', handleWheel);
+      tableScroll.removeEventListener('wheel', handleWheel);
     };
   }, []);
 
   return (
     <>
-      {/* Inject CSS styles */}
       <style>{tableContainerStyles}</style>
       
       <SidebarProvider>
@@ -105,9 +105,7 @@ export default function FokusarkPage() {
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="#">
-                      Operations
-                    </BreadcrumbLink>
+                    <BreadcrumbLink href="#">Operations</BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
@@ -116,6 +114,7 @@ export default function FokusarkPage() {
                 </BreadcrumbList>
               </Breadcrumb>
             </header>
+            
             <div className="flex flex-col gap-4 p-4 md:p-6 overflow-y-auto">
               <div className="flex flex-col gap-4">
                 <h2 className="text-2xl font-semibold tracking-tight">Fokusark Table</h2>
@@ -123,12 +122,14 @@ export default function FokusarkPage() {
                   This table contains 24 columns and 50 rows with scrollable content. Hover over the table to scroll horizontally.
                 </p>
               </div>
+              
               <div className="rounded-md border w-full overflow-hidden">
-                <div className="h-[600px] overflow-y-auto">
-                  {/* Apply the custom-table-container class and ref */}
+                {/* Vertical scroll container */}
+                <div className="table-vertical-scroll">
+                  {/* Horizontal scroll container */}
                   <div 
-                    ref={tableContainerRef}
-                    className="custom-table-container"
+                    ref={tableScrollRef}
+                    className="table-scroll-container"
                   >
                     <table className="min-w-[1600px] table-auto border-collapse divide-y divide-border">
                       <thead className="bg-muted/50">
