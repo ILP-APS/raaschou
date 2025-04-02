@@ -24,6 +24,8 @@ const tableContainerStyles = `
     width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
+    position: relative; /* Create a stacking context */
+    z-index: 1; /* Ensure proper stacking */
   }
 
   /* Hide scrollbar when not hovering */
@@ -52,18 +54,26 @@ const tableContainerStyles = `
     height: 600px;
     overflow-y: auto;
     overflow-x: hidden;
+    position: relative;
   }
 
-  /* Main content styles - prevent unwanted scrolling */
+  /* Main content styles - hard block horizontal scrolling outside the table */
   .main-content {
     overflow-x: hidden !important;
     width: 100%;
+    position: relative;
   }
   
-  /* Headers and other content should not scroll horizontally */
+  /* Headers and other content should absolutely never scroll horizontally */
   .content-wrapper {
-    overflow-x: hidden;
+    overflow-x: hidden !important;
     max-width: 100%;
+  }
+  
+  /* Prevent any horizontal scrolling at the page level */
+  .page-container {
+    overflow-x: hidden !important;
+    max-width: 100vw;
   }
 `;
 
@@ -93,23 +103,24 @@ export default function FokusarkPage() {
     if (!tableScroll || !tableVerticalScroll) return;
     
     const handleWheel = (e: WheelEvent) => {
-      // Only process events that originated in the table container
+      // Check if the event originated within the table container
       if (tableScroll.contains(e.target as Node)) {
-        // For horizontal scrolling (when Shift key is pressed or when using a trackpad)
+        // Handle horizontal scrolling from trackpad or shift+wheel
         if (e.deltaX !== 0) {
-          // Let the browser handle horizontal scroll naturally within the container
+          // Let the browser handle natural horizontal scroll within the container
+          // but prevent it from propagating up to parent elements
           e.stopPropagation();
           return;
         }
         
-        // For vertical scrolling within the table
+        // Handle vertical scrolling
         if (e.deltaY !== 0) {
-          // If shift is pressed, convert to horizontal scroll
+          // If shift is held, convert vertical scroll to horizontal
           if (e.shiftKey) {
             e.preventDefault();
             tableScroll.scrollLeft += e.deltaY;
           } else {
-            // Let vertical scroll container handle vertical scrolling
+            // Handle vertical scrolling within table
             e.preventDefault();
             tableVerticalScroll.scrollTop += e.deltaY;
           }
@@ -117,11 +128,22 @@ export default function FokusarkPage() {
       }
     };
     
-    // Add event listeners to the table container
+    // Add wheel event listener with non-passive option to allow preventDefault
     tableScroll.addEventListener('wheel', handleWheel, { passive: false });
+    
+    // Additionally, prevent any wheel events from reaching document
+    const preventDocumentScroll = (e: WheelEvent) => {
+      if (e.shiftKey && tableScroll.contains(e.target as Node)) {
+        e.preventDefault();
+      }
+    };
+    
+    // Add document-level event listener to catch any events that might bubble up
+    document.addEventListener('wheel', preventDocumentScroll, { passive: false });
     
     return () => {
       tableScroll.removeEventListener('wheel', handleWheel);
+      document.removeEventListener('wheel', preventDocumentScroll);
     };
   }, []);
 
@@ -132,8 +154,9 @@ export default function FokusarkPage() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <div className="flex flex-col h-screen overflow-hidden">
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 z-10 bg-background">
+          {/* Added page-container class to block any horizontal overflow at root level */}
+          <div className="flex flex-col h-screen page-container">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 z-10 bg-background content-wrapper">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
               <Breadcrumb>
