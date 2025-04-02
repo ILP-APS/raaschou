@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import {
   Breadcrumb,
@@ -16,27 +16,32 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-// Add CSS styles for table container
+// Add CSS styles for table container - with more specific selectors
 const tableContainerStyles = `
-  .table-container {
-    overflow-x: hidden; /* Hide horizontal scrollbar by default */
-    transition: overflow-x 0.2s ease; /* Smooth transition */
+  /* Custom table container with horizontal scroll only */
+  .custom-table-container {
+    width: 100%;
+    overflow-x: auto; /* Allow horizontal scrolling */
+    overflow-y: hidden; /* Prevent vertical scrolling in this container */
+    scrollbar-width: thin;
   }
 
-  .table-container:hover {
-    overflow-x: auto; /* Show scrollbar and enable scrolling on hover */
+  /* Hide scrollbar when not hovering */
+  .custom-table-container:not(:hover)::-webkit-scrollbar {
+    display: none;
   }
 
-  /* Scrollbar styling */
-  .table-container {
-    scrollbar-width: thin; /* Firefox */
+  .custom-table-container:not(:hover) {
+    scrollbar-width: none; /* Firefox */
   }
-  
-  .table-container::-webkit-scrollbar {
-    height: 6px; /* Chrome, Edge, Safari */
+
+  /* Show scrollbar on hover */
+  .custom-table-container:hover::-webkit-scrollbar {
+    display: block;
+    height: 6px;
   }
-  
-  .table-container::-webkit-scrollbar-thumb {
+
+  .custom-table-container:hover::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.2);
     border-radius: 3px;
   }
@@ -57,6 +62,33 @@ export default function FokusarkPage() {
   };
   
   const tableData = generateTableData();
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Set up event handling for horizontal scrolling only within the table
+  useEffect(() => {
+    const tableContainer = tableContainerRef.current;
+    if (!tableContainer) return;
+    
+    // Function to handle wheel events specifically for horizontal scrolling
+    const handleWheel = (e: WheelEvent) => {
+      // Only convert vertical scroll to horizontal when directly over the table
+      // and when there is no horizontal component to the scroll
+      if (e.deltaX === 0 && e.deltaY !== 0) {
+        // Prevent the default scroll behavior
+        e.preventDefault();
+        // Apply the scroll delta to the container's horizontal scroll
+        tableContainer.scrollLeft += e.deltaY;
+      }
+    };
+    
+    // Add event listener directly to the table container element
+    tableContainer.addEventListener('wheel', handleWheel, { passive: false });
+    
+    return () => {
+      // Clean up
+      tableContainer.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
 
   return (
     <>
@@ -93,8 +125,11 @@ export default function FokusarkPage() {
               </div>
               <div className="rounded-md border w-full overflow-hidden">
                 <div className="h-[600px] overflow-y-auto">
-                  {/* Apply the table-container class */}
-                  <div className="table-container w-full">
+                  {/* Apply the custom-table-container class and ref */}
+                  <div 
+                    ref={tableContainerRef}
+                    className="custom-table-container"
+                  >
                     <table className="min-w-[1600px] table-auto border-collapse divide-y divide-border">
                       <thead className="bg-muted/50">
                         <tr>
