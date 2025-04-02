@@ -60,7 +60,7 @@ export const tableContainerStyles = `
   
   /* Ensure sticky columns work correctly with appropriate shadows */
   tr:hover td.sticky {
-    background-color: hsla(var(--muted)/0.5) !important;
+    background-color: white !important;
   }
   
   /* Add shadow to the right of sticky columns */
@@ -83,9 +83,5 @@ export const tableContainerStyles = `
   
   table th:nth-child(2) {
     min-width: 200px; /* Width for Navn column */
-  }
-  
-  table th:nth-child(3) {
-    min-width: 150px; /* Width for Ansvarlig column */
   }
 `;
