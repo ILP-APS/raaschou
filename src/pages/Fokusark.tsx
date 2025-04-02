@@ -15,6 +15,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Add CSS styles for table container - focused on fixing the horizontal scroll
 const tableContainerStyles = `
