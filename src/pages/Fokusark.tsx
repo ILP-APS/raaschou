@@ -19,6 +19,7 @@ import FokusarkTable from "@/components/FokusarkTable";
 import { generateTableData } from "@/utils/tableData";
 import { fetchOpenAppointments } from "@/utils/apiUtils";
 import { useToast } from "@/hooks/use-toast";
+import { Appointment } from "@/types/appointment";
 
 export default function FokusarkPage() {
   const [tableData, setTableData] = useState<string[][]>([]);
@@ -33,9 +34,12 @@ export default function FokusarkPage() {
         const appointments = await fetchOpenAppointments();
         
         // Process the appointment data to match our table format
-        const processedData = appointments.map((appointment: any, index: number) => {
-          // Create a row with the appointment number and name in first two columns
-          const row = [`${index + 1}`, appointment.name || 'N/A'];
+        const processedData = appointments.map((appointment: Appointment, index: number) => {
+          // Create a row with the appointment number and customer name in first two columns
+          const row = [
+            appointment.appointmentNumber || `${index + 1}`, 
+            appointment.customerAddress.name || 'N/A'
+          ];
           
           // Add remaining columns with placeholder data to match the 24 column structure
           for (let i = 2; i < 24; i++) {
