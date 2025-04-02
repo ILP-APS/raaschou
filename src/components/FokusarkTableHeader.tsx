@@ -15,6 +15,12 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
         return "Navn";
       case 2:
         return "Ansvarlig";
+      case 3:
+        return "Tilbud";
+      case 4:
+        return "Montage";
+      case 5:
+        return "Underleverandør";
       default:
         return `Column ${index + 1}`;
     }
