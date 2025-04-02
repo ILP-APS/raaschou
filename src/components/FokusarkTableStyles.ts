@@ -96,6 +96,16 @@ export const tableContainerStyles = `
     text-align: left;
   }
   
+  /* Remove vertical borders in header rows */
+  thead th {
+    border-right: none !important;
+  }
+  
+  /* Remove the vertical separator lines between header groups */
+  thead tr:first-child th:not(:first-child)::before {
+    display: none;
+  }
+  
   /* Ensure the grouped headers stay fixed when scrolling */
   thead tr:first-child th[colspan="2"]:first-child {
     position: sticky;
@@ -103,20 +113,5 @@ export const tableContainerStyles = `
     z-index: 30;
     background-color: white;
     width: 300px; /* Combined width of Nr. and Navn columns */
-  }
-  
-  /* Group header styling - add visual separation between groups */
-  thead tr:first-child th {
-    position: relative;
-  }
-  
-  thead tr:first-child th:not(:first-child)::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 25%;
-    height: 50%;
-    width: 1px;
-    background-color: hsl(var(--border));
   }
 `;
