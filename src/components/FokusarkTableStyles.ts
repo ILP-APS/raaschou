@@ -96,11 +96,12 @@ export const tableContainerStyles = `
   }
   
   /* Ensure the grouped headers stay fixed when scrolling */
-  thead tr:first-child th[colspan="3"]:first-child {
+  thead tr:first-child th[colspan="2"]:first-child {
     position: sticky;
     left: 0;
     z-index: 30;
     background-color: white;
+    width: 300px; /* Combined width of Nr. and Navn columns */
   }
   
   /* Group header styling - add visual separation between groups */
