@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import {
@@ -65,9 +66,10 @@ export default function FokusarkPage() {
             // Get the responsible user name from the map
             const responsibleUserName = userMap.get(details.responsibleHnUserID) || 'Unknown';
             
-            // Initialize offer total and montage total
+            // Initialize offer total, montage total, and underleverandør total
             let offerTotal = '0';
             let montageTotal = '0';
+            let underleverandorTotal = '0';
             
             // If there's an offer ID, fetch the line items
             if (details.hnOfferID) {
@@ -86,27 +88,36 @@ export default function FokusarkPage() {
                 
                 // Format the montage total as a string with thousands separator
                 montageTotal = montageSum > 0 ? montageSum.toLocaleString('da-DK') : '0';
+                
+                // Calculate the total for underleverandør line items
+                const underleverandorItems = lineItems.filter(item => item.itemNumber === "Underleverandør");
+                const underleverandorSum = underleverandorItems.reduce((sum, item) => sum + item.totalPriceStandardCurrency, 0);
+                
+                // Format the underleverandør total as a string with thousands separator
+                underleverandorTotal = underleverandorSum > 0 ? underleverandorSum.toLocaleString('da-DK') : '0';
               } catch (error) {
                 console.error(`Error fetching offer line items for offer ID ${details.hnOfferID}:`, error);
                 offerTotal = 'Error';
                 montageTotal = 'Error';
+                underleverandorTotal = 'Error';
               }
             }
             
-            // Create a row with the appointment number, subject, responsible user name, offer total, and montage total
+            // Create a row with the appointment number, subject, responsible user name, offer total, montage total, and underleverandør total
             const row = [
               appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
               details.subject || 'N/A',
               responsibleUserName,
               offerTotal,  // Offer total in the 'Tilbud' column
               montageTotal, // Montage total in the 'Montage' column
+              underleverandorTotal, // Underleverandør total in the 'Underleverandør' column
             ];
             
             // Determine if this is a sub-appointment
             const isSubAppointment = appointment.appointmentNumber && appointment.appointmentNumber.includes('-');
             
             // Add remaining columns with placeholder data to match the 24 column structure
-            for (let i = 5; i < 24; i++) {
+            for (let i = 6; i < 24; i++) {
               row.push(`R${processedData.length + 1}C${i + 1}`);
             }
             
@@ -129,10 +140,11 @@ export default function FokusarkPage() {
               'Unknown',
               '0',  // Default offer total for error rows
               '0',  // Default montage total for error rows
+              '0',  // Default underleverandør total for error rows
             ];
             
             // Add remaining columns with placeholder data
-            for (let i = 5; i < 24; i++) {
+            for (let i = 6; i < 24; i++) {
               errorRow.push(`-`);
             }
             
