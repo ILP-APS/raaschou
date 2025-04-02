@@ -85,6 +85,11 @@ export const tableContainerStyles = `
     min-width: 200px; /* Width for Navn column */
   }
   
+  /* Standard column width for data columns */
+  table th:nth-child(n+3) {
+    min-width: 120px;
+  }
+  
   /* Make sure column groups are properly aligned with their columns */
   thead tr:first-child th {
     border-bottom: 1px solid hsl(var(--border));
@@ -96,5 +101,20 @@ export const tableContainerStyles = `
     left: 0;
     z-index: 30;
     background-color: white;
+  }
+  
+  /* Group header styling - add visual separation between groups */
+  thead tr:first-child th {
+    position: relative;
+  }
+  
+  thead tr:first-child th:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 25%;
+    height: 50%;
+    width: 1px;
+    background-color: hsl(var(--border));
   }
 `;

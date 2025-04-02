@@ -25,15 +25,42 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data }) => {
     return classes;
   };
 
+  // Function to ensure all rows have the same number of columns
+  const normalizeRow = (row: string[], expectedLength: number): string[] => {
+    const displayRow = row.slice(0, row.length - 1); // Remove the row type indicator
+    const rowType = row[row.length - 1];
+    
+    // Create a new array with the right length, filling in empty cells with placeholder data
+    const normalizedRow = Array(expectedLength).fill('');
+    
+    // Copy values from the original row
+    displayRow.forEach((value, index) => {
+      if (index < expectedLength) {
+        normalizedRow[index] = value;
+      }
+    });
+    
+    // Add the row type indicator back
+    normalizedRow.push(rowType);
+    
+    return normalizedRow;
+  };
+
+  // Determine the expected number of columns (excluding the row type indicator)
+  const expectedColumns = 27; // Based on our header columns
+
   return (
     <tbody className="bg-background divide-y divide-border">
       {data.map((row, rowIndex) => {
-        // The last element in each row now indicates if it's a sub-appointment
+        // The last element in each row indicates if it's a sub-appointment
         const rowType = row[row.length - 1];
         const isSubAppointment = rowType === 'sub-appointment';
         
+        // Normalize the row to ensure it has the expected number of columns
+        const normalizedRow = normalizeRow(row, expectedColumns);
+        
         // Remove the row type indicator before rendering
-        const displayRow = row.slice(0, row.length - 1);
+        const displayRow = normalizedRow.slice(0, normalizedRow.length - 1);
         
         return (
           <tr 

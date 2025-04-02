@@ -25,6 +25,44 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
         return "Column 7";
       case 7:
         return "Column 8";
+      case 8:
+        return "Est 1";
+      case 9:
+        return "Est 2";
+      case 10:
+        return "Est 3";
+      case 11:
+        return "Est 4";
+      case 12:
+        return "Est 5";
+      case 13:
+        return "Real 1";
+      case 14:
+        return "Real 2";
+      case 15:
+        return "Real 3";
+      case 16:
+        return "Real 4";
+      case 17:
+        return "Real 5";
+      case 18:
+        return "Timer tilbage";
+      case 19:
+        return "Prod 1";
+      case 20:
+        return "Prod 2";
+      case 21:
+        return "Prod 3";
+      case 22:
+        return "Prod 4";
+      case 23:
+        return "Prod 5";
+      case 24:
+        return "Prod 6";
+      case 25:
+        return "Mont 1";
+      case 26:
+        return "Mont 2";
       default:
         return `Column ${index + 1}`;
     }
@@ -50,6 +88,16 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
       return { name: "Aftale", colSpan: 3 }; // Group for Nr, Navn, Ansvarlig
     } else if (index === 3) {
       return { name: "TILBUD", colSpan: 5 }; // Group for Tilbud, Montage, Underleverandør, Column 7, Column 8
+    } else if (index === 8) {
+      return { name: "Estimeret", colSpan: 5 }; // Group for Est 1-5
+    } else if (index === 13) {
+      return { name: "Realiseret", colSpan: 5 }; // Group for Real 1-5
+    } else if (index === 18) {
+      return { name: "Timer tilbage", colSpan: 1 }; // Group for Timer tilbage
+    } else if (index === 19) {
+      return { name: "Produktion", colSpan: 6 }; // Group for Prod 1-6
+    } else if (index === 25) {
+      return { name: "Montage", colSpan: 2 }; // Group for Mont 1-2
     }
     return null;
   };
