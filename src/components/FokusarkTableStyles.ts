@@ -90,12 +90,13 @@ export const tableContainerStyles = `
     border-bottom: 1px solid hsl(var(--border));
   }
   
-  /* IMPORTANT: Ensure column groups align precisely with their columns below */
+  /* IMPORTANT: Ensure Aftale column group aligns precisely with its columns below */
   thead tr:first-child th[colspan="3"]:first-child {
     position: sticky;
     left: 0;
     z-index: 30;
     background-color: white;
+    width: 300px !important; /* Match exact width of Nr. + Navn columns (100px + 200px) */
   }
 
   /* Remove any weird stacking/overlap issues between header rows */
