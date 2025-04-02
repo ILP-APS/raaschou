@@ -48,12 +48,26 @@ export const useTableData = () => {
             // Fetch the appointment details
             const details = await getAppointmentDetail(appointment.hnAppointmentID);
             
+            // Skip appointments that are marked as done
+            if (details.done) {
+              continue;
+            }
+            
             // Get the responsible user name from the map
             const responsibleUserName = userMap.get(details.responsibleHnUserID) || 'Unknown';
             
             // Get the offer, montage, and underleverandør totals
             const { offerTotal, montageTotal, underleverandorTotal } = 
               await getOfferLineItems(details.hnOfferID);
+            
+            // Parse the offerTotal to a number for comparison
+            // Remove any non-numeric characters (except decimal point) and convert to number
+            const offerTotalNumber = parseFloat(offerTotal.replace(/[^0-9,]/g, '').replace(',', '.'));
+            
+            // Skip appointments with offer total less than or equal to 40,000
+            if (offerTotalNumber <= 40000) {
+              continue;
+            }
             
             // Create a row with the appointment number, subject, responsible user name, 
             // offer total, montage total, and underleverandør total
@@ -78,42 +92,24 @@ export const useTableData = () => {
             processedData.push(row);
           } catch (error) {
             console.error(`Error processing appointment ${appointment.hnAppointmentID}:`, error);
-            // Add a row with error information
-            const errorRow = [
-              appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
-              `Error: Could not fetch details`,
-              'Unknown',
-              '0',
-              '0',
-              '0',
-            ];
-            
-            // Add remaining columns with placeholder data
-            for (let i = 6; i < 24; i++) {
-              errorRow.push(`-`);
-            }
-            
-            // Add row type
-            const isSubApp = isSubAppointment(appointment.appointmentNumber);
-            errorRow.push(isSubApp ? 'sub-appointment' : 'parent-appointment');
-            
-            processedData.push(errorRow);
+            // Skip erroring appointments instead of adding error row
+            continue;
           }
         }
         
-        // If no appointments, use sample data
+        // If no appointments meet the criteria, use sample data
         if (processedData.length === 0) {
           setTableData(generateTableData());
           toast({
-            title: "No appointments found",
-            description: "Using sample data instead.",
+            title: "No matching appointments found",
+            description: "No appointments met the criteria (not done and offer > 40,000). Using sample data instead.",
             variant: "default",
           });
         } else {
           setTableData(processedData);
           toast({
-            title: "Data loaded",
-            description: `Loaded ${processedData.length} appointments.`,
+            title: "Filtered data loaded",
+            description: `Loaded ${processedData.length} appointments that are not done and have offer > 40,000.`,
             variant: "default",
           });
         }
