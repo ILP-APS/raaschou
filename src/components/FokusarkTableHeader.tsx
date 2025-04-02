@@ -6,13 +6,6 @@ interface FokusarkTableHeaderProps {
 }
 
 const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }) => {
-  // Define fixed column widths
-  const columnWidths = {
-    0: "100px", // Nr. column
-    1: "200px", // Navn column
-    2: "150px", // Ansvarlig column
-  };
-  
   // Function to get column name based on index
   const getColumnName = (index: number): string => {
     switch (index) {
@@ -42,28 +35,15 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
       classes += " sticky left-0 z-20 bg-white"; // Solid white background
     } else if (index === 1) {
       classes += " sticky left-[100px] z-20 bg-white"; // Solid white background
-    } else if (index === 2) {
-      classes += " sticky left-[300px] z-20 bg-white"; // Solid white background for Ansvarlig
     }
     
     return classes;
   };
 
   // Function to get column group information
-  const getColumnGroup = (index: number): { name: string, colSpan: number, style?: React.CSSProperties } | null => {
+  const getColumnGroup = (index: number): { name: string, colSpan: number } | null => {
     if (index === 0) {
-      return { 
-        name: "Aftale", 
-        colSpan: 3, // Group for Nr, Navn, Ansvarlig
-        style: {
-          position: 'sticky',
-          left: 0,
-          zIndex: 30,
-          backgroundColor: 'white',
-          minWidth: '300px', // Min width to match Nr(100px) + Navn(200px) columns
-          width: '450px' // Total width of all three columns (100px + 200px + 150px)
-        }
-      };
+      return { name: "Aftale", colSpan: 3 }; // Group for Nr, Navn, Ansvarlig
     } else if (index === 3) {
       return { name: "Økonomi", colSpan: 3 }; // Group for Tilbud, Montage, Underleverandør
     }
@@ -74,24 +54,22 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
   const renderColumnGroups = () => {
     const groups = [];
     let currentIndex = 0;
-    
+
     while (currentIndex < columnCount) {
       const group = getColumnGroup(currentIndex);
       
       if (group) {
-        // Add a grouped header cell with its specific style if provided
+        // Add a grouped header cell
         groups.push(
           <th 
             key={`group-${currentIndex}`} 
             colSpan={group.colSpan}
-            className="px-4 py-2 text-center text-sm font-medium text-foreground uppercase tracking-wider whitespace-nowrap bg-muted/30 border-b"
-            style={group.style}
+            className={`px-4 py-2 text-center text-sm font-medium text-foreground uppercase tracking-wider whitespace-nowrap bg-muted/30 border-b 
+              ${currentIndex === 0 ? 'sticky left-0 z-20 bg-white' : ''}`}
           >
             {group.name}
           </th>
         );
-        
-        // Update for next iteration
         currentIndex += group.colSpan;
       } else {
         // Add an empty header cell
@@ -122,7 +100,6 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
           <th 
             key={index} 
             className={getColumnClass(index)}
-            style={{ minWidth: columnWidths[index as keyof typeof columnWidths] || "auto" }}
           >
             {getColumnName(index)}
           </th>
