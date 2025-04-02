@@ -22,6 +22,11 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data }) => {
       classes += " sticky left-[100px] z-10 bg-white"; // Solid white background
     }
     
+    // Add special class for last column to ensure proper right border
+    if (index === expectedColumns - 1) {
+      classes += " border-r border-border";
+    }
+    
     return classes;
   };
 
@@ -47,7 +52,7 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data }) => {
   };
 
   // Determine the expected number of columns (excluding the row type indicator)
-  const expectedColumns = 25; // Adjusted from 24 to 25 (added Mont 2 back)
+  const expectedColumns = 25; // Keep at 25 to include Mont 2
 
   return (
     <tbody className="bg-background divide-y divide-border">

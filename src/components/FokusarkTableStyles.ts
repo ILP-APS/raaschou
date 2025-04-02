@@ -124,7 +124,7 @@ export const tableContainerStyles = `
     min-width: 100%;
   }
   
-  /* Ensure the table has proper right border */
+  /* Ensure the table has proper right border - remove the extra space */
   .table-scroll-container {
     border-right: 1px solid hsl(var(--border));
   }
@@ -139,4 +139,17 @@ export const tableContainerStyles = `
   tr th:last-child {
     border-right: 1px solid hsl(var(--border));
   }
+  
+  /* Specifically target the Mont 2 column to ensure no space after it */
+  table th:last-child, 
+  table td:last-child {
+    border-right: 1px solid hsl(var(--border));
+  }
+  
+  /* Fix potential table width issues */
+  .table-scroll-container table {
+    table-layout: fixed;
+    width: fit-content !important;
+  }
 `;
+

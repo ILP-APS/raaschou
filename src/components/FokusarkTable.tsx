@@ -81,7 +81,7 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
             ref={tableScrollRef}
             className="table-scroll-container"
           >
-            <table className="table-auto border-collapse divide-y divide-border">
+            <table className="table-auto border-collapse divide-y divide-border w-auto">
               <FokusarkTableHeader columnCount={columnCount} />
               <FokusarkTableBody data={data} />
             </table>
