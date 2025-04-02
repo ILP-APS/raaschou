@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import {
   Breadcrumb,
@@ -34,13 +34,24 @@ export default function FokusarkPage() {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   
-  // Handle mouse wheel events for horizontal scrolling
-  const handleWheel = (e: React.WheelEvent) => {
-    if (isHovering && tableContainerRef.current) {
-      e.preventDefault();
-      tableContainerRef.current.scrollLeft += e.deltaY;
-    }
-  };
+  // Add passive wheel event listener to prevent page scrolling
+  useEffect(() => {
+    const tableContainer = tableContainerRef.current;
+    if (!tableContainer) return;
+    
+    const handleWheelEvent = (e: WheelEvent) => {
+      if (isHovering) {
+        e.preventDefault();
+        tableContainer.scrollLeft += e.deltaY;
+      }
+    };
+    
+    tableContainer.addEventListener('wheel', handleWheelEvent, { passive: false });
+    
+    return () => {
+      tableContainer.removeEventListener('wheel', handleWheelEvent);
+    };
+  }, [isHovering]);
 
   return (
     <SidebarProvider>
@@ -75,14 +86,13 @@ export default function FokusarkPage() {
               <div className="h-[600px] overflow-y-auto">
                 <div 
                   ref={tableContainerRef}
-                  className="w-full overflow-x-auto"
+                  className="w-full"
                   style={{
                     overflowX: isHovering ? 'auto' : 'hidden',
                     scrollbarWidth: 'thin'
                   }}
                   onMouseEnter={() => setIsHovering(true)}
                   onMouseLeave={() => setIsHovering(false)}
-                  onWheel={handleWheel}
                 >
                   <table className="min-w-[1600px] table-auto border-collapse divide-y divide-border">
                     <thead className="bg-muted/50">
