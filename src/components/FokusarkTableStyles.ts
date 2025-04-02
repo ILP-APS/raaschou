@@ -40,23 +40,24 @@ export const tableContainerStyles = `
     position: relative;
   }
 
-  /* Main content styles - hard block horizontal scrolling outside the table */
+  /* Main content styles - allow horizontal scrolling */
   .main-content {
-    overflow-x: hidden !important;
     width: 100%;
     position: relative;
+    /* Don't restrict horizontal scrolling */
+    overflow-x: auto !important;
   }
   
   /* Headers and other content should absolutely never scroll horizontally */
   .content-wrapper {
-    overflow-x: hidden !important;
-    max-width: 100%;
+    /* Allow for potential overflow */
+    max-width: none;
   }
   
-  /* Prevent any horizontal scrolling at the page level */
+  /* Prevent page-level scrolling restriction */
   .page-container {
-    overflow-x: hidden !important;
-    max-width: 100vw;
+    /* Allow content to extend beyond view if needed */
+    max-width: none;
   }
   
   /* Ensure sticky columns work correctly with appropriate shadows */
@@ -146,10 +147,9 @@ export const tableContainerStyles = `
     border-right: 1px solid hsl(var(--border));
   }
   
-  /* Fix potential table width issues */
+  /* Fix table width issues */
   .table-scroll-container table {
     table-layout: fixed;
-    width: fit-content !important;
+    width: max-content !important; /* Allow table to take necessary width */
   }
 `;
-
