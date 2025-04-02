@@ -53,6 +53,11 @@ const tableContainerStyles = `
     overflow-y: auto;
     overflow-x: hidden;
   }
+
+  /* Stop wheel event propagation */
+  .prevent-scroll-propagation {
+    overflow: hidden;  /* Prevents scrolling of parent elements */
+  }
 `;
 
 export default function FokusarkPage() {
@@ -71,20 +76,41 @@ export default function FokusarkPage() {
   
   const tableData = generateTableData();
   const tableScrollRef = useRef<HTMLDivElement>(null);
+  const tableVerticalScrollRef = useRef<HTMLDivElement>(null);
   
   // Set up wheel event handling for horizontal scrolling
   useEffect(() => {
     const tableScroll = tableScrollRef.current;
-    if (!tableScroll) return;
+    const tableVerticalScroll = tableVerticalScrollRef.current;
+    
+    if (!tableScroll || !tableVerticalScroll) return;
     
     const handleWheel = (e: WheelEvent) => {
-      // Only handle vertical wheel movements when no horizontal component exists
-      if (e.deltaX === 0 && e.deltaY !== 0) {
-        e.preventDefault();
-        tableScroll.scrollLeft += e.deltaY;
+      // Only if we're in the table area
+      if (e.currentTarget === tableScroll) {
+        // For horizontal scrolling (when Shift key is pressed or when using a trackpad)
+        if (e.deltaX !== 0) {
+          e.stopPropagation();
+          // Let the browser handle the native horizontal scroll
+          return;
+        }
+        
+        // For vertical scrolling within the table
+        if (e.deltaY !== 0) {
+          // If shift is pressed, convert to horizontal scroll
+          if (e.shiftKey) {
+            e.preventDefault();
+            tableScroll.scrollLeft += e.deltaY;
+          } else {
+            // Let vertical scroll container handle vertical scrolling
+            tableVerticalScroll.scrollTop += e.deltaY;
+            e.preventDefault();
+          }
+        }
       }
     };
     
+    // Add event listeners with capturing to intercept events before they propagate
     tableScroll.addEventListener('wheel', handleWheel, { passive: false });
     
     return () => {
@@ -99,7 +125,7 @@ export default function FokusarkPage() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <div className="flex flex-col h-screen overflow-hidden">
+          <div className="flex flex-col h-screen overflow-hidden prevent-scroll-propagation">
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 z-10 bg-background">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
@@ -126,11 +152,16 @@ export default function FokusarkPage() {
               
               <div className="rounded-md border w-full overflow-hidden">
                 {/* Vertical scroll container */}
-                <div className="table-vertical-scroll">
+                <div 
+                  ref={tableVerticalScrollRef}
+                  className="table-vertical-scroll"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   {/* Horizontal scroll container */}
                   <div 
                     ref={tableScrollRef}
                     className="table-scroll-container"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <table className="min-w-[1600px] table-auto border-collapse divide-y divide-border">
                       <thead className="bg-muted/50">
