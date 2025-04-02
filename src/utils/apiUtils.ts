@@ -78,8 +78,30 @@ export const sortAndGroupAppointments = (appointments: any[]) => {
   sortedParentNumbers.forEach(parentNumber => {
     const group = appointmentGroups[parentNumber];
     
-    // Add all appointments in this group
-    sortedAppointments.push(...group);
+    // Sort sub-appointments within the group, if there are any besides the parent
+    if (group.length > 1) {
+      // The first element is the parent appointment, which should stay first
+      const parent = group[0];
+      const subAppointments = group.slice(1);
+      
+      // Sort sub-appointments by their number (everything after the hyphen)
+      subAppointments.sort((a, b) => {
+        if (!a.appointmentNumber || !b.appointmentNumber) return 0;
+        
+        const aSubNumber = a.appointmentNumber.split('-')[1];
+        const bSubNumber = b.appointmentNumber.split('-')[1];
+        
+        if (!aSubNumber || !bSubNumber) return 0;
+        
+        return parseInt(aSubNumber) - parseInt(bSubNumber);
+      });
+      
+      // Reconstruct the group with parent first, then sorted sub-appointments
+      sortedAppointments.push(parent, ...subAppointments);
+    } else {
+      // Just add the single appointment (no sub-appointments)
+      sortedAppointments.push(...group);
+    }
   });
   
   return sortedAppointments;
