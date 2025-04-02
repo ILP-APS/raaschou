@@ -1,3 +1,4 @@
+
 import React from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import {
@@ -70,15 +71,15 @@ export default function FokusarkPage() {
               </p>
             </div>
 
-            <div className="rounded-md border w-full">
+            <div className="rounded-md border w-full overflow-hidden">
               <ScrollArea className="h-[600px]">
-                <div className="max-w-full overflow-x-auto">
+                <div className="overflow-x-auto">
                   <div className="w-max min-w-full">
                     <Table>
                       <TableHeader>
                         <TableRow>
                           {Array.from({ length: 24 }, (_, index) => (
-                            <TableHead key={index} className="whitespace-nowrap">
+                            <TableHead key={index} className="whitespace-nowrap sticky top-0 bg-background">
                               Column {index + 1}
                             </TableHead>
                           ))}
