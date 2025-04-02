@@ -21,6 +21,10 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
         return "Montage";
       case 5:
         return "Underleverandør";
+      case 6:
+        return "Column 7";
+      case 7:
+        return "Column 8";
       default:
         return `Column ${index + 1}`;
     }
@@ -45,7 +49,7 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
     if (index === 0) {
       return { name: "Aftale", colSpan: 3 }; // Group for Nr, Navn, Ansvarlig
     } else if (index === 3) {
-      return { name: "Økonomi", colSpan: 3 }; // Group for Tilbud, Montage, Underleverandør
+      return { name: "TILBUD", colSpan: 5 }; // Group for Tilbud, Montage, Underleverandør, Column 7, Column 8
     }
     return null;
   };
