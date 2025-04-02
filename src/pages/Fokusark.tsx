@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useRef } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import {
   Breadcrumb,
@@ -29,8 +29,18 @@ export default function FokusarkPage() {
     }
     return rows;
   };
-
+  
   const tableData = generateTableData();
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const [isHovering, setIsHovering] = useState(false);
+  
+  // Handle mouse wheel events for horizontal scrolling
+  const handleWheel = (e: React.WheelEvent) => {
+    if (isHovering && tableContainerRef.current) {
+      e.preventDefault();
+      tableContainerRef.current.scrollLeft += e.deltaY;
+    }
+  };
 
   return (
     <SidebarProvider>
@@ -61,10 +71,19 @@ export default function FokusarkPage() {
                 This table contains 24 columns and 50 rows with scrollable content. Hover over the table to scroll horizontally.
               </p>
             </div>
-
             <div className="rounded-md border w-full overflow-hidden">
               <div className="h-[600px] overflow-y-auto">
-                <div className="w-full overflow-x-auto overscroll-x-contain hover:overflow-x-scroll">
+                <div 
+                  ref={tableContainerRef}
+                  className="w-full overflow-x-auto"
+                  style={{
+                    overflowX: isHovering ? 'auto' : 'hidden',
+                    scrollbarWidth: 'thin'
+                  }}
+                  onMouseEnter={() => setIsHovering(true)}
+                  onMouseLeave={() => setIsHovering(false)}
+                  onWheel={handleWheel}
+                >
                   <table className="min-w-[1600px] table-auto border-collapse divide-y divide-border">
                     <thead className="bg-muted/50">
                       <tr>
