@@ -93,6 +93,7 @@ export const tableContainerStyles = `
   /* Make sure column groups are properly aligned with their columns */
   thead tr:first-child th {
     border-bottom: 1px solid hsl(var(--border));
+    text-align: left;
   }
   
   /* Ensure the grouped headers stay fixed when scrolling */

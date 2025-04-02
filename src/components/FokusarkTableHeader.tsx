@@ -121,7 +121,7 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
           <th 
             key={`group-${currentIndex}`} 
             colSpan={group.colSpan}
-            className={`px-4 py-2 text-center text-sm font-medium text-foreground uppercase tracking-wider whitespace-nowrap bg-muted/30 border-b 
+            className={`px-4 py-2 text-left text-sm font-medium text-foreground uppercase tracking-wider whitespace-nowrap bg-muted/30 border-b 
               ${isAftaleGroup ? 'sticky left-0 z-20 bg-white' : ''}`}
           >
             {group.name}
@@ -133,7 +133,7 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
         groups.push(
           <th 
             key={`group-${currentIndex}`} 
-            className="px-4 py-2 bg-muted/30 border-b"
+            className="px-4 py-2 bg-muted/30 border-b text-left"
           >
             &nbsp;
           </th>
