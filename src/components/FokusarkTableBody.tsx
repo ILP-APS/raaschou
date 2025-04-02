@@ -47,7 +47,7 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data }) => {
   };
 
   // Determine the expected number of columns (excluding the row type indicator)
-  const expectedColumns = 27; // Based on our header columns
+  const expectedColumns = 26; // Reduced from 27 to 26 (removed Prod 6)
 
   return (
     <tbody className="bg-background divide-y divide-border">

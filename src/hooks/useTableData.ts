@@ -80,8 +80,9 @@ export const useTableData = () => {
               underleverandorTotal,
             ];
             
-            // Add remaining columns with placeholder data to match the 24 column structure
-            for (let i = 6; i < 24; i++) {
+            // Add remaining columns with placeholder data, but now only up to 23 (instead of 24)
+            // since we removed Prod 6
+            for (let i = 6; i < 23; i++) {
               row.push(`R${processedData.length + 1}C${i + 1}`);
             }
             

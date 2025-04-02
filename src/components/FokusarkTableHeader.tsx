@@ -57,11 +57,10 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
         return "Prod 4";
       case 23:
         return "Prod 5";
+      // Delete the "Prod 6" column (index 24)
       case 24:
-        return "Prod 6";
-      case 25:
         return "Mont 1";
-      case 26:
+      case 25:
         return "Mont 2";
       default:
         return `Column ${index + 1}`;
@@ -91,13 +90,13 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
     } else if (index === 3) {
       return { name: "TILBUD", colSpan: 5 }; // Group for Tilbud, Montage, Underleverandør, Column 7, Column 8
     } else if (index === 8) {
-      return { name: "Estimeret", colSpan: 4 }; // Changed from 5 to 4 columns
+      return { name: "Estimeret", colSpan: 4 }; // 4 columns
     } else if (index === 12) {
-      return { name: "Realiseret", colSpan: 4 }; // Changed from 5 to 4 columns
+      return { name: "Realiseret", colSpan: 4 }; // 4 columns
     } else if (index === 16) {
       return { name: "Timer tilbage", colSpan: 1 }; // Group for Timer tilbage
     } else if (index === 17) {
-      return { name: "Produktion", colSpan: 5 }; // Changed from 6 to 5 columns
+      return { name: "Produktion", colSpan: 5 }; // 5 columns (removed Prod 6)
     } else if (index === 22) {
       return { name: "Montage", colSpan: 2 }; // Keep Montage with 2 columns
     }
