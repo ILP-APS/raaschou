@@ -15,15 +15,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 export default function FokusarkPage() {
   // Generate table data - 50 rows, 24 columns
@@ -67,39 +58,45 @@ export default function FokusarkPage() {
             <div className="flex flex-col gap-4">
               <h2 className="text-2xl font-semibold tracking-tight">Fokusark Table</h2>
               <p className="text-sm text-muted-foreground">
-                This table contains 24 columns and 50 rows with scrollable content.
+                This table contains 24 columns and 50 rows with scrollable content. Hover over the table to scroll horizontally.
               </p>
             </div>
 
             <div className="rounded-md border w-full overflow-hidden">
-              <ScrollArea className="h-[600px]">
-                <div className="overflow-x-auto">
+              <div className="h-[600px] overflow-y-auto">
+                <div className="overflow-x-hidden hover:overflow-x-auto transition-all duration-300 max-w-full">
                   <div className="w-max min-w-full">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
+                    <table className="w-full divide-y divide-border">
+                      <thead className="bg-muted/50">
+                        <tr>
                           {Array.from({ length: 24 }, (_, index) => (
-                            <TableHead key={index} className="whitespace-nowrap sticky top-0 bg-background">
+                            <th 
+                              key={index} 
+                              className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap sticky top-0 bg-background border-b"
+                            >
                               Column {index + 1}
-                            </TableHead>
+                            </th>
                           ))}
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-background divide-y divide-border">
                         {tableData.map((row, rowIndex) => (
-                          <TableRow key={rowIndex}>
+                          <tr key={rowIndex} className="hover:bg-muted/50">
                             {row.map((cell, cellIndex) => (
-                              <TableCell key={cellIndex} className="whitespace-nowrap">
+                              <td 
+                                key={cellIndex} 
+                                className="px-4 py-3 whitespace-nowrap text-sm"
+                              >
                                 {cell}
-                              </TableCell>
+                              </td>
                             ))}
-                          </TableRow>
+                          </tr>
                         ))}
-                      </TableBody>
-                    </Table>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-              </ScrollArea>
+              </div>
             </div>
           </div>
         </div>
