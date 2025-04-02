@@ -64,37 +64,35 @@ export default function FokusarkPage() {
 
             <div className="rounded-md border w-full overflow-hidden">
               <div className="h-[600px] overflow-y-auto">
-                <div className="relative w-full max-h-[600px]">
-                  <div className="overflow-x-hidden hover:overflow-x-auto overscroll-x-contain transition-all duration-300">
-                    <table className="min-w-max table-auto border-collapse divide-y divide-border">
-                      <thead className="bg-muted/50">
-                        <tr>
-                          {Array.from({ length: 24 }, (_, index) => (
-                            <th 
-                              key={index} 
-                              className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap sticky top-0 bg-background border-b"
+                <div className="max-w-full overflow-x-hidden hover:overflow-x-auto overscroll-x-contain transition-all duration-300">
+                  <table className="min-w-max table-auto border-collapse divide-y divide-border">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        {Array.from({ length: 24 }, (_, index) => (
+                          <th 
+                            key={index} 
+                            className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap sticky top-0 bg-background border-b"
+                          >
+                            Column {index + 1}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="bg-background divide-y divide-border">
+                      {tableData.map((row, rowIndex) => (
+                        <tr key={rowIndex} className="hover:bg-muted/50">
+                          {row.map((cell, cellIndex) => (
+                            <td 
+                              key={cellIndex} 
+                              className="px-4 py-3 whitespace-nowrap text-sm"
                             >
-                              Column {index + 1}
-                            </th>
+                              {cell}
+                            </td>
                           ))}
                         </tr>
-                      </thead>
-                      <tbody className="bg-background divide-y divide-border">
-                        {tableData.map((row, rowIndex) => (
-                          <tr key={rowIndex} className="hover:bg-muted/50">
-                            {row.map((cell, cellIndex) => (
-                              <td 
-                                key={cellIndex} 
-                                className="px-4 py-3 whitespace-nowrap text-sm"
-                              >
-                                {cell}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
