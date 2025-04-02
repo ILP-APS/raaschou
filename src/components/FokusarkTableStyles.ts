@@ -85,6 +85,10 @@ export const tableContainerStyles = `
     min-width: 200px; /* Width for Navn column */
   }
   
+  table th:nth-child(3) {
+    min-width: 150px; /* Width for Ansvarlig column */
+  }
+  
   /* Make sure column groups stay aligned with their columns */
   thead tr:first-child th {
     border-bottom: 1px solid hsl(var(--border));
@@ -97,7 +101,7 @@ export const tableContainerStyles = `
     z-index: 30;
     background-color: white;
     min-width: 300px; /* Minimum width to match Nr. + Navn columns (100px + 200px) */
-    width: auto; /* Allow it to expand with all three columns */
+    width: 450px; /* Fixed width to match all three columns (100px + 200px + 150px) */
   }
 
   /* Remove any weird stacking/overlap issues between header rows */
