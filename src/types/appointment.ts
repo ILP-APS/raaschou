@@ -60,3 +60,9 @@ export interface AppointmentDetail {
   doneDate: string | null;
   created: string;
 }
+
+export interface User {
+  hnUserID: number;
+  name: string;
+  username: string;
+}

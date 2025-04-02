@@ -17,19 +17,31 @@ import {
 } from "@/components/ui/sidebar";
 import FokusarkTable from "@/components/FokusarkTable";
 import { generateTableData } from "@/utils/tableData";
-import { fetchOpenAppointments, fetchAppointmentDetail, sortAndGroupAppointments } from "@/utils/apiUtils";
+import { fetchOpenAppointments, fetchAppointmentDetail, fetchUsers, sortAndGroupAppointments } from "@/utils/apiUtils";
 import { useToast } from "@/hooks/use-toast";
-import { Appointment, AppointmentDetail } from "@/types/appointment";
+import { Appointment, AppointmentDetail, User } from "@/types/appointment";
 
 export default function FokusarkPage() {
   const [tableData, setTableData] = useState<string[][]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [users, setUsers] = useState<User[]>([]);
   const { toast } = useToast();
   
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true);
+        
+        // Fetch users first
+        const usersList = await fetchUsers();
+        setUsers(usersList);
+        
+        // Create a map of user IDs to names for quick lookup
+        const userMap = new Map<number, string>();
+        usersList.forEach((user: User) => {
+          userMap.set(user.hnUserID, user.name);
+        });
+        
         // Fetch appointments from the API
         const appointments = await fetchOpenAppointments();
         
@@ -39,23 +51,27 @@ export default function FokusarkPage() {
         // Create an array to hold the processed data
         const processedData: string[][] = [];
         
-        // For each appointment, fetch the details to get the subject
+        // For each appointment, fetch the details to get the subject and responsible user
         for (const appointment of sortedAppointments) {
           try {
             // Fetch the appointment details
             const details = await fetchAppointmentDetail(appointment.hnAppointmentID);
             
-            // Create a row with the appointment number and subject in first two columns
+            // Get the responsible user name from the map
+            const responsibleUserName = userMap.get(details.responsibleHnUserID) || 'Unknown';
+            
+            // Create a row with the appointment number, subject, and responsible user name
             const row = [
               appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
-              details.subject || 'N/A'
+              details.subject || 'N/A',
+              responsibleUserName
             ];
             
             // Determine if this is a sub-appointment
             const isSubAppointment = appointment.appointmentNumber && appointment.appointmentNumber.includes('-');
             
             // Add remaining columns with placeholder data to match the 24 column structure
-            for (let i = 2; i < 24; i++) {
+            for (let i = 3; i < 24; i++) {
               row.push(`R${processedData.length + 1}C${i + 1}`);
             }
             
@@ -74,11 +90,12 @@ export default function FokusarkPage() {
             // Add a row with error information
             const errorRow = [
               appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
-              `Error: Could not fetch details`
+              `Error: Could not fetch details`,
+              'Unknown'
             ];
             
             // Add remaining columns with placeholder data
-            for (let i = 2; i < 24; i++) {
+            for (let i = 3; i < 24; i++) {
               errorRow.push(`-`);
             }
             
@@ -107,12 +124,12 @@ export default function FokusarkPage() {
           });
         }
       } catch (error) {
-        console.error("Error fetching appointments:", error);
+        console.error("Error fetching data:", error);
         // Use generated data as fallback
         setTableData(generateTableData());
         toast({
           title: "Error loading data",
-          description: "Failed to fetch appointments. Using sample data instead.",
+          description: "Failed to fetch data. Using sample data instead.",
           variant: "destructive",
         });
       } finally {
@@ -149,7 +166,7 @@ export default function FokusarkPage() {
             <div className="flex flex-col gap-4 content-wrapper">
               <h2 className="text-2xl font-semibold tracking-tight">Fokusark Table</h2>
               <p className="text-sm text-muted-foreground mb-6">
-                This table displays open appointments from e-regnskab with Nr. and Subject in the first two columns.
+                This table displays open appointments from e-regnskab with Nr., Subject, and Responsible Person.
                 Sub-appointments are grouped with their parent appointments.
               </p>
             </div>
