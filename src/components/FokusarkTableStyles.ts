@@ -40,24 +40,23 @@ export const tableContainerStyles = `
     position: relative;
   }
 
-  /* Main content styles - allow horizontal scrolling */
+  /* Main content styles - hard block horizontal scrolling outside the table */
   .main-content {
+    overflow-x: hidden !important;
     width: 100%;
     position: relative;
-    /* Don't restrict horizontal scrolling */
-    overflow-x: auto !important;
   }
   
   /* Headers and other content should absolutely never scroll horizontally */
   .content-wrapper {
-    /* Allow for potential overflow */
-    max-width: none;
+    overflow-x: hidden !important;
+    max-width: 100%;
   }
   
-  /* Prevent page-level scrolling restriction */
+  /* Prevent any horizontal scrolling at the page level */
   .page-container {
-    /* Allow content to extend beyond view if needed */
-    max-width: none;
+    overflow-x: hidden !important;
+    max-width: 100vw;
   }
   
   /* Ensure sticky columns work correctly with appropriate shadows */
@@ -125,7 +124,7 @@ export const tableContainerStyles = `
     min-width: 100%;
   }
   
-  /* Ensure the table has proper right border - remove the extra space */
+  /* Ensure the table has proper right border */
   .table-scroll-container {
     border-right: 1px solid hsl(var(--border));
   }
@@ -139,17 +138,5 @@ export const tableContainerStyles = `
   tr td:last-child,
   tr th:last-child {
     border-right: 1px solid hsl(var(--border));
-  }
-  
-  /* Specifically target the Mont 2 column to ensure no space after it */
-  table th:last-child, 
-  table td:last-child {
-    border-right: 1px solid hsl(var(--border));
-  }
-  
-  /* Fix table width issues */
-  .table-scroll-container table {
-    table-layout: fixed;
-    width: max-content !important; /* Allow table to take necessary width */
   }
 `;

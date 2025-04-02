@@ -70,7 +70,7 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   return (
     <>
       <style>{tableContainerStyles}</style>
-      <div className="rounded-md border overflow-hidden main-content">
+      <div className="rounded-md border w-full overflow-hidden main-content">
         {/* Vertical scroll container */}
         <div 
           ref={tableVerticalScrollRef}
@@ -81,7 +81,7 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
             ref={tableScrollRef}
             className="table-scroll-container"
           >
-            <table className="table-auto border-collapse divide-y divide-border w-max">
+            <table className="table-auto border-collapse divide-y divide-border">
               <FokusarkTableHeader columnCount={columnCount} />
               <FokusarkTableBody data={data} />
             </table>
