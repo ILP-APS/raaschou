@@ -1,5 +1,7 @@
 
 import React, { useRef, useEffect } from "react";
+import FokusarkTableHeader from "./FokusarkTableHeader";
+import FokusarkTableBody from "./FokusarkTableBody";
 import { tableContainerStyles } from "./FokusarkTableStyles";
 
 interface FokusarkTableProps {
@@ -9,6 +11,9 @@ interface FokusarkTableProps {
 const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const tableVerticalScrollRef = useRef<HTMLDivElement>(null);
+  
+  // Determine the number of columns based on the first row of data
+  const columnCount = data.length > 0 ? data[0].length : 0;
   
   // Set up wheel event handling for horizontal scrolling
   useEffect(() => {
@@ -77,32 +82,8 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
             className="table-scroll-container"
           >
             <table className="min-w-[1600px] table-auto border-collapse divide-y divide-border">
-              <thead className="bg-muted/50">
-                <tr>
-                  {Array.from({ length: 24 }, (_, index) => (
-                    <th 
-                      key={index} 
-                      className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap sticky top-0 bg-background border-b"
-                    >
-                      Column {index + 1}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-background divide-y divide-border">
-                {data.map((row, rowIndex) => (
-                  <tr key={rowIndex} className="hover:bg-muted/50">
-                    {row.map((cell, cellIndex) => (
-                      <td 
-                        key={cellIndex} 
-                        className="px-4 py-3 whitespace-nowrap text-sm"
-                      >
-                        {cell}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
+              <FokusarkTableHeader columnCount={columnCount} />
+              <FokusarkTableBody data={data} />
             </table>
           </div>
         </div>
