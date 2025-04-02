@@ -64,7 +64,7 @@ export default function FokusarkPage() {
 
             <div className="rounded-md border w-full overflow-hidden">
               <div className="h-[600px] overflow-y-auto">
-                <div className="max-w-full overflow-x-hidden hover:overflow-x-auto overscroll-x-contain transition-all duration-300">
+                <div className="w-full overflow-x-auto overscroll-x-contain hover:overflow-x-scroll">
                   <table className="min-w-max table-auto border-collapse divide-y divide-border">
                     <thead className="bg-muted/50">
                       <tr>
