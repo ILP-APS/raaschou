@@ -1,4 +1,3 @@
-
 import React from "react";
 
 interface FokusarkTableHeaderProps {
@@ -34,33 +33,28 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
       case 11:
         return "Est 4";
       case 12:
-        return "Est 5";
-      case 13:
         return "Real 1";
-      case 14:
+      case 13:
         return "Real 2";
-      case 15:
+      case 14:
         return "Real 3";
-      case 16:
+      case 15:
         return "Real 4";
-      case 17:
-        return "Real 5";
-      case 18:
+      case 16:
         return "Timer tilbage";
-      case 19:
+      case 17:
         return "Prod 1";
-      case 20:
+      case 18:
         return "Prod 2";
-      case 21:
+      case 19:
         return "Prod 3";
-      case 22:
+      case 20:
         return "Prod 4";
-      case 23:
+      case 21:
         return "Prod 5";
-      // Delete the "Prod 6" column (index 24)
-      case 24:
+      case 22:
         return "Mont 1";
-      case 25:
+      case 23:
         return "Mont 2";
       default:
         return `Column ${index + 1}`;
@@ -96,7 +90,7 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
     } else if (index === 16) {
       return { name: "Timer tilbage", colSpan: 1 }; // Group for Timer tilbage
     } else if (index === 17) {
-      return { name: "Produktion", colSpan: 5 }; // 5 columns (removed Prod 6)
+      return { name: "Produktion", colSpan: 5 }; // 5 columns
     } else if (index === 22) {
       return { name: "Montage", colSpan: 2 }; // Keep Montage with 2 columns
     }

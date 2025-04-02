@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAppointments } from "./useAppointments";
 import { useUsers } from "./useUsers";
@@ -80,9 +79,8 @@ export const useTableData = () => {
               underleverandorTotal,
             ];
             
-            // Add remaining columns with placeholder data, but now only up to 23 (instead of 24)
-            // since we removed Prod 6
-            for (let i = 6; i < 23; i++) {
+            // Add remaining columns with placeholder data (removed extra column)
+            for (let i = 6; i < 22; i++) {
               row.push(`R${processedData.length + 1}C${i + 1}`);
             }
             
