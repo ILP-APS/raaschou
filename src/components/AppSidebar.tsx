@@ -11,8 +11,8 @@ const data = {
     title: "Operations",
     url: "#",
     items: [{
-      title: "Tasks",
-      url: "#",
+      title: "Fokusark",
+      url: "/fokusark",
       isActive: true
     }]
   }]
