@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAppointments } from "./useAppointments";
 import { useUsers } from "./useUsers";
@@ -79,8 +80,8 @@ export const useTableData = () => {
               underleverandorTotal,
             ];
             
-            // Add remaining columns with placeholder data (removed extra column)
-            for (let i = 6; i < 22; i++) {
+            // Add remaining columns with placeholder data (updated range to include Mont 2)
+            for (let i = 6; i < 23; i++) {
               row.push(`R${processedData.length + 1}C${i + 1}`);
             }
             
