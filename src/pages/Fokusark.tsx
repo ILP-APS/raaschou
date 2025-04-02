@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import {
@@ -17,9 +16,15 @@ import {
 } from "@/components/ui/sidebar";
 import FokusarkTable from "@/components/FokusarkTable";
 import { generateTableData } from "@/utils/tableData";
-import { fetchOpenAppointments, fetchAppointmentDetail, fetchUsers, sortAndGroupAppointments } from "@/utils/apiUtils";
+import { 
+  fetchOpenAppointments, 
+  fetchAppointmentDetail, 
+  fetchUsers, 
+  sortAndGroupAppointments,
+  fetchOfferLineItems 
+} from "@/utils/apiUtils";
 import { useToast } from "@/hooks/use-toast";
-import { Appointment, AppointmentDetail, User } from "@/types/appointment";
+import { Appointment, AppointmentDetail, User, OfferLineItem } from "@/types/appointment";
 
 export default function FokusarkPage() {
   const [tableData, setTableData] = useState<string[][]>([]);
@@ -55,23 +60,43 @@ export default function FokusarkPage() {
         for (const appointment of sortedAppointments) {
           try {
             // Fetch the appointment details
-            const details = await fetchAppointmentDetail(appointment.hnAppointmentID);
+            const details: AppointmentDetail = await fetchAppointmentDetail(appointment.hnAppointmentID);
             
             // Get the responsible user name from the map
             const responsibleUserName = userMap.get(details.responsibleHnUserID) || 'Unknown';
             
-            // Create a row with the appointment number, subject, and responsible user name
+            // Initialize offer total
+            let offerTotal = '0';
+            
+            // If there's an offer ID, fetch the line items
+            if (details.hnOfferID) {
+              try {
+                const lineItems: OfferLineItem[] = await fetchOfferLineItems(details.hnOfferID);
+                
+                // Calculate the total from all line items
+                const total = lineItems.reduce((sum, item) => sum + item.totalPriceStandardCurrency, 0);
+                
+                // Format the total as a string with thousands separator
+                offerTotal = total.toLocaleString('da-DK');
+              } catch (error) {
+                console.error(`Error fetching offer line items for offer ID ${details.hnOfferID}:`, error);
+                offerTotal = 'Error';
+              }
+            }
+            
+            // Create a row with the appointment number, subject, responsible user name, and offer total
             const row = [
               appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
               details.subject || 'N/A',
-              responsibleUserName
+              responsibleUserName,
+              offerTotal,  // Offer total in the 'Tilbud' column
             ];
             
             // Determine if this is a sub-appointment
             const isSubAppointment = appointment.appointmentNumber && appointment.appointmentNumber.includes('-');
             
             // Add remaining columns with placeholder data to match the 24 column structure
-            for (let i = 3; i < 24; i++) {
+            for (let i = 4; i < 24; i++) {
               row.push(`R${processedData.length + 1}C${i + 1}`);
             }
             
@@ -91,11 +116,12 @@ export default function FokusarkPage() {
             const errorRow = [
               appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
               `Error: Could not fetch details`,
-              'Unknown'
+              'Unknown',
+              '0',  // Default offer total for error rows
             ];
             
             // Add remaining columns with placeholder data
-            for (let i = 3; i < 24; i++) {
+            for (let i = 4; i < 24; i++) {
               errorRow.push(`-`);
             }
             
@@ -144,7 +170,6 @@ export default function FokusarkPage() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        {/* Added page-container class to block any horizontal overflow at root level */}
         <div className="flex flex-col h-screen page-container">
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 z-10 bg-background content-wrapper">
             <SidebarTrigger className="-ml-1" />

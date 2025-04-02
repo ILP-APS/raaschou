@@ -59,10 +59,27 @@ export interface AppointmentDetail {
   done: boolean;
   doneDate: string | null;
   created: string;
+  hnOfferID?: number | null;
+  appointmentAssociatedUsers?: number[];
 }
 
 export interface User {
   hnUserID: number;
   name: string;
   username: string;
+}
+
+export interface OfferLineItem {
+  lineID: number;
+  itemNumber: string;
+  description: string;
+  units: number;
+  unitName: string;
+  costPriceStandardCurrency: number;
+  salesPriceStandardCurrency: number;
+  totalPriceStandardCurrency: number;
+  hnOfferID: number;
+  hnBudgetLineID: number | null;
+  date: string;
+  hnUserID: number;
 }

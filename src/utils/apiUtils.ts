@@ -50,6 +50,23 @@ export const fetchUsers = async () => {
   return res.json();
 };
 
+// New function to fetch offer line items by offer ID
+export const fetchOfferLineItems = async (offerId: number) => {
+  const res = await fetch(
+    `https://publicapi.e-regnskab.dk/Offer/Standard/Line/Item?hnOfferID=${offerId}`,
+    {
+      method: "GET",
+      headers: {
+        "accept": "application/json",
+        "ApiKey": "w9Jq5NiTeOIpXfovZ0Hf1jLnM:pGwZ"
+      }
+    }
+  );
+  
+  if (!res.ok) throw new Error(`Failed to fetch offer line items for offer ID: ${offerId}`);
+  return res.json();
+};
+
 // Helper function to sort appointments by ID and group sub-appointments
 export const sortAndGroupAppointments = (appointments: any[]) => {
   // Create a mapping of parent appointment numbers to arrays of sub-appointments
