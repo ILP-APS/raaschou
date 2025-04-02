@@ -40,8 +40,61 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
     return classes;
   };
 
+  // Function to get column group information
+  const getColumnGroup = (index: number): { name: string, colSpan: number } | null => {
+    if (index === 0) {
+      return { name: "Aftale", colSpan: 3 }; // Group for Nr, Navn, Ansvarlig
+    } else if (index === 3) {
+      return { name: "Økonomi", colSpan: 3 }; // Group for Tilbud, Montage, Underleverandør
+    }
+    return null;
+  };
+
+  // Generate column groups for the first header row
+  const renderColumnGroups = () => {
+    const groups = [];
+    let currentIndex = 0;
+
+    while (currentIndex < columnCount) {
+      const group = getColumnGroup(currentIndex);
+      
+      if (group) {
+        // Add a grouped header cell
+        groups.push(
+          <th 
+            key={`group-${currentIndex}`} 
+            colSpan={group.colSpan}
+            className={`px-4 py-2 text-center text-sm font-medium text-foreground uppercase tracking-wider whitespace-nowrap bg-muted/30 border-b 
+              ${currentIndex === 0 ? 'sticky left-0 z-20 bg-white' : ''}`}
+          >
+            {group.name}
+          </th>
+        );
+        currentIndex += group.colSpan;
+      } else {
+        // Add an empty header cell
+        groups.push(
+          <th 
+            key={`group-${currentIndex}`} 
+            className="px-4 py-2 bg-muted/30 border-b"
+          >
+            &nbsp;
+          </th>
+        );
+        currentIndex += 1;
+      }
+    }
+    
+    return groups;
+  };
+
   return (
     <thead className="bg-muted/50">
+      {/* Column group row */}
+      <tr>
+        {renderColumnGroups()}
+      </tr>
+      {/* Regular header row */}
       <tr>
         {Array.from({ length: columnCount }, (_, index) => (
           <th 

@@ -84,4 +84,17 @@ export const tableContainerStyles = `
   table th:nth-child(2) {
     min-width: 200px; /* Width for Navn column */
   }
+  
+  /* Make sure column groups are properly aligned with their columns */
+  thead tr:first-child th {
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  
+  /* Ensure the grouped headers stay fixed when scrolling */
+  thead tr:first-child th[colspan="3"]:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 30;
+    background-color: white;
+  }
 `;
