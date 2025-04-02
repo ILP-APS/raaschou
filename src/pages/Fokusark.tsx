@@ -54,9 +54,16 @@ const tableContainerStyles = `
     overflow-x: hidden;
   }
 
-  /* Stop wheel event propagation */
-  .prevent-scroll-propagation {
-    overflow: hidden;  /* Prevents scrolling of parent elements */
+  /* Main content styles - prevent unwanted scrolling */
+  .main-content {
+    overflow-x: hidden !important;
+    width: 100%;
+  }
+  
+  /* Headers and other content should not scroll horizontally */
+  .content-wrapper {
+    overflow-x: hidden;
+    max-width: 100%;
   }
 `;
 
@@ -86,12 +93,12 @@ export default function FokusarkPage() {
     if (!tableScroll || !tableVerticalScroll) return;
     
     const handleWheel = (e: WheelEvent) => {
-      // Only if we're in the table area
-      if (e.currentTarget === tableScroll) {
+      // Only process events that originated in the table container
+      if (tableScroll.contains(e.target as Node)) {
         // For horizontal scrolling (when Shift key is pressed or when using a trackpad)
         if (e.deltaX !== 0) {
+          // Let the browser handle horizontal scroll naturally within the container
           e.stopPropagation();
-          // Let the browser handle the native horizontal scroll
           return;
         }
         
@@ -103,14 +110,14 @@ export default function FokusarkPage() {
             tableScroll.scrollLeft += e.deltaY;
           } else {
             // Let vertical scroll container handle vertical scrolling
-            tableVerticalScroll.scrollTop += e.deltaY;
             e.preventDefault();
+            tableVerticalScroll.scrollTop += e.deltaY;
           }
         }
       }
     };
     
-    // Add event listeners with capturing to intercept events before they propagate
+    // Add event listeners to the table container
     tableScroll.addEventListener('wheel', handleWheel, { passive: false });
     
     return () => {
@@ -125,7 +132,7 @@ export default function FokusarkPage() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <div className="flex flex-col h-screen overflow-hidden prevent-scroll-propagation">
+          <div className="flex flex-col h-screen overflow-hidden">
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 z-10 bg-background">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
@@ -142,26 +149,24 @@ export default function FokusarkPage() {
               </Breadcrumb>
             </header>
             
-            <div className="flex flex-col gap-4 p-4 md:p-6 overflow-y-auto">
-              <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 p-4 md:p-6 overflow-y-auto content-wrapper">
+              <div className="flex flex-col gap-4 content-wrapper">
                 <h2 className="text-2xl font-semibold tracking-tight">Fokusark Table</h2>
                 <p className="text-sm text-muted-foreground">
                   This table contains 24 columns and 50 rows with scrollable content. Hover over the table to scroll horizontally.
                 </p>
               </div>
               
-              <div className="rounded-md border w-full overflow-hidden">
+              <div className="rounded-md border w-full overflow-hidden main-content">
                 {/* Vertical scroll container */}
                 <div 
                   ref={tableVerticalScrollRef}
                   className="table-vertical-scroll"
-                  onClick={(e) => e.stopPropagation()}
                 >
-                  {/* Horizontal scroll container */}
+                  {/* Horizontal scroll container - THIS IS THE ONLY ELEMENT THAT SHOULD SCROLL HORIZONTALLY */}
                   <div 
                     ref={tableScrollRef}
                     className="table-scroll-container"
-                    onClick={(e) => e.stopPropagation()}
                   >
                     <table className="min-w-[1600px] table-auto border-collapse divide-y divide-border">
                       <thead className="bg-muted/50">
