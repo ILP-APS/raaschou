@@ -65,7 +65,7 @@ export default function FokusarkPage() {
             <div className="rounded-md border w-full overflow-hidden">
               <div className="h-[600px] overflow-y-auto">
                 <div className="w-full overflow-x-auto overscroll-x-contain hover:overflow-x-scroll">
-                  <table className="min-w-max table-auto border-collapse divide-y divide-border">
+                  <table className="min-w-[1600px] table-auto border-collapse divide-y divide-border">
                     <thead className="bg-muted/50">
                       <tr>
                         {Array.from({ length: 24 }, (_, index) => (
