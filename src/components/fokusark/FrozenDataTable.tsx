@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -40,6 +40,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { tableContainerStyles } from '@/components/FokusarkTableStyles';
 
 // Define the data type for our rows
 interface DataItem {
@@ -131,6 +132,8 @@ export default function FrozenDataTable() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const tableContainerRef = useRef<HTMLDivElement>(null);
+  const frozenColumnsRef = useRef<HTMLDivElement>(null);
+  const mainTableRef = useRef<HTMLDivElement>(null);
   
   const table = useReactTable({
     data,
@@ -151,17 +154,43 @@ export default function FrozenDataTable() {
     },
   });
 
-  // Function to calculate left position for frozen columns
-  const calculateLeftPosition = (headerIndex: number, headers: any[]) => {
-    let leftPos = 0;
-    for (let i = 0; i < headerIndex; i++) {
-      const isFrozen = !!(headers[i].column.columnDef.meta as ColumnMeta)?.frozen;
-      if (isFrozen) {
-        leftPos += 150; // Fixed width for frozen columns
+  // Sync scrolling between frozen and main table
+  useEffect(() => {
+    const mainTable = mainTableRef.current;
+    const frozenColumns = frozenColumnsRef.current;
+    
+    if (!mainTable || !frozenColumns) return;
+    
+    const handleMainScroll = () => {
+      if (frozenColumns) {
+        frozenColumns.scrollTop = mainTable.scrollTop;
+        
+        // Add shadow to frozen columns when scrolling horizontally
+        if (mainTable.scrollLeft > 0) {
+          frozenColumns.classList.add('with-shadow');
+        } else {
+          frozenColumns.classList.remove('with-shadow');
+        }
       }
+    };
+    
+    mainTable.addEventListener('scroll', handleMainScroll);
+    
+    return () => {
+      mainTable.removeEventListener('scroll', handleMainScroll);
+    };
+  }, []);
+
+  // Add style tag to the document once
+  useEffect(() => {
+    const styleId = 'fokusark-table-styles';
+    if (!document.getElementById(styleId)) {
+      const styleTag = document.createElement('style');
+      styleTag.id = styleId;
+      styleTag.innerHTML = tableContainerStyles;
+      document.head.appendChild(styleTag);
     }
-    return leftPos;
-  };
+  }, []);
 
   return (
     <div className="w-full">
@@ -204,129 +233,105 @@ export default function FrozenDataTable() {
         </DropdownMenu>
       </div>
       
-      {/* Main table container with overflow */}
-      <div className="relative border rounded-md" style={{ overflow: 'hidden' }}>
-        <div 
-          ref={tableContainerRef}
-          style={{ 
-            maxHeight: '400px',
-            width: '100%',
-            overflow: 'auto'
-          }}
-        >
-          <Table>
-            <TableHeader>
-              {/* First header row */}
-              <TableRow style={{ 
-                position: 'sticky', 
-                top: 0, 
-                zIndex: 50,
-                backgroundColor: 'white' 
-              }}>
-                {table.getHeaderGroups()[0].headers.map((header, colIndex) => {
-                  const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
-                  const leftPos = isFrozen ? 
-                    calculateLeftPosition(colIndex, table.getHeaderGroups()[0].headers) : 'auto';
-                  
-                  return (
-                    <TableHead
-                      key={header.id}
-                      style={{
-                        minWidth: '150px',
-                        width: '150px',
-                        position: isFrozen ? 'sticky' : 'static',
-                        left: isFrozen ? `${leftPos}px` : 'auto',
-                        zIndex: isFrozen ? 60 : 50,
-                        backgroundColor: 'white',
-                        boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : 'none',
-                        borderRight: isFrozen ? '1px solid #e5e7eb' : 'none'
-                      }}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-              
-              {/* Second header row */}
-              <TableRow style={{ 
-                position: 'sticky', 
-                top: '41px',  // Adjust based on your actual first row height
-                zIndex: 50,
-                backgroundColor: '#f5f5f5' 
-              }}>
-                {table.getHeaderGroups()[0].headers.map((header, colIndex) => {
-                  const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
-                  const leftPos = isFrozen ? 
-                    calculateLeftPosition(colIndex, table.getHeaderGroups()[0].headers) : 'auto';
-                  
-                  return (
-                    <TableHead
-                      key={`subheader-${header.id}`}
-                      style={{
-                        minWidth: '150px',
-                        width: '150px',
-                        position: isFrozen ? 'sticky' : 'static',
-                        left: isFrozen ? `${leftPos}px` : 'auto',
-                        zIndex: isFrozen ? 60 : 50,
-                        backgroundColor: '#f5f5f5',
-                        boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : 'none',
-                        borderRight: isFrozen ? '1px solid #e5e7eb' : 'none'
-                      }}
-                    >
-                      {`Sub-header ${colIndex + 1}`}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            </TableHeader>
-            
-            <TableBody>
-              {table.getRowModel().rows.map((row) => (
-                <TableRow 
-                  key={row.id} 
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell, cellIndex) => {
-                    const isFrozen = !!(cell.column.columnDef.meta as ColumnMeta)?.frozen;
-                    
-                    // Calculate left position for cells in frozen columns
-                    let leftPos = 0;
-                    if (isFrozen) {
-                      for (let i = 0; i < cellIndex; i++) {
-                        if ((row.getVisibleCells()[i].column.columnDef.meta as ColumnMeta)?.frozen) {
-                          leftPos += 150;
-                        }
-                      }
-                    }
-                    
-                    return (
-                      <TableCell
-                        key={cell.id}
-                        style={{
-                          minWidth: '150px',
-                          width: '150px',
-                          position: isFrozen ? 'sticky' : 'static',
-                          left: isFrozen ? `${leftPos}px` : 'auto',
-                          zIndex: isFrozen ? 40 : 30,
-                          backgroundColor: 'white',
-                          boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : 'none',
-                          borderRight: isFrozen ? '1px solid #e5e7eb' : 'none'
-                        }}
-                      >
+      {/* Main table container using the styles from FokusarkTableStyles */}
+      <div className="fokusark-table-scroll-container">
+        <div className="fokusark-table-wrapper">
+          {/* Frozen columns table */}
+          <div 
+            ref={frozenColumnsRef} 
+            className="frozen-columns"
+            style={{ overflow: 'hidden' }}
+          >
+            <table className="frozen-table">
+              <thead>
+                {/* Group header row */}
+                <tr>
+                  <th colSpan={2} className="group-header">Aftale</th>
+                </tr>
+                {/* Column header row */}
+                <tr>
+                  <th className="col-0 column-header">Nr.</th>
+                  <th className="col-1 column-header">Navn</th>
+                </tr>
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="h-12"
+                    data-sub-appointment={false} // Could be dynamic based on your data
+                  >
+                    <td className="col-0">
+                      {flexRender(
+                        row.getVisibleCells()[0].column.columnDef.cell,
+                        row.getVisibleCells()[0].getContext()
+                      )}
+                    </td>
+                    <td className="col-1">
+                      {flexRender(
+                        row.getVisibleCells()[1].column.columnDef.cell,
+                        row.getVisibleCells()[1].getContext()
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Main scrollable table */}
+          <div 
+            ref={mainTableRef} 
+            style={{ 
+              overflow: 'auto',
+              maxHeight: '400px'
+            }}
+          >
+            <table className="fokusark-table">
+              <colgroup>
+                {table.getVisibleFlatColumns().slice(2).map((column, i) => (
+                  <col key={column.id} className="col-scrollable" />
+                ))}
+              </colgroup>
+              <thead>
+                {/* Group header row */}
+                <tr>
+                  <th colSpan={3} className="group-header">Ansvarlig</th>
+                  <th colSpan={5} className="group-header">TILBUD</th>
+                  <th colSpan={4} className="group-header">Estimeret</th>
+                  <th colSpan={4} className="group-header">Realiseret</th>
+                  <th colSpan={1} className="group-header">Timer tilbage</th>
+                  <th colSpan={5} className="group-header">Produktion</th>
+                </tr>
+                {/* Column header row */}
+                <tr>
+                  {table.getVisibleFlatColumns().slice(2).map((column, i) => (
+                    <th key={column.id} className="col-scrollable column-header">
+                      {column.columnDef.header ? 
+                        flexRender(column.columnDef.header, column.getContext()) : 
+                        `Column ${i + 3}`}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="h-12"
+                  >
+                    {row.getVisibleCells().slice(2).map((cell) => (
+                      <td key={cell.id} className="col-scrollable">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
       
