@@ -147,33 +147,67 @@ export default function MinimalStickyTable() {
         borderCollapse: 'separate'
       }}>
         <TableHeader>
-          {/* Header group row */}
+          {/* Header group row with split Info group */}
           <TableRow>
-            {headerGroups.map((group, groupIndex) => {
-              // Calculate if this is a sticky group (only the first group with Info)
-              const isSticky = groupIndex === 0;
-              
-              return (
-                <TableHead
-                  key={`group-${group.id}`}
-                  colSpan={group.colSpan}
-                  style={{
-                    position: 'sticky',
-                    top: 0,
-                    left: isSticky ? 0 : 'auto',
-                    zIndex: isSticky ? 60 : 50,
-                    backgroundColor: getBgColor(),
-                    textAlign: 'center',
-                    fontWeight: 'bold',
-                    height: headerGroupHeight,
-                    boxShadow: isSticky ? '2px 2px 5px -2px rgba(0,0,0,0.15)' : '0 2px 0 0 rgba(0,0,0,0.1)',
-                    borderBottom: '1px solid hsl(var(--border))'
-                  }}
-                >
-                  {group.title}
-                </TableHead>
-              );
-            })}
+            {/* Sticky part of Info group (covering ID and Name only) */}
+            <TableHead
+              key="sticky-info-group"
+              colSpan={2} // Only span the 2 sticky columns
+              style={{
+                position: 'sticky',
+                top: 0,
+                left: 0,
+                zIndex: 60,
+                backgroundColor: getBgColor(),
+                textAlign: 'center',
+                fontWeight: 'bold',
+                boxShadow: '2px 2px 5px -2px rgba(0,0,0,0.15)',
+                borderBottom: '1px solid hsl(var(--border))',
+                // Width should match the combined width of ID and Name columns
+                width: '260px', // 80px + 180px
+                minWidth: '260px'
+              }}
+            >
+              Info
+            </TableHead>
+            
+            {/* Non-sticky part of Info group (just the Type column) */}
+            <TableHead
+              key="non-sticky-info-group"
+              colSpan={1} // Just the Type column
+              style={{
+                position: 'static',
+                top: 0,
+                zIndex: 50,
+                backgroundColor: getBgColor(),
+                textAlign: 'center',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 0 0 rgba(0,0,0,0.1)',
+                borderBottom: '1px solid hsl(var(--border))'
+              }}
+            >
+              Info
+            </TableHead>
+            
+            {/* The rest of the header groups */}
+            {headerGroups.slice(1).map((group) => (
+              <TableHead
+                key={`group-${group.id}`}
+                colSpan={group.colSpan}
+                style={{
+                  position: 'static',
+                  top: 0,
+                  zIndex: 50,
+                  backgroundColor: getBgColor(),
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  boxShadow: '0 2px 0 0 rgba(0,0,0,0.1)',
+                  borderBottom: '1px solid hsl(var(--border))'
+                }}
+              >
+                {group.title}
+              </TableHead>
+            ))}
           </TableRow>
           
           {/* Regular header row */}
