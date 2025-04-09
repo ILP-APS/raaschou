@@ -15,89 +15,23 @@ import {
 } from '@/components/ui/table';
 import { useTheme } from 'next-themes';
 
-// Sample data with more columns
-const data = [
-  { 
-    id: '1', 
-    name: 'Project 1', 
-    col1: 'Bud-1-1', 
-    col2: 'Bud-1-2', 
-    col3: 'Bud-1-3',
-    col4: 'Bud-1-4',
-    col5: 'Bud-1-5',
-    col6: 'Bud-1-6',
-    col7: 'Bud-1-7',
-    col8: 'Bud-1-8',
-    col9: 'Bud-1-9',
-    col10: 'Bud-1-10',
-    col11: 'Bud-1-11',
-    col12: 'Bud-1-12'
-  },
-  { 
-    id: '2', 
-    name: 'Project 2', 
-    col1: 'Bud-2-1', 
-    col2: 'Bud-2-2', 
-    col3: 'Bud-2-3',
-    col4: 'Bud-2-4',
-    col5: 'Bud-2-5',
-    col6: 'Bud-2-6',
-    col7: 'Bud-2-7',
-    col8: 'Bud-2-8',
-    col9: 'Bud-2-9',
-    col10: 'Bud-2-10',
-    col11: 'Bud-2-11',
-    col12: 'Bud-2-12'
-  },
-  { 
-    id: '3', 
-    name: 'Project 3', 
-    col1: 'Bud-3-1', 
-    col2: 'Bud-3-2', 
-    col3: 'Bud-3-3',
-    col4: 'Bud-3-4',
-    col5: 'Bud-3-5',
-    col6: 'Bud-3-6',
-    col7: 'Bud-3-7',
-    col8: 'Bud-3-8',
-    col9: 'Bud-3-9',
-    col10: 'Bud-3-10',
-    col11: 'Bud-3-11',
-    col12: 'Bud-3-12'
-  },
-  { 
-    id: '4', 
-    name: 'Project 4', 
-    col1: 'Bud-4-1', 
-    col2: 'Bud-4-2', 
-    col3: 'Bud-4-3',
-    col4: 'Bud-4-4',
-    col5: 'Bud-4-5',
-    col6: 'Bud-4-6',
-    col7: 'Bud-4-7',
-    col8: 'Bud-4-8',
-    col9: 'Bud-4-9',
-    col10: 'Bud-4-10',
-    col11: 'Bud-4-11',
-    col12: 'Bud-4-12'
-  },
-  { 
-    id: '5', 
-    name: 'Project 5', 
-    col1: 'Bud-5-1', 
-    col2: 'Bud-5-2', 
-    col3: 'Bud-5-3',
-    col4: 'Bud-5-4',
-    col5: 'Bud-5-5',
-    col6: 'Bud-5-6',
-    col7: 'Bud-5-7',
-    col8: 'Bud-5-8',
-    col9: 'Bud-5-9',
-    col10: 'Bud-5-10',
-    col11: 'Bud-5-11',
-    col12: 'Bud-5-12'
-  },
-];
+// Generate 50 rows of sample data
+const data = Array.from({ length: 50 }).map((_, i) => ({
+  id: `${i + 1}`,
+  name: `Project ${i + 1}`,
+  col1: `Bud-${i + 1}-1`,
+  col2: `Bud-${i + 1}-2`,
+  col3: `Bud-${i + 1}-3`,
+  col4: `Bud-${i + 1}-4`,
+  col5: `Bud-${i + 1}-5`,
+  col6: `Bud-${i + 1}-6`, 
+  col7: `Bud-${i + 1}-7`,
+  col8: `Bud-${i + 1}-8`,
+  col9: `Bud-${i + 1}-9`,
+  col10: `Bud-${i + 1}-10`,
+  col11: `Bud-${i + 1}-11`,
+  col12: `Bud-${i + 1}-12`
+}));
 
 const columns = [
   {
@@ -190,7 +124,8 @@ export default function MinimalStickyTable() {
     <div style={{
       position: 'relative',
       width: '100%',
-      maxWidth: '800px', // Restrict container width to force scrolling
+      maxWidth: '800px', // Restrict container width to force horizontal scrolling
+      height: '400px', // Fixed height to force vertical scrolling
       overflowX: 'auto',
       overflowY: 'auto',
       maxHeight: '70vh',
