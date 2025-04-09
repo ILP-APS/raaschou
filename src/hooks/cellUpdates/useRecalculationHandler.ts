@@ -29,7 +29,6 @@ export const useRecalculationHandler = ({
     updateProduktionUI, 
     updateMontageUI,
     updateTimerTilbageUI,
-    updateProjekteringRestUI,
     updateProduktionTimerTilbageUI
   } = useUIUpdates(tableData, setTableData);
   
@@ -69,7 +68,7 @@ export const useRecalculationHandler = ({
         
         // Also recalculate timer tilbage if projektering changed
         const { timerTilbageValue } = await recalculateTimerTilbage(appointmentNumber, newRowData);
-        updateProjekteringRestUI(rowIndex, timerTilbageValue);
+        updateTimerTilbageUI(rowIndex, timerTilbageValue);
         newRowData[16] = timerTilbageValue;
       } catch (error) {
         console.error(`Failed to recalculate projektering for ${appointmentNumber}:`, error);
@@ -84,10 +83,8 @@ export const useRecalculationHandler = ({
         updateProduktionUI(rowIndex, produktionValue);
         newRowData[10] = produktionValue;
         
-        // Also recalculate produktion timer tilbage if produktion changed
-        const { produktionTimerTilbageValue } = await recalculateProduktionTimerTilbage(appointmentNumber, newRowData);
-        updateProduktionTimerTilbageUI(rowIndex, produktionTimerTilbageValue);
-        newRowData[17] = produktionTimerTilbageValue;
+        // Always recalculate produktion timer tilbage when produktion changes
+        await recalculateAndUpdateProduktionTimerTilbage(appointmentNumber, rowIndex, newRowData);
       } catch (error) {
         console.error(`Failed to recalculate produktion for ${appointmentNumber}:`, error);
       }
@@ -119,14 +116,7 @@ export const useRecalculationHandler = ({
     
     // Handle produktion timer tilbage recalculation if needed
     if (recalcNeeded.produktionTimerTilbage) {
-      console.log(`Need to recalculate Produktion Timer Tilbage for ${appointmentNumber}`);
-      try {
-        const { produktionTimerTilbageValue } = await recalculateProduktionTimerTilbage(appointmentNumber, newRowData);
-        updateProduktionTimerTilbageUI(rowIndex, produktionTimerTilbageValue);
-        newRowData[17] = produktionTimerTilbageValue;
-      } catch (error) {
-        console.error(`Failed to recalculate produktion timer tilbage for ${appointmentNumber}:`, error);
-      }
+      await recalculateAndUpdateProduktionTimerTilbage(appointmentNumber, rowIndex, newRowData);
     }
     
     // Always recalculate the total when any of the values change that affect it
@@ -157,6 +147,33 @@ export const useRecalculationHandler = ({
       } catch (error) {
         console.error(`Failed to recalculate total for ${appointmentNumber}:`, error);
       }
+    }
+  };
+
+  // Helper function to recalculate and update produktion timer tilbage
+  const recalculateAndUpdateProduktionTimerTilbage = async (
+    appointmentNumber: string,
+    rowIndex: number,
+    rowData: string[]
+  ) => {
+    console.log(`Recalculating Produktion Timer Tilbage for ${appointmentNumber}`);
+    try {
+      // Make sure we have the latest row data including any realized produktion value at position 13
+      console.log(`Row data for produktion timer tilbage calculation:`, {
+        produktion: rowData[10],
+        realizedProduktion: rowData[13]
+      });
+      
+      const { produktionTimerTilbageValue } = await recalculateProduktionTimerTilbage(appointmentNumber, rowData);
+      console.log(`Calculated new produktion timer tilbage: ${produktionTimerTilbageValue} for ${appointmentNumber}`);
+      
+      // Update the UI with the new value
+      updateProduktionTimerTilbageUI(rowIndex, produktionTimerTilbageValue);
+      
+      return { produktionTimerTilbageValue };
+    } catch (error) {
+      console.error(`Failed to recalculate produktion timer tilbage for ${appointmentNumber}:`, error);
+      throw error;
     }
   };
   

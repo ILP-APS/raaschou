@@ -124,7 +124,7 @@ export const useCalculations = () => {
     
     console.log(`Calculated new produktion timer tilbage value: ${produktionTimerTilbageValue} (${produktionTimerTilbageNumericValue}) for appointment ${appointmentNumber}`);
     
-    // Update Supabase with the calculated value
+    // Update Supabase with the calculated value - using timer_tilbage_2 field
     await updateAppointmentField(
       appointmentNumber, 
       'timer_tilbage_2', 

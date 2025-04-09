@@ -33,17 +33,17 @@ export const useFieldMapping = () => {
       case 15:
         return 'total'; // Using the existing total field for realized total
       case 16:
-        return 'timer_tilbage_1'; // Projektering
+        return 'timer_tilbage_1'; // Projektering timer tilbage
       case 17:
-        return 'timer_tilbage_2'; // Timer tilbage (moved from position 21)
+        return 'timer_tilbage_2'; // Produktion timer tilbage
       case 18:
-        return 'faerdig_pct_ex_montage_nu'; // Moved from position 17
+        return 'faerdig_pct_ex_montage_nu';
       case 19:
-        return 'faerdig_pct_ex_montage_foer'; // Moved from position 18
+        return 'faerdig_pct_ex_montage_foer';
       case 20:
-        return 'est_timer_ift_faerdig_pct'; // Moved from position 19
+        return 'est_timer_ift_faerdig_pct';
       case 21:
-        return 'plus_minus_timer'; // Moved from position 20
+        return 'plus_minus_timer';
       case 22:
         return 'afsat_fragt';
       default:
@@ -87,17 +87,17 @@ export const useFieldMapping = () => {
       case 15:
         return 'Real. Total';
       case 16:
-        return 'Projektering';
+        return 'Proj. Timer tilbage';
       case 17:
-        return 'Timer tilbage'; // Rearranged from position 21
+        return 'Prod. Timer tilbage';
       case 18:
-        return 'Færdig % ex montage nu'; // Rearranged from position 17
+        return 'Færdig % ex montage nu';
       case 19:
-        return 'Færdig % ex montage før'; // Rearranged from position 18
+        return 'Færdig % ex montage før';
       case 20:
-        return 'Est timer ift færdig %'; // Rearranged from position 19
+        return 'Est timer ift færdig %';
       case 21:
-        return '+/- timer'; // Rearranged from position 20
+        return '+/- timer';
       case 22:
         return 'Afsat fragt';
       default:

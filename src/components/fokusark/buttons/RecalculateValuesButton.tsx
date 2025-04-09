@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Calculator } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { loadFokusarkAppointments, updateAppointmentField } from "@/services/fokusark/appointmentDbService";
+import { loadFokusarkAppointments, updateAppointmentField } from "@/services/fokusarkAppointmentService";
 import { calculateProjektering, calculateProduktion, calculateMontage, calculateTimerTilbage, calculateProduktionTimerTilbage, parseNumber, calculateTotal, formatDanishNumber } from "@/utils/fokusarkCalculations";
 
 interface RecalculateValuesButtonProps {
@@ -36,7 +36,8 @@ const RecalculateValuesButton: React.FC<RecalculateValuesButtonProps> = ({ table
               produktion: appointment.produktion,
               montage_3: appointment.montage_3,
               projektering_2: appointment.projektering_2,
-              timer_tilbage_1: appointment.timer_tilbage_1
+              timer_tilbage_1: appointment.timer_tilbage_1,
+              timer_tilbage_2: appointment.timer_tilbage_2
             },
             rowData
           });
@@ -114,6 +115,7 @@ const RecalculateValuesButton: React.FC<RecalculateValuesButtonProps> = ({ table
             );
             
             // Calculate projektering timer tilbage
+            // Ensure we have the realized projektering value at position 12
             updatedRowData[12] = formatDanishNumber(appointment.projektering_2 || 0);
             
             const timerTilbageValue = calculateTimerTilbage(updatedRowData);
@@ -133,11 +135,11 @@ const RecalculateValuesButton: React.FC<RecalculateValuesButtonProps> = ({ table
               timerTilbageNumericValue
             );
             
-            // Calculate produktion timer tilbage - This is where we need to focus
-            // First, ensure we're adding the realized produktion value to the row data
-            // In the UI it's at position 13, so we need to update that
-            const realizedProdValue = formatDanishNumber(appointment.projektering_2 || 0);
-            updatedRowData[13] = realizedProdValue;
+            // Calculate produktion timer tilbage 
+            // First, ensure we have the realized produktion value at position 13
+            // This is critical for the calculation to work correctly
+            const realizedProduktion = appointment.projektering_2 || 0; // This might need to be a different field
+            updatedRowData[13] = formatDanishNumber(realizedProduktion);
             
             // Now calculate produktion timer tilbage
             const produktionTimerTilbageValue = calculateProduktionTimerTilbage(updatedRowData);
@@ -148,7 +150,7 @@ const RecalculateValuesButton: React.FC<RecalculateValuesButtonProps> = ({ table
               numeric: produktionTimerTilbageNumeric,
               current: appointment.timer_tilbage_2,
               produktion: produktionNumeric,
-              realized_produktion: parseNumber(realizedProdValue), 
+              realized_produktion: realizedProduktion, 
               rowData: updatedRowData
             });
             

@@ -67,8 +67,6 @@ export const useUIUpdates = (
       updateCellUI(rowIndex, ColumnIndex.MONTAGE, value),
     updateTimerTilbageUI: (rowIndex: number, value: string) => 
       updateCellUI(rowIndex, ColumnIndex.TIMER_TILBAGE, value),
-    updateProjekteringRestUI: (rowIndex: number, value: string) => 
-      updateCellUI(rowIndex, ColumnIndex.TIMER_TILBAGE, value),
     updateProduktionTimerTilbageUI: (rowIndex: number, value: string) => {
       console.log(`Updating UI for produktion timer tilbage at row ${rowIndex}, column ${ColumnIndex.PRODUKTION_TIMER_TILBAGE} with value: ${value}`);
       updateCellUI(rowIndex, ColumnIndex.PRODUKTION_TIMER_TILBAGE, value);
