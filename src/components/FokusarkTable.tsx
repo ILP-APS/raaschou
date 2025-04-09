@@ -2,7 +2,6 @@
 import React from "react";
 import { useFokusarkData } from "@/hooks/useFokusarkData";
 import FokusarkTableLoading from "./fokusark/FokusarkTableLoading";
-import MinimalStickyTable from "./fokusark/MinimalStickyTable";
 
 interface FokusarkTableProps {
   data: string[][];
@@ -32,7 +31,9 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
 
   return (
     <div className="rounded-md w-full relative">
-      <MinimalStickyTable />
+      <div className="text-center p-8">
+        <p>Table implementation removed.</p>
+      </div>
     </div>
   );
 };
