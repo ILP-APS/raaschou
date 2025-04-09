@@ -1,5 +1,16 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  createColumnHelper,
+  flexRender,
+  SortingState,
+  ColumnDef,
+} from '@tanstack/react-table';
 import {
   Table,
   TableBody,
@@ -19,12 +30,42 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
-// Generate sample data
-const generateSampleData = () => {
-  const data = [];
+// Define the data type for our table
+type FokusarkRow = {
+  id: number;
+  nr: string;
+  navn: string;
+  ansvarlig: string;
+  tilbud: string;
+  montage: string;
+  underleverandor: string;
+  montage2: string;
+  underleverandor2: string;
+  materialer: string;
+  projektering: string;
+  produktion: string;
+  montage3: string;
+  projektering2: string;
+  produktionRealized: string;
+  montageRealized: string;
+  total: string;
+  timerTilbage1: string;
+  timerTilbage2: string;
+  faerdigPctExMontageNu: string;
+  faerdigPctExMontageFoer: string;
+  estTimerIftFaerdigPct: string;
+  plusMinusTimer: string;
+  afsatFragt: string;
+  isSubAppointment: boolean;
+};
+
+// Generate sample data for the table
+const generateSampleData = (): FokusarkRow[] => {
+  const data: FokusarkRow[] = [];
   for (let i = 1; i <= 50; i++) {
-    const row = {
+    const row: FokusarkRow = {
       id: i,
       nr: `A-${100 + i}`,
       navn: `Project ${i}`,
@@ -56,178 +97,301 @@ const generateSampleData = () => {
   return data;
 };
 
-const sampleData = generateSampleData();
+// Create a column helper based on our data type
+const columnHelper = createColumnHelper<FokusarkRow>();
 
-// Simple table component with basic styling and pagination
 export default function FrozenDataTable() {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [searchTerm, setSearchTerm] = useState('');
-  const tableContainerRef = useRef<HTMLDivElement>(null);
-  const itemsPerPage = 10;
+  const [data] = useState<FokusarkRow[]>(() => generateSampleData());
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [globalFilter, setGlobalFilter] = useState('');
   
-  // Filter data based on search term
-  const filteredData = sampleData.filter(row => 
-    row.navn.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    row.nr.toLowerCase().includes(searchTerm.toLowerCase())
+  // Define columns with column helper
+  const columns = React.useMemo<ColumnDef<FokusarkRow>[]>(
+    () => [
+      columnHelper.accessor('nr', {
+        header: 'Nr.',
+        cell: info => info.getValue(),
+        meta: {
+          className: 'sticky left-0 bg-background z-10 min-w-[100px]',
+          headerClassName: 'sticky left-0 bg-muted z-20'
+        },
+      }),
+      columnHelper.accessor('navn', {
+        header: 'Navn',
+        cell: info => info.getValue(),
+        meta: {
+          className: 'sticky left-[100px] bg-background z-10 min-w-[250px]',
+          headerClassName: 'sticky left-[100px] bg-muted z-20'
+        },
+      }),
+      columnHelper.accessor('ansvarlig', {
+        header: 'Ansvarlig',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('tilbud', {
+        header: 'Tilbud',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('montage', {
+        header: 'Montage',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('underleverandor', {
+        header: 'Underleverandør',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('montage2', {
+        header: 'Montage 2',
+        cell: info => (
+          <Input 
+            value={info.getValue()} 
+            onChange={e => console.log('Changing montage2:', e.target.value)}
+            className="h-8 w-full border-0 bg-transparent focus:ring-1 focus:ring-primary"
+          />
+        ),
+      }),
+      columnHelper.accessor('underleverandor2', {
+        header: 'Underleverandør 2',
+        cell: info => (
+          <Input 
+            value={info.getValue()} 
+            onChange={e => console.log('Changing underleverandor2:', e.target.value)}
+            className="h-8 w-full border-0 bg-transparent focus:ring-1 focus:ring-primary"
+          />
+        ),
+      }),
+      columnHelper.accessor('materialer', {
+        header: 'Materialer',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('projektering', {
+        header: 'Projektering',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('produktion', {
+        header: 'Produktion',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('montage3', {
+        header: 'Montage',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('projektering2', {
+        header: 'Projektering',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('produktionRealized', {
+        header: 'Produktion',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('montageRealized', {
+        header: 'Montage',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('total', {
+        header: 'Total',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('timerTilbage1', {
+        header: 'Timer tilbage',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('timerTilbage2', {
+        header: 'Timer tilbage',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('faerdigPctExMontageNu', {
+        header: 'Færdig % ex montage nu',
+        cell: info => (
+          <Input 
+            value={info.getValue()} 
+            onChange={e => console.log('Changing faerdigPctExMontageNu:', e.target.value)}
+            className="h-8 w-full border-0 bg-transparent focus:ring-1 focus:ring-primary"
+          />
+        ),
+      }),
+      columnHelper.accessor('faerdigPctExMontageFoer', {
+        header: 'Færdig % ex montage før',
+        cell: info => (
+          <Input 
+            value={info.getValue()} 
+            onChange={e => console.log('Changing faerdigPctExMontageFoer:', e.target.value)}
+            className="h-8 w-full border-0 bg-transparent focus:ring-1 focus:ring-primary"
+          />
+        ),
+      }),
+      columnHelper.accessor('estTimerIftFaerdigPct', {
+        header: 'Est timer ift færdig %',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('plusMinusTimer', {
+        header: '+/- timer',
+        cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('afsatFragt', {
+        header: 'Afsat fragt',
+        cell: info => info.getValue(),
+      })
+    ],
+    []
   );
   
-  // Paginate data
-  const paginatedData = filteredData.slice(
-    currentPage * itemsPerPage,
-    (currentPage + 1) * itemsPerPage
-  );
-  
-  const pageCount = Math.ceil(filteredData.length / itemsPerPage);
-  
-  // Reset to first page when search term changes
-  useEffect(() => {
-    setCurrentPage(0);
-  }, [searchTerm]);
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      sorting,
+      globalFilter,
+    },
+    onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
+    },
+  });
   
   return (
     <div className="w-full">
       <div className="flex items-center py-4 gap-2">
         <Input
           placeholder="Search projects..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={globalFilter ?? ''}
+          onChange={e => setGlobalFilter(String(e.target.value))}
           className="max-w-sm"
         />
       </div>
       
-      <div 
-        ref={tableContainerRef}
-        className="border rounded-md overflow-auto"
-        style={{ maxHeight: '500px' }}
-      >
+      <div className="border rounded-md relative overflow-auto" style={{ maxHeight: '500px' }}>
+        <style jsx>{`
+          .sticky {
+            position: sticky;
+            z-index: 10;
+          }
+          
+          .left-0 {
+            left: 0;
+          }
+          
+          .left-\\[100px\\] {
+            left: 100px;
+          }
+          
+          .bg-background {
+            background-color: hsl(var(--background));
+          }
+          
+          .bg-muted {
+            background-color: hsl(var(--muted));
+          }
+        `}</style>
+        
         <Table>
-          <TableHeader className="sticky top-0 bg-background z-10">
-            <TableRow>
-              <TableHead className="w-[100px] bg-muted">Nr.</TableHead>
-              <TableHead className="w-[250px] bg-muted">Navn</TableHead>
-              <TableHead className="bg-muted">Ansvarlig</TableHead>
-              <TableHead className="bg-muted">Tilbud</TableHead>
-              <TableHead className="bg-muted">Montage</TableHead>
-              <TableHead className="bg-muted">Underleverandør</TableHead>
-              <TableHead className="bg-muted">Montage 2</TableHead>
-              <TableHead className="bg-muted">Underleverandør 2</TableHead>
-              <TableHead className="bg-muted">Materialer</TableHead>
-              <TableHead className="bg-muted">Projektering</TableHead>
-              <TableHead className="bg-muted">Produktion</TableHead>
-              <TableHead className="bg-muted">Montage</TableHead>
-              <TableHead className="bg-muted">Projektering</TableHead>
-              <TableHead className="bg-muted">Produktion</TableHead>
-              <TableHead className="bg-muted">Montage</TableHead>
-              <TableHead className="bg-muted">Total</TableHead>
-              <TableHead className="bg-muted">Timer tilbage</TableHead>
-              <TableHead className="bg-muted">Timer tilbage</TableHead>
-              <TableHead className="bg-muted">Færdig % ex montage nu</TableHead>
-              <TableHead className="bg-muted">Færdig % ex montage før</TableHead>
-              <TableHead className="bg-muted">Est timer ift færdig %</TableHead>
-              <TableHead className="bg-muted">+/- timer</TableHead>
-              <TableHead className="bg-muted">Afsat fragt</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedData.map((row) => (
-              <TableRow 
-                key={row.id} 
-                className={row.isSubAppointment ? 'bg-muted/20' : ''}
-              >
-                <TableCell className="font-medium">{row.nr}</TableCell>
-                <TableCell>{row.navn}</TableCell>
-                <TableCell>{row.ansvarlig}</TableCell>
-                <TableCell>{row.tilbud}</TableCell>
-                <TableCell>{row.montage}</TableCell>
-                <TableCell>{row.underleverandor}</TableCell>
-                <TableCell>
-                  <Input 
-                    value={row.montage2} 
-                    className="h-8 w-full border-0 bg-transparent focus:ring-1 focus:ring-primary"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Input 
-                    value={row.underleverandor2} 
-                    className="h-8 w-full border-0 bg-transparent focus:ring-1 focus:ring-primary"
-                  />
-                </TableCell>
-                <TableCell>{row.materialer}</TableCell>
-                <TableCell>{row.projektering}</TableCell>
-                <TableCell>{row.produktion}</TableCell>
-                <TableCell>{row.montage3}</TableCell>
-                <TableCell>{row.projektering2}</TableCell>
-                <TableCell>{row.produktionRealized}</TableCell>
-                <TableCell>{row.montageRealized}</TableCell>
-                <TableCell>{row.total}</TableCell>
-                <TableCell>{row.timerTilbage1}</TableCell>
-                <TableCell>{row.timerTilbage2}</TableCell>
-                <TableCell>
-                  <Input 
-                    value={row.faerdigPctExMontageNu} 
-                    className="h-8 w-full border-0 bg-transparent focus:ring-1 focus:ring-primary"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Input 
-                    value={row.faerdigPctExMontageFoer} 
-                    className="h-8 w-full border-0 bg-transparent focus:ring-1 focus:ring-primary"
-                  />
-                </TableCell>
-                <TableCell>{row.estTimerIftFaerdigPct}</TableCell>
-                <TableCell>{row.plusMinusTimer}</TableCell>
-                <TableCell>{row.afsatFragt}</TableCell>
+          <TableHeader className="sticky top-0 bg-muted z-10">
+            {table.getHeaderGroups().map(headerGroup => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <TableHead
+                    key={header.id}
+                    className={(header.column.columnDef.meta as any)?.headerClassName}
+                    onClick={header.column.getToggleSortingHandler()}
+                    style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
+                  >
+                    <div className="flex items-center justify-between">
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.column.getCanSort() && (
+                        <div className="pl-1">
+                          {{
+                            asc: <ChevronUp className="h-4 w-4" />,
+                            desc: <ChevronDown className="h-4 w-4" />
+                          }[header.column.getIsSorted() as string] ?? null}
+                        </div>
+                      )}
+                    </div>
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className={row.original.isSubAppointment ? 'bg-muted/20' : ''}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell 
+                      key={cell.id}
+                      className={(cell.column.columnDef.meta as any)?.className}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
       
       <div className="flex items-center justify-between py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          Showing page {currentPage + 1} of {Math.max(1, pageCount)}
+          Showing page {table.getState().pagination.pageIndex + 1} of{" "}
+          {table.getPageCount()}
         </div>
         
         <Pagination>
           <PaginationContent>
             <PaginationItem>
-              <PaginationPrevious 
+              <PaginationPrevious
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  setCurrentPage(prev => Math.max(0, prev - 1));
+                  table.previousPage();
                 }}
-                aria-disabled={currentPage === 0}
-                className={currentPage === 0 ? "pointer-events-none opacity-50" : ""}
+                aria-disabled={!table.getCanPreviousPage()}
+                className={!table.getCanPreviousPage() ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
             
-            {Array.from({ length: Math.min(5, pageCount) }).map((_, i) => (
+            {Array.from({ length: Math.min(5, table.getPageCount()) }, (_, i) => (
               <PaginationItem key={i}>
-                <PaginationLink 
+                <PaginationLink
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    setCurrentPage(i);
+                    table.setPageIndex(i);
                   }}
-                  isActive={currentPage === i}
+                  isActive={table.getState().pagination.pageIndex === i}
                 >
                   {i + 1}
                 </PaginationLink>
               </PaginationItem>
             ))}
             
-            {pageCount > 5 && <PaginationEllipsis />}
+            {table.getPageCount() > 5 && <PaginationEllipsis />}
             
             <PaginationItem>
-              <PaginationNext 
+              <PaginationNext
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  setCurrentPage(prev => Math.min(pageCount - 1, prev + 1));
+                  table.nextPage();
                 }}
-                aria-disabled={currentPage >= pageCount - 1}
-                className={currentPage >= pageCount - 1 ? "pointer-events-none opacity-50" : ""}
+                aria-disabled={!table.getCanNextPage()}
+                className={!table.getCanNextPage() ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
           </PaginationContent>
