@@ -124,13 +124,30 @@ export const tableContainerStyles = `
     z-index: 20;
     background-color: white;
   }
+
+  /* Fix header rows to stay visible when scrolling */
+  thead tr:first-child th {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background-color: white;
+  }
   
-  /* Fix the table end appearance */
-  .table-scroll-container table {
-    border-collapse: collapse;
-    border-spacing: 0;
-    width: max-content;
-    min-width: 100%;
+  /* Second header row sticks below the first one */
+  thead tr:nth-child(2) th {
+    position: sticky;
+    top: 41px; /* Height of the first header row (adjust if needed) */
+    z-index: 20;
+    background-color: white;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  
+  /* Handle overlap of sticky headers and sticky columns */
+  thead tr:first-child th:first-child,
+  thead tr:first-child th:nth-child(2),
+  thead tr:nth-child(2) th:first-child,
+  thead tr:nth-child(2) th:nth-child(2) {
+    z-index: 50 !important; /* Ensure corner cells are above all others */
   }
   
   /* Ensure the table has proper right border */
