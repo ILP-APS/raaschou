@@ -37,70 +37,53 @@ const FokusarkContent: React.FC = () => {
         <FokusarkDescription />
       </div>
       
-      <div className="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-0">
-        {/* Main scrollable container */}
+      <div className="rounded-lg border border-border shadow-sm">
         <div className="sticky-table-container">
           <Table className="sticky-table">
             <TableHeader>
               {/* First Header Row - Group Headers */}
               <TableRow>
-                {/* Column 1 (First sticky column) */}
+                {/* First sticky column under Group 1 */}
                 <TableHead 
+                  rowSpan={1}
                   data-sticky="true"
-                  style={{ left: 0, width: '150px', minWidth: '150px' }}
-                  className="font-medium whitespace-nowrap text-center border-r"
+                  style={{ left: 0, width: '150px' }}
                 >
                   Group 1
                 </TableHead>
                 
-                {/* Column 2 (Second sticky column) */}
+                {/* Second sticky column under Group 1 */}
                 <TableHead 
+                  rowSpan={1}
                   data-sticky="true"
                   data-last-sticky="true"
-                  style={{ left: 150, width: '150px', minWidth: '150px' }}
-                  className="font-medium whitespace-nowrap text-center border-r"
+                  style={{ left: '150px', width: '150px' }}
                 >
                   Group 1
                 </TableHead>
                 
-                {/* Column 3 - Non-sticky part of Group 1 */}
-                <TableHead 
-                  className="font-medium whitespace-nowrap text-center border-r"
-                  colSpan={1}
-                  style={{ width: '120px', minWidth: '120px' }}
-                >
+                {/* Remaining column for Group 1 */}
+                <TableHead colSpan={1}>
                   Group 1
                 </TableHead>
                 
                 {/* Group 2: Columns 4-8 */}
-                <TableHead 
-                  className="font-medium whitespace-nowrap text-center border-r"
-                  colSpan={5}
-                >
+                <TableHead colSpan={5}>
                   Group 2
                 </TableHead>
                 
                 {/* Group 3: Columns 9-14 */}
-                <TableHead 
-                  className="font-medium whitespace-nowrap text-center border-r"
-                  colSpan={6}
-                >
+                <TableHead colSpan={6}>
                   Group 3
                 </TableHead>
                 
                 {/* Group 4: Columns 15-19 */}
-                <TableHead 
-                  className="font-medium whitespace-nowrap text-center border-r"
-                  colSpan={5}
-                >
+                <TableHead colSpan={5}>
                   Group 4
                 </TableHead>
                 
                 {/* Group 5: Columns 20-25 */}
-                <TableHead 
-                  className="font-medium whitespace-nowrap text-center border-r"
-                  colSpan={6}
-                >
+                <TableHead colSpan={6}>
                   Group 5
                 </TableHead>
               </TableRow>
@@ -108,29 +91,23 @@ const FokusarkContent: React.FC = () => {
               {/* Second Header Row - Column Headers */}
               <TableRow>
                 {Array.from({ length: 25 }, (_, i) => {
-                  // Fixed width for each column type
-                  const columnWidth = i < 2 ? 150 : 120;
+                  // Fixed width for columns
+                  const columnWidth = i < 2 ? '150px' : '120px';
                   
-                  // Calculate the left position for sticky columns
-                  const leftPosition = i === 0 ? 0 : (i === 1 ? 150 : undefined);
-                  
-                  // Determine if this is a sticky column
+                  // Sticky properties
                   const isSticky = i < 2;
-                  
-                  // Is this the last sticky column?
                   const isLastSticky = i === 1;
+                  const leftPosition = isSticky ? (i === 0 ? 0 : '150px') : undefined;
                   
                   return (
                     <TableHead 
-                      key={`header-${i}`} 
-                      className="font-medium whitespace-nowrap border-r"
-                      style={{
-                        width: `${columnWidth}px`,
-                        minWidth: `${columnWidth}px`,
-                        left: leftPosition
-                      }}
+                      key={`header-${i}`}
                       data-sticky={isSticky ? "true" : undefined}
                       data-last-sticky={isLastSticky ? "true" : undefined}
+                      style={{
+                        width: columnWidth,
+                        left: leftPosition
+                      }}
                     >
                       Column {i+1}
                     </TableHead>
@@ -139,46 +116,31 @@ const FokusarkContent: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tableData.map((row, rowIndex) => {
-                const rowBgClass = rowIndex % 2 === 0 ? "bg-background" : "bg-muted/20";
-                
-                return (
-                  <TableRow 
-                    key={`row-${rowIndex}`} 
-                    className={rowBgClass}
-                  >
-                    {row.map((cell, cellIndex) => {
-                      // Fixed width for each column type
-                      const columnWidth = cellIndex < 2 ? 150 : 120;
-                      
-                      // Calculate the left position for sticky columns
-                      const leftPosition = cellIndex === 0 ? 0 : (cellIndex === 1 ? 150 : undefined);
-                      
-                      // Determine if this is a sticky column
-                      const isSticky = cellIndex < 2;
-                      
-                      // Is this the last sticky column?
-                      const isLastSticky = cellIndex === 1;
-                      
-                      return (
-                        <TableCell 
-                          key={`cell-${rowIndex}-${cellIndex}`} 
-                          className="p-2 whitespace-nowrap border-r"
-                          style={{
-                            width: `${columnWidth}px`,
-                            minWidth: `${columnWidth}px`,
-                            left: leftPosition
-                          }}
-                          data-sticky={isSticky ? "true" : undefined}
-                          data-last-sticky={isLastSticky ? "true" : undefined}
-                        >
-                          {cell}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
+              {tableData.map((row, rowIndex) => (
+                <TableRow key={`row-${rowIndex}`}>
+                  {row.map((cell, cellIndex) => {
+                    // Column properties
+                    const columnWidth = cellIndex < 2 ? '150px' : '120px';
+                    const isSticky = cellIndex < 2;
+                    const isLastSticky = cellIndex === 1;
+                    const leftPosition = isSticky ? (cellIndex === 0 ? 0 : '150px') : undefined;
+                    
+                    return (
+                      <TableCell 
+                        key={`cell-${rowIndex}-${cellIndex}`}
+                        data-sticky={isSticky ? "true" : undefined}
+                        data-last-sticky={isLastSticky ? "true" : undefined}
+                        style={{
+                          width: columnWidth,
+                          left: leftPosition
+                        }}
+                      >
+                        {cell}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </div>
