@@ -16,7 +16,7 @@ import {
   TableRow,
   TableHead
 } from "@/components/ui/table";
-import "./FokusarkTableStyles.css";
+import { useTheme } from "next-themes";
 
 // Define column metadata type
 interface ColumnMeta {
@@ -33,6 +33,8 @@ interface FokusarkRow {
 
 const FokusarkContent: React.FC = () => {
   const { tableData, isLoading } = useFokusarkData();
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
   
   // Define column groups
   const groups = [
@@ -69,12 +71,12 @@ const FokusarkContent: React.FC = () => {
     {
       accessorKey: "id",
       header: "ID",
-      meta: { sticky: true } as ColumnMeta
+      meta: { sticky: true, group: "Info" } as ColumnMeta
     },
     {
       accessorKey: "name",
       header: "Name",
-      meta: { sticky: true } as ColumnMeta
+      meta: { sticky: true, group: "Info" } as ColumnMeta
     }
   ];
   
@@ -84,7 +86,7 @@ const FokusarkContent: React.FC = () => {
     for (let i = 1; i <= group.cols; i++) {
       columns.push({
         accessorKey: `col_${colNum}`,
-        header: `C${colNum}`,
+        header: `${group.name} ${i}`,
         meta: { group: group.name } as ColumnMeta
       });
       colNum++;
@@ -105,19 +107,6 @@ const FokusarkContent: React.FC = () => {
     return undefined;
   };
   
-  // Get unique groups for the header row
-  const uniqueGroups = Array.from(
-    new Set(columns.filter(col => (col.meta as ColumnMeta)?.group).map(col => (col.meta as ColumnMeta)?.group))
-  );
-  
-  // Calculate column spans for each group
-  const groupSpans: Record<string, number> = {};
-  uniqueGroups.forEach(group => {
-    if (group) {
-      groupSpans[group] = columns.filter(col => (col.meta as ColumnMeta)?.group === group).length;
-    }
-  });
-  
   if (isLoading) {
     return (
       <div className="flex flex-col gap-4 p-4 md:p-6">
@@ -131,6 +120,15 @@ const FokusarkContent: React.FC = () => {
       </div>
     );
   }
+
+  // Get background color based on theme
+  const getBgColor = (isEvenRow: boolean = false) => {
+    if (isDarkMode) {
+      return isEvenRow ? 'hsl(var(--muted)/20)' : 'hsl(var(--background))';
+    } else {
+      return isEvenRow ? 'hsl(var(--muted)/10)' : 'hsl(var(--background))';
+    }
+  };
   
   return (
     <div className="flex flex-col gap-4 p-4 md:p-6">
@@ -139,29 +137,46 @@ const FokusarkContent: React.FC = () => {
         <FokusarkDescription />
       </div>
       
-      <div className="sticky-table-container">
-        <Table className="sticky-table">
+      <div 
+        style={{ 
+          position: 'relative',
+          overflow: 'auto',
+          maxHeight: '70vh',
+          border: '1px solid hsl(var(--border))',
+          borderRadius: '0.5rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+        }}
+      >
+        <Table>
           <TableHeader>
             {/* Group header row */}
             <TableRow>
               {/* Empty cells for ID and Name columns */}
               <TableHead 
                 colSpan={2}
-                className="sticky-cell sticky-col-0"
                 style={{ 
+                  position: 'sticky',
                   left: 0,
                   minWidth: "260px", // Combined width of first two columns
                   width: "260px",
-                  zIndex: 40
+                  zIndex: 40,
+                  backgroundColor: 'hsl(var(--muted)/80)'
                 }}
               >
-                &nbsp;
+                Info
               </TableHead>
               
               {/* Group headers */}
-              {uniqueGroups.map((group, index) => (
-                <TableHead key={`group-${index}`} colSpan={groupSpans[group as string]}>
-                  {group}
+              {groups.map((group, index) => (
+                <TableHead 
+                  key={`group-${index}`} 
+                  colSpan={group.cols}
+                  style={{
+                    backgroundColor: 'hsl(var(--muted)/80)',
+                    textAlign: 'center'
+                  }}
+                >
+                  {group.name}
                 </TableHead>
               ))}
             </TableRow>
@@ -174,14 +189,14 @@ const FokusarkContent: React.FC = () => {
                 return (
                   <TableHead
                     key={header.id}
-                    className={`
-                      ${isSticky ? 'sticky-cell' : ''}
-                      ${index === 0 ? 'sticky-col-0' : ''}
-                      ${index === 1 ? 'sticky-col-1' : ''}
-                    `}
                     style={{
+                      minWidth: index === 0 ? '80px' : index === 1 ? '180px' : '160px',
+                      width: index === 0 ? '80px' : index === 1 ? '180px' : '160px',
                       position: isSticky ? 'sticky' : 'static',
-                      left: isSticky ? getLeftPosition(index) : undefined
+                      left: isSticky ? getLeftPosition(index) : undefined,
+                      zIndex: isSticky ? 30 : 20,
+                      backgroundColor: 'hsl(var(--muted))',
+                      boxShadow: isSticky ? '2px 0 5px -2px rgba(0,0,0,0.1)' : 'none',
                     }}
                   >
                     {flexRender(
@@ -195,22 +210,23 @@ const FokusarkContent: React.FC = () => {
           </TableHeader>
           
           <TableBody>
-            {table.getRowModel().rows.map(row => (
+            {table.getRowModel().rows.map((row, rowIndex) => (
               <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell, index) => {
+                {row.getVisibleCells().map((cell, cellIndex) => {
                   const isSticky = !!(cell.column.columnDef.meta as ColumnMeta)?.sticky;
+                  const isEvenRow = rowIndex % 2 === 1;
                   
                   return (
                     <TableCell
                       key={cell.id}
-                      className={`
-                        ${isSticky ? 'sticky-cell' : ''}
-                        ${index === 0 ? 'sticky-col-0' : ''}
-                        ${index === 1 ? 'sticky-col-1' : ''}
-                      `}
                       style={{
+                        minWidth: cellIndex === 0 ? '80px' : cellIndex === 1 ? '180px' : '160px',
+                        width: cellIndex === 0 ? '80px' : cellIndex === 1 ? '180px' : '160px',
                         position: isSticky ? 'sticky' : 'static',
-                        left: isSticky ? getLeftPosition(index) : undefined
+                        left: isSticky ? getLeftPosition(cellIndex) : undefined,
+                        zIndex: isSticky ? 10 : 0,
+                        backgroundColor: getBgColor(isEvenRow),
+                        boxShadow: isSticky ? '2px 0 5px -2px rgba(0,0,0,0.1)' : 'none',
                       }}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

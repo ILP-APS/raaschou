@@ -1,122 +1,21 @@
 
-/* Main container with position relative for sticky positioning to work */
-.sticky-table-container {
-  position: relative;
-  overflow: auto;
-  max-height: 70vh;
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  background-color: hsl(var(--background));
-}
-
-/* Basic table setup */
-.sticky-table {
-  border-collapse: separate;
-  border-spacing: 0;
-  width: 100%;
-}
-
-/* Cell styling */
-.sticky-table th,
-.sticky-table td {
-  border: 1px solid hsl(var(--border));
-  padding: 0.75rem;
-  text-align: left;
-  white-space: nowrap;
-}
-
-/* Styles for sticky positioning */
-.sticky-cell {
-  position: -webkit-sticky !important;
-  position: sticky !important;
-  background-color: hsl(var(--background)) !important;
-  z-index: 10;
-}
-
-/* Sticky header cells need higher z-index */
-th.sticky-cell {
-  z-index: 30 !important;
-}
-
-/* First column styling */
-.sticky-col-0 {
-  left: 0;
-  min-width: 80px;
-  width: 80px;
-  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
-}
-
-/* Second column styling */
-.sticky-col-1 {
-  left: 80px; /* Width of the first column */
-  min-width: 180px;
-  width: 180px;
-  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
-}
-
-/* Header styling */
-.sticky-table thead th {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background-color: hsl(var(--muted));
-}
-
-/* Corner cells (header + first/second column) need higher z-index */
-.sticky-table thead th.sticky-cell {
-  z-index: 40;
-}
-
-/* Default column widths */
-.sticky-table th:not(.sticky-col-0):not(.sticky-col-1),
-.sticky-table td:not(.sticky-col-0):not(.sticky-col-1) {
-  min-width: 160px;
-  width: 160px;
-}
-
-/* Row styles */
-.sticky-table tbody tr:nth-child(even) {
-  background-color: hsl(var(--muted)/10);
-}
-
-.sticky-table tbody tr:hover {
-  background-color: hsl(var(--muted)/20);
-}
-
-/* Ensure background colors are applied for sticky columns too */
-.sticky-table tbody tr:nth-child(even) td.sticky-cell {
-  background-color: hsl(var(--muted)/10) !important;
-}
-
-.sticky-table tbody tr:hover td.sticky-cell {
-  background-color: hsl(var(--muted)/20) !important;
-}
-
-/* Group header row styling */
-.sticky-table thead tr:first-child th {
-  text-align: center;
-  background-color: hsl(var(--muted)/80);
-}
-
-/* Custom scrollbars */
-.sticky-table-container::-webkit-scrollbar {
+/* Optional styling for improved scrollbars */
+::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
 
-.sticky-table-container::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: hsl(var(--muted)/30);
   border-radius: 6px;
 }
 
-.sticky-table-container::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background-color: hsl(var(--primary)/50);
   border-radius: 6px;
   border: 3px solid hsl(var(--muted)/30);
 }
 
-.sticky-table-container::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb:hover {
   background-color: hsl(var(--primary)/70);
 }
