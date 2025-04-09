@@ -58,7 +58,7 @@ export const useTableData = () => {
             console.log(`Realized hours for ${appointment.appointmentNumber}:`, realizedHours);
             
             try {
-              // Parse realized hours from API
+              // Parse realized hours from API (these are already formatted strings)
               const projekteringNum = parseFloat(realizedHours.projektering.replace(/\./g, '').replace(',', '.')) || 0;
               const produktionNum = parseFloat(realizedHours.produktion.replace(/\./g, '').replace(',', '.')) || 0;
               const montageNum = parseFloat(realizedHours.montage.replace(/\./g, '').replace(',', '.')) || 0;
@@ -66,16 +66,17 @@ export const useTableData = () => {
               
               console.log(`Storing realized hours for ${appointment.appointmentNumber}:`, {
                 projektering: projekteringNum,
-                produktion: produktionNum,
+                produktion: produktionNum, // API value for realized production
                 montage: montageNum,
                 total: totalNum
               });
               
               // Store realized hours in database - ensure we're using the correct columns
+              // Store API produktion value in produktion_realized field
               await updateRealizedHours(
                 appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
                 projekteringNum,
-                produktionNum, // This is the realized production from API
+                produktionNum, // API produktion value goes to produktion_realized field
                 montageNum,
                 totalNum
               );
@@ -112,7 +113,7 @@ export const useTableData = () => {
             // Add the realized values from the API (columns 12-15)
             row.push(
               realizedHours.projektering, 
-              realizedHours.produktion, // This should come from the API, not calculation
+              realizedHours.produktion, // API value for realized production
               realizedHours.montage, 
               realizedHours.total
             );

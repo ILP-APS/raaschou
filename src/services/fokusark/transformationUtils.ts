@@ -1,3 +1,4 @@
+
 import { FokusarkAppointment } from "@/api/fokusarkAppointmentsApi";
 import { parseNumber } from "@/utils/numberFormatUtils";
 import { formatDanishNumber } from "@/utils/formatUtils";
@@ -30,6 +31,7 @@ export const transformApiDataToAppointments = (tableData: string[][]): FokusarkA
       montage_3: null,
       total: null,
       projektering_2: null,
+      produktion_realized: null, // Explicitly initialize this to null
       timer_tilbage_1: null,
       faerdig_pct_ex_montage_nu: null,
       faerdig_pct_ex_montage_foer: null,
@@ -128,12 +130,15 @@ const addEstimatedValues = (appointment: FokusarkAppointment, row: string[]): vo
  */
 const addRealizedValues = (appointment: FokusarkAppointment, row: string[]): void => {
   row[12] = formatValueOrEmpty(appointment.projektering_2);
+  
+  // Explicitly use produktion_realized for the realized production column (column 13)
   row[13] = formatValueOrEmpty(appointment.produktion_realized);
+  
   row[14] = formatValueOrEmpty(appointment.montage_3);
   
   // Calculate and add total
-  const total = (appointment.projektering_1 || 0) + 
-                (appointment.produktion || 0) + 
+  const total = (appointment.projektering_2 || 0) + 
+                (appointment.produktion_realized || 0) + 
                 (appointment.montage_3 || 0);
   row[15] = formatDanishNumber(total);
 };
