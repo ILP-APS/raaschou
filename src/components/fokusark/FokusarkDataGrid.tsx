@@ -17,6 +17,11 @@ import {
 import { useTheme } from "next-themes";
 import "./FokusarkDataGridStyles.css";
 
+// Define custom meta type for columns
+type FokusarkColumnMeta = {
+  frozen?: boolean;
+};
+
 // Define the row type for our grid
 interface FokusarkRow {
   [key: string]: string | number | boolean;
@@ -76,7 +81,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
   };
 
   // Define columns - similar to the example
-  const columns: ColumnDef<FokusarkRow>[] = [
+  const columns: ColumnDef<FokusarkRow, unknown, FokusarkColumnMeta>[] = [
     {
       accessorKey: 'nr',
       header: 'Nr.',
@@ -241,7 +246,8 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
   const getColumnOffset = (index: number): number => {
     let offset = 0;
     for (let i = 0; i < index; i++) {
-      if (columns[i].meta?.frozen) {
+      const isFrozen = !!columns[i].meta?.frozen;
+      if (isFrozen) {
         offset += 150; // Fixed column width
       }
     }
