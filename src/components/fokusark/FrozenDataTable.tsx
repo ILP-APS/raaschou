@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -151,6 +151,18 @@ export default function FrozenDataTable() {
     },
   });
 
+  // Function to calculate left position for frozen columns
+  const calculateLeftPosition = (headerIndex: number, headers: any[]) => {
+    let leftPos = 0;
+    for (let i = 0; i < headerIndex; i++) {
+      const isFrozen = !!(headers[i].column.columnDef.meta as ColumnMeta)?.frozen;
+      if (isFrozen) {
+        leftPos += 150; // Fixed width for frozen columns
+      }
+    }
+    return leftPos;
+  };
+
   return (
     <div className="w-full">
       <div className="flex items-center py-4 gap-2">
@@ -213,16 +225,8 @@ export default function FrozenDataTable() {
               }}>
                 {table.getHeaderGroups()[0].headers.map((header, colIndex) => {
                   const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
-                  
-                  // Calculate left for frozen columns
-                  let leftPosition = 0;
-                  if (isFrozen) {
-                    for (let i = 0; i < colIndex; i++) {
-                      if ((table.getHeaderGroups()[0].headers[i].column.columnDef.meta as ColumnMeta)?.frozen) {
-                        leftPosition += 150; // Width of each column
-                      }
-                    }
-                  }
+                  const leftPos = isFrozen ? 
+                    calculateLeftPosition(colIndex, table.getHeaderGroups()[0].headers) : 'auto';
                   
                   return (
                     <TableHead
@@ -231,7 +235,7 @@ export default function FrozenDataTable() {
                         minWidth: '150px',
                         width: '150px',
                         position: isFrozen ? 'sticky' : 'static',
-                        left: isFrozen ? `${leftPosition}px` : 'auto',
+                        left: isFrozen ? `${leftPos}px` : 'auto',
                         zIndex: isFrozen ? 60 : 50,
                         backgroundColor: 'white',
                         boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : 'none',
@@ -258,16 +262,8 @@ export default function FrozenDataTable() {
               }}>
                 {table.getHeaderGroups()[0].headers.map((header, colIndex) => {
                   const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
-                  
-                  // Calculate left for frozen columns
-                  let leftPosition = 0;
-                  if (isFrozen) {
-                    for (let i = 0; i < colIndex; i++) {
-                      if ((table.getHeaderGroups()[0].headers[i].column.columnDef.meta as ColumnMeta)?.frozen) {
-                        leftPosition += 150;
-                      }
-                    }
-                  }
+                  const leftPos = isFrozen ? 
+                    calculateLeftPosition(colIndex, table.getHeaderGroups()[0].headers) : 'auto';
                   
                   return (
                     <TableHead
@@ -276,7 +272,7 @@ export default function FrozenDataTable() {
                         minWidth: '150px',
                         width: '150px',
                         position: isFrozen ? 'sticky' : 'static',
-                        left: isFrozen ? `${leftPosition}px` : 'auto',
+                        left: isFrozen ? `${leftPos}px` : 'auto',
                         zIndex: isFrozen ? 60 : 50,
                         backgroundColor: '#f5f5f5',
                         boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : 'none',
@@ -299,12 +295,12 @@ export default function FrozenDataTable() {
                   {row.getVisibleCells().map((cell, cellIndex) => {
                     const isFrozen = !!(cell.column.columnDef.meta as ColumnMeta)?.frozen;
                     
-                    // Calculate left for frozen columns
-                    let leftPosition = 0;
+                    // Calculate left position for cells in frozen columns
+                    let leftPos = 0;
                     if (isFrozen) {
                       for (let i = 0; i < cellIndex; i++) {
                         if ((row.getVisibleCells()[i].column.columnDef.meta as ColumnMeta)?.frozen) {
-                          leftPosition += 150;
+                          leftPos += 150;
                         }
                       }
                     }
@@ -316,7 +312,7 @@ export default function FrozenDataTable() {
                           minWidth: '150px',
                           width: '150px',
                           position: isFrozen ? 'sticky' : 'static',
-                          left: isFrozen ? `${leftPosition}px` : 'auto',
+                          left: isFrozen ? `${leftPos}px` : 'auto',
                           zIndex: isFrozen ? 40 : 30,
                           backgroundColor: 'white',
                           boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : 'none',
