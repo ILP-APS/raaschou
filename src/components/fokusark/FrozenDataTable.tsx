@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   useReactTable,
@@ -268,8 +267,7 @@ export default function FrozenDataTable() {
       </div>
       
       <div className="border rounded-md relative overflow-auto" style={{ maxHeight: '500px' }}>
-        <style>
-          {`
+        <style dangerouslySetInnerHTML={{ __html: `
           .sticky {
             position: sticky;
             z-index: 10;
@@ -290,8 +288,22 @@ export default function FrozenDataTable() {
           .bg-muted {
             background-color: hsl(var(--muted));
           }
-        `}
-        </style>
+          
+          .left-\\[100px\\]::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -8px;
+            width: 8px;
+            height: 100%;
+            box-shadow: inset -8px 0 8px -8px rgba(0,0,0,0.15);
+            pointer-events: none;
+          }
+          
+          .dark .left-\\[100px\\]::after {
+            box-shadow: inset -8px 0 8px -8px rgba(0,0,0,0.3);
+          }
+        ` }} />
         
         <Table>
           <TableHeader className="sticky top-0 bg-muted z-10">
