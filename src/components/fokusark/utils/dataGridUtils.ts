@@ -1,3 +1,4 @@
+
 // Define the row type for our grid
 export interface FokusarkRow {
   [key: string]: string | number | boolean;
