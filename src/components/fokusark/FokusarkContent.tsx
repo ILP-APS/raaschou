@@ -157,12 +157,19 @@ const FokusarkContent: React.FC = () => {
           overflow: 'auto',
           maxHeight: '70vh',
           width: '100%',
+          minWidth: '100%',
           border: '1px solid hsl(var(--border))',
           borderRadius: '0.5rem',
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
         }}
+        className="fokusark-table-container"
       >
-        <Table style={{ tableLayout: 'fixed', borderCollapse: 'separate' }}>
+        <Table style={{ 
+          tableLayout: 'fixed', 
+          borderCollapse: 'separate',
+          width: 'auto',
+          minWidth: '100%'
+        }}>
           <TableHeader>
             {/* Group header row */}
             <TableRow>

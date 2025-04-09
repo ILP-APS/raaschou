@@ -19,3 +19,11 @@
 ::-webkit-scrollbar-thumb:hover {
   background-color: hsl(var(--primary)/70);
 }
+
+/* Add styles for table container to improve horizontal scrolling */
+.fokusark-table-container {
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
