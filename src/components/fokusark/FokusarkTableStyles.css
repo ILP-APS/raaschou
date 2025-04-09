@@ -46,7 +46,6 @@
   position: sticky;
   left: 0;
   z-index: 10;
-  background-color: hsl(var(--background));
 }
 
 /* Second column (Name) is wider */
@@ -57,7 +56,6 @@
   position: sticky;
   left: 80px; /* Width of the ID column */
   z-index: 10;
-  background-color: hsl(var(--background));
 }
 
 /* Add shadow effect to the Name column to show it's sticky */
@@ -75,10 +73,17 @@
   text-align: left;
 }
 
+/* Ensure sticky columns retain their background color */
+.sticky-table tbody tr .col-id,
+.sticky-table tbody tr .col-name {
+  background-color: hsl(var(--background));
+}
+
 /* Increase z-index for sticky headers that are also sticky columns */
 .sticky-table thead th.col-id,
 .sticky-table thead th.col-name {
   z-index: 30;
+  background-color: hsl(var(--muted));
 }
 
 /* Dark mode shadow */

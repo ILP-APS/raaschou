@@ -12,12 +12,20 @@ import {
 } from "@/components/ui/table";
 import "./FokusarkTableStyles.css";
 
+interface ColumnDefinition {
+  id: string;
+  header: string;
+  sticky?: boolean;
+  className?: string;
+  groupName?: string;
+}
+
 const FokusarkContent: React.FC = () => {
-  const { isLoading, data } = useFokusarkData();
+  const { tableData, isLoading } = useFokusarkData();
   const tableContainerRef = useRef<HTMLDivElement>(null);
   
-  // Generate 25 columns - explicitly defining many columns to ensure scrolling
-  const columns = [
+  // Generate columns - explicitly defining many columns to ensure scrolling
+  const columns: ColumnDefinition[] = [
     { id: "id", header: "ID", sticky: true, className: "col-id" },
     { id: "name", header: "Name", sticky: true, className: "col-name last-sticky-cell" },
   ];
@@ -27,7 +35,7 @@ const FokusarkContent: React.FC = () => {
     columns.push({
       id: `col${i}`,
       header: `Column ${i}`,
-      group: `Group ${Math.ceil(i / 4)}`,
+      groupName: `Group ${Math.ceil(i / 4)}`,
     });
   }
   
@@ -41,15 +49,29 @@ const FokusarkContent: React.FC = () => {
   
   // Organize columns by group
   const columnGroups = columns.reduce((groups, column) => {
-    if (!column.group) return groups;
-    if (!groups[column.group]) {
-      groups[column.group] = [];
+    if (!column.groupName) return groups;
+    if (!groups[column.groupName]) {
+      groups[column.groupName] = [];
     }
-    groups[column.group].push(column);
+    groups[column.groupName].push(column);
     return groups;
-  }, {} as Record<string, typeof columns>);
+  }, {} as Record<string, ColumnDefinition[]>);
   
   const groupNames = Object.keys(columnGroups);
+  
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-4 p-4 md:p-6">
+        <div className="flex flex-col gap-4 pb-4">
+          <h2 className="text-2xl font-semibold tracking-tight">Fokusark</h2>
+          <FokusarkDescription />
+        </div>
+        <div className="h-64 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="flex flex-col gap-4 p-4 md:p-6 overflow-hidden h-full">
@@ -88,32 +110,28 @@ const FokusarkContent: React.FC = () => {
             
             {/* Column Headers Row */}
             <TableRow>
-              {columns.map((column, colIndex) => {
-                return (
-                  <TableHead 
-                    key={column.id}
-                    className={column.className || ""}
-                  >
-                    {column.header}
-                  </TableHead>
-                );
-              })}
+              {columns.map((column) => (
+                <TableHead 
+                  key={column.id}
+                  className={column.className || ""}
+                >
+                  {column.header}
+                </TableHead>
+              ))}
             </TableRow>
           </TableHeader>
           
           <TableBody>
             {rows.map((row, rowIndex) => (
               <TableRow key={`row-${rowIndex}`}>
-                {columns.map((column) => {
-                  return (
-                    <TableCell 
-                      key={`${rowIndex}-${column.id}`}
-                      className={column.className || ""}
-                    >
-                      {row[column.id]}
-                    </TableCell>
-                  );
-                })}
+                {columns.map((column) => (
+                  <TableCell 
+                    key={`${rowIndex}-${column.id}`}
+                    className={column.className || ""}
+                  >
+                    {row[column.id]}
+                  </TableCell>
+                ))}
               </TableRow>
             ))}
           </TableBody>
