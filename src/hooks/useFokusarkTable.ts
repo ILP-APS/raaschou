@@ -13,14 +13,13 @@ export const useFokusarkTable = (initialData: string[][]) => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   
-  // Calculate Materialer based on the updated formula and column preference:
-  // If Montage 2 and Underleverandør 2 have values, use them, otherwise use the original columns
-  // Formula: ((Tilbud - Montage) - Underleverandør) * 0.25
+  // Calculate Materialer based on the formula: ((Tilbud - Montage) - Underleverandør) * 0.25
+  // If Montage 2 and Underleverandør 2 have numeric values, use them, otherwise use the original columns
   const calculateMaterialer = (row: string[]): string => {
     try {
       console.log("Calculating Materialer for row:", JSON.stringify(row));
       
-      // Get values from relevant columns and parse them properly
+      // Get values from relevant columns
       const tilbudStr = row[3] || '0';
       const montageStr = row[4] || '0';
       const underleverandorStr = row[5] || '0';
@@ -38,6 +37,10 @@ export const useFokusarkTable = (initialData: string[][]) => {
       // Helper function to properly parse Danish number format
       const parseNumber = (value: string): number => {
         if (!value || value.trim() === '') return 0;
+        
+        // Check if the value looks like a real number format (contains digits)
+        if (!/\d/.test(value)) return 0;
+        
         // Remove periods (thousands separators in Danish) and replace comma with dot
         const cleanValue = value.replace(/\./g, '').replace(',', '.');
         const result = parseFloat(cleanValue);
@@ -60,13 +63,19 @@ export const useFokusarkTable = (initialData: string[][]) => {
       });
       
       // Determine which values to use in calculation
-      const montageValue = montage2Str && montage2Str.trim() !== '' ? montage2 : montage;
-      const underleverandorValue = underleverandor2Str && underleverandor2Str.trim() !== '' ? underleverandor2 : underleverandor;
+      // Only use Montage 2 and Underleverandør 2 if they are actual numbers (not placeholders like "R1C7")
+      const useMontage2 = montage2Str && /\d/.test(montage2Str);
+      const useUnderleverandor2 = underleverandor2Str && /\d/.test(underleverandor2Str);
+      
+      const montageValue = useMontage2 ? montage2 : montage;
+      const underleverandorValue = useUnderleverandor2 ? underleverandor2 : underleverandor;
       
       console.log("Using values:", {
         tilbud,
         montage: montageValue,
-        underleverandor: underleverandorValue
+        underleverandor: underleverandorValue,
+        useMontage2,
+        useUnderleverandor2
       });
       
       // Calculate using the formula: ((Tilbud - Montage) - Underleverandør) * 0.25
@@ -204,4 +213,3 @@ export const useFokusarkTable = (initialData: string[][]) => {
   
   return { tableData, isLoading, handleCellChange };
 };
-
