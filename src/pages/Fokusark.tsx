@@ -16,7 +16,7 @@ export default function FokusarkPage() {
         <SidebarInset>
           <div className="flex flex-col h-full">
             <FokusarkHeader />
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-hidden">
               <FokusarkContent />
             </div>
           </div>
