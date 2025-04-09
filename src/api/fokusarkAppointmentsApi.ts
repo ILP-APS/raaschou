@@ -119,3 +119,35 @@ export async function updateFokusarkAppointmentField(
   
   return data as FokusarkAppointment;
 }
+
+/**
+ * Update realized hours for an appointment
+ */
+export async function updateRealizedHours(
+  appointmentNumber: string,
+  projektering: number,
+  produktion: number,
+  montage: number,
+  total: number
+) {
+  const updateData = {
+    projektering_2: projektering,
+    produktion_2: produktion,
+    montage_4: montage,
+    realized_total: total
+  };
+  
+  const { data, error } = await (supabase
+    .from('fokusark_appointments') as any)
+    .update(updateData)
+    .eq('appointment_number', appointmentNumber)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error(`API error when updating realized hours for ${appointmentNumber}:`, error);
+    throw error;
+  }
+  
+  return data as FokusarkAppointment;
+}
