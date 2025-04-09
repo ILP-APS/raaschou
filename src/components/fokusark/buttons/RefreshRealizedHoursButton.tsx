@@ -1,17 +1,24 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadFokusarkAppointments } from "@/services/fokusark/appointmentDbService";
-import { getRealizedHours } from "@/utils/appointmentUtils";
+import { fetchAppointmentLineWork } from "@/utils/apiUtils";
+import { calculateRealizedHours } from "@/utils/workTypeMapping";
 import { updateRealizedHours } from "@/api/fokusarkAppointmentsApi";
+import { formatDanishNumber } from "@/utils/formatUtils";
 
 const RefreshRealizedHoursButton: React.FC = () => {
   const { toast } = useToast();
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   const handleRefreshRealizedHours = async () => {
+    if (isRefreshing) return;
+    
     try {
+      setIsRefreshing(true);
+      
       toast({
         title: "Refreshing realized hours",
         description: "Fetching the latest data from the API...",
@@ -24,35 +31,32 @@ const RefreshRealizedHoursButton: React.FC = () => {
         if (appointment.hn_appointment_id) {
           try {
             console.log(`Fetching realized hours for appointment ${appointment.appointment_number} (ID: ${appointment.hn_appointment_id})`);
-            const realizedHours = await getRealizedHours(appointment.hn_appointment_id);
-            console.log(`Got realized hours for ${appointment.appointment_number}:`, realizedHours);
             
-            // Convert the formatted string values back to numbers for storage
-            const projekteringNum = parseFloat(realizedHours.projektering.replace(/\./g, '').replace(',', '.')) || 0;
-            const produktionNum = parseFloat(realizedHours.produktion.replace(/\./g, '').replace(',', '.')) || 0;
-            const montageNum = parseFloat(realizedHours.montage.replace(/\./g, '').replace(',', '.')) || 0;
-            const totalNum = parseFloat(realizedHours.total.replace(/\./g, '').replace(',', '.')) || 0;
+            // Fetch appointment line work data directly from API
+            const lineWorkData = await fetchAppointmentLineWork(appointment.hn_appointment_id);
             
-            console.log(`Parsed values for ${appointment.appointment_number}:`, {
-              projektering: projekteringNum,
-              produktion_realized: produktionNum, // API value for realized production - renamed for clarity
-              montage: montageNum,
-              total: totalNum
-            });
+            // Use the mapping function to categorize and calculate hours
+            const realizedHours = calculateRealizedHours(lineWorkData);
             
-            console.log(`Current appointment data in DB for ${appointment.appointment_number}:`, {
-              projektering_1: appointment.projektering_1,
-              produktion: appointment.produktion, // estimated/calculated
-              produktion_realized: appointment.produktion_realized // realized from API
-            });
+            console.log(`Calculated realized hours for ${appointment.appointment_number}:`, realizedHours);
+            
+            // Format the hours for display
+            const formattedHours = {
+              projektering: formatDanishNumber(realizedHours.projektering),
+              produktion: formatDanishNumber(realizedHours.produktion),
+              montage: formatDanishNumber(realizedHours.montage),
+              total: formatDanishNumber(realizedHours.total)
+            };
+            
+            console.log(`Formatted realized hours for ${appointment.appointment_number}:`, formattedHours);
             
             // Update the realized hours in database - explicitly storing API value in produktion_realized
             await updateRealizedHours(
               appointment.appointment_number,
-              projekteringNum,
-              produktionNum, // Store API value in produktion_realized column
-              montageNum,
-              totalNum
+              realizedHours.projektering,
+              realizedHours.produktion, // Store API value in produktion_realized column
+              realizedHours.montage,
+              realizedHours.total
             );
             
             console.log(`Successfully updated realized hours for ${appointment.appointment_number}`);
@@ -79,6 +83,8 @@ const RefreshRealizedHoursButton: React.FC = () => {
         description: "There was a problem fetching the latest data. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -87,9 +93,10 @@ const RefreshRealizedHoursButton: React.FC = () => {
       onClick={handleRefreshRealizedHours} 
       className="gap-2"
       variant="outline"
+      disabled={isRefreshing}
     >
-      <RefreshCw className="h-4 w-4" />
-      Refresh Realized Hours
+      <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+      {isRefreshing ? 'Refreshing...' : 'Refresh Realized Hours'}
     </Button>
   );
 };

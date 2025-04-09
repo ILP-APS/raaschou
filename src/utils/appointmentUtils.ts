@@ -37,18 +37,14 @@ export const calculateOfferTotals = (lineItems: OfferLineItem[]): {
   montageTotal: string;
   underleverandorTotal: string;
 } => {
-  // Calculate the total from all line items
   const total = lineItems.reduce((sum, item) => sum + item.totalPriceStandardCurrency, 0);
   
-  // Calculate the total for montage line items
   const montageItems = lineItems.filter(item => item.itemNumber === "Montage");
   const montageSum = montageItems.reduce((sum, item) => sum + item.totalPriceStandardCurrency, 0);
   
-  // Calculate the total for underleverandør line items
   const underleverandorItems = lineItems.filter(item => item.itemNumber === "Underleverandør");
   const underleverandorSum = underleverandorItems.reduce((sum, item) => sum + item.totalPriceStandardCurrency, 0);
   
-  // Format the totals as strings with thousands separator
   return {
     offerTotal: total.toLocaleString('da-DK'),
     montageTotal: montageSum > 0 ? montageSum.toLocaleString('da-DK') : '0',
@@ -84,7 +80,7 @@ export const getOfferLineItems = async (offerId: number | null): Promise<{
 };
 
 /**
- * Fetches and calculates realized hours for an appointment
+ * Fetches and calculates realized hours for an appointment using work type mapping
  */
 export const getRealizedHours = async (appointmentId: number): Promise<{
   projektering: string;
@@ -94,13 +90,19 @@ export const getRealizedHours = async (appointmentId: number): Promise<{
 }> => {
   try {
     console.log(`Fetching realized hours for appointment ID ${appointmentId}`);
+    
     // Fetch the line work data for the appointment
     const lineWorkData = await fetchAppointmentLineWork(appointmentId);
     console.log(`Line work data for appointment ${appointmentId}:`, lineWorkData);
     
-    // Calculate the realized hours by category
+    // Calculate the realized hours by category using the updated mapping
     const { projektering, produktion, montage, total } = calculateRealizedHours(lineWorkData);
-    console.log(`Calculated hours for appointment ${appointmentId}:`, { projektering, produktion, montage, total });
+    console.log(`Calculated hours for appointment ${appointmentId}:`, { 
+      projektering, 
+      produktion, 
+      montage, 
+      total 
+    });
     
     // Format the values with Danish number format
     return {
