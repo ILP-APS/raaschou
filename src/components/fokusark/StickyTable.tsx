@@ -35,11 +35,6 @@ interface DataItem {
   col10: string;
 }
 
-// Define custom metadata for our columns
-interface ColumnMeta {
-  frozen?: boolean;
-}
-
 // Generate sample data
 const generateData = (): DataItem[] => {
   return Array.from({ length: 30 }).map((_, i) => ({
@@ -69,17 +64,17 @@ export default function StickyTable() {
   const rowBgColor = isDarkMode ? 'hsl(var(--background))' : 'white';
   const borderColor = 'hsl(var(--border))';
 
-  // Define columns with first two frozen
+  // Define columns
   const columns: ColumnDef<DataItem, any>[] = [
     {
       accessorKey: 'col1',
       header: 'Nr.',
-      meta: { frozen: true } as ColumnMeta,
+      enablePinning: true,
     },
     {
       accessorKey: 'col2',
       header: 'Navn',
-      meta: { frozen: true } as ColumnMeta,
+      enablePinning: true,
     },
     {
       accessorKey: 'col3',
@@ -124,7 +119,12 @@ export default function StickyTable() {
       pagination: {
         pageSize: 10,
       },
+      columnPinning: {
+        left: ['col1', 'col2'],  // Pin first two columns by default
+        right: [],
+      },
     },
+    enableColumnPinning: true,
   });
 
   return (
@@ -136,22 +136,24 @@ export default function StickyTable() {
             <TableHeader>
               {/* First sticky header row */}
               <TableRow className="sticky-header" style={{ backgroundColor: headerBgColor }}>
-                {table.getFlatHeaders().map((header, index) => {
-                  const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
+                {table.getFlatHeaders().map((header) => {
+                  const isPinned = header.column.getIsPinned();
+                  const pinSide = isPinned === 'left' ? 'left' : (isPinned === 'right' ? 'right' : undefined);
+                  const left = pinSide === 'left' ? `${header.column.getStart()}px` : undefined;
+                  const right = pinSide === 'right' ? `${header.column.getAfter()}px` : undefined;
                   
                   return (
                     <TableHead
                       key={header.id}
-                      className={
-                        isFrozen 
-                          ? `sticky-column sticky-column-${index + 1}` 
-                          : ""
-                      }
+                      className={isPinned ? `cell-pinned-${pinSide}` : ""}
                       style={{
                         width: '150px',
                         minWidth: '150px',
+                        left: left,
+                        right: right,
                         backgroundColor: headerBgColor,
-                        boxShadow: isFrozen ? `1px 0 0 0 ${borderColor}` : undefined,
+                        boxShadow: isPinned ? `${pinSide === 'left' ? 1 : -1}px 0 0 0 ${borderColor}` : undefined,
+                        zIndex: isPinned ? 40 : 30,
                       }}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
@@ -163,21 +165,23 @@ export default function StickyTable() {
               {/* Second sticky header row */}
               <TableRow className="sticky-subheader" style={{ backgroundColor: subheaderBgColor }}>
                 {table.getFlatHeaders().map((header, index) => {
-                  const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
+                  const isPinned = header.column.getIsPinned();
+                  const pinSide = isPinned === 'left' ? 'left' : (isPinned === 'right' ? 'right' : undefined);
+                  const left = pinSide === 'left' ? `${header.column.getStart()}px` : undefined;
+                  const right = pinSide === 'right' ? `${header.column.getAfter()}px` : undefined;
                   
                   return (
                     <TableHead
                       key={`subheader-${header.id}`}
-                      className={
-                        isFrozen 
-                          ? `sticky-column sticky-column-${index + 1}` 
-                          : ""
-                      }
+                      className={isPinned ? `cell-pinned-${pinSide}` : ""}
                       style={{
                         width: '150px',
                         minWidth: '150px',
+                        left: left,
+                        right: right,
                         backgroundColor: subheaderBgColor,
-                        boxShadow: isFrozen ? `1px 0 0 0 ${borderColor}` : undefined,
+                        boxShadow: isPinned ? `${pinSide === 'left' ? 1 : -1}px 0 0 0 ${borderColor}` : undefined,
+                        zIndex: isPinned ? 40 : 30,
                       }}
                     >
                       {`Sub ${index + 1}`}
@@ -190,22 +194,24 @@ export default function StickyTable() {
             <TableBody>
               {table.getRowModel().rows.map(row => (
                 <TableRow key={row.id} style={{ backgroundColor: rowBgColor }}>
-                  {row.getVisibleCells().map((cell, index) => {
-                    const isFrozen = !!(cell.column.columnDef.meta as ColumnMeta)?.frozen;
+                  {row.getVisibleCells().map((cell) => {
+                    const isPinned = cell.column.getIsPinned();
+                    const pinSide = isPinned === 'left' ? 'left' : (isPinned === 'right' ? 'right' : undefined);
+                    const left = pinSide === 'left' ? `${cell.column.getStart()}px` : undefined;
+                    const right = pinSide === 'right' ? `${cell.column.getAfter()}px` : undefined;
                     
                     return (
                       <TableCell
                         key={cell.id}
-                        className={
-                          isFrozen 
-                            ? `sticky-column sticky-column-${index + 1}` 
-                            : ""
-                        }
+                        className={isPinned ? `cell-pinned-${pinSide}` : ""}
                         style={{
                           width: '150px',
                           minWidth: '150px',
+                          left: left,
+                          right: right,
                           backgroundColor: rowBgColor,
-                          boxShadow: isFrozen ? `1px 0 0 0 ${borderColor}` : undefined,
+                          boxShadow: isPinned ? `${pinSide === 'left' ? 1 : -1}px 0 0 0 ${borderColor}` : undefined,
+                          zIndex: isPinned ? 20 : 10,
                         }}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}

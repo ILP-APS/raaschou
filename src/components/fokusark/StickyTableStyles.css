@@ -31,20 +31,17 @@
   background-color: inherit;
 }
 
-/* Frozen column styling */
-.sticky-column {
+/* Pinned column styling */
+.cell-pinned-left {
   position: sticky !important;
-  left: 0;
   z-index: 20;
   background-color: inherit;
 }
 
-.sticky-column-1 {
-  left: 0 !important;
-}
-
-.sticky-column-2 {
-  left: 150px !important; /* Width of the first column */
+.cell-pinned-right {
+  position: sticky !important;
+  z-index: 20;
+  background-color: inherit;
 }
 
 /* Custom scrollbar styles */
