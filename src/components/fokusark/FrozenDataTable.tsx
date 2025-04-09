@@ -157,9 +157,9 @@ export default function FrozenDataTable() {
   const calculateLeftOffset = (columnIndex: number) => {
     let offset = 0;
     for (let i = 0; i < columnIndex; i++) {
-      if ((columns[i].meta as ColumnMeta)?.frozen) {
-        // Using fixed width for simplicity, adjust as needed
-        offset += 150;
+      const column = table.getVisibleFlatColumns()[i];
+      if ((column.columnDef.meta as ColumnMeta)?.frozen) {
+        offset += 150; // Fixed width per column
       }
     }
     return offset;
@@ -206,7 +206,8 @@ export default function FrozenDataTable() {
         </DropdownMenu>
       </div>
       
-      <div className="relative border rounded-md overflow-hidden">
+      {/* This is the critical part for proper scrolling and freezing */}
+      <div className="relative border rounded-md">
         <div 
           className="overflow-auto"
           style={{ 
@@ -216,45 +217,74 @@ export default function FrozenDataTable() {
         >
           <Table>
             <TableHeader>
-              {table.getHeaderGroups().slice(0, 2).map((headerGroup, groupIndex) => (
-                <TableRow 
-                  key={headerGroup.id}
-                  className="sticky bg-background" 
-                  style={{ 
-                    top: `${groupIndex * 41}px`, // 41px is approximate row height
-                    zIndex: 20
-                  }}
-                >
-                  {headerGroup.headers.map((header, colIndex) => {
-                    const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
-                    const leftOffset = isFrozen ? calculateLeftOffset(colIndex) : undefined;
-                    
-                    return (
-                      <TableHead
-                        key={header.id}
-                        style={{
-                          minWidth: '150px',
-                          position: isFrozen ? 'sticky' : undefined,
-                          left: isFrozen ? `${leftOffset}px` : undefined,
-                          zIndex: isFrozen ? 30 : undefined,
-                          backgroundColor: isFrozen ? 'var(--background)' : undefined,
-                          boxShadow: isFrozen ? '1px 0 0 0 #e5e7eb' : undefined
-                        }}
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              headerGroup.id === table.getHeaderGroups()[0].id
-                                ? header.column.columnDef.header
-                                : `Sub-header ${colIndex + 1}`,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
+              {/* First header row - always frozen */}
+              <TableRow 
+                className="bg-background" 
+                style={{ 
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 20
+                }}
+              >
+                {table.getHeaderGroups()[0].headers.map((header, colIndex) => {
+                  const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
+                  const leftOffset = isFrozen ? calculateLeftOffset(colIndex) : undefined;
+                  
+                  return (
+                    <TableHead
+                      key={header.id}
+                      style={{
+                        minWidth: '150px',
+                        position: isFrozen ? 'sticky' : 'static',
+                        left: isFrozen ? `${leftOffset}px` : undefined,
+                        zIndex: isFrozen ? 30 : 'auto',
+                        backgroundColor: 'var(--background)',
+                        boxShadow: isFrozen ? '2px 0 5px rgba(0,0,0,0.1)' : undefined
+                      }}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+              
+              {/* Second header row - also frozen */}
+              <TableRow 
+                className="bg-muted/50" 
+                style={{ 
+                  position: 'sticky',
+                  top: '41px', // Height of the first row
+                  zIndex: 20
+                }}
+              >
+                {table.getHeaderGroups()[0].headers.map((header, colIndex) => {
+                  const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
+                  const leftOffset = isFrozen ? calculateLeftOffset(colIndex) : undefined;
+                  
+                  return (
+                    <TableHead
+                      key={`subheader-${header.id}`}
+                      style={{
+                        minWidth: '150px',
+                        position: isFrozen ? 'sticky' : 'static',
+                        left: isFrozen ? `${leftOffset}px` : undefined,
+                        zIndex: isFrozen ? 30 : 'auto',
+                        backgroundColor: 'var(--muted)', // Background for the subheader
+                        boxShadow: isFrozen ? '2px 0 5px rgba(0,0,0,0.1)' : undefined
+                      }}
+                    >
+                      {`Sub-header ${colIndex + 1}`}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
             </TableHeader>
+            
             <TableBody>
               {table.getRowModel().rows.map((row) => (
                 <TableRow 
@@ -270,11 +300,11 @@ export default function FrozenDataTable() {
                         key={cell.id}
                         style={{
                           minWidth: '150px',
-                          position: isFrozen ? 'sticky' : undefined,
+                          position: isFrozen ? 'sticky' : 'static',
                           left: isFrozen ? `${leftOffset}px` : undefined,
-                          zIndex: isFrozen ? 10 : undefined,
-                          backgroundColor: isFrozen ? 'var(--background)' : undefined,
-                          boxShadow: isFrozen ? '1px 0 0 0 #e5e7eb' : undefined
+                          zIndex: isFrozen ? 10 : 'auto',
+                          backgroundColor: 'var(--background)',
+                          boxShadow: isFrozen ? '2px 0 5px rgba(0,0,0,0.1)' : undefined
                         }}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
