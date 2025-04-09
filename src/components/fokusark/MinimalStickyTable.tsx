@@ -16,13 +16,6 @@ import {
 } from '@/components/ui/table';
 import { useTheme } from 'next-themes';
 
-// Define custom column meta type to support our sticky properties
-interface ColumnMeta {
-  sticky?: boolean;
-  index?: number;
-  group?: string;
-}
-
 interface MinimalStickyTableProps {
   tableData?: string[][];
 }
@@ -31,25 +24,22 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   
-  // Define fixed column widths
-  const idColWidth = '80px';
-  const nameColWidth = '180px';
-  const standardColWidth = '150px';
-  const infoGroupWidth = '260px'; // Combined width for ID + Name columns only
-  
   // Transform tableData into usable data for the table
   const data = React.useMemo(() => {
     if (!tableData || tableData.length === 0) {
       // Provide default data if none is passed
-      return Array.from({ length: 10 }).map((_, i) => ({
-        id: `${i + 1}`,
-        name: `Project ${i + 1}`,
-        type: `Type ${i % 4 + 1}`,
-        // Add sample data for other columns
-        ...(Object.fromEntries(
-          Array.from({ length: 20 }).map((_, j) => [`col${j}`, `Value ${i}-${j}`])
-        ))
-      }));
+      return [
+        { id: '1', name: 'Project 1', type: 'Type 1', col1: 'Value 1-1', col2: 'Value 1-2', col3: 'Value 1-3' },
+        { id: '2', name: 'Project 2', type: 'Type 2', col1: 'Value 2-1', col2: 'Value 2-2', col3: 'Value 2-3' },
+        { id: '3', name: 'Project 3', type: 'Type 3', col1: 'Value 3-1', col2: 'Value 3-2', col3: 'Value 3-3' },
+        { id: '4', name: 'Project 4', type: 'Type 4', col1: 'Value 4-1', col2: 'Value 4-2', col3: 'Value 4-3' },
+        { id: '5', name: 'Project 5', type: 'Type 1', col1: 'Value 5-1', col2: 'Value 5-2', col3: 'Value 5-3' },
+        { id: '6', name: 'Project 6', type: 'Type 2', col1: 'Value 6-1', col2: 'Value 6-2', col3: 'Value 6-3' },
+        { id: '7', name: 'Project 7', type: 'Type 3', col1: 'Value 7-1', col2: 'Value 7-2', col3: 'Value 7-3' },
+        { id: '8', name: 'Project 8', type: 'Type 4', col1: 'Value 8-1', col2: 'Value 8-2', col3: 'Value 8-3' },
+        { id: '9', name: 'Project 9', type: 'Type 1', col1: 'Value 9-1', col2: 'Value 9-2', col3: 'Value 9-3' },
+        { id: '10', name: 'Project 10', type: 'Type 2', col1: 'Value 10-1', col2: 'Value 10-2', col3: 'Value 10-3' },
+      ];
     }
     
     // Convert the 2D array data to objects
@@ -61,7 +51,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
       };
       
       // Add remaining columns
-      for (let j = 3; j < row.length; j++) {
+      for (let j = 3; j < Math.min(row.length, 20); j++) {
         rowObj[`col${j-3}`] = row[j] || `Value ${i}-${j}`;
       }
       
@@ -69,43 +59,30 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     });
   }, [tableData]);
   
-  // Define columns with proper grouping
-  const columns = React.useMemo<ColumnDef<Record<string, string>, unknown>[]>(() => [
-    // Group 1: Info (3 cols)
+  // Define columns - much simpler approach
+  const columns = React.useMemo<ColumnDef<Record<string, string>, any>[]>(() => [
     { 
       accessorKey: 'id', 
       header: 'ID', 
-      meta: { sticky: true, index: 0, group: 'Info' } as ColumnMeta
+      meta: { sticky: true, index: 0 } 
     },
     { 
       accessorKey: 'name', 
       header: 'Name', 
-      meta: { sticky: true, index: 1, group: 'Info' } as ColumnMeta
+      meta: { sticky: true, index: 1 } 
     },
     { 
       accessorKey: 'type', 
-      header: 'Type', 
-      meta: { group: 'Info' } as ColumnMeta
+      header: 'Type'
     },
     
-    // Other columns
-    ...Array.from({ length: 20 }).map((_, i) => ({
+    // Generate additional columns
+    ...Array.from({ length: 17 }).map((_, i) => ({
       accessorKey: `col${i}`,
-      header: `Column ${i + 1}`,
-      meta: { group: `Group ${Math.floor(i / 4) + 1}` } as ColumnMeta
+      header: `Column ${i + 1}`
     }))
   ], []);
 
-  // Define the header groups explicitly
-  const headerGroups = [
-    { id: 'Info', title: 'Info', colSpan: 3 },
-    { id: 'Group 1', title: 'Group 1', colSpan: 4 },
-    { id: 'Group 2', title: 'Group 2', colSpan: 4 },
-    { id: 'Group 3', title: 'Group 3', colSpan: 4 },
-    { id: 'Group 4', title: 'Group 4', colSpan: 4 },
-    { id: 'Group 5', title: 'Group 5', colSpan: 4 }
-  ];
-  
   const table = useReactTable({
     data,
     columns,
@@ -113,9 +90,9 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   });
 
   // Function to calculate left position for each sticky column
-  const getLeftPosition = (index: number) => {
+  const getLeftPosition = (index: number): string | number | undefined => {
     if (index === 0) return 0;
-    if (index === 1) return idColWidth; // Width of first column
+    if (index === 1) return '80px'; // Width of first column
     return undefined;
   };
 
@@ -127,9 +104,6 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
       return isEvenRow ? 'hsl(var(--muted)/10)' : 'hsl(var(--background))';
     }
   };
-
-  // Header group row height
-  const headerGroupHeight = '40px';
 
   return (
     <div style={{
@@ -143,100 +117,27 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     }}>
       <Table style={{ 
         width: 'auto', 
-        minWidth: '1800px', // Sufficient width for all columns
+        minWidth: '100%',
         borderCollapse: 'separate'
       }}>
         <TableHeader>
-          {/* Header group row with split Info group */}
-          <TableRow>
-            {/* Sticky part of Info group (covering ID and Name only) */}
-            <TableHead
-              key="sticky-info-group"
-              colSpan={2} // Only span the 2 sticky columns
-              style={{
-                position: 'sticky',
-                top: 0,
-                left: 0,
-                zIndex: 60,
-                backgroundColor: getBgColor(),
-                textAlign: 'center',
-                fontWeight: 'bold',
-                boxShadow: '2px 2px 5px -2px rgba(0,0,0,0.15)',
-                borderBottom: '1px solid hsl(var(--border))',
-                borderRight: 'none', // Remove right border for visual continuity
-                width: infoGroupWidth,
-                minWidth: infoGroupWidth
-              }}
-            >
-              Info
-            </TableHead>
-            
-            {/* Non-sticky part of Info group (just the Type column) */}
-            <TableHead
-              key="non-sticky-info-group"
-              colSpan={1} // Just the Type column
-              style={{
-                position: 'static',
-                top: 0,
-                zIndex: 50,
-                backgroundColor: getBgColor(),
-                textAlign: 'center',
-                fontWeight: 'bold',
-                boxShadow: '0 2px 0 0 rgba(0,0,0,0.1)',
-                borderBottom: '1px solid hsl(var(--border))',
-                borderLeft: 'none', // Remove left border for visual continuity
-                // Make the title invisible to create a single group appearance
-                color: 'transparent',
-                userSelect: 'none'
-              }}
-            >
-              Info
-            </TableHead>
-            
-            {/* The rest of the header groups */}
-            {headerGroups.slice(1).map((group) => (
-              <TableHead
-                key={`group-${group.id}`}
-                colSpan={group.colSpan}
-                style={{
-                  position: 'static',
-                  top: 0,
-                  zIndex: 50,
-                  backgroundColor: getBgColor(),
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  boxShadow: '0 2px 0 0 rgba(0,0,0,0.1)',
-                  borderBottom: '1px solid hsl(var(--border))'
-                }}
-              >
-                {group.title}
-              </TableHead>
-            ))}
-          </TableRow>
-          
-          {/* Regular header row */}
           <TableRow>
             {table.getFlatHeaders().map((header, index) => {
-              const columnMeta = header.column.columnDef.meta as ColumnMeta || {};
-              const isSticky = columnMeta && columnMeta.sticky || false;
-              const stickyIndex = columnMeta && columnMeta.index || 0;
+              const isSticky = !!header.column.columnDef.meta?.sticky;
+              const stickyIndex = header.column.columnDef.meta?.index as number || 0;
               const isIdCol = index === 0;
-              const isNameCol = index === 1;
               
               return (
                 <TableHead
                   key={header.id}
                   style={{
-                    minWidth: isIdCol ? idColWidth : isNameCol ? nameColWidth : standardColWidth,
-                    width: isIdCol ? idColWidth : isNameCol ? nameColWidth : standardColWidth,
-                    position: isSticky ? 'sticky' : 'static',
-                    top: headerGroupHeight, // Position below the group header
+                    minWidth: isIdCol ? '80px' : '200px',
+                    width: isIdCol ? '80px' : '200px',
+                    position: isSticky ? 'sticky' : undefined,
                     left: isSticky ? getLeftPosition(stickyIndex) : undefined,
-                    zIndex: isSticky ? 45 : 40,
+                    zIndex: isSticky ? 30 : undefined,
                     backgroundColor: getBgColor(),
-                    boxShadow: isSticky 
-                      ? '2px 2px 5px -2px rgba(0,0,0,0.15)'
-                      : '0 2px 5px -2px rgba(0,0,0,0.15)'
+                    boxShadow: isSticky ? '2px 0 5px -2px rgba(0,0,0,0.15)' : undefined
                   }}
                 >
                   {flexRender(
@@ -255,21 +156,19 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
             return (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell, cellIndex) => {
-                  const columnMeta = cell.column.columnDef.meta as ColumnMeta || {};
-                  const isSticky = columnMeta && columnMeta.sticky || false;
-                  const stickyIndex = columnMeta && columnMeta.index || 0;
+                  const isSticky = !!cell.column.columnDef.meta?.sticky;
+                  const stickyIndex = cell.column.columnDef.meta?.index as number || 0;
                   const isIdCol = cellIndex === 0;
-                  const isNameCol = cellIndex === 1;
                   
                   return (
                     <TableCell
                       key={cell.id}
                       style={{
-                        width: isIdCol ? idColWidth : isNameCol ? nameColWidth : standardColWidth,
-                        minWidth: isIdCol ? idColWidth : isNameCol ? nameColWidth : standardColWidth,
-                        position: isSticky ? 'sticky' : 'static',
+                        width: isIdCol ? '80px' : '200px',
+                        minWidth: isIdCol ? '80px' : '200px',
+                        position: isSticky ? 'sticky' : undefined,
                         left: isSticky ? getLeftPosition(stickyIndex) : undefined,
-                        zIndex: isSticky ? 20 : 0,
+                        zIndex: isSticky ? 20 : undefined,
                         backgroundColor: getBgColor(isEvenRow),
                         boxShadow: isSticky ? '2px 0 5px -2px rgba(0,0,0,0.15)' : undefined
                       }}
