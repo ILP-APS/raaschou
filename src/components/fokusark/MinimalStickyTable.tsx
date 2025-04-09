@@ -126,8 +126,11 @@ export default function MinimalStickyTable() {
     }
   };
 
-  // Header group row height
-  const headerGroupHeight = '40px';
+  // Header row heights
+  const emptyRowHeight = '40px';
+  const groupRowHeight = '40px';
+  const columnHeaderHeight = '40px';
+  const totalHeaderHeight = '120px'; // Sum of all three header rows
 
   return (
     <div style={{
@@ -144,42 +147,105 @@ export default function MinimalStickyTable() {
       <Table style={{ 
         width: 'auto', 
         minWidth: '2400px', // Sufficient width for all 24 columns
-        borderCollapse: 'separate'
+        borderCollapse: 'separate',
+        borderSpacing: 0
       }}>
         <TableHeader>
-          {/* Header group row with new approach for Info group */}
+          {/* Empty top row just for borders */}
           <TableRow>
+            {/* First cell: ID column - with top border styling */}
             <TableHead
-              key="info-group"
-              colSpan={3}
+              key="id-header-top"
               style={{
-                position: 'relative', // Use relative instead of sticky for the container
+                position: 'sticky',
+                top: 0,
+                left: 0,
                 zIndex: 60,
                 backgroundColor: getBgColor(),
-                textAlign: 'center',
-                fontWeight: 'bold',
-                borderBottom: '1px solid hsl(var(--border))',
-                padding: 0 // Remove padding to allow absolute positioning inside
+                borderBottom: 'none',
+                borderTop: '1px solid hsl(var(--border))',
+                borderLeft: '1px solid hsl(var(--border))',
+                borderRight: '1px solid hsl(var(--border))',
+                width: '80px',
+                minWidth: '80px',
+                height: emptyRowHeight,
+                padding: '0px'
               }}
             >
-              {/* Use an absolutely positioned div inside for the sticky text */}
-              <div
-                style={{
-                  position: 'sticky',
-                  left: 0,
-                  top: 0,
-                  width: '260px', // Width of ID + Name columns
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: getBgColor(),
-                  zIndex: 61,
-                  boxShadow: '2px 0 5px -2px rgba(0,0,0,0.15)'
-                }}
-              >
-                Info
-              </div>
+              {/* Empty cell */}
+            </TableHead>
+            
+            {/* Second cell: Name column - with top border styling */}
+            <TableHead
+              key="name-header-top"
+              style={{
+                position: 'sticky',
+                top: 0,
+                left: '80px',
+                zIndex: 60,
+                backgroundColor: getBgColor(),
+                borderBottom: 'none',
+                borderTop: '1px solid hsl(var(--border))',
+                borderRight: '1px solid hsl(var(--border))',
+                width: '180px',
+                minWidth: '180px',
+                height: emptyRowHeight,
+                padding: '0px'
+              }}
+            >
+              {/* Empty cell */}
+            </TableHead>
+            
+            {/* Rest of cells in the top row - Non-sticky */}
+            <TableHead
+              colSpan={columns.length - 2}
+              style={{
+                backgroundColor: getBgColor(),
+                borderBottom: 'none',
+                borderTop: '1px solid hsl(var(--border))',
+                borderRight: '1px solid hsl(var(--border))',
+                height: emptyRowHeight,
+                padding: '0px'
+              }}
+            >
+              {/* Empty cell */}
+            </TableHead>
+          </TableRow>
+          
+          {/* Group header row */}
+          <TableRow>
+            {/* Sticky Info group spanning first two columns */}
+            <TableHead
+              colSpan={2}
+              style={{
+                position: 'sticky',
+                top: emptyRowHeight,
+                left: 0,
+                zIndex: 60,
+                backgroundColor: getBgColor(),
+                fontWeight: 'bold',
+                textAlign: 'center',
+                borderBottom: '1px solid hsl(var(--border))',
+                boxShadow: '2px 2px 5px -2px rgba(0,0,0,0.15)',
+                height: groupRowHeight
+              }}
+            >
+              Info
+            </TableHead>
+            
+            {/* Non-sticky part for Type column */}
+            <TableHead
+              colSpan={1}
+              style={{
+                backgroundColor: getBgColor(),
+                fontWeight: 'bold',
+                textAlign: 'center',
+                borderBottom: '1px solid hsl(var(--border))',
+                height: groupRowHeight
+              }}
+            >
+              {/* Make this text transparent to create the appearance of a single group */}
+              <span style={{ color: 'transparent', userSelect: 'none' }}>Info</span>
             </TableHead>
             
             {/* The rest of the header groups */}
@@ -188,14 +254,11 @@ export default function MinimalStickyTable() {
                 key={`group-${group.id}`}
                 colSpan={group.colSpan}
                 style={{
-                  position: 'static',
-                  top: 0,
-                  zIndex: 50,
                   backgroundColor: getBgColor(),
-                  textAlign: 'center',
                   fontWeight: 'bold',
-                  boxShadow: '0 2px 0 0 rgba(0,0,0,0.1)',
-                  borderBottom: '1px solid hsl(var(--border))'
+                  textAlign: 'center',
+                  borderBottom: '1px solid hsl(var(--border))',
+                  height: groupRowHeight
                 }}
               >
                 {group.title}
@@ -203,7 +266,7 @@ export default function MinimalStickyTable() {
             ))}
           </TableRow>
           
-          {/* Regular header row */}
+          {/* Regular header row with column titles */}
           <TableRow>
             {table.getFlatHeaders().map((header, index) => {
               const isSticky = !!(header.column.columnDef.meta as any)?.sticky;
@@ -216,13 +279,14 @@ export default function MinimalStickyTable() {
                     minWidth: '150px',
                     width: index === 0 ? '80px' : index === 1 ? '180px' : '150px',
                     position: isSticky ? 'sticky' : undefined,
-                    top: headerGroupHeight, // Position below the group header
+                    top: `calc(${emptyRowHeight} + ${groupRowHeight})`, // Position below both rows above
                     left: isSticky ? getLeftPosition(stickyIndex) : undefined,
                     zIndex: isSticky ? 45 : 40,
                     backgroundColor: getBgColor(),
                     boxShadow: isSticky 
                       ? '2px 2px 5px -2px rgba(0,0,0,0.15)'
-                      : '0 2px 5px -2px rgba(0,0,0,0.15)'
+                      : '0 2px 5px -2px rgba(0,0,0,0.15)',
+                    height: columnHeaderHeight
                   }}
                 >
                   {flexRender(
