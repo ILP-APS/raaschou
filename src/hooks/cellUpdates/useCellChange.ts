@@ -1,7 +1,7 @@
 
 import { useToast } from "@/hooks/use-toast";
 import { updateAppointmentField, loadFokusarkAppointments, transformAppointmentsToDisplayData } from "@/services/fokusarkAppointmentService";
-import { parseNumber, calculateTotal, calculateTimerTilbage } from "@/utils/fokusarkCalculations";
+import { parseNumber, calculateTotal, calculateTimerTilbage, formatPercentageInput } from "@/utils/fokusarkCalculations";
 import { FokusarkAppointment } from "@/api/fokusarkAppointmentsApi";
 import { Dispatch, SetStateAction } from 'react';
 import { useFieldMapping } from "./useFieldMapping";
