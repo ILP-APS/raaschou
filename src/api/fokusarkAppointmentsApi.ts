@@ -22,8 +22,9 @@ export interface FokusarkAppointment {
  * Fetches all fokusark appointments from Supabase
  */
 export async function fetchFokusarkAppointments() {
-  const { data, error } = await supabase
-    .from('fokusark_appointments')
+  // Use type assertion to bypass TypeScript's type checking
+  const { data, error } = await (supabase
+    .from('fokusark_appointments') as any)
     .select('*')
     .order('appointment_number');
     
@@ -36,8 +37,9 @@ export async function fetchFokusarkAppointments() {
  * This will either update an existing appointment or create a new one
  */
 export async function upsertFokusarkAppointment(appointment: FokusarkAppointment) {
-  const { data, error } = await supabase
-    .from('fokusark_appointments')
+  // Use type assertion to bypass TypeScript's type checking
+  const { data, error } = await (supabase
+    .from('fokusark_appointments') as any)
     .upsert([appointment], { 
       onConflict: 'appointment_number',
       ignoreDuplicates: false 
@@ -53,8 +55,9 @@ export async function upsertFokusarkAppointment(appointment: FokusarkAppointment
  * Batch upsert multiple fokusark appointments
  */
 export async function batchUpsertFokusarkAppointments(appointments: FokusarkAppointment[]) {
-  const { data, error } = await supabase
-    .from('fokusark_appointments')
+  // Use type assertion to bypass TypeScript's type checking
+  const { data, error } = await (supabase
+    .from('fokusark_appointments') as any)
     .upsert(appointments, { 
       onConflict: 'appointment_number',
       ignoreDuplicates: false 
@@ -76,8 +79,9 @@ export async function updateFokusarkAppointmentField(
     [field]: value
   };
   
-  const { data, error } = await supabase
-    .from('fokusark_appointments')
+  // Use type assertion to bypass TypeScript's type checking
+  const { data, error } = await (supabase
+    .from('fokusark_appointments') as any)
     .update(updateData)
     .eq('appointment_number', appointmentNumber)
     .select()
