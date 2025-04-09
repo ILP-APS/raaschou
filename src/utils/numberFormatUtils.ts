@@ -16,6 +16,12 @@ export const parseNumber = (value: string): number => {
   // Remove periods (thousands separators in Danish) and replace comma with dot
   const cleanValue = value.replace(/\./g, '').replace(',', '.');
   const result = parseFloat(cleanValue);
+  
+  // Add debug log for special values like appointment 24371
+  if (result > 1000000) {
+    console.log(`Large number parsed: ${value} -> ${cleanValue} -> ${result}`);
+  }
+  
   return isNaN(result) ? 0 : result;
 };
 

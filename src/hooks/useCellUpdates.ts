@@ -51,6 +51,7 @@ export const useCellUpdates = (
   const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {
     // Get the appointment number from the current row
     const appointmentNumber = tableData[rowIndex][0];
+    console.log(`Updating value for appointment ${appointmentNumber}, column ${colIndex}, new value: ${value}`);
     
     // Update local state first for immediate feedback
     setTableData(prevData => {
@@ -70,6 +71,7 @@ export const useCellUpdates = (
     
     // Parse the value
     const parsedValue = parseNumber(value);
+    console.log(`Parsed value for ${appointmentNumber}, ${fieldName}: ${parsedValue}`);
     
     // Save to Supabase
     try {
@@ -81,6 +83,8 @@ export const useCellUpdates = (
         fieldName, 
         parsedValue
       );
+      
+      console.log(`Updated appointment ${appointmentNumber} in database:`, updatedAppointment);
       
       // Update the appointments state with the new data
       setAppointments(prev => 
@@ -123,8 +127,9 @@ export const useCellUpdates = (
         
         // Use the common calculation function for consistency
         const projekteringValue = calculateProjektering(updatedRow);
+        const projekteringNumericValue = parseNumber(projekteringValue);
         
-        console.log(`Calculated new projektering value: ${projekteringValue} for appointment ${appointmentNumber}`);
+        console.log(`Calculated new projektering value: ${projekteringValue} (${projekteringNumericValue}) for appointment ${appointmentNumber}`);
         
         // Update the UI with the new calculated value
         setTableData(prevData => {
@@ -137,7 +142,6 @@ export const useCellUpdates = (
         });
         
         // Also update Supabase with the calculated value
-        const projekteringNumericValue = parseNumber(projekteringValue);
         await updateAppointmentField(
           appointmentNumber, 
           'projektering_1', 

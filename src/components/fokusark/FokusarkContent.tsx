@@ -47,6 +47,21 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
         // Calculate using the official function
         const officialResult = calculateProjektering(targetAppointment);
         console.log("24371 Official calculation result:", officialResult);
+        
+        // Add debugging for database value
+        try {
+          loadFokusarkAppointments().then(appointments => {
+            const dbAppointment = appointments.find(a => a.appointment_number === '24371');
+            if (dbAppointment) {
+              console.log("24371 Database value:", {
+                projektering_1: dbAppointment.projektering_1,
+                calculated: projektering
+              });
+            }
+          });
+        } catch (error) {
+          console.error("Error loading appointment data:", error);
+        }
       }
     }
   }, [tableData]);
@@ -76,15 +91,20 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
           const projekteringValue = calculateProjektering(rowData);
           const projekteringNumeric = parseNumber(projekteringValue);
           
-          // Update if the value changed
-          if (projekteringNumeric > 0 && projekteringNumeric !== appointment.projektering_1) {
-            await updateAppointmentField(
-              appointmentNumber,
-              'projektering_1',
-              projekteringNumeric
-            );
-            updatedCount++;
-          }
+          console.log(`Recalculating projektering for ${appointmentNumber}:`, {
+            calculated: projekteringValue,
+            numeric: projekteringNumeric,
+            current: appointment.projektering_1
+          });
+          
+          // Force update by removing the comparison - we want to update all values
+          // This ensures any stale values in the database are refreshed
+          await updateAppointmentField(
+            appointmentNumber,
+            'projektering_1',
+            projekteringNumeric
+          );
+          updatedCount++;
         }
       }
       
@@ -94,9 +114,7 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
       });
       
       // Force a page reload to show the new values
-      if (updatedCount > 0) {
-        window.location.reload();
-      }
+      window.location.reload();
     } catch (error) {
       console.error("Error recalculating values:", error);
       toast({

@@ -48,7 +48,20 @@ export const updateAppointmentField = async (
 ): Promise<FokusarkAppointment> => {
   try {
     console.log(`Updating ${field} for appointment ${appointmentNumber} to ${value}`);
-    return await updateFokusarkAppointmentField(appointmentNumber, field, value);
+    
+    // If this is appointment 24371 and we're updating projektering_1, log extra debug info
+    if (appointmentNumber === '24371' && field === 'projektering_1') {
+      console.log(`Special debug: Updating projektering for 24371 to ${value}`);
+    }
+    
+    const result = await updateFokusarkAppointmentField(appointmentNumber, field, value);
+    
+    // Add debug log for the updated appointment
+    if (appointmentNumber === '24371') {
+      console.log('Updated appointment 24371:', result);
+    }
+    
+    return result;
   } catch (error) {
     console.error(`Error updating ${field} for appointment ${appointmentNumber}:`, error);
     throw error;

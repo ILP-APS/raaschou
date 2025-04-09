@@ -8,12 +8,13 @@ import { parseNumber, formatDanishNumber, hasRealValue } from './numberFormatUti
 export const calculateProjektering = (row: string[]): string => {
   try {
     // Get values from relevant columns
+    const appointmentNumber = row[0] || 'unknown';
     const tilbudStr = row[3] || '0';
     const montageStr = row[4] || '0';
     const montage2Str = row[6] || '';
     
     console.log("Raw input for Projektering calculation:", {
-      appointmentNumber: row[0],
+      appointmentNumber,
       tilbud: tilbudStr,
       montage: montageStr,
       montage2: montage2Str
@@ -30,7 +31,7 @@ export const calculateProjektering = (row: string[]): string => {
     
     if (hasMontage2Value) {
       montage2 = parseNumber(montage2Str);
-      console.log(`Found valid Montage2 value for appointment ${row[0]}: ${montage2}`);
+      console.log(`Found valid Montage2 value for appointment ${appointmentNumber}: ${montage2}`);
     }
     
     // Determine which montage value to use in the calculation
@@ -41,7 +42,7 @@ export const calculateProjektering = (row: string[]): string => {
     const step2 = step1 * 0.10;
     const projektering = step2 / 830;
     
-    console.log("Projektering calculation steps for appointment " + row[0] + ":", {
+    console.log("Projektering calculation steps for appointment " + appointmentNumber + ":", {
       tilbud,
       montageValue,
       step1_tilbud_minus_montage: step1,
@@ -51,13 +52,13 @@ export const calculateProjektering = (row: string[]): string => {
     
     // Check for NaN and return '0' if the calculation resulted in NaN
     if (isNaN(projektering) || projektering === 0) {
-      console.log(`Projektering result is NaN or 0 for appointment ${row[0]}, returning 0`);
+      console.log(`Projektering result is NaN or 0 for appointment ${appointmentNumber}, returning 0`);
       return '0';
     }
     
     // Format the result with the Danish number format
     const formattedValue = formatDanishNumber(projektering);
-    console.log(`Final formatted projektering for appointment ${row[0]}: ${formattedValue}`);
+    console.log(`Final formatted projektering for appointment ${appointmentNumber}: ${formattedValue}`);
     return formattedValue;
   } catch (error) {
     console.error(`Error calculating Projektering for appointment ${row[0]}:`, error);

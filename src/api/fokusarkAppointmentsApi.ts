@@ -87,6 +87,11 @@ export async function updateFokusarkAppointmentField(
   field: string, 
   value: any
 ) {
+  // Add extra debug for specific appointment
+  if (appointmentNumber === '24371' && field === 'projektering_1') {
+    console.log(`API call: Updating projektering_1 for 24371 to ${value}`);
+  }
+  
   const updateData = {
     [field]: value
   };
@@ -98,7 +103,16 @@ export async function updateFokusarkAppointmentField(
     .eq('appointment_number', appointmentNumber)
     .select()
     .single();
-    
-  if (error) throw error;
+  
+  if (error) {
+    console.error(`API error when updating ${field} for ${appointmentNumber}:`, error);
+    throw error;
+  }
+  
+  // Extra debug for appointment 24371
+  if (appointmentNumber === '24371') {
+    console.log(`API response for 24371 update:`, data);
+  }
+  
   return data as FokusarkAppointment;
 }
