@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import "./StickyTableStyles.css";
 
 // Define your data type
 interface DataItem {
@@ -140,7 +141,7 @@ export default function StickyTable() {
 
   return (
     <div className="w-full space-y-4">
-      <div className="rounded-md border border-border overflow-hidden">
+      <div className="rounded-md border border-border">
         {/* Table container with scrolling */}
         <div 
           className="sticky-table-container"
@@ -150,7 +151,7 @@ export default function StickyTable() {
             overflow: 'auto',
           }}
         >
-          <Table style={{ width: 'auto', minWidth: '100%' }}>
+          <Table style={{ width: 'auto', minWidth: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
             <TableHeader>
               {/* First sticky header row */}
               <TableRow
@@ -170,6 +171,7 @@ export default function StickyTable() {
                   return (
                     <TableHead
                       key={header.id}
+                      className={isFrozen ? "sticky-frozen-header-cell" : ""}
                       style={{
                         width: '150px',
                         minWidth: '150px',
@@ -204,6 +206,7 @@ export default function StickyTable() {
                   return (
                     <TableHead
                       key={`subheader-${header.id}`}
+                      className={isFrozen ? "sticky-frozen-header-cell" : ""}
                       style={{
                         width: '150px',
                         minWidth: '150px',
@@ -232,6 +235,7 @@ export default function StickyTable() {
                     return (
                       <TableCell
                         key={cell.id}
+                        className={isFrozen ? "sticky-frozen-column" : ""}
                         style={{
                           width: '150px',
                           minWidth: '150px',
