@@ -143,7 +143,9 @@ const addRealizedValues = (appointment: FokusarkAppointment, row: string[]): voi
  * Add remaining columns (timer tilbage and production data)
  */
 const addRemainingColumns = (appointment: FokusarkAppointment, row: string[]): void => {
-  row[16] = formatValueOrEmpty(appointment.timer_tilbage_1);
+  // Calculate timer_tilbage as projektering_1 - projektering_2
+  const timerTilbage = (appointment.projektering_1 || 0) - (appointment.projektering_2 || 0);
+  row[16] = formatDanishNumber(timerTilbage);
   
   // Add remaining production columns
   const productionFields = [

@@ -1,7 +1,7 @@
 
 import { useToast } from "@/hooks/use-toast";
 import { updateAppointmentField, loadFokusarkAppointments, transformAppointmentsToDisplayData } from "@/services/fokusarkAppointmentService";
-import { parseNumber, calculateTotal } from "@/utils/fokusarkCalculations";
+import { parseNumber, calculateTotal, calculateTimerTilbage } from "@/utils/fokusarkCalculations";
 import { FokusarkAppointment } from "@/api/fokusarkAppointmentsApi";
 import { Dispatch, SetStateAction } from 'react';
 import { useFieldMapping } from "./useFieldMapping";
@@ -24,8 +24,8 @@ export const useCellChange = ({
 }: UseCellChangeProps) => {
   const { toast } = useToast();
   const { getFieldNameForColumn, getColumnDisplayName } = useFieldMapping();
-  const { updateMaterialerUI, updateTotalUI, updateProjekteringUI, updateProduktionUI, updateMontageUI, updateCellUI } = useUIUpdates(tableData, setTableData);
-  const { recalculateProjektering, recalculateProduktion, recalculateMontage } = useCalculations();
+  const { updateMaterialerUI, updateTotalUI, updateProjekteringUI, updateProduktionUI, updateMontageUI, updateCellUI, updateTimerTilbageUI } = useUIUpdates(tableData, setTableData);
+  const { recalculateProjektering, recalculateProduktion, recalculateMontage, recalculateTimerTilbage } = useCalculations();
   
   const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {
     const appointmentNumber = tableData[rowIndex][0];
@@ -68,6 +68,7 @@ export const useCellChange = ({
       const shouldRecalculateProjektering = [3, 4, 6].includes(colIndex);
       const shouldRecalculateProduktion = [3, 4, 5, 6, 7, 8, 9].includes(colIndex); 
       const shouldRecalculateMontage = [4, 6].includes(colIndex);
+      const shouldRecalculateTimerTilbage = [9, 12].includes(colIndex); // Projektering or Realiseret Projektering changed
       
       // Calculate values that depend on the changed value
       if (shouldRecalculateProjektering) {
@@ -76,6 +77,12 @@ export const useCellChange = ({
           const { projekteringValue } = await recalculateProjektering(appointmentNumber, updatedRow);
           updateProjekteringUI(rowIndex, projekteringValue);
           updatedRow[9] = projekteringValue;
+          
+          // Also recalculate timer tilbage if projektering changed
+          if (shouldRecalculateTimerTilbage || true) {
+            const { timerTilbageValue } = await recalculateTimerTilbage(appointmentNumber, updatedRow);
+            updateTimerTilbageUI(rowIndex, timerTilbageValue);
+          }
         } catch (error) {
           console.error(`Failed to recalculate projektering for ${appointmentNumber}:`, error);
         }
@@ -100,6 +107,17 @@ export const useCellChange = ({
           updatedRow[11] = montageValue;
         } catch (error) {
           console.error(`Failed to recalculate montage for ${appointmentNumber}:`, error);
+        }
+      }
+      
+      // Handle recalculation of timer tilbage
+      if (shouldRecalculateTimerTilbage) {
+        console.log(`Need to recalculate Timer Tilbage for ${appointmentNumber} due to column ${colIndex} change`);
+        try {
+          const { timerTilbageValue } = await recalculateTimerTilbage(appointmentNumber, updatedRow);
+          updateTimerTilbageUI(rowIndex, timerTilbageValue);
+        } catch (error) {
+          console.error(`Failed to recalculate timer tilbage for ${appointmentNumber}:`, error);
         }
       }
       

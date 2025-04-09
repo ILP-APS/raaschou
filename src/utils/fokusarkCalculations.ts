@@ -53,3 +53,15 @@ export const calculateTotal = (row: string[]): string => {
   
   return formatDanishNumber(total);
 };
+
+// Calculate Timer Tilbage (Estimeret Projektering - Realiseret Projektering)
+export const calculateTimerTilbage = (row: string[]): string => {
+  // Get values from column 9 (projektering_1 - Estimeret) and column 12 (projektering_2 - Realiseret)
+  const estimatedProjektering = parseNumber(row[9]);
+  const realizedProjektering = parseNumber(row[12]);
+  
+  // Calculate the difference
+  const timerTilbage = estimatedProjektering - realizedProjektering;
+  
+  return formatDanishNumber(timerTilbage);
+};
