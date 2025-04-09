@@ -1,3 +1,4 @@
+
 import React from "react";
 
 interface FokusarkTableHeaderProps {
@@ -25,7 +26,7 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
       case 7:
         return "Underleverandør 2";
       case 8:
-        return "Est 1";
+        return "Materialer";
       case 9:
         return "Est 2";
       case 10:
