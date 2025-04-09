@@ -20,7 +20,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import './StickyTableStyles.css';
 
-// Define your data type
+// Define data type
 interface DataItem {
   id: number;
   col1: string;
@@ -64,7 +64,7 @@ export default function StickyTable() {
   const rowBgColor = isDarkMode ? 'hsl(var(--background))' : 'white';
   const borderColor = 'hsl(var(--border))';
 
-  // Define columns
+  // Define columns with enablePinning
   const columns: ColumnDef<DataItem, any>[] = [
     {
       accessorKey: 'col1',
@@ -79,34 +79,42 @@ export default function StickyTable() {
     {
       accessorKey: 'col3',
       header: 'Column 3',
+      enablePinning: true,
     },
     {
       accessorKey: 'col4',
       header: 'Column 4',
+      enablePinning: true,
     },
     {
       accessorKey: 'col5',
       header: 'Column 5',
+      enablePinning: true,
     },
     {
       accessorKey: 'col6',
       header: 'Column 6',
+      enablePinning: true,
     },
     {
       accessorKey: 'col7',
       header: 'Column 7',
+      enablePinning: true,
     },
     {
       accessorKey: 'col8',
       header: 'Column 8',
+      enablePinning: true,
     },
     {
       accessorKey: 'col9',
       header: 'Column 9',
+      enablePinning: true,
     },
     {
       accessorKey: 'col10',
       header: 'Column 10',
+      enablePinning: true,
     },
   ];
 
@@ -120,7 +128,7 @@ export default function StickyTable() {
         pageSize: 10,
       },
       columnPinning: {
-        left: ['col1', 'col2'],  // Pin first two columns by default
+        left: ['col1', 'col2'],
         right: [],
       },
     },
@@ -135,12 +143,10 @@ export default function StickyTable() {
           <Table className="sticky-table">
             <TableHeader>
               {/* First sticky header row */}
-              <TableRow className="sticky-header" style={{ backgroundColor: headerBgColor }}>
-                {table.getFlatHeaders().map((header) => {
+              <TableRow className="sticky-header">
+                {table.getHeaderGroups()[0].headers.map((header) => {
                   const isPinned = header.column.getIsPinned();
-                  const pinSide = isPinned === 'left' ? 'left' : (isPinned === 'right' ? 'right' : undefined);
-                  const left = pinSide === 'left' ? `${header.column.getStart()}px` : undefined;
-                  const right = pinSide === 'right' ? `${header.column.getAfter()}px` : undefined;
+                  const pinSide = isPinned === 'left' ? 'left' : (isPinned === 'right' ? 'right' : null);
                   
                   return (
                     <TableHead
@@ -149,11 +155,9 @@ export default function StickyTable() {
                       style={{
                         width: '150px',
                         minWidth: '150px',
-                        left: left,
-                        right: right,
                         backgroundColor: headerBgColor,
-                        boxShadow: isPinned ? `${pinSide === 'left' ? 1 : -1}px 0 0 0 ${borderColor}` : undefined,
-                        zIndex: isPinned ? 40 : 30,
+                        left: isPinned === 'left' ? `${header.column.getStart('left')}px` : undefined,
+                        right: isPinned === 'right' ? `${header.column.getAfter('right')}px` : undefined,
                       }}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
@@ -163,12 +167,10 @@ export default function StickyTable() {
               </TableRow>
               
               {/* Second sticky header row */}
-              <TableRow className="sticky-subheader" style={{ backgroundColor: subheaderBgColor }}>
-                {table.getFlatHeaders().map((header, index) => {
+              <TableRow className="sticky-subheader">
+                {table.getHeaderGroups()[0].headers.map((header) => {
                   const isPinned = header.column.getIsPinned();
-                  const pinSide = isPinned === 'left' ? 'left' : (isPinned === 'right' ? 'right' : undefined);
-                  const left = pinSide === 'left' ? `${header.column.getStart()}px` : undefined;
-                  const right = pinSide === 'right' ? `${header.column.getAfter()}px` : undefined;
+                  const pinSide = isPinned === 'left' ? 'left' : (isPinned === 'right' ? 'right' : null);
                   
                   return (
                     <TableHead
@@ -177,14 +179,12 @@ export default function StickyTable() {
                       style={{
                         width: '150px',
                         minWidth: '150px',
-                        left: left,
-                        right: right,
                         backgroundColor: subheaderBgColor,
-                        boxShadow: isPinned ? `${pinSide === 'left' ? 1 : -1}px 0 0 0 ${borderColor}` : undefined,
-                        zIndex: isPinned ? 40 : 30,
+                        left: isPinned === 'left' ? `${header.column.getStart('left')}px` : undefined,
+                        right: isPinned === 'right' ? `${header.column.getAfter('right')}px` : undefined,
                       }}
                     >
-                      {`Sub ${index + 1}`}
+                      {`Sub ${table.getHeaderGroups()[0].headers.indexOf(header) + 1}`}
                     </TableHead>
                   );
                 })}
@@ -192,13 +192,11 @@ export default function StickyTable() {
             </TableHeader>
             
             <TableBody>
-              {table.getRowModel().rows.map(row => (
-                <TableRow key={row.id} style={{ backgroundColor: rowBgColor }}>
+              {table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => {
                     const isPinned = cell.column.getIsPinned();
-                    const pinSide = isPinned === 'left' ? 'left' : (isPinned === 'right' ? 'right' : undefined);
-                    const left = pinSide === 'left' ? `${cell.column.getStart()}px` : undefined;
-                    const right = pinSide === 'right' ? `${cell.column.getAfter()}px` : undefined;
+                    const pinSide = isPinned === 'left' ? 'left' : (isPinned === 'right' ? 'right' : null);
                     
                     return (
                       <TableCell
@@ -207,11 +205,9 @@ export default function StickyTable() {
                         style={{
                           width: '150px',
                           minWidth: '150px',
-                          left: left,
-                          right: right,
                           backgroundColor: rowBgColor,
-                          boxShadow: isPinned ? `${pinSide === 'left' ? 1 : -1}px 0 0 0 ${borderColor}` : undefined,
-                          zIndex: isPinned ? 20 : 10,
+                          left: isPinned === 'left' ? `${cell.column.getStart('left')}px` : undefined,
+                          right: isPinned === 'right' ? `${cell.column.getAfter('right')}px` : undefined,
                         }}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
