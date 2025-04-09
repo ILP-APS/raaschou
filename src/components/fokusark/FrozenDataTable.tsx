@@ -195,9 +195,11 @@ export default function FrozenDataTable() {
       </div>
       
       <div className="relative overflow-auto border rounded-md" style={{ maxHeight: '400px', maxWidth: '100%' }}>
-        <div className="sticky top-0 z-30 left-0 bg-background w-[302px]" style={{ height: '82px' }}>
-          {/* Empty div that covers the top-left corner where both freeze areas intersect */}
-        </div>
+        {/* This div acts as the corner element where frozen rows and columns intersect */}
+        <div 
+          className="sticky top-0 left-0 z-40 bg-background" 
+          style={{ width: '300px', height: '82px', position: 'absolute' }}
+        />
         
         <Table>
           {/* Frozen Header Rows (Top 2) */}
@@ -207,7 +209,9 @@ export default function FrozenDataTable() {
               {table.getHeaderGroups()[0].headers.map((header) => (
                 <TableHead
                   key={header.id}
-                  className={(header.column.columnDef.meta as ColumnMeta)?.frozen ? 'sticky left-0 z-30 bg-background' : ''}
+                  className={(header.column.columnDef.meta as ColumnMeta)?.frozen 
+                    ? 'sticky left-0 z-30 bg-background shadow-[1px_0_0_0_#e5e7eb]' 
+                    : ''}
                   style={{ minWidth: '150px' }}
                 >
                   {header.isPlaceholder
@@ -216,12 +220,14 @@ export default function FrozenDataTable() {
                 </TableHead>
               ))}
             </TableRow>
-            {/* Second frozen header row (just for demonstration) */}
+            {/* Second frozen header row */}
             <TableRow className="bg-muted/50">
               {table.getHeaderGroups()[0].headers.map((header) => (
                 <TableHead
                   key={`subheader-${header.id}`}
-                  className={(header.column.columnDef.meta as ColumnMeta)?.frozen ? 'sticky left-0 z-30 bg-muted/50' : ''}
+                  className={(header.column.columnDef.meta as ColumnMeta)?.frozen 
+                    ? 'sticky left-0 z-30 bg-muted/50 shadow-[1px_0_0_0_#e5e7eb]' 
+                    : ''}
                   style={{ minWidth: '150px' }}
                 >
                   Sub-header {header.index + 1}
@@ -235,7 +241,9 @@ export default function FrozenDataTable() {
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
-                    className={(cell.column.columnDef.meta as ColumnMeta)?.frozen ? 'sticky left-0 z-10 bg-background' : ''}
+                    className={(cell.column.columnDef.meta as ColumnMeta)?.frozen 
+                      ? 'sticky left-0 z-10 bg-background shadow-[1px_0_0_0_#e5e7eb]' 
+                      : ''}
                     style={{ minWidth: '150px' }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
