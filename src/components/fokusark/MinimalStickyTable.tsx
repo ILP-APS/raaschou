@@ -46,9 +46,9 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
         name: `Project ${i + 1}`,
         type: `Type ${i % 4 + 1}`,
         // Add sample data for other columns
-        ...Object.fromEntries(
+        ...(Object.fromEntries(
           Array.from({ length: 20 }).map((_, j) => [`col${j}`, `Value ${i}-${j}`])
-        )
+        ))
       }));
     }
     
@@ -212,9 +212,9 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
           {/* Regular header row */}
           <TableRow>
             {table.getFlatHeaders().map((header, index) => {
-              const meta = header.column.columnDef.meta as ColumnMeta | undefined;
-              const isSticky = meta?.sticky || false;
-              const stickyIndex = meta?.index || 0;
+              const columnMeta = header.column.columnDef.meta as ColumnMeta || {};
+              const isSticky = columnMeta && columnMeta.sticky || false;
+              const stickyIndex = columnMeta && columnMeta.index || 0;
               const isIdCol = index === 0;
               const isNameCol = index === 1;
               
@@ -250,9 +250,9 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
             return (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell, cellIndex) => {
-                  const meta = cell.column.columnDef.meta as ColumnMeta | undefined;
-                  const isSticky = meta?.sticky || false;
-                  const stickyIndex = meta?.index || 0;
+                  const columnMeta = cell.column.columnDef.meta as ColumnMeta || {};
+                  const isSticky = columnMeta && columnMeta.sticky || false;
+                  const stickyIndex = columnMeta && columnMeta.index || 0;
                   const isIdCol = cellIndex === 0;
                   const isNameCol = cellIndex === 1;
                   
