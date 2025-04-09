@@ -2,7 +2,6 @@
 import React from "react";
 import FokusarkDescription from "./FokusarkDescription";
 import { useFokusarkData } from "@/hooks/useFokusarkData";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -11,6 +10,7 @@ import {
   TableRow,
   TableHead
 } from "@/components/ui/table";
+import "./FokusarkTableStyles.css";
 
 const FokusarkContent: React.FC = () => {
   const { isLoading } = useFokusarkData();
@@ -39,64 +39,41 @@ const FokusarkContent: React.FC = () => {
       
       <div className="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-0">
         {/* Main scrollable container */}
-        <div 
-          className="w-full overflow-auto" 
-          style={{ 
-            maxHeight: '70vh'
-          }}
-        >
-          <Table className="w-max border-collapse">
-            <TableHeader className="sticky top-0 z-10">
+        <div className="sticky-table-container">
+          <Table className="sticky-table">
+            <TableHeader>
               {/* First Header Row - Group Headers */}
               <TableRow>
                 {/* Column 1 (First sticky column) */}
                 <TableHead 
-                  key="group-header-col1"
+                  data-sticky="true"
+                  style={{ left: 0, width: '150px', minWidth: '150px' }}
                   className="font-medium whitespace-nowrap text-center border-r"
-                  style={{ 
-                    position: 'sticky' as const,
-                    left: 0,
-                    zIndex: 40,
-                    width: '150px',
-                    minWidth: '150px',
-                    backgroundColor: 'hsl(var(--muted)/50)'
-                  }}
                 >
                   Group 1
                 </TableHead>
                 
                 {/* Column 2 (Second sticky column) */}
                 <TableHead 
-                  key="group-header-col2"
+                  data-sticky="true"
+                  data-last-sticky="true"
+                  style={{ left: 150, width: '150px', minWidth: '150px' }}
                   className="font-medium whitespace-nowrap text-center border-r"
-                  style={{ 
-                    position: 'sticky' as const,
-                    left: 150,
-                    zIndex: 40,
-                    width: '150px',
-                    minWidth: '150px',
-                    backgroundColor: 'hsl(var(--muted)/50)'
-                  }}
                 >
                   Group 1
                 </TableHead>
                 
                 {/* Column 3 - Non-sticky part of Group 1 */}
                 <TableHead 
-                  key="group-header-col3"
                   className="font-medium whitespace-nowrap text-center border-r"
                   colSpan={1}
-                  style={{ 
-                    width: '120px',
-                    minWidth: '120px'
-                  }}
+                  style={{ width: '120px', minWidth: '120px' }}
                 >
                   Group 1
                 </TableHead>
                 
                 {/* Group 2: Columns 4-8 */}
                 <TableHead 
-                  key="group-header-1" 
                   className="font-medium whitespace-nowrap text-center border-r"
                   colSpan={5}
                 >
@@ -105,7 +82,6 @@ const FokusarkContent: React.FC = () => {
                 
                 {/* Group 3: Columns 9-14 */}
                 <TableHead 
-                  key="group-header-2" 
                   className="font-medium whitespace-nowrap text-center border-r"
                   colSpan={6}
                 >
@@ -114,7 +90,6 @@ const FokusarkContent: React.FC = () => {
                 
                 {/* Group 4: Columns 15-19 */}
                 <TableHead 
-                  key="group-header-3" 
                   className="font-medium whitespace-nowrap text-center border-r"
                   colSpan={5}
                 >
@@ -123,7 +98,6 @@ const FokusarkContent: React.FC = () => {
                 
                 {/* Group 5: Columns 20-25 */}
                 <TableHead 
-                  key="group-header-4" 
                   className="font-medium whitespace-nowrap text-center border-r"
                   colSpan={6}
                 >
@@ -140,14 +114,11 @@ const FokusarkContent: React.FC = () => {
                   // Calculate the left position for sticky columns
                   const leftPosition = i === 0 ? 0 : (i === 1 ? 150 : undefined);
                   
-                  // Set background and z-index for sticky columns
-                  const stickyStyles = i < 2 ? {
-                    position: 'sticky' as const,
-                    left: leftPosition,
-                    zIndex: 30,
-                    backgroundColor: 'hsl(var(--muted)/50)',
-                    boxShadow: i === 1 ? '4px 0 4px -2px rgba(0,0,0,0.15)' : 'none'
-                  } : {};
+                  // Determine if this is a sticky column
+                  const isSticky = i < 2;
+                  
+                  // Is this the last sticky column?
+                  const isLastSticky = i === 1;
                   
                   return (
                     <TableHead 
@@ -156,8 +127,10 @@ const FokusarkContent: React.FC = () => {
                       style={{
                         width: `${columnWidth}px`,
                         minWidth: `${columnWidth}px`,
-                        ...stickyStyles
+                        left: leftPosition
                       }}
+                      data-sticky={isSticky ? "true" : undefined}
+                      data-last-sticky={isLastSticky ? "true" : undefined}
                     >
                       Column {i+1}
                     </TableHead>
@@ -167,12 +140,12 @@ const FokusarkContent: React.FC = () => {
             </TableHeader>
             <TableBody>
               {tableData.map((row, rowIndex) => {
-                const rowBgColor = rowIndex % 2 === 0 ? 'hsl(var(--background))' : 'hsl(var(--muted)/20)';
+                const rowBgClass = rowIndex % 2 === 0 ? "bg-background" : "bg-muted/20";
                 
                 return (
                   <TableRow 
                     key={`row-${rowIndex}`} 
-                    className={rowIndex % 2 === 0 ? "bg-background" : "bg-muted/20"}
+                    className={rowBgClass}
                   >
                     {row.map((cell, cellIndex) => {
                       // Fixed width for each column type
@@ -181,14 +154,11 @@ const FokusarkContent: React.FC = () => {
                       // Calculate the left position for sticky columns
                       const leftPosition = cellIndex === 0 ? 0 : (cellIndex === 1 ? 150 : undefined);
                       
-                      // Apply sticky styles only to the first two columns
-                      const cellStyles = cellIndex < 2 ? {
-                        position: 'sticky' as const,
-                        left: leftPosition,
-                        zIndex: 20,
-                        backgroundColor: rowBgColor,
-                        boxShadow: cellIndex === 1 ? '4px 0 4px -2px rgba(0,0,0,0.15)' : 'none'
-                      } : {};
+                      // Determine if this is a sticky column
+                      const isSticky = cellIndex < 2;
+                      
+                      // Is this the last sticky column?
+                      const isLastSticky = cellIndex === 1;
                       
                       return (
                         <TableCell 
@@ -197,8 +167,10 @@ const FokusarkContent: React.FC = () => {
                           style={{
                             width: `${columnWidth}px`,
                             minWidth: `${columnWidth}px`,
-                            ...cellStyles
+                            left: leftPosition
                           }}
+                          data-sticky={isSticky ? "true" : undefined}
+                          data-last-sticky={isLastSticky ? "true" : undefined}
                         >
                           {cell}
                         </TableCell>
