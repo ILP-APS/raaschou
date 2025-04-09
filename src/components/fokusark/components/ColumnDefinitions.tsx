@@ -9,8 +9,20 @@ import EditableCell from "./EditableCell";
  */
 export function getColumns(): Column<FokusarkRow, unknown>[] {
   const baseColumns = [
-    { key: "nr", name: "Nr.", frozen: true, width: 80 },
-    { key: "navn", name: "Navn", frozen: true, width: 250 },
+    { 
+      key: "nr", 
+      name: "Nr.", 
+      frozen: true, 
+      width: 80,
+      headerCellClass: "bg-muted font-medium"
+    },
+    { 
+      key: "navn", 
+      name: "Navn", 
+      frozen: true, 
+      width: 250,
+      headerCellClass: "bg-muted font-medium"
+    },
     { key: "ansvarlig", name: "Ansvarlig", width: 120 },
     { key: "tilbud", name: "Tilbud", width: 120 },
     { key: "montage", name: "Montage", width: 120 },
@@ -21,13 +33,15 @@ export function getColumns(): Column<FokusarkRow, unknown>[] {
       key: "montage2", 
       name: "Montage 2", 
       width: 120, 
-      editor: EditableCell
+      editor: EditableCell,
+      cellClass: "editable-cell"
     },
     { 
       key: "underleverandor2", 
       name: "Underleverandør 2", 
       width: 120,
-      editor: EditableCell
+      editor: EditableCell,
+      cellClass: "editable-cell"
     },
     
     // Continue with non-editable columns
@@ -47,13 +61,15 @@ export function getColumns(): Column<FokusarkRow, unknown>[] {
       key: "faerdig_pct_ex_montage_nu", 
       name: "Færdig % ex montage nu", 
       width: 160,
-      editor: EditableCell
+      editor: EditableCell,
+      cellClass: "editable-cell"
     },
     { 
       key: "faerdig_pct_ex_montage_foer", 
       name: "Færdig % ex montage før", 
       width: 160,
-      editor: EditableCell
+      editor: EditableCell,
+      cellClass: "editable-cell"
     },
     
     // Finish with non-editable columns

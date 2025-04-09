@@ -17,7 +17,7 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   }
 
   return (
-    <div className="rounded-md w-full relative">
+    <div className="rounded-md w-full relative shadow-sm">
       <FokusarkDataGrid 
         data={tableData}
         onCellChange={handleCellChange}

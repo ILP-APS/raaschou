@@ -18,7 +18,8 @@ const EditableCell: React.FC<EditableCellProps<FokusarkRow>> = ({
         ...row,
         [column.key]: e.target.value
       })}
-      className="w-full h-full px-2 bg-transparent"
+      className="w-full h-full px-2 bg-transparent focus:ring-1 focus:ring-primary"
+      autoFocus
     />
   );
 };

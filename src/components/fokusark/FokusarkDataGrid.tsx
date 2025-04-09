@@ -1,13 +1,11 @@
 
 import React, { useState, useCallback } from "react";
 import DataGrid, { SortColumn } from "react-data-grid";
-import "./DataGridStyles.css"; // Use our local CSS file instead
-import "./FokusarkDataGridStyles.css";
+import "./styles/dataGridStyles.css";
 import { useTheme } from "next-themes";
 import { transformDataToRows, FokusarkRow } from "./utils/dataGridUtils";
 import { getColumns } from "./components/ColumnDefinitions";
 import SubAppointmentRow from "./components/SubAppointmentRow";
-import "./styles/dataGridStyles.css";
 
 // Define props for our component
 interface FokusarkDataGridProps {
@@ -57,6 +55,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
             handleCellChange(rowIndex, columnKey, String(updatedRows[rowIndex][columnKey]));
           }
         }}
+        enableVirtualization
       />
     </div>
   );
