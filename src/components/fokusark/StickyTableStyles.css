@@ -1,8 +1,36 @@
 
-/* Styles for the sticky table - simplified to just handle scrollbars */
+/* Styles for the sticky table */
 .sticky-table-container {
   position: relative;
   overflow: auto;
+  max-height: 500px;
+  max-width: 100%;
+}
+
+/* Make sure the table uses separate borders */
+.sticky-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: auto;
+  min-width: 100%;
+}
+
+/* Explicitly style sticky columns and headers */
+.sticky-header {
+  position: sticky !important;
+  top: 0;
+  z-index: 30;
+}
+
+.sticky-subheader {
+  position: sticky !important;
+  top: 41px; /* Match the height of the first header row */
+  z-index: 30;
+}
+
+.sticky-cell {
+  position: sticky !important;
+  z-index: 20;
 }
 
 /* Custom scrollbar styles */

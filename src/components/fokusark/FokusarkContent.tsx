@@ -9,7 +9,7 @@ const FokusarkContent: React.FC = () => {
   const { isLoading } = useFokusarkData();
   
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6 overflow-y-auto content-wrapper">
+    <div className="flex flex-col gap-4 md:p-6 overflow-y-auto content-wrapper">
       <div className="flex flex-col gap-4 content-wrapper">
         <h2 className="text-2xl font-semibold tracking-tight">Fokusark</h2>
         <FokusarkDescription />

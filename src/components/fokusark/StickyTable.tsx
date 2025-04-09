@@ -18,7 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import './StickyTableStyles.css'; // Keep this import for scrollbar styles only
+import './StickyTableStyles.css';
 
 // Define your data type
 interface DataItem {
@@ -131,7 +131,7 @@ export default function StickyTable() {
   const getColumnOffset = (index: number): number => {
     let offset = 0;
     for (let i = 0; i < index; i++) {
-      if ((table.getFlatHeaders()[i].column.columnDef.meta as ColumnMeta)?.frozen) {
+      if ((columns[i].meta as ColumnMeta)?.frozen) {
         offset += 150; // Fixed column width
       }
     }
@@ -142,27 +142,11 @@ export default function StickyTable() {
     <div className="w-full space-y-4">
       <div className="rounded-md border overflow-hidden">
         {/* Table container with scrolling */}
-        <div 
-          className="sticky-table-container"
-          style={{ 
-            maxHeight: '500px',
-            maxWidth: '100%',
-            overflow: 'auto',
-            position: 'relative' // Ensure position context for sticky elements
-          }}
-        >
-          <Table style={{ width: 'auto', minWidth: '100%' }}>
+        <div className="sticky-table-container">
+          <Table className="sticky-table">
             <TableHeader>
               {/* First sticky header row */}
-              <TableRow
-                style={{
-                  position: 'sticky',
-                  top: 0,
-                  zIndex: 30,
-                  backgroundColor: headerBgColor,
-                  boxShadow: `0 1px 0 0 ${borderColor}`,
-                }}
-              >
+              <TableRow className="sticky-header" style={{ backgroundColor: headerBgColor }}>
                 {table.getFlatHeaders().map((header, index) => {
                   const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
                   const leftOffset = isFrozen ? getColumnOffset(index) : undefined;
@@ -170,11 +154,11 @@ export default function StickyTable() {
                   return (
                     <TableHead
                       key={header.id}
+                      className={isFrozen ? "sticky-cell" : ""}
                       style={{
                         width: '150px',
                         minWidth: '150px',
-                        position: isFrozen ? 'sticky' : 'static',
-                        left: isFrozen ? `${leftOffset}px` : undefined,
+                        left: leftOffset ? `${leftOffset}px` : undefined,
                         zIndex: isFrozen ? 40 : 30,
                         backgroundColor: headerBgColor,
                         boxShadow: isFrozen ? `1px 0 0 0 ${borderColor}` : undefined,
@@ -187,15 +171,7 @@ export default function StickyTable() {
               </TableRow>
               
               {/* Second sticky header row */}
-              <TableRow
-                style={{
-                  position: 'sticky',
-                  top: '41px', // Adjust based on your first row height
-                  zIndex: 30,
-                  backgroundColor: subheaderBgColor,
-                  boxShadow: `0 1px 0 0 ${borderColor}`,
-                }}
-              >
+              <TableRow className="sticky-subheader" style={{ backgroundColor: subheaderBgColor }}>
                 {table.getFlatHeaders().map((header, index) => {
                   const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
                   const leftOffset = isFrozen ? getColumnOffset(index) : undefined;
@@ -203,11 +179,11 @@ export default function StickyTable() {
                   return (
                     <TableHead
                       key={`subheader-${header.id}`}
+                      className={isFrozen ? "sticky-cell" : ""}
                       style={{
                         width: '150px',
                         minWidth: '150px',
-                        position: isFrozen ? 'sticky' : 'static',
-                        left: isFrozen ? `${leftOffset}px` : undefined,
+                        left: leftOffset ? `${leftOffset}px` : undefined,
                         zIndex: isFrozen ? 40 : 30,
                         backgroundColor: subheaderBgColor,
                         boxShadow: isFrozen ? `1px 0 0 0 ${borderColor}` : undefined,
@@ -222,7 +198,7 @@ export default function StickyTable() {
             
             <TableBody>
               {table.getRowModel().rows.map(row => (
-                <TableRow key={row.id}>
+                <TableRow key={row.id} style={{ backgroundColor: rowBgColor }}>
                   {row.getVisibleCells().map((cell, index) => {
                     const isFrozen = !!(cell.column.columnDef.meta as ColumnMeta)?.frozen;
                     const leftOffset = isFrozen ? getColumnOffset(index) : undefined;
@@ -230,11 +206,11 @@ export default function StickyTable() {
                     return (
                       <TableCell
                         key={cell.id}
+                        className={isFrozen ? "sticky-cell" : ""}
                         style={{
                           width: '150px',
                           minWidth: '150px',
-                          position: isFrozen ? 'sticky' : 'static',
-                          left: isFrozen ? `${leftOffset}px` : undefined,
+                          left: leftOffset ? `${leftOffset}px` : undefined,
                           zIndex: isFrozen ? 20 : 10,
                           backgroundColor: rowBgColor,
                           boxShadow: isFrozen ? `1px 0 0 0 ${borderColor}` : undefined,
