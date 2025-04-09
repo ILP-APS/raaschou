@@ -72,7 +72,7 @@ export const calculateTimerTilbage = (row: string[]): string => {
 
 // Calculate Produktion Timer Tilbage (Estimeret Produktion - Realiseret Produktion)
 export const calculateProduktionTimerTilbage = (row: string[]): string => {
-  // Get values from column 10 (produktion - Estimeret) and column 13 (produktion_realized - Realiseret)
+  // Get values from column 10 (produktion - Estimated/calculated) and column 13 (produktion_realized - from API)
   const estimatedProduktion = parseNumber(row[10]);  // Estimated (from formula)
   const realizedProduktion = parseNumber(row[13]);   // Realized (from API)
   
@@ -83,6 +83,15 @@ export const calculateProduktionTimerTilbage = (row: string[]): string => {
     row10: row[10],
     row13: row[13],
   });
+  
+  // Special debug for appointment 24258
+  if (row[0] === '24258') {
+    console.log(`[CRITICAL DEBUG] Produktion Timer Tilbage for 24258:`, {
+      estimatedProduktion,
+      realizedProduktion,
+      difference: estimatedProduktion - realizedProduktion
+    });
+  }
   
   // Calculate the difference
   const produktionTimerTilbage = estimatedProduktion - realizedProduktion;

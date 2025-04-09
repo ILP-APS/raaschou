@@ -75,10 +75,25 @@ export const calculateProduktion = (row: string[]): string => {
     const produktion = step2 - projektering;
     
     console.log(`[DEBUG ESTIMATED PRODUCTION] Produktion calculation steps for ${appointmentNumber}:`, {
-      step1_subtraction: step1,
-      step2_divide_by_750: step2,
-      final_result: produktion
+      step1_subtraction: `${tilbud} - ${montageValue} - ${underleverandorValue} - ${materialer} = ${step1}`,
+      step2_divide_by_750: `${step1} / 750 = ${step2}`,
+      final_result: `${step2} - ${projektering} = ${produktion}`
     });
+    
+    // Special debug for appointment 24258
+    if (appointmentNumber === '24258') {
+      console.log(`[CRITICAL DEBUG] Calculation for appointment 24258:`, {
+        tilbud,
+        montageValue,
+        underleverandorValue,
+        materialer,
+        step1,
+        step2,
+        projektering,
+        produktion,
+        formula: `(${tilbud} - ${montageValue} - ${underleverandorValue} - ${materialer})/750 - ${projektering} = ${produktion}`
+      });
+    }
     
     // Check for NaN and return '0' if the calculation resulted in NaN
     if (isNaN(produktion)) {

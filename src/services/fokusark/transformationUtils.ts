@@ -134,6 +134,14 @@ const addEstimatedValues = (appointment: FokusarkAppointment, row: string[]): vo
   // For column 10 (produktion - estimated calculated value)
   row[10] = formatValueOrEmpty(appointment.produktion);
   
+  // Special debug for appointment 24258
+  if (appointment.appointment_number === '24258') {
+    console.log(`[CRITICAL DEBUG] Adding estimated produktion for 24258:`, {
+      produktion_value: appointment.produktion,
+      formatted: formatValueOrEmpty(appointment.produktion)
+    });
+  }
+  
   row[11] = formatValueOrEmpty(appointment.montage_3);
 };
 
@@ -144,14 +152,22 @@ const addRealizedValues = (appointment: FokusarkAppointment, row: string[]): voi
   // Debug log the realized values
   console.log(`Adding realized values for ${appointment.appointment_number}:`, {
     projektering_2: appointment.projektering_2,
-    produktion_realized: appointment.produktion_realized,
+    produktion_realized: appointment.produktion_realized, // From API
     montage_3: appointment.montage_3
   });
 
   row[12] = formatValueOrEmpty(appointment.projektering_2);
   
-  // For column 13 (realized produktion - from API)
+  // For column 13 (realized produktion - explicitly from API)
   row[13] = formatValueOrEmpty(appointment.produktion_realized);
+  
+  // Special debug for appointment 24258
+  if (appointment.appointment_number === '24258') {
+    console.log(`[CRITICAL DEBUG] Adding realized produktion for 24258:`, {
+      produktion_realized_value: appointment.produktion_realized,
+      formatted: formatValueOrEmpty(appointment.produktion_realized)
+    });
+  }
   
   row[14] = formatValueOrEmpty(appointment.montage_3);
   
@@ -173,6 +189,16 @@ const addRemainingColumns = (appointment: FokusarkAppointment, row: string[]): v
   // Calculate produktion timer tilbage as produktion - produktion_realized
   const produktionTimerTilbage = (appointment.produktion || 0) - (appointment.produktion_realized || 0);
   row[17] = formatDanishNumber(produktionTimerTilbage);
+  
+  // Special debug for appointment 24258
+  if (appointment.appointment_number === '24258') {
+    console.log(`[CRITICAL DEBUG] Adding produktion timer tilbage for 24258:`, {
+      produktion: appointment.produktion, // estimated/calculated
+      produktion_realized: appointment.produktion_realized, // from API
+      difference: (appointment.produktion || 0) - (appointment.produktion_realized || 0),
+      formatted_difference: formatDanishNumber((appointment.produktion || 0) - (appointment.produktion_realized || 0))
+    });
+  }
   
   // Add production columns in the new rearranged order
   row[18] = formatValueOrEmpty(appointment.faerdig_pct_ex_montage_nu);

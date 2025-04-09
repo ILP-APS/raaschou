@@ -33,10 +33,10 @@ const RecalculateValuesButton: React.FC<RecalculateValuesButtonProps> = ({ table
           console.log(`Recalculating values for ${appointmentNumber}`, {
             currentValues: {
               projektering_1: appointment.projektering_1,
-              produktion: appointment.produktion,
+              produktion: appointment.produktion, // estimated/calculated
+              produktion_realized: appointment.produktion_realized, // from API
               montage_3: appointment.montage_3,
               projektering_2: appointment.projektering_2,
-              produktion_realized: appointment.produktion_realized,
               timer_tilbage_1: appointment.timer_tilbage_1,
               timer_tilbage_2: appointment.timer_tilbage_2
             },
@@ -63,15 +63,22 @@ const RecalculateValuesButton: React.FC<RecalculateValuesButtonProps> = ({ table
             const updatedRowData = [...rowData];
             updatedRowData[9] = projekteringValue;
             
-            // Calculate produktion
+            // Calculate produktion (estimated)
             const produktionValue = calculateProduktion(updatedRowData);
             const produktionNumeric = parseNumber(produktionValue);
             
-            console.log(`Recalculating produktion for ${appointmentNumber}:`, {
+            console.log(`Recalculating estimated produktion for ${appointmentNumber}:`, {
               calculated: produktionValue,
               numeric: produktionNumeric,
               current: appointment.produktion
             });
+            
+            if (appointmentNumber === '24258') {
+              console.log(`[CRITICAL DEBUG] Saving estimated produktion for 24258:`, {
+                value: produktionNumeric,
+                formatted: produktionValue
+              });
+            }
             
             await updateAppointmentField(
               appointmentNumber,
@@ -137,8 +144,18 @@ const RecalculateValuesButton: React.FC<RecalculateValuesButtonProps> = ({ table
             );
             
             // Calculate produktion timer tilbage 
-            // First, ensure we have the realized produktion value at position 13
+            // Make sure we have the realized produktion value at position 13 (from API)
             updatedRowData[13] = formatDanishNumber(appointment.produktion_realized || 0);
+            
+            // Check the values for appointment 24258
+            if (appointmentNumber === '24258') {
+              console.log(`[CRITICAL DEBUG] Produktion timer tilbage calculation for 24258:`, {
+                estimatedProduktion: produktionNumeric,
+                realizedProduktion: appointment.produktion_realized,
+                row10: updatedRowData[10],
+                row13: updatedRowData[13]
+              });
+            }
             
             // Now calculate produktion timer tilbage
             const produktionTimerTilbageValue = calculateProduktionTimerTilbage(updatedRowData);
@@ -150,7 +167,7 @@ const RecalculateValuesButton: React.FC<RecalculateValuesButtonProps> = ({ table
               current: appointment.timer_tilbage_2,
               produktion: produktionNumeric,
               realized_produktion: appointment.produktion_realized, 
-              rowData: updatedRowData
+              difference: produktionNumeric - (appointment.produktion_realized || 0)
             });
             
             // Update timer_tilbage_2 in the database

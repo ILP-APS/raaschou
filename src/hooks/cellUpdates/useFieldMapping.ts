@@ -1,4 +1,3 @@
-
 /**
  * Hook to map table column indices to field names and vice versa
  */
@@ -21,13 +20,13 @@ export const useFieldMapping = () => {
       case 9:
         return 'projektering_1';
       case 10:
-        return 'produktion'; // Estimated produktion (calculated via formula)
+        return 'produktion'; // Column 10 is the calculated estimated produktion
       case 11:
         return 'montage_3';
       case 12:
         return 'projektering_2'; // Realized projektering
       case 13:
-        return 'produktion_realized'; // This is specifically the produktion_realized field from API
+        return 'produktion_realized'; // Column 13 is explicitly the produktion_realized field from API
       case 14:
         return 'montage_3'; // Realized montage field
       case 15:
@@ -75,13 +74,13 @@ export const useFieldMapping = () => {
       case 9:
         return 'Projektering';
       case 10:
-        return 'Produktion'; // Estimated produktion - calculated
+        return 'Est. Produktion'; // Clarify this is the estimated (calculated) produktion
       case 11:
         return 'Montage';
       case 12:
         return 'Real. Projektering';
       case 13:
-        return 'Real. Produktion'; // Realized produktion - from API
+        return 'Real. Produktion'; // Clarify this is realized produktion from API
       case 14:
         return 'Real. Montage';
       case 15:
