@@ -15,93 +15,90 @@ import {
 } from '@/components/ui/table';
 import { useTheme } from 'next-themes';
 
-// Generate 50 rows of sample data
-const data = Array.from({ length: 50 }).map((_, i) => ({
-  id: `${i + 1}`,
-  name: `Project ${i + 1}`,
-  col1: `Bud-${i + 1}-1`,
-  col2: `Bud-${i + 1}-2`,
-  col3: `Bud-${i + 1}-3`,
-  col4: `Bud-${i + 1}-4`,
-  col5: `Bud-${i + 1}-5`,
-  col6: `Bud-${i + 1}-6`, 
-  col7: `Bud-${i + 1}-7`,
-  col8: `Bud-${i + 1}-8`,
-  col9: `Bud-${i + 1}-9`,
-  col10: `Bud-${i + 1}-10`,
-  col11: `Bud-${i + 1}-11`,
-  col12: `Bud-${i + 1}-12`
-}));
-
+// Define columns with proper grouping
 const columns = [
-  {
-    accessorKey: 'id',
-    header: 'ID',
-    meta: { sticky: true, index: 0 }
-  },
-  {
-    accessorKey: 'name',
-    header: 'Name',
-    meta: { sticky: true, index: 1 }
-  },
-  {
-    accessorKey: 'col1',
-    header: 'Budget 1'
-  },
-  {
-    accessorKey: 'col2',
-    header: 'Budget 2'
-  },
-  {
-    accessorKey: 'col3',
-    header: 'Budget 3'
-  },
-  {
-    accessorKey: 'col4',
-    header: 'Budget 4'
-  },
-  {
-    accessorKey: 'col5',
-    header: 'Budget 5'
-  },
-  {
-    accessorKey: 'col6',
-    header: 'Budget 6'
-  },
-  {
-    accessorKey: 'col7',
-    header: 'Budget 7'
-  },
-  {
-    accessorKey: 'col8',
-    header: 'Budget 8'
-  },
-  {
-    accessorKey: 'col9',
-    header: 'Budget 9'
-  },
-  {
-    accessorKey: 'col10',
-    header: 'Budget 10'
-  },
-  {
-    accessorKey: 'col11',
-    header: 'Budget 11'
-  },
-  {
-    accessorKey: 'col12',
-    header: 'Budget 12'
-  }
+  // Group 1: Info (3 cols)
+  { accessorKey: 'id', header: 'ID', meta: { sticky: true, index: 0, group: 'Info' } },
+  { accessorKey: 'name', header: 'Name', meta: { sticky: true, index: 1, group: 'Info' } },
+  { accessorKey: 'type', header: 'Type', meta: { group: 'Info' } },
+  
+  // Group 2: Budget Group A (5 cols)
+  { accessorKey: 'budA1', header: 'Budget 1', meta: { group: 'Budget Group A' } },
+  { accessorKey: 'budA2', header: 'Budget 2', meta: { group: 'Budget Group A' } },
+  { accessorKey: 'budA3', header: 'Budget 3', meta: { group: 'Budget Group A' } },
+  { accessorKey: 'budA4', header: 'Budget 4', meta: { group: 'Budget Group A' } },
+  { accessorKey: 'budA5', header: 'Budget 5', meta: { group: 'Budget Group A' } },
+  
+  // Group 3: Budget Group B (4 cols)
+  { accessorKey: 'budB1', header: 'Budget 6', meta: { group: 'Budget Group B' } },
+  { accessorKey: 'budB2', header: 'Budget 7', meta: { group: 'Budget Group B' } },
+  { accessorKey: 'budB3', header: 'Budget 8', meta: { group: 'Budget Group B' } },
+  { accessorKey: 'budB4', header: 'Budget 9', meta: { group: 'Budget Group B' } },
+  
+  // Group 4: Budget Group C (4 cols)
+  { accessorKey: 'budC1', header: 'Budget 10', meta: { group: 'Budget Group C' } },
+  { accessorKey: 'budC2', header: 'Budget 11', meta: { group: 'Budget Group C' } },
+  { accessorKey: 'budC3', header: 'Budget 12', meta: { group: 'Budget Group C' } },
+  { accessorKey: 'budC4', header: 'Budget 13', meta: { group: 'Budget Group C' } },
+  
+  // Group 5: Special (1 col)
+  { accessorKey: 'special', header: 'Special', meta: { group: 'Special' } },
+  
+  // Group 6: Budget Group D (5 cols)
+  { accessorKey: 'budD1', header: 'Budget 14', meta: { group: 'Budget Group D' } },
+  { accessorKey: 'budD2', header: 'Budget 15', meta: { group: 'Budget Group D' } },
+  { accessorKey: 'budD3', header: 'Budget 16', meta: { group: 'Budget Group D' } },
+  { accessorKey: 'budD4', header: 'Budget 17', meta: { group: 'Budget Group D' } },
+  { accessorKey: 'budD5', header: 'Budget 18', meta: { group: 'Budget Group D' } },
+  
+  // Group 7: Summary (2 cols)
+  { accessorKey: 'sum1', header: 'Total', meta: { group: 'Summary' } },
+  { accessorKey: 'sum2', header: 'Average', meta: { group: 'Summary' } }
 ];
 
-// Define header groups
+// Define the header groups explicitly
 const headerGroups = [
-  { title: 'Info', colSpan: 2 },          // Group 1: 2 cols (ID, Name)
-  { title: 'Budget Group A', colSpan: 5 }, // Group 2: 5 cols
-  { title: 'Budget Group B', colSpan: 4 }, // Group 3: 4 cols
-  { title: 'Special', colSpan: 1 },       // Group 4: 1 col
-  { title: 'Budget Group C', colSpan: 2 }  // Group 5: 2 cols
+  { id: 'Info', title: 'Info', colSpan: 3 },
+  { id: 'Budget Group A', title: 'Budget Group A', colSpan: 5 },
+  { id: 'Budget Group B', title: 'Budget Group B', colSpan: 4 },
+  { id: 'Budget Group C', title: 'Budget Group C', colSpan: 4 },
+  { id: 'Special', title: 'Special', colSpan: 1 },
+  { id: 'Budget Group D', title: 'Budget Group D', colSpan: 5 },
+  { id: 'Summary', title: 'Summary', colSpan: 2 }
 ];
+
+// Generate sample data with all columns
+const data = Array.from({ length: 50 }).map((_, i) => {
+  const rowData: Record<string, string> = {
+    id: `${i + 1}`,
+    name: `Project ${i + 1}`,
+    type: `Type ${i % 4 + 1}`,
+  };
+  
+  // Add all budget columns
+  for (let j = 1; j <= 5; j++) {
+    rowData[`budA${j}`] = `Bud-A${i + 1}-${j}`;
+  }
+  
+  for (let j = 1; j <= 4; j++) {
+    rowData[`budB${j}`] = `Bud-B${i + 1}-${j}`;
+  }
+  
+  for (let j = 1; j <= 4; j++) {
+    rowData[`budC${j}`] = `Bud-C${i + 1}-${j}`;
+  }
+  
+  rowData.special = `Special ${i + 1}`;
+  
+  for (let j = 1; j <= 5; j++) {
+    rowData[`budD${j}`] = `Bud-D${i + 1}-${j}`;
+  }
+  
+  rowData.sum1 = `Total ${i + 1}`;
+  rowData.sum2 = `Avg ${i + 1}`;
+  
+  return rowData;
+});
 
 export default function MinimalStickyTable() {
   const { resolvedTheme } = useTheme();
@@ -146,7 +143,7 @@ export default function MinimalStickyTable() {
     }}>
       <Table style={{ 
         width: 'auto', 
-        minWidth: '1500px', // Force table to be wider than container
+        minWidth: '2400px', // Sufficient width for all 24 columns
         borderCollapse: 'separate'
       }}>
         <TableHeader>
@@ -158,7 +155,7 @@ export default function MinimalStickyTable() {
               
               return (
                 <TableHead
-                  key={`group-${groupIndex}`}
+                  key={`group-${group.id}`}
                   colSpan={group.colSpan}
                   style={{
                     position: 'sticky',
@@ -189,8 +186,8 @@ export default function MinimalStickyTable() {
                 <TableHead
                   key={header.id}
                   style={{
-                    width: index === 0 ? '80px' : '150px',
-                    minWidth: index === 0 ? '80px' : '150px',
+                    minWidth: '150px',
+                    width: index === 0 ? '80px' : index === 1 ? '180px' : '150px',
                     position: 'sticky',
                     top: headerGroupHeight, // Position below the group header
                     left: isSticky ? getLeftPosition(stickyIndex) : undefined,
@@ -224,8 +221,8 @@ export default function MinimalStickyTable() {
                     <TableCell
                       key={cell.id}
                       style={{
-                        width: cellIndex === 0 ? '80px' : '150px',
-                        minWidth: cellIndex === 0 ? '80px' : '150px',
+                        width: cellIndex === 0 ? '80px' : cellIndex === 1 ? '180px' : '150px',
+                        minWidth: cellIndex === 0 ? '80px' : cellIndex === 1 ? '180px' : '150px',
                         position: isSticky ? 'sticky' : undefined,
                         left: isSticky ? getLeftPosition(stickyIndex) : undefined,
                         zIndex: isSticky ? 20 : undefined,
