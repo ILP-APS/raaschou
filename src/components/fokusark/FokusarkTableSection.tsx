@@ -1,6 +1,7 @@
 
 import React from "react";
-import FokusarkTable from "@/components/FokusarkTable";
+import FokusarkDataGrid from "./FokusarkDataGrid";
+import { useFokusarkTable } from "@/hooks/useFokusarkTable";
 
 interface FokusarkTableSectionProps {
   tableData: string[][];
@@ -11,6 +12,8 @@ const FokusarkTableSection: React.FC<FokusarkTableSectionProps> = ({
   tableData, 
   isLoading 
 }) => {
+  const { handleCellChange } = useFokusarkTable(tableData);
+  
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -19,7 +22,14 @@ const FokusarkTableSection: React.FC<FokusarkTableSectionProps> = ({
     );
   }
   
-  return <FokusarkTable data={tableData} />;
+  return (
+    <div className="fokusark-table-container">
+      <FokusarkDataGrid 
+        data={tableData}
+        onCellChange={handleCellChange}
+      />
+    </div>
+  );
 };
 
 export default FokusarkTableSection;

@@ -1,0 +1,64 @@
+
+/* React Data Grid custom styling */
+.rdg-dark {
+  --rdg-background-color: hsl(var(--background));
+  --rdg-header-background-color: hsl(var(--background));
+  --rdg-row-hover-background-color: hsl(var(--muted)/50);
+  --rdg-row-selected-background-color: hsl(var(--muted)/30);
+  --rdg-border-color: hsl(var(--border));
+  --rdg-header-row-color: hsl(var(--foreground));
+  --rdg-summary-row-background-color: hsl(var(--muted)/20);
+  color: hsl(var(--foreground));
+}
+
+/* Common styles for both light and dark mode */
+.rdg {
+  block-size: 100%;
+  border-radius: 0.5rem;
+  overflow: auto;
+}
+
+/* Frozen column shadow */
+.rdg [aria-frozen="true"] {
+  z-index: 1;
+}
+
+.rdg [aria-frozen="true"]:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  inset-inline-end: 0;
+  height: 100%;
+  width: 5px;
+  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.15);
+  pointer-events: none;
+}
+
+.dark .rdg [aria-frozen="true"]:after {
+  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.3);
+}
+
+/* Sub-appointment styling */
+.rdg-row.bg-muted\/20 .rdg-cell:first-child {
+  padding-left: 20px;
+}
+
+/* Column group headers */
+.rdg-header-row:first-child .rdg-cell {
+  border-bottom: none;
+}
+
+.rdg-header-row:nth-child(2) .rdg-cell {
+  border-top: none;
+}
+
+/* Row height for consistency */
+.rdg-row {
+  height: 48px;
+}
+
+/* Custom editable cell styling */
+.rdg-cell[aria-selected="true"] {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: -2px;
+}
