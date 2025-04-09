@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback } from "react";
 import DataGrid, { Column, SortColumn } from "react-data-grid";
-import "react-data-grid/lib/styles.css";
+import "./DataGridStyles.css"; // Use our local CSS file instead
 import "./FokusarkDataGridStyles.css";
 import { useTheme } from "next-themes";
 
@@ -156,7 +156,8 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
 
   return (
     <div className="fokusark-data-grid">
-      <style jsx>{`
+      {/* Use regular style tag without the jsx prop */}
+      <style>{`
         .fokusark-data-grid {
           height: calc(100vh - 220px);
           width: 100%;
@@ -164,26 +165,26 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
           border-radius: 0.5rem;
         }
         
-        :global(.rdg) {
+        .rdg {
           border-radius: 0.5rem;
           border: none;
           height: 100%;
         }
         
-        :global(.rdg-header-row) {
+        .rdg-header-row {
           background-color: hsl(var(--background));
         }
         
-        :global(.rdg-cell) {
+        .rdg-cell {
           border-right: 1px solid hsl(var(--border));
           border-bottom: 1px solid hsl(var(--border));
         }
         
-        :global(.rdg-row:hover) {
+        .rdg-row:hover {
           background-color: hsl(var(--muted)/50);
         }
         
-        :global(.rdg-row[aria-selected=true]) {
+        .rdg-row[aria-selected=true] {
           background-color: hsl(var(--muted)/30);
         }
       `}</style>
