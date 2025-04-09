@@ -42,11 +42,21 @@ const FokusarkContent: React.FC = () => {
             <TableHeader className="bg-muted/50">
               {/* First Header Row - Group Headers */}
               <TableRow>
-                {/* Group 1: Columns 1-3 */}
+                {/* Group 1: Columns 1-3 - First 2 columns are sticky */}
                 <TableHead 
                   key="group-header-0" 
+                  className="font-medium whitespace-nowrap text-center border-r sticky left-0 z-30"
+                  colSpan={2}
+                  style={{ backgroundColor: 'hsl(var(--muted)/50)' }}
+                >
+                  Group 1 (Sticky)
+                </TableHead>
+                
+                {/* Column 3 - Non-sticky part of Group 1 */}
+                <TableHead 
+                  key="group-header-0-rest" 
                   className="font-medium whitespace-nowrap text-center border-r"
-                  colSpan={3}
+                  colSpan={1}
                 >
                   Group 1
                 </TableHead>
@@ -91,7 +101,14 @@ const FokusarkContent: React.FC = () => {
               {/* Second Header Row - Column Headers */}
               <TableRow>
                 {Array.from({ length: 25 }, (_, i) => (
-                  <TableHead key={`header-${i}`} className="font-medium whitespace-nowrap">
+                  <TableHead 
+                    key={`header-${i}`} 
+                    className={`font-medium whitespace-nowrap ${i < 2 ? 'sticky left-0 z-30' : ''}`}
+                    style={i < 2 ? { 
+                      backgroundColor: 'hsl(var(--muted)/50)',
+                      left: i === 0 ? 0 : '150px', // Assuming first column is 150px wide
+                    } : {}}
+                  >
                     Column {i+1}
                   </TableHead>
                 ))}
@@ -101,7 +118,15 @@ const FokusarkContent: React.FC = () => {
               {tableData.map((row, rowIndex) => (
                 <TableRow key={`row-${rowIndex}`} className={rowIndex % 2 === 0 ? "bg-background" : "bg-muted/20"}>
                   {row.map((cell, cellIndex) => (
-                    <TableCell key={`cell-${rowIndex}-${cellIndex}`} className="p-2 whitespace-nowrap">
+                    <TableCell 
+                      key={`cell-${rowIndex}-${cellIndex}`} 
+                      className={`p-2 whitespace-nowrap ${cellIndex < 2 ? 'sticky left-0 z-20' : ''}`}
+                      style={cellIndex < 2 ? { 
+                        backgroundColor: rowIndex % 2 === 0 ? 'hsl(var(--background))' : 'hsl(var(--muted)/20)',
+                        left: cellIndex === 0 ? 0 : '150px', // Assuming first column is 150px wide
+                        boxShadow: cellIndex === 1 ? '4px 0 4px -2px rgba(0,0,0,0.15)' : 'none' 
+                      } : {}}
+                    >
                       {cell}
                     </TableCell>
                   ))}
