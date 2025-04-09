@@ -27,13 +27,30 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
       <style>{tableContainerStyles}</style>
       <div className="rounded-md w-full relative">
         <FokusarkTableScroll>
-          <table>
-            <FokusarkTableHeader columnCount={columnCount} />
-            <FokusarkTableBody 
-              data={tableData} 
-              onCellChange={handleCellChange}
-            />
-          </table>
+          <div className="fokusark-table-wrapper">
+            {/* Frozen columns table (first two columns) */}
+            <div className="frozen-columns">
+              <table className="frozen-table">
+                <FokusarkTableHeader columnCount={2} isFrozen={true} />
+                <FokusarkTableBody 
+                  data={tableData} 
+                  onCellChange={handleCellChange}
+                  columnCount={2}
+                  isFrozen={true}
+                />
+              </table>
+            </div>
+            
+            {/* Main scrollable table */}
+            <table className="fokusark-table">
+              <FokusarkTableHeader columnCount={columnCount} />
+              <FokusarkTableBody 
+                data={tableData} 
+                onCellChange={handleCellChange}
+                columnCount={columnCount}
+              />
+            </table>
+          </div>
         </FokusarkTableScroll>
       </div>
     </>

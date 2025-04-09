@@ -1,157 +1,171 @@
 
 // CSS styles for table container - focused on fixing the sticky header and columns
 export const tableContainerStyles = `
-  /* Main table container */
-  .fokusark-table-container {
+  /* CSS Variables for table layout */
+  :root {
+    --frozen-col-0-width: 100px;
+    --frozen-col-1-width: 250px;
+    --table-scroll-position: 0px;
+  }
+  
+  /* Main container */
+  .fokusark-table-scroll-container {
     position: relative;
     width: 100%;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: auto;
     max-height: calc(100vh - 220px);
     border: 1px solid hsl(var(--border));
     border-radius: 0.5rem;
+    -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+  }
+  
+  /* Table container with frozen columns */
+  .fokusark-table-wrapper {
+    position: relative;
+    width: 100%;
+  }
+  
+  /* Main table styling */
+  .fokusark-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+  }
+  
+  /* Frozen columns container */
+  .frozen-columns {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(var(--frozen-col-0-width) + var(--frozen-col-1-width));
+    z-index: 20;
+    background: hsl(var(--background));
+    overflow: hidden;
+    border-right: 2px solid hsl(var(--border));
+    box-shadow: 2px 0 5px rgba(0,0,0,0.15);
+    height: 100%;
+    pointer-events: none; /* Let events pass through */
+  }
+  
+  /* Frozen table styling */
+  .frozen-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+    width: 100%;
+    pointer-events: auto; /* Re-enable pointer events */
+  }
+  
+  /* Column widths */
+  .col-0 {
+    width: var(--frozen-col-0-width);
+    min-width: var(--frozen-col-0-width);
+    max-width: var(--frozen-col-0-width);
+  }
+  
+  .col-1 {
+    width: var(--frozen-col-1-width);
+    min-width: var(--frozen-col-1-width);
+    max-width: var(--frozen-col-1-width);
+  }
+  
+  .col-scrollable {
+    min-width: 120px;
+  }
+  
+  /* Headers styling */
+  .fokusark-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: hsl(var(--background));
+  }
+  
+  /* Frozen table headers need higher z-index */
+  .frozen-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background-color: hsl(var(--background));
+  }
+  
+  /* Two-row header styling */
+  .group-header {
+    height: 41px; /* Fixed height for group header */
+  }
+  
+  .column-header {
+    height: 41px; /* Fixed height for column header */
+  }
+  
+  /* Cell styling */
+  .fokusark-table th,
+  .fokusark-table td,
+  .frozen-table th,
+  .frozen-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid hsl(var(--border));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Row hover effect */
+  .fokusark-table tbody tr:hover,
+  .frozen-table tbody tr:hover {
+    background-color: hsl(var(--muted)/50);
+  }
+  
+  /* Make sure rows in both tables have same height */
+  .frozen-table tr,
+  .fokusark-table tr {
+    height: 48px; /* Set a fixed height for all rows */
+  }
+  
+  /* Sub-appointment styling */
+  [data-sub-appointment="true"] {
+    background-color: hsl(var(--muted)/20);
+  }
+  
+  [data-sub-appointment="true"] td:first-child {
+    padding-left: 20px;
   }
   
   /* Custom scrollbar styling */
-  .fokusark-table-container::-webkit-scrollbar {
+  .fokusark-table-scroll-container::-webkit-scrollbar {
     height: 8px;
     width: 8px;
   }
   
-  .fokusark-table-container::-webkit-scrollbar-thumb {
+  .fokusark-table-scroll-container::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.2);
     border-radius: 4px;
   }
   
-  .fokusark-table-container::-webkit-scrollbar-track {
+  .fokusark-table-scroll-container::-webkit-scrollbar-track {
     background-color: rgba(0, 0, 0, 0.05);
   }
   
-  /* Table styling */
-  .fokusark-table-container table {
-    border-collapse: separate;
-    border-spacing: 0;
-    width: max-content;
-    min-width: 100%;
-    table-layout: fixed;
-  }
-  
-  /* Headers styling */
-  .fokusark-table-container thead {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  
-  .fokusark-table-container thead tr:first-child th {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background-color: hsl(var(--background));
-  }
-  
-  .fokusark-table-container thead tr:nth-child(2) th {
-    position: sticky;
-    top: 41px; /* Height of the first row */
-    z-index: 20;
-    background-color: hsl(var(--background));
-  }
-
-  /* First column - fixed */
-  .fixed-col-0 {
-    position: sticky !important;
-    left: 0;
-    z-index: 15;
-    background-color: hsl(var(--background));
-    width: 100px;
-    min-width: 100px;
-    max-width: 100px;
-  }
-  
-  /* Second column - fixed */
-  .fixed-col-1 {
-    position: sticky !important;
-    left: 100px; /* Width of first column */
-    z-index: 15;
-    background-color: hsl(var(--background));
-    width: 200px;
-    min-width: 200px;
-    max-width: 200px;
-  }
-  
-  /* Fixed column styling for header intersection */
-  thead tr:first-child th.fixed-col-0,
-  thead tr:first-child th.fixed-col-1 {
-    z-index: 30;
-  }
-  
-  thead tr:nth-child(2) th.fixed-col-0,
-  thead tr:nth-child(2) th.fixed-col-1 {
-    z-index: 30;
-  }
-  
-  /* Shadow effect for scrolling state */
-  .is-scrolling .fixed-col-1::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: -5px;
-    bottom: 0;
-    width: 5px;
-    pointer-events: none;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.15);
-  }
-  
-  /* Other columns */
-  .table-col {
-    min-width: 120px;
-  }
-  
-  /* Cell styling */
-  .fokusark-table-container th,
-  .fokusark-table-container td {
-    padding: 12px;
-    text-align: left;
-    border-right: 1px solid transparent;
-    border-bottom: 1px solid hsl(var(--border));
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  
-  /* Row hover effect */
-  .fokusark-table-container tbody tr:hover {
-    background-color: hsl(var(--muted)/50);
-  }
-  
-  /* Sub-appointment styling */
-  .fokusark-table-container tbody tr[data-sub-appointment="true"] {
-    background-color: hsl(var(--muted)/20);
-  }
-  
-  .fokusark-table-container tbody tr[data-sub-appointment="true"] td.fixed-col-0 {
-    padding-left: 20px;
-  }
-  
-  /* Add visual borders to clearly delineate fixed regions */
-  .fixed-col-1 {
-    border-right: 1px solid hsl(var(--border));
-  }
-  
   /* Dark mode support */
-  .dark .fokusark-table-container thead tr th,
-  .dark .fokusark-table-container .fixed-col-0,
-  .dark .fokusark-table-container .fixed-col-1 {
+  .dark .frozen-columns {
+    background: hsl(var(--background));
+    border-right: 2px solid hsl(var(--border));
+    box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+  }
+  
+  .dark .fokusark-table thead th,
+  .dark .frozen-table thead th {
     background-color: hsl(var(--background));
   }
   
-  /* Firefox-specific fixes */
-  @-moz-document url-prefix() {
-    .fokusark-table-container thead tr:first-child th {
-      top: 0;
-    }
-    
-    .fokusark-table-container thead tr:nth-child(2) th {
-      top: 41px;
-    }
+  .dark .fokusark-table-scroll-container::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .dark .fokusark-table-scroll-container::-webkit-scrollbar-track {
+    background-color: rgba(255, 255, 255, 0.05);
   }
 `;

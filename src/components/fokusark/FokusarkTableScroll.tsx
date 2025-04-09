@@ -10,28 +10,14 @@ const FokusarkTableScroll: React.FC<FokusarkTableScrollProps> = ({ children }) =
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
-    
     if (!scrollContainer) return;
     
-    const handleWheel = (e: WheelEvent) => {
-      if (scrollContainer.contains(e.target as Node)) {
-        // Let horizontal scrolling work naturally
-        if (e.deltaX !== 0) {
-          return;
-        }
-        
-        // Convert shift+wheel to horizontal scroll
-        if (e.shiftKey && e.deltaY !== 0) {
-          e.preventDefault();
-          scrollContainer.scrollLeft += e.deltaY;
-        }
-      }
-    };
-    
     const handleScroll = () => {
+      // Update the scroll position of the fixed columns header
       const scrollLeft = scrollContainer.scrollLeft;
+      document.documentElement.style.setProperty('--table-scroll-position', `${scrollLeft}px`);
       
-      // Update class based on scroll position
+      // Add/remove scrolling class for shadow effects
       if (scrollLeft > 0) {
         scrollContainer.classList.add('is-scrolling');
       } else {
@@ -39,14 +25,13 @@ const FokusarkTableScroll: React.FC<FokusarkTableScrollProps> = ({ children }) =
       }
     };
     
-    scrollContainer.addEventListener('wheel', handleWheel, { passive: false });
+    // Listen for scroll events
     scrollContainer.addEventListener('scroll', handleScroll);
     
     // Initial check
     handleScroll();
     
     return () => {
-      scrollContainer.removeEventListener('wheel', handleWheel);
       scrollContainer.removeEventListener('scroll', handleScroll);
     };
   }, []);
@@ -54,7 +39,7 @@ const FokusarkTableScroll: React.FC<FokusarkTableScrollProps> = ({ children }) =
   return (
     <div 
       ref={scrollContainerRef}
-      className="fokusark-table-container"
+      className="fokusark-table-scroll-container"
     >
       {children}
     </div>

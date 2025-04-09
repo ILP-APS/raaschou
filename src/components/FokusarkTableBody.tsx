@@ -1,13 +1,19 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 
 interface FokusarkTableBodyProps {
   data: string[][];
   onCellChange?: (rowIndex: number, colIndex: number, value: string) => void;
+  columnCount?: number;
+  isFrozen?: boolean;
 }
 
-const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChange }) => {
+const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ 
+  data, 
+  onCellChange,
+  columnCount = 26, // Default value
+  isFrozen = false 
+}) => {
   // Function to ensure all rows have the same number of columns
   const normalizeRow = (row: string[], expectedLength: number): string[] => {
     const displayRow = row.slice(0, row.length - 1); // Remove the row type indicator
