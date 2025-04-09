@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction } from 'react';
 import { useUIUpdates } from "./useUIUpdates";
 import { useCellValueUpdates } from "./useCellValueUpdates";
 import { useRecalculationHandler } from "./useRecalculationHandler";
+import { formatPercentageInput } from "@/utils/fokusarkCalculations";
 
 interface UseCellChangeProps {
   tableData: string[][],
