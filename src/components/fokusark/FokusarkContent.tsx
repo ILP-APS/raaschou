@@ -1,26 +1,23 @@
 
 import React from "react";
-import TableActions from "./TableActions";
 import FokusarkDescription from "./FokusarkDescription";
-import FokusarkTable from "../FokusarkTable";
-import { useFokusarkData } from "@/hooks/useFokusarkData";
 
 const FokusarkContent: React.FC = () => {
-  const { tableData, isLoading } = useFokusarkData();
-
   return (
     <div className="flex flex-col gap-4 p-4 md:p-6 overflow-y-auto content-wrapper">
       <div className="flex flex-col gap-4 content-wrapper">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-semibold tracking-tight">Fokusark Table</h2>
-          <TableActions tableData={tableData} />
-        </div>
+        <h2 className="text-2xl font-semibold tracking-tight">Fokusark</h2>
         <FokusarkDescription />
       </div>
       
-      <FokusarkTable 
-        data={tableData} 
-      />
+      <div className="p-6 rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <h3 className="text-lg font-medium mb-2">Table has been removed</h3>
+          <p className="text-muted-foreground max-w-md">
+            The Fokusark table has been removed as requested. This space is now available for new content.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
