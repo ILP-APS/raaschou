@@ -27,78 +27,75 @@ export const tableContainerStyles = `
   }
   
   /* Table styling */
-  table {
-    border-collapse: collapse;
+  .fokusark-table-container table {
+    border-collapse: separate;
+    border-spacing: 0;
     width: max-content;
     min-width: 100%;
-    table-layout: fixed;
   }
   
-  /* Make headers sticky at the top */
-  table thead {
+  /* Headers styling */
+  .fokusark-table-container thead {
     position: sticky;
     top: 0;
     z-index: 10;
   }
   
-  /* First header row - make sticky at top: 0 */
-  table thead tr:first-child th {
+  .fokusark-table-container thead tr:first-child th {
     position: sticky;
     top: 0;
-    z-index: 12;
+    z-index: 20;
     background-color: white;
-    border-bottom: 1px solid hsl(var(--border));
   }
   
-  /* Second header row - make sticky right below first row */
-  table thead tr:nth-child(2) th {
+  .fokusark-table-container thead tr:nth-child(2) th {
     position: sticky;
     top: 41px; /* Height of the first row */
-    z-index: 12;
+    z-index: 20;
     background-color: white;
-    border-bottom: 1px solid hsl(var(--border));
   }
 
-  /* Column width and positioning */
-  /* First column - Nr. */
+  /* First column - fixed */
   .fokusark-col-0 {
-    position: sticky;
+    position: sticky !important;
     left: 0;
-    min-width: 100px;
+    z-index: 15;
+    background-color: white;
     width: 100px;
-    z-index: 11;
-    background-color: white;
-    box-shadow: 1px 0 1px rgba(0,0,0,0.07);
+    min-width: 100px;
   }
   
-  /* Second column - Navn */
+  /* Second column - fixed */
   .fokusark-col-1 {
-    position: sticky;
-    left: 100px;
-    min-width: 200px;
-    width: 200px;
-    z-index: 11;
+    position: sticky !important;
+    left: 100px; /* Width of first column */
+    z-index: 15;
     background-color: white;
+    width: 200px;
+    min-width: 200px;
   }
   
-  /* Add box shadow to second column when scrolling */
+  /* Fixed column styling for header intersection */
+  thead tr:first-child th.fokusark-col-0,
+  thead tr:first-child th.fokusark-col-1 {
+    z-index: 30;
+  }
+  
+  thead tr:nth-child(2) th.fokusark-col-0,
+  thead tr:nth-child(2) th.fokusark-col-1 {
+    z-index: 30;
+  }
+  
+  /* Shadow effect for scrolling state */
   .is-scrolling .fokusark-col-1::after {
     content: '';
     position: absolute;
     top: 0;
-    right: 0;
+    right: -5px;
     bottom: 0;
-    width: 4px;
+    width: 5px;
     pointer-events: none;
-    background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
-  }
-  
-  /* Z-index boost for sticky intersections (corners) */
-  thead tr:first-child .fokusark-col-0,
-  thead tr:first-child .fokusark-col-1,
-  thead tr:nth-child(2) .fokusark-col-0,
-  thead tr:nth-child(2) .fokusark-col-1 {
-    z-index: 13;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.15);
   }
   
   /* Other columns */
@@ -107,37 +104,29 @@ export const tableContainerStyles = `
   }
   
   /* Cell styling */
-  table th,
-  table td {
+  .fokusark-table-container th,
+  .fokusark-table-container td {
     padding: 12px;
     text-align: left;
-    border-right: none;
+    border-right: 1px solid transparent;
     border-bottom: 1px solid hsl(var(--border));
-    background-clip: padding-box;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
   
   /* Row hover effect */
-  table tbody tr:hover {
+  .fokusark-table-container tbody tr:hover {
     background-color: hsl(var(--muted)/50);
   }
   
   /* Sub-appointment styling */
-  table tbody tr[data-sub-appointment="true"] {
+  .fokusark-table-container tbody tr[data-sub-appointment="true"] {
     background-color: hsl(var(--muted)/20);
   }
   
-  table tbody tr[data-sub-appointment="true"] td.fokusark-col-0 {
+  .fokusark-table-container tbody tr[data-sub-appointment="true"] td.fokusark-col-0 {
     padding-left: 20px;
-  }
-  
-  /* Dark mode support */
-  .dark table thead tr th,
-  .dark .fokusark-col-0,
-  .dark .fokusark-col-1 {
-    background-color: hsl(var(--background));
   }
   
   /* Add visual borders to clearly delineate fixed regions */
@@ -145,25 +134,21 @@ export const tableContainerStyles = `
     border-right: 1px solid hsl(var(--border));
   }
   
-  table thead tr:nth-child(2) th {
-    border-bottom: 2px solid hsl(var(--border));
+  /* Dark mode support */
+  .dark .fokusark-table-container thead tr th,
+  .dark .fokusark-table-container .fokusark-col-0,
+  .dark .fokusark-table-container .fokusark-col-1 {
+    background-color: hsl(var(--background));
   }
   
   /* Firefox-specific fixes */
   @-moz-document url-prefix() {
-    table thead tr:first-child th {
+    .fokusark-table-container thead tr:first-child th {
       top: 0;
     }
     
-    table thead tr:nth-child(2) th {
+    .fokusark-table-container thead tr:nth-child(2) th {
       top: 41px;
-    }
-    
-    thead tr:first-child .fokusark-col-0,
-    thead tr:first-child .fokusark-col-1,
-    thead tr:nth-child(2) .fokusark-col-0,
-    thead tr:nth-child(2) .fokusark-col-1 {
-      z-index: 13;
     }
   }
 `;

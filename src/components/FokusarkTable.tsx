@@ -15,7 +15,7 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   const { tableData, isLoading, handleCellChange } = useFokusarkTable(data);
   
   // Determine the number of columns based on the first row of data
-  const columnCount = tableData.length > 0 ? tableData[0].length : 0;
+  const columnCount = tableData.length > 0 ? tableData[0].length - 1 : 0; // Subtract 1 for the row type indicator
 
   // Show loading state while fetching data
   if (isLoading) {
@@ -25,7 +25,7 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   return (
     <>
       <style>{tableContainerStyles}</style>
-      <div className="rounded-md w-full relative z-0">
+      <div className="rounded-md w-full relative">
         <FokusarkTableScroll>
           <table>
             <FokusarkTableHeader columnCount={columnCount} />

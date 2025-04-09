@@ -28,31 +28,27 @@ const FokusarkTableScroll: React.FC<FokusarkTableScrollProps> = ({ children }) =
       }
     };
     
-    // For touch devices, sync the positions of sticky elements
     const handleScroll = () => {
       const scrollLeft = scrollContainer.scrollLeft;
       
-      // Force repaint sticky elements by setting a small transform
-      const headers = scrollContainer.querySelectorAll('thead th');
-      const stickyColumns = scrollContainer.querySelectorAll('.fokusark-col-0, .fokusark-col-1');
-      
-      // Apply a minimal transform to force a repaint, which helps with rendering issues
-      [...headers, ...stickyColumns].forEach((el) => {
-        (el as HTMLElement).style.transform = 'translateZ(0)';
-      });
-      
-      // Add or remove class when scrolling horizontally
+      // Update class based on scroll position
       if (scrollLeft > 0) {
         scrollContainer.classList.add('is-scrolling');
       } else {
         scrollContainer.classList.remove('is-scrolling');
       }
+
+      // Apply scroll position to fixed header cells
+      const fixedCols = scrollContainer.querySelectorAll('.fixed-column');
+      fixedCols.forEach((col) => {
+        (col as HTMLElement).style.left = `${scrollLeft}px`;
+      });
     };
     
     scrollContainer.addEventListener('wheel', handleWheel, { passive: false });
     scrollContainer.addEventListener('scroll', handleScroll);
     
-    // Initial scroll position check
+    // Initial check
     handleScroll();
     
     return () => {
@@ -64,7 +60,7 @@ const FokusarkTableScroll: React.FC<FokusarkTableScrollProps> = ({ children }) =
   return (
     <div 
       ref={scrollContainerRef}
-      className="fokusark-table-container relative z-0"
+      className="fokusark-table-container"
     >
       {children}
     </div>
