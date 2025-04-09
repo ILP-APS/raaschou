@@ -1,6 +1,6 @@
-
 import { calculateMaterialer } from './materialsCalculations';
 import { calculateProjektering } from './projekteringCalculations';
+import { calculateProduktion } from './productionCalculations';
 import { parseNumber, formatDanishNumber } from './numberFormatUtils';
 
 /**
@@ -54,6 +54,53 @@ export const applyProjekteringCalculations = (data: string[][]): string[][] => {
 };
 
 /**
+ * Apply Produktion calculation to all rows in a dataset
+ */
+export const applyProduktionCalculations = (data: string[][]): string[][] => {
+  console.log("Running batch produktion calculations on data rows:", data.length);
+  return data.map(row => {
+    const rowCopy = [...row];
+    // Produktion is at index 10
+    const produktionValue = calculateProduktion(row);
+    rowCopy[10] = produktionValue;
+    
+    // Log detailed calculation for specific appointment number
+    if (row[0] === '24371') {
+      console.log(`DETAILED BATCH CALCULATION for appointment 24371 produktion:`);
+      
+      const tilbud = parseNumber(row[3]);
+      const montage = parseNumber(row[4]);
+      const underleverandor = parseNumber(row[5]);
+      const montage2Str = row[6];
+      const underleverandor2Str = row[7];
+      const materialer = parseNumber(row[8]);
+      const projektering = parseNumber(row[9]);
+      
+      const hasMontage2Value = hasRealValue(montage2Str);
+      const hasUnderleverandor2Value = hasRealValue(underleverandor2Str);
+      
+      const montage2 = hasMontage2Value ? parseNumber(montage2Str) : 0;
+      const underleverandor2 = hasUnderleverandor2Value ? parseNumber(underleverandor2Str) : 0;
+      
+      const montageValue = hasMontage2Value ? montage2 : montage;
+      const underleverandorValue = hasUnderleverandor2Value ? underleverandor2 : underleverandor;
+      
+      console.log(`Parsed values: Tilbud=${tilbud}, Montage=${montageValue}, Underleverandor=${underleverandorValue}, Materialer=${materialer}, Projektering=${projektering}`);
+      
+      const step1 = tilbud - montageValue - underleverandorValue - materialer;
+      const step2 = step1 / 750;
+      const produktion = step2 - projektering;
+      
+      console.log(`Calculation steps: (${tilbud} - ${montageValue} - ${underleverandorValue} - ${materialer}) / 750 - ${projektering} = ${produktion}`);
+      console.log(`Formatted result: ${formatDanishNumber(produktion)}`);
+    }
+    
+    console.log(`Calculated produktion for appointment ${row[0]}: ${produktionValue}`);
+    return rowCopy;
+  });
+};
+
+/**
  * Recalculate all calculated fields for a dataset
  */
 export const recalculateAllFields = (data: string[][]): string[][] => {
@@ -61,6 +108,11 @@ export const recalculateAllFields = (data: string[][]): string[][] => {
   let result = [...data];
   result = applyMaterialerCalculations(result);
   result = applyProjekteringCalculations(result);
+  result = applyProduktionCalculations(result);
   console.log("Recalculation complete");
   return result;
 };
+
+function hasRealValue(value: string): boolean {
+  return !/^R\d+C\d+$/.test(value) && value.trim() !== '';
+}

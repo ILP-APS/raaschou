@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Calculator } from "lucide-react";
 import { loadFokusarkAppointments, updateAppointmentField } from "@/services/fokusarkAppointmentService";
-import { calculateProjektering, parseNumber } from "@/utils/fokusarkCalculations";
+import { calculateProjektering, calculateProduktion, parseNumber } from "@/utils/fokusarkCalculations";
 
 interface FokusarkContentProps {
   tableData: string[][];
@@ -97,13 +97,35 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
             current: appointment.projektering_1
           });
           
-          // Force update by removing the comparison - we want to update all values
-          // This ensures any stale values in the database are refreshed
+          // Force update projektering
           await updateAppointmentField(
             appointmentNumber,
             'projektering_1',
             projekteringNumeric
           );
+          
+          // After updating projektering, recalculate produktion which depends on it
+          // Get the updated row data with new projektering value
+          const updatedRowData = [...rowData];
+          updatedRowData[9] = projekteringValue;
+          
+          // Calculate produktion value
+          const produktionValue = calculateProduktion(updatedRowData);
+          const produktionNumeric = parseNumber(produktionValue);
+          
+          console.log(`Recalculating produktion for ${appointmentNumber}:`, {
+            calculated: produktionValue,
+            numeric: produktionNumeric,
+            current: appointment.produktion
+          });
+          
+          // Force update produktion
+          await updateAppointmentField(
+            appointmentNumber,
+            'produktion',
+            produktionNumeric
+          );
+          
           updatedCount++;
         }
       }
@@ -144,7 +166,7 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
           Only showing appointments that are not done and have a Tilbud value greater than 40,000 DKK.
           <br />
           <span className="text-primary font-medium">
-            Materialer and Projektering calculations are automatically handled by the system.
+            Materialer, Projektering, and Produktion calculations are automatically handled by the system.
           </span>
         </p>
       </div>

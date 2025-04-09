@@ -1,7 +1,7 @@
 
 import { useToast } from "@/hooks/use-toast";
 import { updateAppointmentField, loadFokusarkAppointments, transformAppointmentsToDisplayData } from "@/services/fokusarkAppointmentService";
-import { parseNumber, formatDanishNumber, calculateProjektering } from "@/utils/fokusarkCalculations";
+import { parseNumber, formatDanishNumber, calculateProjektering, calculateProduktion } from "@/utils/fokusarkCalculations";
 import { FokusarkAppointment } from "@/api/fokusarkAppointmentsApi";
 
 /**
@@ -149,6 +149,71 @@ export const useCellUpdates = (
         );
         
         console.log(`Updated projektering_1 in database to ${projekteringNumericValue}`);
+        
+        // After updating projektering, also update produktion which depends on it
+        // Get the updated row with the new projektering value
+        const updatedRowWithProjektering = [...tableData[rowIndex]];
+        updatedRowWithProjektering[colIndex] = value;
+        updatedRowWithProjektering[9] = projekteringValue;
+        
+        // Calculate produktion
+        const produktionValue = calculateProduktion(updatedRowWithProjektering);
+        const produktionNumericValue = parseNumber(produktionValue);
+        
+        console.log(`Calculated new produktion value: ${produktionValue} (${produktionNumericValue}) for appointment ${appointmentNumber}`);
+        
+        // Update the UI with the new calculated produktion value
+        setTableData(prevData => {
+          const newData = [...prevData];
+          const rowCopy = [...newData[rowIndex]];
+          // Update the produktion column (index 10)
+          rowCopy[10] = produktionValue;
+          newData[rowIndex] = rowCopy;
+          return newData;
+        });
+        
+        // Also update Supabase with the calculated produktion value
+        await updateAppointmentField(
+          appointmentNumber, 
+          'produktion', 
+          produktionNumericValue
+        );
+        
+        console.log(`Updated produktion in database to ${produktionNumericValue}`);
+      }
+      
+      // Similarly, calculate Produktion if Materialer or Projektering changed
+      if (colIndex === 8 || colIndex === 9) {
+        console.log("Materialer or Projektering value changed, recalculating Produktion");
+        
+        // Get the current row data with the updated value
+        const updatedRow = [...tableData[rowIndex]];
+        updatedRow[colIndex] = value; // Make sure we're using the latest value
+        
+        // Calculate new produktion value
+        const produktionValue = calculateProduktion(updatedRow);
+        const produktionNumericValue = parseNumber(produktionValue);
+        
+        console.log(`Calculated new produktion value: ${produktionValue} (${produktionNumericValue}) for appointment ${appointmentNumber}`);
+        
+        // Update the UI with the new calculated value
+        setTableData(prevData => {
+          const newData = [...prevData];
+          const rowCopy = [...newData[rowIndex]];
+          // Update the produktion column (index 10)
+          rowCopy[10] = produktionValue;
+          newData[rowIndex] = rowCopy;
+          return newData;
+        });
+        
+        // Also update Supabase with the calculated value
+        await updateAppointmentField(
+          appointmentNumber, 
+          'produktion', 
+          produktionNumericValue
+        );
+        
+        console.log(`Updated produktion in database to ${produktionNumericValue}`);
       }
       
       // Show a toast notification

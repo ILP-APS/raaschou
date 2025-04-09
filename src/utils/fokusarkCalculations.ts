@@ -21,6 +21,11 @@ export {
   calculateProjektering
 } from './projekteringCalculations';
 
+// Re-export produktion calculations
+export {
+  calculateProduktion
+} from './productionCalculations';
+
 // Re-export batch calculations
 export {
   applyMaterialerCalculations,
