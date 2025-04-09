@@ -86,7 +86,7 @@ export const useUIUpdates = (
     });
   };
   
-  // Update projektering rest cell in the UI
+  // Update projektering rest cell in the UI (alias for timer tilbage)
   const updateProjekteringRestUI = (rowIndex: number, value: string) => {
     setTableData(prevData => {
       const newData = [...prevData];

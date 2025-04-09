@@ -33,19 +33,19 @@ export const useFieldMapping = () => {
       case 15:
         return 'total'; // Using the existing total field for realized total
       case 16:
-        return 'timer_tilbage_1'; // Changed from projektering_rest to timer_tilbage_1
+        return 'timer_tilbage_1'; // Renamed display name but kept field name
       case 17:
-        return 'faerdig_pct_ex_montage_nu'; // Shifted one index down
+        return 'faerdig_pct_ex_montage_nu'; 
       case 18:
-        return 'faerdig_pct_ex_montage_foer'; // Shifted one index down
+        return 'faerdig_pct_ex_montage_foer';
       case 19:
-        return 'est_timer_ift_faerdig_pct'; // Shifted one index down
+        return 'est_timer_ift_faerdig_pct';
       case 20:
-        return 'plus_minus_timer'; // Shifted one index down
+        return 'plus_minus_timer';
       case 21:
-        return 'timer_tilbage_2'; // Shifted one index down
+        return 'timer_tilbage_2';
       case 22:
-        return 'afsat_fragt'; // Shifted one index down
+        return 'afsat_fragt';
       default:
         return null;
     }
@@ -87,19 +87,19 @@ export const useFieldMapping = () => {
       case 15:
         return 'Real. Total';
       case 16:
-        return 'Timer tilbage'; // Changed from "Projektering" to "Timer tilbage"
+        return 'Projektering'; // Changed from "Timer tilbage" to "Projektering"
       case 17:
-        return 'Færdig % ex montage nu'; // Shifted one index down
+        return 'Færdig % ex montage nu';
       case 18:
-        return 'Færdig % ex montage før'; // Shifted one index down
+        return 'Færdig % ex montage før';
       case 19:
-        return 'Est timer ift færdig %'; // Shifted one index down
+        return 'Est timer ift færdig %';
       case 20:
-        return '+/- timer'; // Shifted one index down
+        return '+/- timer';
       case 21:
-        return 'Timer tilbage'; // Shifted one index down
+        return 'Timer tilbage';
       case 22:
-        return 'Afsat fragt'; // Shifted one index down
+        return 'Afsat fragt';
       default:
         return `Kolonne ${columnIndex + 1}`;
     }

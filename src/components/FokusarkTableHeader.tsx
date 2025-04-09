@@ -1,3 +1,4 @@
+
 import React from "react";
 
 interface FokusarkTableHeaderProps {
@@ -41,7 +42,7 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
       case 15:
         return "Total";
       case 16:
-        return "Timer tilbage";
+        return "Projektering"; // Changed from "Timer tilbage" to "Projektering"
       case 17:
         return "Færdig % ex montage nu";
       case 18:
@@ -86,7 +87,7 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
     } else if (index === 12) {
       return { name: "Realiseret", colSpan: 4 }; // 4 columns: Projektering, Produktion, Montage, Total
     } else if (index === 16) {
-      return { name: "Timer tilbage", colSpan: 1 }; // Changed from 2 to 1 column: just Timer tilbage
+      return { name: "Timer tilbage", colSpan: 1 }; // Just one column: now renamed to "Projektering"
     } else if (index === 17) {
       return { name: "Produktion", colSpan: 5 }; // Shifted by 1 and reduced by 1
     } else if (index === 22) {
