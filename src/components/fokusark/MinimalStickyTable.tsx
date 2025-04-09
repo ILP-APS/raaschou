@@ -94,6 +94,15 @@ const columns = [
   }
 ];
 
+// Define header groups
+const headerGroups = [
+  { title: 'Info', colSpan: 2 },          // Group 1: 2 cols (ID, Name)
+  { title: 'Budget Group A', colSpan: 5 }, // Group 2: 5 cols
+  { title: 'Budget Group B', colSpan: 4 }, // Group 3: 4 cols
+  { title: 'Special', colSpan: 1 },       // Group 4: 1 col
+  { title: 'Budget Group C', colSpan: 2 }  // Group 5: 2 cols
+];
+
 export default function MinimalStickyTable() {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
@@ -120,6 +129,9 @@ export default function MinimalStickyTable() {
     }
   };
 
+  // Header group row height
+  const headerGroupHeight = '40px';
+
   return (
     <div style={{
       position: 'relative',
@@ -138,6 +150,36 @@ export default function MinimalStickyTable() {
         borderCollapse: 'separate'
       }}>
         <TableHeader>
+          {/* Header group row */}
+          <TableRow>
+            {headerGroups.map((group, groupIndex) => {
+              // Calculate if this is a sticky group (only the first group with Info)
+              const isSticky = groupIndex === 0;
+              
+              return (
+                <TableHead
+                  key={`group-${groupIndex}`}
+                  colSpan={group.colSpan}
+                  style={{
+                    position: 'sticky',
+                    top: 0,
+                    left: isSticky ? 0 : 'auto',
+                    zIndex: isSticky ? 60 : 50,
+                    backgroundColor: getBgColor(),
+                    textAlign: 'center',
+                    fontWeight: 'bold',
+                    height: headerGroupHeight,
+                    boxShadow: isSticky ? '2px 2px 5px -2px rgba(0,0,0,0.15)' : '0 2px 0 0 rgba(0,0,0,0.1)',
+                    borderBottom: '1px solid hsl(var(--border))'
+                  }}
+                >
+                  {group.title}
+                </TableHead>
+              );
+            })}
+          </TableRow>
+          
+          {/* Regular header row */}
           <TableRow>
             {table.getFlatHeaders().map((header, index) => {
               const isSticky = !!(header.column.columnDef.meta as any)?.sticky;
@@ -149,14 +191,14 @@ export default function MinimalStickyTable() {
                   style={{
                     width: index === 0 ? '80px' : '150px',
                     minWidth: index === 0 ? '80px' : '150px',
-                    position: 'sticky', // Make all header cells sticky vertically
-                    top: 0, // Stick to the top
-                    left: isSticky ? getLeftPosition(stickyIndex) : undefined, // Keep horizontal stickiness
-                    zIndex: isSticky ? 50 : 40, // Higher z-index for headers, even higher for sticky columns
+                    position: 'sticky',
+                    top: headerGroupHeight, // Position below the group header
+                    left: isSticky ? getLeftPosition(stickyIndex) : undefined,
+                    zIndex: isSticky ? 45 : 40,
                     backgroundColor: getBgColor(),
                     boxShadow: isSticky 
-                      ? '2px 2px 5px -2px rgba(0,0,0,0.15)' // Shadow for corner cells
-                      : '0 2px 5px -2px rgba(0,0,0,0.15)' // Bottom shadow for regular header cells
+                      ? '2px 2px 5px -2px rgba(0,0,0,0.15)'
+                      : '0 2px 5px -2px rgba(0,0,0,0.15)'
                   }}
                 >
                   {flexRender(
