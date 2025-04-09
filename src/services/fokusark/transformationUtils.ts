@@ -115,7 +115,10 @@ export const transformAppointmentsToDisplayData = (appointments: FokusarkAppoint
     row[12] = appointment.projektering_2 !== null ? formatDanishNumber(appointment.projektering_2) : '';
     row[13] = appointment.produktion !== null ? formatDanishNumber(appointment.produktion) : '';
     row[14] = appointment.montage_3 !== null ? formatDanishNumber(appointment.montage_3) : '';
-    row[15] = appointment.total !== null ? formatDanishNumber(appointment.total) : '';
+    
+    // Add total based on the sum of estimeret values
+    const total = (appointment.projektering_1 || 0) + (appointment.produktion || 0) + (appointment.montage_3 || 0);
+    row[15] = formatDanishNumber(total);
     
     // Add remaining columns
     row[16] = appointment.timer_tilbage_1 !== null ? formatDanishNumber(appointment.timer_tilbage_1) : '';
