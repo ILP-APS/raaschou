@@ -1,21 +1,13 @@
-
 import React, { useRef, useEffect, useState } from "react";
 import FokusarkTableHeader from "./FokusarkTableHeader";
 import FokusarkTableBody from "./FokusarkTableBody";
 import { tableContainerStyles } from "./FokusarkTableStyles";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { FokusarkCellData } from "@/api/fokusarkApi";
 
 interface FokusarkTableProps {
   data: string[][];
-}
-
-interface SavedCellData {
-  id?: number;
-  row_index: number;
-  col_index: number;
-  value: string;
-  created_at?: string;
 }
 
 const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
@@ -40,7 +32,10 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
         // Fetch saved values from Supabase
         const { data: savedCells, error } = await supabase
           .from('fokusark_cells')
-          .select('*');
+          .select('*') as unknown as {
+            data: FokusarkCellData[] | null;
+            error: Error | null;
+          };
         
         if (error) {
           throw error;
@@ -48,7 +43,7 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
         
         if (savedCells && savedCells.length > 0) {
           // Apply saved values to the data
-          savedCells.forEach((cell: SavedCellData) => {
+          savedCells.forEach((cell: FokusarkCellData) => {
             const { row_index, col_index, value } = cell;
             if (row_index < initialData.length) {
               // Create a copy of the row if it exists
@@ -100,7 +95,10 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
         .from('fokusark_cells')
         .select('*')
         .eq('row_index', rowIndex)
-        .eq('col_index', colIndex);
+        .eq('col_index', colIndex) as unknown as {
+          data: FokusarkCellData[] | null;
+          error: Error | null;
+        };
       
       if (fetchError) throw fetchError;
       
@@ -112,12 +110,16 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
           .from('fokusark_cells')
           .update({ value })
           .eq('row_index', rowIndex)
-          .eq('col_index', colIndex);
+          .eq('col_index', colIndex) as unknown as {
+            error: Error | null;
+          };
       } else {
         // Insert new record
         result = await supabase
           .from('fokusark_cells')
-          .insert([{ row_index: rowIndex, col_index: colIndex, value }]);
+          .insert([{ row_index: rowIndex, col_index: colIndex, value }]) as unknown as {
+            error: Error | null;
+          };
       }
       
       if (result.error) throw result.error;

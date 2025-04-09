@@ -9,7 +9,63 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      fokusark_cells: {
+        Row: {
+          col_index: number
+          created_at: string
+          id: number
+          row_index: number
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          col_index: number
+          created_at?: string
+          id?: number
+          row_index: number
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          col_index?: number
+          created_at?: string
+          id?: number
+          row_index?: number
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          created_at: string
+          id: string
+          status: string
+          task_id: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          status: string
+          task_id: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          status?: string
+          task_id?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

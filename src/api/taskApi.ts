@@ -6,7 +6,10 @@ export async function fetchTasks() {
   const { data, error } = await supabase
     .from('tasks')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false }) as unknown as {
+      data: Task[] | null;
+      error: Error | null;
+    };
     
   if (error) {
     console.error('Error fetching tasks:', error);
@@ -21,10 +24,13 @@ export async function createTask(newTask: Omit<Task, 'id'>) {
     .from('tasks')
     .insert([newTask])
     .select()
-    .single();
+    .single() as unknown as {
+      data: Task | null;
+      error: Error | null;
+    };
     
   if (error) throw error;
-  return data;
+  return data as Task;
 }
 
 export async function updateTask(id: string, task: Partial<Task>) {
@@ -33,17 +39,22 @@ export async function updateTask(id: string, task: Partial<Task>) {
     .update(task)
     .eq('id', id)
     .select()
-    .single();
+    .single() as unknown as {
+      data: Task | null;
+      error: Error | null;
+    };
     
   if (error) throw error;
-  return data;
+  return data as Task;
 }
 
 export async function deleteTask(id: string) {
   const { error } = await supabase
     .from('tasks')
     .delete()
-    .eq('id', id);
+    .eq('id', id) as unknown as {
+      error: Error | null;
+    };
     
   if (error) throw error;
 }

@@ -14,9 +14,13 @@ export interface FokusarkCellData {
  * Fetches all saved cell data from Supabase
  */
 export async function fetchSavedCells() {
+  // Use type assertion to work around type issues
   const { data, error } = await supabase
     .from('fokusark_cells')
-    .select('*');
+    .select('*') as unknown as { 
+      data: FokusarkCellData[] | null; 
+      error: Error | null;
+    };
     
   if (error) throw error;
   return data as FokusarkCellData[];
@@ -31,7 +35,10 @@ export async function saveCellValue(rowIndex: number, colIndex: number, value: s
     .from('fokusark_cells')
     .select('id')
     .eq('row_index', rowIndex)
-    .eq('col_index', colIndex);
+    .eq('col_index', colIndex) as unknown as {
+      data: { id: number }[] | null;
+      error: Error | null;
+    };
     
   if (fetchError) throw fetchError;
   
@@ -40,7 +47,9 @@ export async function saveCellValue(rowIndex: number, colIndex: number, value: s
     const { error } = await supabase
       .from('fokusark_cells')
       .update({ value })
-      .eq('id', existingData[0].id);
+      .eq('id', existingData[0].id) as unknown as {
+        error: Error | null;
+      };
       
     if (error) throw error;
     
@@ -51,11 +60,14 @@ export async function saveCellValue(rowIndex: number, colIndex: number, value: s
       .from('fokusark_cells')
       .insert([{ row_index: rowIndex, col_index: colIndex, value }])
       .select('id')
-      .single();
+      .single() as unknown as {
+        data: { id: number } | null;
+        error: Error | null;
+      };
       
     if (error) throw error;
     
-    return { id: data.id, updated: false };
+    return { id: data?.id, updated: false };
   }
 }
 
@@ -72,7 +84,10 @@ export async function batchImportCells(cells: Omit<FokusarkCellData, 'id' | 'cre
         value: cell.value
       })),
       { onConflict: 'row_index,col_index' }
-    );
+    ) as unknown as {
+      data: any | null;
+      error: Error | null;
+    };
     
   if (error) throw error;
   return data;
