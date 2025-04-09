@@ -27,15 +27,15 @@ export const useFieldMapping = () => {
       case 12:
         return 'projektering_2'; // Realized projektering
       case 13:
-        return 'produktion'; // Using the existing produktion field for realized produktion
+        return 'produktion'; // Realized produktion field
       case 14:
-        return 'montage_3'; // Using the existing montage_3 field for realized montage
+        return 'montage_3'; // Realized montage field
       case 15:
-        return 'total'; // Using the existing total field for realized total
+        return 'total'; // Realized total field
       case 16:
         return 'timer_tilbage_1'; // Projektering timer tilbage
       case 17:
-        return 'timer_tilbage_2'; // Produktion timer tilbage - This must be correctly mapped
+        return 'timer_tilbage_2'; // Produktion timer tilbage
       case 18:
         return 'faerdig_pct_ex_montage_nu';
       case 19:

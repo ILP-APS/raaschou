@@ -116,7 +116,11 @@ export const useCalculations = () => {
     appointmentNumber: string,
     updatedRow: string[]
   ) => {
-    console.log("Recalculating Produktion Timer Tilbage with row data:", updatedRow);
+    console.log("Recalculating Produktion Timer Tilbage with row data:", {
+      rowData: updatedRow,
+      estimatedProduktion: updatedRow[10],
+      realizedProduktion: updatedRow[13]
+    });
     
     // Use the calculation function for produktion timer tilbage
     const produktionTimerTilbageValue = calculateProduktionTimerTilbage(updatedRow);

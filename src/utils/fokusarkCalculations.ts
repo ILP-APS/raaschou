@@ -76,12 +76,12 @@ export const calculateProduktionTimerTilbage = (row: string[]): string => {
   const estimatedProduktion = parseNumber(row[10]);
   const realizedProduktion = parseNumber(row[13]);
   
-  console.log(`Calculating Produktion Timer Tilbage: ${estimatedProduktion} - ${realizedProduktion}`, {
+  console.log(`Calculating Produktion Timer Tilbage:`, {
+    estimatedProduktion: estimatedProduktion,
+    realizedProduktion: realizedProduktion,
     rowData: row,
     row10: row[10],
     row13: row[13],
-    estimatedProduktion,
-    realizedProduktion,
   });
   
   // Calculate the difference
