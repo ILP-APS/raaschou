@@ -16,12 +16,15 @@ const FokusarkContent: React.FC = () => {
   const { isLoading } = useFokusarkData();
   const tableContainerRef = useRef<HTMLDivElement>(null);
   
-  // Generate sample data for the table
+  // Generate sample data for the table - increase column count to create overflow
   const generateTableData = () => {
     const rows = [];
+    // More columns to force horizontal overflow
+    const columnCount = 25;
+    
     for (let i = 0; i < 30; i++) {
       const row = [];
-      for (let j = 0; j < 25; j++) {
+      for (let j = 0; j < columnCount; j++) {
         row.push(`R${i+1}C${j+1}`);
       }
       rows.push(row);
@@ -31,13 +34,15 @@ const FokusarkContent: React.FC = () => {
   
   const tableData = generateTableData();
 
-  // Group definitions for the header
+  // Group definitions for the header - create more groups for more columns
   const headerGroups = [
-    { name: "Group 1", colSpan: 3 },
-    { name: "Group 2", colSpan: 5 },
-    { name: "Group 3", colSpan: 6 },
-    { name: "Group 4", colSpan: 5 },
-    { name: "Group 5", colSpan: 6 },
+    { name: "Group 1", colSpan: 2 }, // For the sticky columns
+    { name: "Group 2", colSpan: 4 },
+    { name: "Group 3", colSpan: 5 },
+    { name: "Group 4", colSpan: 4 },
+    { name: "Group 5", colSpan: 4 },
+    { name: "Group 6", colSpan: 3 },
+    { name: "Group 7", colSpan: 3 },
   ];
 
   // Effect to sync horizontal scroll between frozen and main content
@@ -68,41 +73,31 @@ const FokusarkContent: React.FC = () => {
             <TableHeader>
               {/* Group Headers Row */}
               <TableRow>
-                {headerGroups.map((group, groupIndex) => {
-                  // Handle special styling for the first group (which contains sticky columns)
-                  if (groupIndex === 0) {
-                    return (
-                      <React.Fragment key={`group-${groupIndex}`}>
-                        <TableHead 
-                          className="sticky-cell col-id"
-                          style={{ left: '0px' }}
-                          rowSpan={1}
-                        >
-                          {group.name}
-                        </TableHead>
-                        <TableHead 
-                          className="sticky-cell last-sticky-cell col-name"
-                          style={{ left: '180px' }}
-                          rowSpan={1}
-                        >
-                          {group.name}
-                        </TableHead>
-                        <TableHead colSpan={group.colSpan - 2}>
-                          {group.name}
-                        </TableHead>
-                      </React.Fragment>
-                    );
-                  }
-                  
-                  return (
-                    <TableHead 
-                      key={`group-${groupIndex}`} 
-                      colSpan={group.colSpan}
-                    >
-                      {group.name}
-                    </TableHead>
-                  );
-                })}
+                {/* Fixed first two columns */}
+                <TableHead 
+                  className="sticky-cell col-id"
+                  style={{ left: '0px' }}
+                  colSpan={1}
+                >
+                  ID
+                </TableHead>
+                <TableHead 
+                  className="sticky-cell last-sticky-cell col-name"
+                  style={{ left: '180px' }}
+                  colSpan={1}
+                >
+                  Name
+                </TableHead>
+                
+                {/* Scrollable column groups */}
+                {headerGroups.slice(1).map((group, groupIndex) => (
+                  <TableHead 
+                    key={`group-${groupIndex + 1}`} 
+                    colSpan={group.colSpan}
+                  >
+                    {group.name}
+                  </TableHead>
+                ))}
               </TableRow>
               
               {/* Column Headers Row */}
