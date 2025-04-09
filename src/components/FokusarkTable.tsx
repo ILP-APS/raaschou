@@ -9,17 +9,47 @@ interface FokusarkTableProps {
   data: string[][];
 }
 
+interface SavedCellData {
+  [key: string]: string; // Format: "rowIndex-colIndex": "value"
+}
+
 const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const tableVerticalScrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
   // Create a state copy of the data to allow for editing
-  const [tableData, setTableData] = useState<string[][]>([...data]);
+  const [tableData, setTableData] = useState<string[][]>([]);
   
-  // Update the table data when the prop changes
+  // Load data and saved values from localStorage when component mounts
   useEffect(() => {
-    setTableData([...data]);
+    if (!data.length) return;
+    
+    // Get fresh copy of data
+    const initialData = [...data];
+    
+    // Try to load saved cell values from localStorage
+    try {
+      const savedCells = localStorage.getItem('fokusarkEditableCells');
+      if (savedCells) {
+        const savedCellsData: SavedCellData = JSON.parse(savedCells);
+        
+        // Apply saved values to the data
+        Object.entries(savedCellsData).forEach(([key, value]) => {
+          const [rowIndex, colIndex] = key.split('-').map(Number);
+          if (rowIndex < initialData.length) {
+            // Create a copy of the row if it exists
+            const rowCopy = [...initialData[rowIndex]];
+            rowCopy[colIndex] = value;
+            initialData[rowIndex] = rowCopy;
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error loading saved cell data:', error);
+    }
+    
+    setTableData(initialData);
   }, [data]);
   
   // Handle cell value changes
@@ -36,14 +66,35 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
       // Update the row in the data
       newData[rowIndex] = rowCopy;
       
-      // Show a toast notification
-      toast({
-        title: "Cell updated",
-        description: `Updated Montage 2 value for row ${rowIndex + 1}`,
-      });
-      
       return newData;
     });
+    
+    // Save to localStorage
+    try {
+      // Get current saved data or initialize empty object
+      const savedCells = localStorage.getItem('fokusarkEditableCells');
+      const savedCellsData: SavedCellData = savedCells ? JSON.parse(savedCells) : {};
+      
+      // Update with new value
+      savedCellsData[`${rowIndex}-${colIndex}`] = value;
+      
+      // Save back to localStorage
+      localStorage.setItem('fokusarkEditableCells', JSON.stringify(savedCellsData));
+      
+      // Show a toast notification
+      const columnName = colIndex === 6 ? "Montage 2" : "Underleverandør 2";
+      toast({
+        title: "Cell updated",
+        description: `Updated ${columnName} value for row ${rowIndex + 1}`,
+      });
+    } catch (error) {
+      console.error('Error saving cell data:', error);
+      toast({
+        title: "Error saving data",
+        description: "Could not save your changes. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   // Determine the number of columns based on the first row of data
