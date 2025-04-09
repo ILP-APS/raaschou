@@ -137,14 +137,14 @@ const RecalculateValuesButton: React.FC<RecalculateValuesButtonProps> = ({ table
             console.log(`Recalculating produktion timer tilbage for ${appointmentNumber}:`, {
               calculated: produktionTimerTilbageValue,
               numeric: produktionTimerTilbageNumeric,
-              current: appointment.produktion_rest,
+              current: appointment.timer_tilbage_2,
               produktion: produktionNumeric,
               realized_produktion: appointment.produktion
             });
             
             await updateAppointmentField(
               appointmentNumber,
-              'produktion_rest',
+              'timer_tilbage_2',
               produktionTimerTilbageNumeric
             );
             
