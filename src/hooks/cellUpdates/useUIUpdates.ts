@@ -79,8 +79,8 @@ export const useUIUpdates = (
     setTableData(prevData => {
       const newData = [...prevData];
       const rowCopy = [...newData[rowIndex]];
-      // Update the timer tilbage column (index 18)
-      rowCopy[18] = value;
+      // Update the timer tilbage column (index 16)
+      rowCopy[16] = value;
       newData[rowIndex] = rowCopy;
       return newData;
     });
@@ -93,18 +93,6 @@ export const useUIUpdates = (
       const rowCopy = [...newData[rowIndex]];
       // Update the projektering rest column (index 16)
       rowCopy[16] = value;
-      newData[rowIndex] = rowCopy;
-      return newData;
-    });
-  };
-  
-  // Update produktion rest cell in the UI
-  const updateProduktionRestUI = (rowIndex: number, value: string) => {
-    setTableData(prevData => {
-      const newData = [...prevData];
-      const rowCopy = [...newData[rowIndex]];
-      // Update the produktion rest column (index 17)
-      rowCopy[17] = value;
       newData[rowIndex] = rowCopy;
       return newData;
     });
@@ -129,7 +117,6 @@ export const useUIUpdates = (
     updateMontageUI,
     updateTimerTilbageUI,
     updateProjekteringRestUI,
-    updateProduktionRestUI,
     updateCellUI
   };
 };

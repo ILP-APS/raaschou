@@ -33,23 +33,19 @@ export const useFieldMapping = () => {
       case 15:
         return 'total'; // Using the existing total field for realized total
       case 16:
-        return 'projektering_rest'; // New field for projektering rest
+        return 'timer_tilbage_1'; // Changed from projektering_rest to timer_tilbage_1
       case 17:
-        return 'produktion_rest'; // New field for produktion rest
+        return 'faerdig_pct_ex_montage_nu'; // Shifted one index down
       case 18:
-        return 'timer_tilbage_1';
+        return 'faerdig_pct_ex_montage_foer'; // Shifted one index down
       case 19:
-        return 'faerdig_pct_ex_montage_nu';
+        return 'est_timer_ift_faerdig_pct'; // Shifted one index down
       case 20:
-        return 'faerdig_pct_ex_montage_foer';
+        return 'plus_minus_timer'; // Shifted one index down
       case 21:
-        return 'est_timer_ift_faerdig_pct';
+        return 'timer_tilbage_2'; // Shifted one index down
       case 22:
-        return 'plus_minus_timer';
-      case 23:
-        return 'timer_tilbage_2';
-      case 24:
-        return 'afsat_fragt';
+        return 'afsat_fragt'; // Shifted one index down
       default:
         return null;
     }
@@ -91,23 +87,19 @@ export const useFieldMapping = () => {
       case 15:
         return 'Real. Total';
       case 16:
-        return 'Projektering'; // Timer tilbage for Projektering
+        return 'Timer tilbage'; // Changed from "Projektering" to "Timer tilbage"
       case 17:
-        return 'Produktion'; // Timer tilbage for Produktion
+        return 'Færdig % ex montage nu'; // Shifted one index down
       case 18:
-        return 'Timer tilbage';
+        return 'Færdig % ex montage før'; // Shifted one index down
       case 19:
-        return 'Færdig % ex montage nu';
+        return 'Est timer ift færdig %'; // Shifted one index down
       case 20:
-        return 'Færdig % ex montage før';
+        return '+/- timer'; // Shifted one index down
       case 21:
-        return 'Est timer ift færdig %';
+        return 'Timer tilbage'; // Shifted one index down
       case 22:
-        return '+/- timer';
-      case 23:
-        return 'Timer tilbage';
-      case 24:
-        return 'Afsat fragt';
+        return 'Afsat fragt'; // Shifted one index down
       default:
         return `Kolonne ${columnIndex + 1}`;
     }

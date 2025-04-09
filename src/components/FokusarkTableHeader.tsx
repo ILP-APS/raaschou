@@ -1,4 +1,3 @@
-
 import React from "react";
 
 interface FokusarkTableHeaderProps {
@@ -42,22 +41,18 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
       case 15:
         return "Total";
       case 16:
-        return "Projektering";
+        return "Timer tilbage";
       case 17:
-        return "Produktion";  // New column added here
-      case 18:
-        return "Timer tilbage";
-      case 19:
         return "Færdig % ex montage nu";
-      case 20:
+      case 18:
         return "Færdig % ex montage før";
-      case 21:
+      case 19:
         return "Est timer ift færdig %";
-      case 22:
+      case 20:
         return "+/- timer";
-      case 23:
+      case 21:
         return "Timer tilbage";
-      case 24:
+      case 22:
         return "Afsat fragt";
       default:
         return `Column ${index + 1}`;
@@ -91,11 +86,11 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
     } else if (index === 12) {
       return { name: "Realiseret", colSpan: 4 }; // 4 columns: Projektering, Produktion, Montage, Total
     } else if (index === 16) {
-      return { name: "Timer tilbage", colSpan: 2 }; // Updated to 2 columns: Projektering, Produktion
-    } else if (index === 18) {
-      return { name: "Produktion", colSpan: 6 }; // Shifted by 1
-    } else if (index === 24) {
-      return { name: "Transport", colSpan: 1 }; // Transport group (shifted by 1)
+      return { name: "Timer tilbage", colSpan: 1 }; // Changed from 2 to 1 column: just Timer tilbage
+    } else if (index === 17) {
+      return { name: "Produktion", colSpan: 5 }; // Shifted by 1 and reduced by 1
+    } else if (index === 22) {
+      return { name: "Transport", colSpan: 1 }; // Transport group (shifted by 2)
     }
     return null;
   };
