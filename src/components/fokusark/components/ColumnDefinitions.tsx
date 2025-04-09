@@ -8,7 +8,7 @@ import EditableCell from "./EditableCell";
  * Get all column definitions with editors configured
  */
 export function getColumns(): Column<FokusarkRow, unknown>[] {
-  const baseColumns = [
+  return [
     { 
       key: "nr", 
       name: "Nr.", 
@@ -166,6 +166,4 @@ export function getColumns(): Column<FokusarkRow, unknown>[] {
       headerCellClass: "bg-muted font-medium" 
     }
   ];
-  
-  return baseColumns;
 }

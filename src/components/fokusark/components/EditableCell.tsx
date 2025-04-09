@@ -3,10 +3,7 @@ import React from "react";
 import { EditorProps } from "react-data-grid";
 import { FokusarkRow } from "../utils/dataGridUtils";
 
-// Define a proper type alias that explicitly includes all the properties we need
-type EditableCellProps<R> = EditorProps<R, unknown>;
-
-const EditableCell: React.FC<EditableCellProps<FokusarkRow>> = ({
+const EditableCell: React.FC<EditorProps<FokusarkRow, unknown>> = ({
   row,
   column,
   onRowChange

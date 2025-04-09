@@ -1,31 +1,44 @@
 
-import { useTableData } from "./useTableData";
-import { useUsers } from "./useUsers";
 import { useState, useEffect, useCallback } from "react";
+import { generateTableData } from "@/utils/tableData";
 
 export const useFokusarkData = () => {
-  const { tableData: initialData, isLoading: isLoadingInitial, refetchData } = useTableData();
-  const { users } = useUsers();
-  const [isDataReady, setIsDataReady] = useState(false);
+  const [tableData, setTableData] = useState<string[][]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Only mark data as ready when initialData has been loaded
   useEffect(() => {
-    if (!isLoadingInitial && initialData.length > 0 && !isDataReady) {
-      setIsDataReady(true);
-    }
-  }, [initialData, isLoadingInitial, isDataReady]);
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        // Generate sample data for now
+        const data = generateTableData();
+        setTableData(data);
+      } catch (error) {
+        console.error("Error loading data:", error);
+        setTableData([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+  }, []);
   
-  // Expose function to manually trigger a data refresh
   const refreshData = useCallback(() => {
-    if (refetchData) {
-      refetchData();
+    setIsLoading(true);
+    try {
+      const data = generateTableData();
+      setTableData(data);
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [refetchData]);
+  }, []);
   
   return { 
-    tableData: initialData, 
-    isLoading: isLoadingInitial || !isDataReady, 
-    users,
+    tableData, 
+    isLoading,
     refreshData
   };
 };

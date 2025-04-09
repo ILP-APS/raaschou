@@ -1,150 +1,72 @@
 
-.fokusark-data-grid {
-  height: calc(100vh - 220px);
-  width: 100%;
-  border: 1px solid hsl(var(--border));
+/* Basic DataGrid styles */
+.rdg {
+  --color: hsl(var(--foreground));
+  --border-color: hsl(var(--border));
+  --background-color: hsl(var(--background));
+  --header-background-color: hsl(var(--muted));
+  --row-hover-background-color: hsl(var(--muted)/50);
+  --selection-color: hsl(var(--primary));
+  
+  box-sizing: border-box;
   border-radius: 0.5rem;
   overflow: hidden;
-  position: relative;
-}
-
-.rdg {
-  border-radius: 0.5rem;
-  border: none;
   height: 100%;
-  font-family: var(--font-sans, 'Geist', sans-serif);
-  background-color: hsl(var(--background));
-  width: 100%; /* Ensure the grid takes full width */
+  width: 100%;
+  color: var(--color);
 }
 
-.rdg-header-row {
-  background-color: hsl(var(--muted));
-  font-weight: 500;
-}
-
-.rdg-cell {
-  border-right: 1px solid hsl(var(--border));
-  border-bottom: 1px solid hsl(var(--border));
-  padding: 0 12px;
-  color: hsl(var(--foreground));
-  position: relative;
-}
-
-.rdg-row:hover {
-  background-color: hsl(var(--muted)/40);
-}
-
-.rdg-row[aria-selected=true] {
-  background-color: hsl(var(--muted)/30);
-}
-
-/* Ensure all rows have proper background */
-.rdg-row {
-  background-color: hsl(var(--background));
-}
-
-/* Dark mode styling */
+/* Dark mode theme */
 .rdg-dark {
-  --rdg-background-color: hsl(var(--background));
-  --rdg-header-background-color: hsl(var(--muted));
-  --rdg-row-hover-background-color: hsl(var(--muted)/50);
-  --rdg-row-selected-background-color: hsl(var(--muted)/30);
-  --rdg-border-color: hsl(var(--border));
-  --rdg-header-row-color: hsl(var(--foreground));
-  --rdg-summary-row-background-color: hsl(var(--muted)/20);
-  color: hsl(var(--foreground));
+  --color: hsl(var(--foreground));
+  --border-color: hsl(var(--border));
+  --background-color: hsl(var(--background));
+  --header-background-color: hsl(var(--muted)/20);
+  --row-hover-background-color: hsl(var(--muted)/50);
+  --selection-color: hsl(var(--primary));
 }
 
-/* Frozen column styling */
-.rdg [aria-frozen="true"] {
-  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
-  z-index: 1;
-  background-color: hsl(var(--background));
-}
-
-.dark .rdg [aria-frozen="true"] {
-  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.3);
-}
-
-/* Column group headers styling */
-.rdg-header-row:first-child .rdg-cell {
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.8rem;
-  letter-spacing: 0.05em;
-  background-color: hsl(var(--muted));
+.fokusark-data-grid {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
 }
 
 /* Sub-appointment styling */
+.rdg-row.bg-muted\/20 {
+  background-color: hsl(var(--muted)/20);
+}
+
 .rdg-row.bg-muted\/20 .rdg-cell:first-child {
-  padding-left: 25px;
+  padding-left: 20px;
 }
 
-/* Ensure proper cell alignment */
-.rdg-cell {
-  display: flex;
-  align-items: center;
-}
-
-/* Input styling for editable cells */
-.rdg-cell input {
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: none;
-  background: transparent;
-  outline: none;
-  color: hsl(var(--foreground));
-}
-
-.rdg-cell input:focus {
-  box-shadow: inset 0 0 0 2px hsl(var(--primary));
-}
-
-/* Make editable cells visually distinct */
-.editable-cell {
-  background-color: hsl(var(--muted)/5);
-}
-
-/* Alternating row colors for better readability */
-.rdg-row:nth-child(even) {
+/* Editable cell styling */
+.rdg-cell.editable-cell {
   background-color: hsl(var(--muted)/10);
 }
 
-/* Add a subtle highlight to headers */
+.rdg-cell[aria-selected="true"] {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: -2px;
+}
+
+/* Row height for consistency */
+.rdg-row {
+  height: 48px;
+}
+
+/* Header styling */
 .rdg-header-row {
-  border-bottom: 2px solid hsl(var(--border));
+  background-color: var(--header-background-color);
+  font-weight: 600;
 }
 
-/* No data message styling */
-.fokusark-data-grid .no-data-message {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  width: 80%;
-  max-width: 500px;
+/* Headers that are grouping headers */
+.bg-muted {
+  background-color: hsl(var(--muted));
 }
 
-/* Fix frozen column z-index */
-.rdg-header-row .rdg-cell[aria-frozen="true"] {
-  z-index: 2;
-}
-
-/* Fix for column resizing and cell content overflow */
-.rdg-cell-value {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Improve visibility of sort indicators */
-.rdg-sort-arrow {
-  fill: hsl(var(--primary));
-}
-
-/* Extra background color for the table to ensure it's visible */
-.rdg-root {
-  background-color: hsl(var(--background));
+.font-medium {
+  font-weight: 500;
 }

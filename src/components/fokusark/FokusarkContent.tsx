@@ -2,14 +2,12 @@
 import React from "react";
 import TableActions from "./TableActions";
 import FokusarkDescription from "./FokusarkDescription";
-import FokusarkTableSection from "./FokusarkTableSection";
+import FokusarkTable from "../FokusarkTable";
+import { useFokusarkData } from "@/hooks/useFokusarkData";
 
-interface FokusarkContentProps {
-  tableData: string[][];
-  isLoading: boolean;
-}
+const FokusarkContent: React.FC = () => {
+  const { tableData, isLoading } = useFokusarkData();
 
-const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading }) => {
   return (
     <div className="flex flex-col gap-4 p-4 md:p-6 overflow-y-auto content-wrapper">
       <div className="flex flex-col gap-4 content-wrapper">
@@ -20,9 +18,8 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
         <FokusarkDescription />
       </div>
       
-      <FokusarkTableSection 
-        tableData={tableData} 
-        isLoading={isLoading} 
+      <FokusarkTable 
+        data={tableData} 
       />
     </div>
   );

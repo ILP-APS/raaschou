@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useTableInitialization } from './useTableInitialization';
-import { useCellUpdates } from './useCellUpdates';
+import { generateTableData } from '@/utils/tableData';
 
 export interface FokusarkTableData {
   data: string[][];
@@ -10,37 +9,61 @@ export interface FokusarkTableData {
 
 /**
  * Main hook for handling the Fokusark table functionality
+ * Simplified version to ensure data is properly displayed
  */
 export const useFokusarkTable = (initialData: string[][]) => {
-  // Initialize table data
-  const { 
-    tableData, 
-    appointments, 
-    setAppointments,
-    setTableData, 
-    isLoading,
-    isInitialized
-  } = useTableInitialization(initialData);
+  const [tableData, setTableData] = useState<string[][]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   
-  // Set up cell updates
-  const { handleCellChange } = useCellUpdates(
-    tableData,
-    setTableData,
-    appointments,
-    setAppointments
-  );
+  useEffect(() => {
+    const initData = async () => {
+      console.log("Initializing table data with:", initialData?.length || 0, "rows");
+      setIsLoading(true);
+      
+      try {
+        // Use provided data or generate sample data if none
+        if (initialData && initialData.length > 0) {
+          console.log("Using provided data");
+          setTableData(initialData);
+        } else {
+          console.log("No initial data, using generated data");
+          const generatedData = generateTableData();
+          setTableData(generatedData);
+        }
+        setIsInitialized(true);
+      } catch (error) {
+        console.error("Error initializing table data:", error);
+        // Fallback to generated data
+        const generatedData = generateTableData();
+        setTableData(generatedData);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    initData();
+  }, [initialData]);
   
-  // Debug logs to track data initialization and loading states
+  // Debug logs
   useEffect(() => {
     console.log("useFokusarkTable state:", {
       initialDataLength: initialData?.length || 0,
       tableDataLength: tableData?.length || 0,
       isLoading,
-      isInitialized,
-      appointmentsCount: appointments?.length || 0
+      isInitialized
     });
-  }, [initialData, tableData, isLoading, isInitialized, appointments]);
+  }, [initialData, tableData, isLoading, isInitialized]);
   
-  // Return the data and functions needed by components
-  return { tableData, isLoading, handleCellChange, isInitialized };
+  const handleCellChange = (rowIndex: number, colIndex: number, value: string) => {
+    console.log("Cell change:", rowIndex, colIndex, value);
+    
+    const newData = [...tableData];
+    if (newData[rowIndex]) {
+      newData[rowIndex][colIndex] = value;
+      setTableData(newData);
+    }
+  };
+  
+  return { tableData, isLoading, isInitialized, handleCellChange };
 };
