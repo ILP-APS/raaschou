@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Input } from "@/components/ui/input";
 
@@ -49,8 +50,8 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
 
   // Function to render a cell - special handling for editable cells
   const renderCell = (rowIndex: number, cellIndex: number, cellValue: string, isSubAppointment: boolean) => {
-    // If it's the "Montage 2" column (index 6), make it editable
-    if (cellIndex === 6) {
+    // If it's the "Montage 2" column (index 6) or "Underleverandør 2" column (index 7), make it editable
+    if (cellIndex === 6 || cellIndex === 7) {
       return (
         <td key={cellIndex} className={getCellClass(cellIndex, isSubAppointment)}>
           <Input
