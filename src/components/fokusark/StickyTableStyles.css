@@ -37,3 +37,28 @@
     scrollbar-color: hsl(var(--muted-foreground)/0.3) hsl(var(--muted)/0.2);
   }
 }
+
+/* Add a shadow effect to indicate there's more content */
+.sticky-table-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 15px;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.05));
+}
+
+/* Left shadow for right-scrolled content */
+.sticky-table-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 15px;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(to left, transparent, rgba(0, 0, 0, 0.05));
+}

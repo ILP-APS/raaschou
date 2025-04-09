@@ -20,7 +20,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import './StickyTableStyles.css';
 
-// Define data type
+// Define data type with more columns
 interface DataItem {
   id: number;
   col1: string;
@@ -33,9 +33,14 @@ interface DataItem {
   col8: string;
   col9: string;
   col10: string;
+  col11: string;
+  col12: string;
+  col13: string;
+  col14: string;
+  col15: string;
 }
 
-// Generate sample data
+// Generate sample data with more columns
 const generateData = (): DataItem[] => {
   return Array.from({ length: 30 }).map((_, i) => ({
     id: i + 1,
@@ -49,6 +54,11 @@ const generateData = (): DataItem[] => {
     col8: `Value 8.${i + 1}`,
     col9: `Value 9.${i + 1}`,
     col10: `Value 10.${i + 1}`,
+    col11: `Value 11.${i + 1}`,
+    col12: `Value 12.${i + 1}`,
+    col13: `Value 13.${i + 1}`,
+    col14: `Value 14.${i + 1}`,
+    col15: `Value 15.${i + 1}`,
   }));
 };
 
@@ -63,7 +73,7 @@ export default function StickyTable() {
   const subheaderBgColor = isDarkMode ? 'hsl(var(--muted)/50)' : '#f5f5f5';
   const rowBgColor = isDarkMode ? 'hsl(var(--background))' : 'white';
   
-  // Column definitions with pinning
+  // Column definitions with pinning - now with more columns
   const columns: ColumnDef<DataItem>[] = [
     {
       accessorKey: 'col1',
@@ -125,6 +135,36 @@ export default function StickyTable() {
       size: 150,
       enablePinning: true,
     },
+    {
+      accessorKey: 'col11',
+      header: 'Column 11',
+      size: 150,
+      enablePinning: true,
+    },
+    {
+      accessorKey: 'col12',
+      header: 'Column 12',
+      size: 150,
+      enablePinning: true,
+    },
+    {
+      accessorKey: 'col13',
+      header: 'Column 13',
+      size: 150,
+      enablePinning: true,
+    },
+    {
+      accessorKey: 'col14',
+      header: 'Column 14',
+      size: 150,
+      enablePinning: true,
+    },
+    {
+      accessorKey: 'col15',
+      header: 'Column 15',
+      size: 150,
+      enablePinning: true,
+    },
   ];
 
   // Initialize table with column pinning
@@ -139,12 +179,14 @@ export default function StickyTable() {
       },
       columnPinning: {
         left: ['col1', 'col2'], // Pin first and second columns to the left
+        right: ['col15'], // Pin the last column to the right
       }
     },
     // This is needed to maintain the columnPinning state
     state: {
       columnPinning: {
         left: ['col1', 'col2'], // Pin first and second columns to the left
+        right: ['col15'], // Pin the last column to the right
       }
     },
   });
@@ -153,14 +195,13 @@ export default function StickyTable() {
     <div className="w-full space-y-4">
       <div className="rounded-md border overflow-hidden">
         <div 
-          className="overflow-x-auto"
+          className="sticky-table-container"
           style={{
-            maxHeight: '500px',
             '--header-bg-color': headerBgColor,
             '--subheader-bg-color': subheaderBgColor,
           } as React.CSSProperties}
         >
-          <Table>
+          <Table className="sticky-table">
             <TableHeader>
               {/* Header row */}
               <TableRow>
