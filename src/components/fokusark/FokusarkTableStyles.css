@@ -20,14 +20,19 @@
   background-color: hsl(var(--primary)/70);
 }
 
-/* Add styles for table container to improve horizontal scrolling */
+/* Table container for horizontal scrolling */
 .fokusark-table-container {
+  position: relative;
+  width: 100%;
   overflow-x: auto;
   overflow-y: auto;
+  max-height: 70vh;
   -webkit-overflow-scrolling: touch;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
 }
 
-/* Critical styles for sticky columns */
+/* Critical styles for sticky columns with !important to ensure they take precedence */
 .sticky-column {
   position: sticky !important;
   z-index: 20 !important;
@@ -36,7 +41,7 @@
 
 .sticky-header {
   position: sticky !important;
-  z-index: 50 !important;
+  z-index: 30 !important;
   top: 0 !important;
 }
 
@@ -53,4 +58,9 @@
 
 .sticky-col-1 {
   left: 80px !important;
+}
+
+/* Background color enforcement for sticky elements */
+.bg-enforce {
+  background-color: inherit !important;
 }

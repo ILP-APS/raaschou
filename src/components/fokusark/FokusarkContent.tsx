@@ -37,19 +37,16 @@ const FokusarkContent: React.FC = () => {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   
-  // Define column groups
+  // Simplified groups for the demonstration
   const groups = [
-    { name: "Budsjett", cols: 4 },
-    { name: "Innkjøp", cols: 3 },
-    { name: "Estimert", cols: 4 },
-    { name: "Realisert", cols: 3 },
-    { name: "Prognoser", cols: 5 },
-    { name: "Avvik", cols: 3 }
+    { name: "Group A", cols: 3 },
+    { name: "Group B", cols: 3 },
+    { name: "Group C", cols: 3 }
   ];
   
-  // Generate rows of data
+  // Generate a smaller sample of rows
   const rows: FokusarkRow[] = [];
-  for (let i = 1; i <= 30; i++) {
+  for (let i = 1; i <= 10; i++) {
     const row: FokusarkRow = {
       id: `${i}`,
       name: `Project ${i}`
@@ -59,7 +56,7 @@ const FokusarkContent: React.FC = () => {
     let colNum = 1;
     groups.forEach(group => {
       for (let j = 1; j <= group.cols; j++) {
-        row[`col_${colNum}`] = `${group.name.substring(0, 3)}-${i}-${colNum}`;
+        row[`col_${colNum}`] = `${group.name.substring(0, 3)}-${i}-${j}`;
         colNum++;
       }
     });
@@ -73,41 +70,26 @@ const FokusarkContent: React.FC = () => {
       accessorKey: "id",
       header: "ID",
       meta: { sticky: true, group: "Info" } as ColumnMeta,
-      cell: info => (
-        <div style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center'
-        }}>
-          {info.getValue() as string}
-        </div>
-      )
+      size: 80,
+      cell: info => info.getValue() as string
     },
     {
       accessorKey: "name",
       header: "Name",
       meta: { sticky: true, group: "Info" } as ColumnMeta,
-      cell: info => (
-        <div style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center'
-        }}>
-          {info.getValue() as string}
-        </div>
-      )
+      size: 180,
+      cell: info => info.getValue() as string
     }
   ];
   
-  // Add columns for each group
+  // Add simplified columns for each group
   let colNum = 1;
   groups.forEach(group => {
     for (let i = 1; i <= group.cols; i++) {
       columns.push({
         accessorKey: `col_${colNum}`,
         header: `${group.name} ${i}`,
+        size: 160,
         meta: { group: group.name } as ColumnMeta
       });
       colNum++;
@@ -144,6 +126,16 @@ const FokusarkContent: React.FC = () => {
     }
   };
   
+  // Get header cell background color
+  const getHeaderBgColor = () => {
+    return isDarkMode ? 'hsl(var(--muted))' : 'hsl(var(--muted))';
+  };
+  
+  // Get corner cell background color
+  const getCornerBgColor = () => {
+    return isDarkMode ? 'hsl(var(--muted)/80)' : 'hsl(var(--muted)/80)';
+  };
+  
   return (
     <div className="flex flex-col gap-4 p-4 md:p-6">
       <div className="flex flex-col gap-4 pb-4">
@@ -151,19 +143,7 @@ const FokusarkContent: React.FC = () => {
         <FokusarkDescription />
       </div>
       
-      <div 
-        className="fokusark-table-container"
-        style={{ 
-          position: 'relative',
-          overflow: 'auto',
-          maxHeight: '70vh',
-          width: '100%',
-          minWidth: '100%',
-          border: '1px solid hsl(var(--border))',
-          borderRadius: '0.5rem',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-        }}
-      >
+      <div className="fokusark-table-container">
         <Table style={{ 
           tableLayout: 'fixed', 
           borderCollapse: 'separate',
@@ -173,14 +153,14 @@ const FokusarkContent: React.FC = () => {
           <TableHeader>
             {/* Group header row */}
             <TableRow>
-              {/* Corner cell for ID and Name columns with explicit sticky styles */}
+              {/* Corner cell for ID and Name columns */}
               <TableHead 
                 colSpan={2}
-                className="sticky-corner sticky-col-0"
+                className="sticky-corner sticky-col-0 bg-enforce"
                 style={{ 
                   minWidth: "260px",
                   width: "260px",
-                  backgroundColor: isDarkMode ? 'hsl(var(--muted)/80)' : 'hsl(var(--muted)/80)'
+                  backgroundColor: getCornerBgColor()
                 }}
               >
                 Info
@@ -191,9 +171,9 @@ const FokusarkContent: React.FC = () => {
                 <TableHead 
                   key={`group-${index}`} 
                   colSpan={group.cols}
-                  className="sticky-header"
+                  className="sticky-header bg-enforce"
                   style={{
-                    backgroundColor: isDarkMode ? 'hsl(var(--muted)/80)' : 'hsl(var(--muted)/80)',
+                    backgroundColor: getCornerBgColor(),
                     textAlign: 'center'
                   }}
                 >
@@ -208,16 +188,16 @@ const FokusarkContent: React.FC = () => {
                 const isSticky = !!(header.column.columnDef.meta as ColumnMeta)?.sticky;
                 const stickyClass = isSticky ? 
                   (index === 0 ? "sticky-column sticky-col-0" : "sticky-column sticky-col-1") : "";
-                const cellWidth = index === 0 ? '80px' : index === 1 ? '180px' : '160px';
+                const cellWidth = header.column.getSize();
                 
                 return (
                   <TableHead
                     key={header.id}
-                    className={stickyClass}
+                    className={`${stickyClass} bg-enforce`}
                     style={{
-                      minWidth: cellWidth,
-                      width: cellWidth,
-                      backgroundColor: isDarkMode ? 'hsl(var(--muted))' : 'hsl(var(--muted))',
+                      minWidth: `${cellWidth}px`,
+                      width: `${cellWidth}px`,
+                      backgroundColor: getHeaderBgColor(),
                       top: '41px',
                     }}
                   >
@@ -242,15 +222,15 @@ const FokusarkContent: React.FC = () => {
                     const isSticky = !!(cell.column.columnDef.meta as ColumnMeta)?.sticky;
                     const stickyClass = isSticky ? 
                       (cellIndex === 0 ? "sticky-column sticky-col-0" : "sticky-column sticky-col-1") : "";
-                    const cellWidth = cellIndex === 0 ? '80px' : cellIndex === 1 ? '180px' : '160px';
+                    const cellWidth = cell.column.getSize();
                     
                     return (
                       <TableCell
                         key={cell.id}
-                        className={stickyClass}
+                        className={`${stickyClass} bg-enforce`}
                         style={{
-                          minWidth: cellWidth,
-                          width: cellWidth,
+                          minWidth: `${cellWidth}px`,
+                          width: `${cellWidth}px`,
                           backgroundColor: bgColor,
                         }}
                       >
