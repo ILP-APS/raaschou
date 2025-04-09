@@ -18,29 +18,73 @@ export const useFokusarkTable = (initialData: string[][]) => {
   // Formula: ((Tilbud - Montage) - Underleverandør) * 0.25
   const calculateMaterialer = (row: string[]): string => {
     try {
-      // Get values from relevant columns
-      const tilbud = parseFloat(row[3]?.replace(/\./g, '').replace(',', '.') || '0');
+      console.log("Calculating Materialer for row:", JSON.stringify(row));
       
-      // Check if Montage 2 (index 6) has a value, otherwise use Montage (index 4)
-      const montageValue = row[6] && row[6].trim() !== '' 
-        ? parseFloat(row[6]?.replace(/\./g, '').replace(',', '.') || '0')
-        : parseFloat(row[4]?.replace(/\./g, '').replace(',', '.') || '0');
+      // Get values from relevant columns and parse them properly
+      const tilbudStr = row[3] || '0';
+      const montageStr = row[4] || '0';
+      const underleverandorStr = row[5] || '0';
+      const montage2Str = row[6] || '';
+      const underleverandor2Str = row[7] || '';
       
-      // Check if Underleverandør 2 (index 7) has a value, otherwise use Underleverandør (index 5)
-      const underleverandorValue = row[7] && row[7].trim() !== '' 
-        ? parseFloat(row[7]?.replace(/\./g, '').replace(',', '.') || '0')
-        : parseFloat(row[5]?.replace(/\./g, '').replace(',', '.') || '0');
+      console.log("Raw values:", {
+        tilbud: tilbudStr,
+        montage: montageStr,
+        underleverandor: underleverandorStr,
+        montage2: montage2Str,
+        underleverandor2: underleverandor2Str
+      });
+      
+      // Helper function to properly parse Danish number format
+      const parseNumber = (value: string): number => {
+        if (!value || value.trim() === '') return 0;
+        // Remove periods (thousands separators in Danish) and replace comma with dot
+        const cleanValue = value.replace(/\./g, '').replace(',', '.');
+        const result = parseFloat(cleanValue);
+        return isNaN(result) ? 0 : result;
+      };
+      
+      // Parse all values to numbers
+      const tilbud = parseNumber(tilbudStr);
+      const montage = parseNumber(montageStr);
+      const underleverandor = parseNumber(underleverandorStr);
+      const montage2 = parseNumber(montage2Str);
+      const underleverandor2 = parseNumber(underleverandor2Str);
+      
+      console.log("Parsed values:", {
+        tilbud,
+        montage,
+        underleverandor,
+        montage2,
+        underleverandor2
+      });
+      
+      // Determine which values to use in calculation
+      const montageValue = montage2Str && montage2Str.trim() !== '' ? montage2 : montage;
+      const underleverandorValue = underleverandor2Str && underleverandor2Str.trim() !== '' ? underleverandor2 : underleverandor;
+      
+      console.log("Using values:", {
+        tilbud,
+        montage: montageValue,
+        underleverandor: underleverandorValue
+      });
       
       // Calculate using the formula: ((Tilbud - Montage) - Underleverandør) * 0.25
       const materialer = ((tilbud - montageValue) - underleverandorValue) * 0.25;
       
+      console.log("Materialer calculation result:", materialer);
+      
       // Check for NaN and return '0' if the calculation resulted in NaN
       if (isNaN(materialer)) {
+        console.log("Result is NaN, returning 0");
         return '0';
       }
       
-      // Format the result with the Danish number format
-      return materialer.toLocaleString('da-DK');
+      // Format the result with the Danish number format (comma as decimal separator, period as thousands separator)
+      return materialer.toLocaleString('da-DK', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
     } catch (error) {
       console.error('Error calculating Materialer:', error);
       return '0';
@@ -137,7 +181,13 @@ export const useFokusarkTable = (initialData: string[][]) => {
       if (!result.success) throw result.error;
       
       // Show a toast notification
-      const columnName = colIndex === 6 ? "Montage 2" : "Underleverandør 2";
+      let columnName = "Value";
+      if (colIndex === 6) columnName = "Montage 2";
+      else if (colIndex === 7) columnName = "Underleverandør 2";
+      else if (colIndex === 3) columnName = "Tilbud";
+      else if (colIndex === 4) columnName = "Montage";
+      else if (colIndex === 5) columnName = "Underleverandør";
+      
       toast({
         title: "Cell updated",
         description: `Updated ${columnName} value for row ${rowIndex + 1}`,
@@ -154,3 +204,4 @@ export const useFokusarkTable = (initialData: string[][]) => {
   
   return { tableData, isLoading, handleCellChange };
 };
+
