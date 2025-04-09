@@ -268,7 +268,8 @@ export default function FrozenDataTable() {
       </div>
       
       <div className="border rounded-md relative overflow-auto" style={{ maxHeight: '500px' }}>
-        <style jsx>{`
+        <style>
+          {`
           .sticky {
             position: sticky;
             z-index: 10;
@@ -289,7 +290,8 @@ export default function FrozenDataTable() {
           .bg-muted {
             background-color: hsl(var(--muted));
           }
-        `}</style>
+        `}
+        </style>
         
         <Table>
           <TableHeader className="sticky top-0 bg-muted z-10">
