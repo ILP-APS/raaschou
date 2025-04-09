@@ -126,14 +126,8 @@ export default function MinimalStickyTable() {
     }
   };
 
-  // Header row heights
-  const emptyRowHeight = '40px';
-  const groupRowHeight = '40px';
-  const columnHeaderHeight = '40px';
-  const totalHeaderHeight = '120px'; // Sum of all three header rows
-  
-  // Header background color
-  const headerBgColor = isDarkMode ? 'hsl(var(--background))' : 'hsl(var(--background))';
+  // Header group row height
+  const headerGroupHeight = '40px';
 
   return (
     <div style={{
@@ -150,107 +144,52 @@ export default function MinimalStickyTable() {
       <Table style={{ 
         width: 'auto', 
         minWidth: '2400px', // Sufficient width for all 24 columns
-        borderCollapse: 'separate',
-        borderSpacing: 0
+        borderCollapse: 'separate'
       }}>
         <TableHeader>
-          {/* Empty top row just for borders */}
+          {/* Header group row with split Info group */}
           <TableRow>
-            {/* First cell: ID column - with top border styling */}
+            {/* Sticky part of Info group (covering ID and Name only) */}
             <TableHead
-              key="id-header-top"
+              key="sticky-info-group"
+              colSpan={2} // Only span the 2 sticky columns
               style={{
                 position: 'sticky',
                 top: 0,
                 left: 0,
                 zIndex: 60,
-                backgroundColor: headerBgColor,
-                borderBottom: 'none',
-                borderTop: '1px solid hsl(var(--border))',
-                borderLeft: '1px solid hsl(var(--border))',
-                borderRight: '1px solid hsl(var(--border))',
-                width: '80px',
-                minWidth: '80px',
-                height: emptyRowHeight,
-                padding: '0px'
-              }}
-            >
-              {/* Empty cell */}
-            </TableHead>
-            
-            {/* Second cell: Name column - with top border styling */}
-            <TableHead
-              key="name-header-top"
-              style={{
-                position: 'sticky',
-                top: 0,
-                left: '80px',
-                zIndex: 60,
-                backgroundColor: headerBgColor,
-                borderBottom: 'none',
-                borderTop: '1px solid hsl(var(--border))',
-                borderRight: '1px solid hsl(var(--border))',
-                width: '180px',
-                minWidth: '180px',
-                height: emptyRowHeight,
-                padding: '0px'
-              }}
-            >
-              {/* Empty cell */}
-            </TableHead>
-            
-            {/* Rest of cells in the top row - Non-sticky */}
-            <TableHead
-              colSpan={columns.length - 2}
-              style={{
-                backgroundColor: headerBgColor,
-                borderBottom: 'none',
-                borderTop: '1px solid hsl(var(--border))',
-                borderRight: '1px solid hsl(var(--border))',
-                height: emptyRowHeight,
-                padding: '0px'
-              }}
-            >
-              {/* Empty cell */}
-            </TableHead>
-          </TableRow>
-          
-          {/* Group header row */}
-          <TableRow>
-            {/* Sticky Info group spanning first two columns - UPDATED WITH FIX */}
-            <TableHead
-              colSpan={2}
-              style={{
-                position: 'sticky',
-                top: emptyRowHeight,
-                left: 0,
-                zIndex: 60,
-                backgroundColor: headerBgColor,
-                fontWeight: 'bold',
+                backgroundColor: getBgColor(),
                 textAlign: 'center',
+                fontWeight: 'bold',
+                boxShadow: '2px 2px 5px -2px rgba(0,0,0,0.15)',
                 borderBottom: '1px solid hsl(var(--border))',
-                width: '260px', // Total width of ID (80px) + Name (180px) columns
-                maxWidth: '260px',
-                overflow: 'hidden', // This prevents content from sticking out
-                boxShadow: '2px 0 5px -2px rgba(0,0,0,0.15)'
+                borderRight: 'none', // Remove right border for visual continuity
+                width: '260px', // 80px + 180px
+                minWidth: '260px'
               }}
             >
               Info
             </TableHead>
             
-            {/* Non-sticky part for Type column */}
+            {/* Non-sticky part of Info group (just the Type column) */}
             <TableHead
-              colSpan={1}
+              key="non-sticky-info-group"
+              colSpan={1} // Just the Type column
               style={{
-                backgroundColor: headerBgColor,
-                fontWeight: 'bold',
+                position: 'static',
+                top: 0,
+                zIndex: 50,
+                backgroundColor: getBgColor(),
                 textAlign: 'center',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 0 0 rgba(0,0,0,0.1)',
                 borderBottom: '1px solid hsl(var(--border))',
-                height: groupRowHeight
+                borderLeft: 'none', // Remove left border for visual continuity
+                color: 'transparent', // Hide text to create appearance of a single group
+                userSelect: 'none' // Prevent text selection of invisible text
               }}
             >
-              {/* Make this text transparent to create the appearance of a single group */}
-              <span style={{ color: 'transparent', userSelect: 'none' }}>Info</span>
+              Info
             </TableHead>
             
             {/* The rest of the header groups */}
@@ -259,11 +198,14 @@ export default function MinimalStickyTable() {
                 key={`group-${group.id}`}
                 colSpan={group.colSpan}
                 style={{
-                  backgroundColor: headerBgColor,
-                  fontWeight: 'bold',
+                  position: 'static',
+                  top: 0,
+                  zIndex: 50,
+                  backgroundColor: getBgColor(),
                   textAlign: 'center',
-                  borderBottom: '1px solid hsl(var(--border))',
-                  height: groupRowHeight
+                  fontWeight: 'bold',
+                  boxShadow: '0 2px 0 0 rgba(0,0,0,0.1)',
+                  borderBottom: '1px solid hsl(var(--border))'
                 }}
               >
                 {group.title}
@@ -271,7 +213,7 @@ export default function MinimalStickyTable() {
             ))}
           </TableRow>
           
-          {/* Regular header row with column titles */}
+          {/* Regular header row */}
           <TableRow>
             {table.getFlatHeaders().map((header, index) => {
               const isSticky = !!(header.column.columnDef.meta as any)?.sticky;
@@ -283,15 +225,14 @@ export default function MinimalStickyTable() {
                   style={{
                     minWidth: '150px',
                     width: index === 0 ? '80px' : index === 1 ? '180px' : '150px',
-                    position: isSticky ? 'sticky' : undefined,
-                    top: `calc(${emptyRowHeight} + ${groupRowHeight})`, // Position below both rows above
+                    position: 'sticky',
+                    top: headerGroupHeight, // Position below the group header
                     left: isSticky ? getLeftPosition(stickyIndex) : undefined,
                     zIndex: isSticky ? 45 : 40,
-                    backgroundColor: headerBgColor,
+                    backgroundColor: getBgColor(),
                     boxShadow: isSticky 
                       ? '2px 2px 5px -2px rgba(0,0,0,0.15)'
-                      : '0 2px 5px -2px rgba(0,0,0,0.15)',
-                    height: columnHeaderHeight
+                      : '0 2px 5px -2px rgba(0,0,0,0.15)'
                   }}
                 >
                   {flexRender(
