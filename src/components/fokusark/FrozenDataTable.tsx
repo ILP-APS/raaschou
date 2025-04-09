@@ -8,6 +8,9 @@ import {
   getSortedRowModel,
   SortingState,
   ColumnDef,
+  ColumnFiltersState,
+  getFilteredRowModel,
+  VisibilityState,
 } from '@tanstack/react-table';
 import {
   Table,
@@ -18,7 +21,25 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, Settings2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 // Define the data type for our rows
 interface DataItem {
@@ -28,6 +49,26 @@ interface DataItem {
   col3: string;
   col4: string;
   col5: string;
+  col6: string;
+  col7: string;
+  col8: string;
+  col9: string;
+  col10: string;
+  col11: string;
+  col12: string;
+  col13: string;
+  col14: string;
+  col15: string;
+  col16: string;
+  col17: string;
+  col18: string;
+  col19: string;
+  col20: string;
+  col21: string;
+  col22: string;
+  col23: string;
+  col24: string;
+  col25: string;
 }
 
 // Define custom metadata for our columns
@@ -35,21 +76,27 @@ interface ColumnMeta {
   frozen?: boolean;
 }
 
-// Sample data - replace with your own
-const data: DataItem[] = [
-  { id: 1, col1: "A1", col2: "B1", col3: "C1", col4: "D1", col5: "E1" },
-  { id: 2, col1: "A2", col2: "B2", col3: "C2", col4: "D2", col5: "E2" },
-  { id: 3, col1: "A3", col2: "B3", col3: "C3", col4: "D3", col5: "E3" },
-  { id: 4, col1: "A4", col2: "B4", col3: "C4", col4: "D4", col5: "E4" },
-  { id: 5, col1: "A5", col2: "B5", col3: "C5", col4: "D5", col5: "E5" },
-  { id: 6, col1: "A6", col2: "B6", col3: "C6", col4: "D6", col5: "E6" },
-  { id: 7, col1: "A7", col2: "B7", col3: "C7", col4: "D7", col5: "E7" },
-  { id: 8, col1: "A8", col2: "B8", col3: "C8", col4: "D8", col5: "E8" },
-];
+// Generate sample data with 25 columns
+const generateSampleData = () => {
+  const data: DataItem[] = [];
+  for (let i = 1; i <= 50; i++) {
+    const row: any = { id: i };
+    for (let j = 1; j <= 25; j++) {
+      row[`col${j}`] = `R${i}C${j}`;
+    }
+    data.push(row as DataItem);
+  }
+  return data;
+};
 
-// Define columns with proper typing
-const columns: ColumnDef<DataItem, keyof DataItem>[] = [
-  {
+const data: DataItem[] = generateSampleData();
+
+// Create columns definition
+const createColumns = (): ColumnDef<DataItem, keyof DataItem>[] => {
+  const columns: ColumnDef<DataItem, keyof DataItem>[] = [];
+
+  // First two columns are frozen
+  columns.push({
     accessorKey: 'col1',
     header: ({ column }) => (
       <div className="flex items-center">
@@ -60,28 +107,32 @@ const columns: ColumnDef<DataItem, keyof DataItem>[] = [
       </div>
     ),
     meta: { frozen: true } as ColumnMeta,
-  },
-  {
+  });
+
+  columns.push({
     accessorKey: 'col2',
     header: 'Column 2',
     meta: { frozen: true } as ColumnMeta,
-  },
-  {
-    accessorKey: 'col3',
-    header: 'Column 3',
-  },
-  {
-    accessorKey: 'col4',
-    header: 'Column 4',
-  },
-  {
-    accessorKey: 'col5',
-    header: 'Column 5',
-  },
-];
+  });
+
+  // Generate other columns
+  for (let i = 3; i <= 25; i++) {
+    columns.push({
+      accessorKey: `col${i}` as keyof DataItem,
+      header: `Column ${i}`,
+    });
+  }
+
+  return columns;
+};
+
+const columns = createColumns();
 
 export default function FrozenDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
   
   const table = useReactTable({
     data,
@@ -89,14 +140,60 @@ export default function FrozenDataTable() {
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
     },
   });
 
   return (
     <div className="w-full">
+      <div className="flex items-center py-4 gap-2">
+        <Input
+          placeholder="Filter column 1..."
+          value={(table.getColumn('col1')?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn('col1')?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto">
+              <Settings2 className="h-4 w-4 mr-2" />
+              Columns
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-popover">
+            <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {table
+              .getAllColumns()
+              .filter(column => column.getCanHide())
+              .slice(0, 10) // Only show first 10 columns in dropdown to avoid menu being too long
+              .map(column => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      
       <div className="relative overflow-auto border rounded-md" style={{ maxHeight: '400px', maxWidth: '100%' }}>
         <Table>
           {/* Frozen Header Rows (Top 2) */}
@@ -130,7 +227,7 @@ export default function FrozenDataTable() {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
+              <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
@@ -146,23 +243,56 @@ export default function FrozenDataTable() {
         </Table>
       </div>
       
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+      <div className="flex items-center justify-between py-4">
+        <div className="flex-1 text-sm text-muted-foreground">
+          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
+        </div>
+        
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                href="#" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  table.previousPage();
+                }} 
+                aria-disabled={!table.getCanPreviousPage()}
+                className={!table.getCanPreviousPage() ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+            
+            {Array.from({ length: Math.min(5, table.getPageCount()) }).map((_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink 
+                  href="#" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    table.setPageIndex(i);
+                  }}
+                  isActive={table.getState().pagination.pageIndex === i}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            
+            {table.getPageCount() > 5 && <PaginationEllipsis />}
+            
+            <PaginationItem>
+              <PaginationNext 
+                href="#" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  table.nextPage();
+                }}
+                aria-disabled={!table.getCanNextPage()}
+                className={!table.getCanNextPage() ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );
