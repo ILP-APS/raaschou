@@ -29,9 +29,14 @@ export const useUIUpdates = (
   const updateCellUI = (rowIndex: number, colIndex: number, value: string) => {
     setTableData(prevData => {
       const newData = [...prevData];
-      const rowCopy = [...newData[rowIndex]];
-      rowCopy[colIndex] = value;
-      newData[rowIndex] = rowCopy;
+      if (rowIndex >= 0 && rowIndex < newData.length && colIndex >= 0) {
+        const rowCopy = [...newData[rowIndex]];
+        rowCopy[colIndex] = value;
+        newData[rowIndex] = rowCopy;
+        console.log(`Updated UI cell at row ${rowIndex}, column ${colIndex} with value: ${value}`);
+      } else {
+        console.warn(`Invalid row/column index for UI update: row=${rowIndex}, col=${colIndex}`);
+      }
       return newData;
     });
   };
@@ -53,6 +58,15 @@ export const useUIUpdates = (
       updateCellUI(rowIndex, ColumnIndex.TOTAL, formatDanishNumber(updatedAppointment.total || 0));
     }
   };
+
+  /**
+   * Update produktion timer tilbage cell from appointment data
+   */
+  const updateProduktionTimerTilbageUI = (rowIndex: number, value: string | number) => {
+    const formattedValue = typeof value === 'string' ? value : formatDanishNumber(value);
+    console.log(`Updating Produktion Timer Tilbage UI at row ${rowIndex} with value: ${formattedValue}`);
+    updateCellUI(rowIndex, ColumnIndex.PRODUKTION_TIMER_TILBAGE, formattedValue);
+  };
   
   return {
     updateCellUI,
@@ -67,9 +81,6 @@ export const useUIUpdates = (
       updateCellUI(rowIndex, ColumnIndex.MONTAGE, value),
     updateTimerTilbageUI: (rowIndex: number, value: string) => 
       updateCellUI(rowIndex, ColumnIndex.TIMER_TILBAGE, value),
-    updateProduktionTimerTilbageUI: (rowIndex: number, value: string) => {
-      console.log(`Updating UI for produktion timer tilbage at row ${rowIndex}, column ${ColumnIndex.PRODUKTION_TIMER_TILBAGE} with value: ${value}`);
-      updateCellUI(rowIndex, ColumnIndex.PRODUKTION_TIMER_TILBAGE, value);
-    }
+    updateProduktionTimerTilbageUI
   };
 };

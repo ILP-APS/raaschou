@@ -35,7 +35,7 @@ export const useFieldMapping = () => {
       case 16:
         return 'timer_tilbage_1'; // Projektering timer tilbage
       case 17:
-        return 'timer_tilbage_2'; // Produktion timer tilbage
+        return 'timer_tilbage_2'; // Produktion timer tilbage - This must be correctly mapped
       case 18:
         return 'faerdig_pct_ex_montage_nu';
       case 19:

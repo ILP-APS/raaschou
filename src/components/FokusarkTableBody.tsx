@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 
@@ -92,6 +91,11 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
 
   // Function to render a cell - special handling for editable cells
   const renderCell = (rowIndex: number, cellIndex: number, cellValue: string, isSubAppointment: boolean) => {
+    // Log cell values for debugging (temporarily)
+    if (cellIndex === 17) {
+      console.log(`Rendering cell at row ${rowIndex}, column ${cellIndex} with value: '${cellValue}'`);
+    }
+    
     // If it's an editable column, make it editable
     if (isEditableColumn(cellIndex)) {
       return (
@@ -111,6 +115,11 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
           />
         </td>
       );
+    }
+    
+    // For column 17, ensure it displays a value (even 0)
+    if (cellIndex === 17 && (cellValue === "" || cellValue === undefined)) {
+      cellValue = "0,00";
     }
     
     // Otherwise, render a regular cell
