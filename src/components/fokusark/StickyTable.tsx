@@ -127,17 +127,6 @@ export default function StickyTable() {
     },
   });
 
-  // Helper function to calculate left offset for frozen columns
-  const getColumnOffset = (index: number): number => {
-    let offset = 0;
-    for (let i = 0; i < index; i++) {
-      if ((columns[i].meta as ColumnMeta)?.frozen) {
-        offset += 150; // Fixed column width
-      }
-    }
-    return offset;
-  };
-
   return (
     <div className="w-full space-y-4">
       <div className="rounded-md border overflow-hidden">
@@ -149,17 +138,18 @@ export default function StickyTable() {
               <TableRow className="sticky-header" style={{ backgroundColor: headerBgColor }}>
                 {table.getFlatHeaders().map((header, index) => {
                   const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
-                  const leftOffset = isFrozen ? getColumnOffset(index) : undefined;
                   
                   return (
                     <TableHead
                       key={header.id}
-                      className={isFrozen ? "sticky-cell" : ""}
+                      className={
+                        isFrozen 
+                          ? `sticky-column sticky-column-${index + 1}` 
+                          : ""
+                      }
                       style={{
                         width: '150px',
                         minWidth: '150px',
-                        left: leftOffset ? `${leftOffset}px` : undefined,
-                        zIndex: isFrozen ? 40 : 30,
                         backgroundColor: headerBgColor,
                         boxShadow: isFrozen ? `1px 0 0 0 ${borderColor}` : undefined,
                       }}
@@ -174,17 +164,18 @@ export default function StickyTable() {
               <TableRow className="sticky-subheader" style={{ backgroundColor: subheaderBgColor }}>
                 {table.getFlatHeaders().map((header, index) => {
                   const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
-                  const leftOffset = isFrozen ? getColumnOffset(index) : undefined;
                   
                   return (
                     <TableHead
                       key={`subheader-${header.id}`}
-                      className={isFrozen ? "sticky-cell" : ""}
+                      className={
+                        isFrozen 
+                          ? `sticky-column sticky-column-${index + 1}` 
+                          : ""
+                      }
                       style={{
                         width: '150px',
                         minWidth: '150px',
-                        left: leftOffset ? `${leftOffset}px` : undefined,
-                        zIndex: isFrozen ? 40 : 30,
                         backgroundColor: subheaderBgColor,
                         boxShadow: isFrozen ? `1px 0 0 0 ${borderColor}` : undefined,
                       }}
@@ -201,17 +192,18 @@ export default function StickyTable() {
                 <TableRow key={row.id} style={{ backgroundColor: rowBgColor }}>
                   {row.getVisibleCells().map((cell, index) => {
                     const isFrozen = !!(cell.column.columnDef.meta as ColumnMeta)?.frozen;
-                    const leftOffset = isFrozen ? getColumnOffset(index) : undefined;
                     
                     return (
                       <TableCell
                         key={cell.id}
-                        className={isFrozen ? "sticky-cell" : ""}
+                        className={
+                          isFrozen 
+                            ? `sticky-column sticky-column-${index + 1}` 
+                            : ""
+                        }
                         style={{
                           width: '150px',
                           minWidth: '150px',
-                          left: leftOffset ? `${leftOffset}px` : undefined,
-                          zIndex: isFrozen ? 20 : 10,
                           backgroundColor: rowBgColor,
                           boxShadow: isFrozen ? `1px 0 0 0 ${borderColor}` : undefined,
                         }}

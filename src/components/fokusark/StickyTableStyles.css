@@ -5,6 +5,7 @@
   overflow: auto;
   max-height: 500px;
   max-width: 100%;
+  border-radius: 0.5rem;
 }
 
 /* Make sure the table uses separate borders */
@@ -20,17 +21,30 @@
   position: sticky !important;
   top: 0;
   z-index: 30;
+  background-color: inherit;
 }
 
 .sticky-subheader {
   position: sticky !important;
   top: 41px; /* Match the height of the first header row */
   z-index: 30;
+  background-color: inherit;
 }
 
-.sticky-cell {
+/* Frozen column styling */
+.sticky-column {
   position: sticky !important;
+  left: 0;
   z-index: 20;
+  background-color: inherit;
+}
+
+.sticky-column-1 {
+  left: 0 !important;
+}
+
+.sticky-column-2 {
+  left: 150px !important; /* Width of the first column */
 }
 
 /* Custom scrollbar styles */
