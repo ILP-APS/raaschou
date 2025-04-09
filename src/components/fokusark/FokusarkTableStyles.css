@@ -1,21 +1,21 @@
 
-/* Container styles with a fixed positioning approach */
+/* Container styles with a different approach */
 .sticky-table-container {
-  position: relative;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
   max-height: 70vh;
-  overflow: auto;
   border-radius: 0.5rem;
   border: 1px solid hsl(var(--border));
-  width: 100%; /* Ensure container takes full width */
+  position: relative;
 }
 
-/* Core table styles */
+/* Table styles */
 .sticky-table {
-  width: 100%;
+  width: auto; /* Don't force width */
   border-collapse: separate;
   border-spacing: 0;
-  table-layout: fixed;
-  min-width: 3500px; /* Increase minimum width to ensure more horizontal overflow */
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
 /* Common cell styling */
@@ -25,10 +25,30 @@
   border-right: 1px solid hsl(var(--border));
   border-bottom: 1px solid hsl(var(--border));
   background-color: inherit;
-  box-sizing: border-box;
+}
+
+/* Fixed widths for cells */
+.sticky-table th,
+.sticky-table td {
+  min-width: 120px;
+  max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* First column (ID) is smaller */
+.sticky-table th.col-id,
+.sticky-table td.col-id {
+  min-width: 80px;
+  max-width: 80px;
+}
+
+/* Second column (Name) is wider */
+.sticky-table th.col-name,
+.sticky-table td.col-name {
+  min-width: 180px;
+  max-width: 180px;
 }
 
 /* Header styling */
@@ -39,17 +59,17 @@
   background-color: hsl(var(--muted));
   font-weight: 600;
   text-align: left;
-  white-space: nowrap;
 }
 
 /* Sticky columns */
 .sticky-table .sticky-cell {
   position: sticky;
-  background-color: hsl(var(--background));
+  left: 0;
   z-index: 5;
+  background-color: hsl(var(--background));
 }
 
-/* Increase z-index for sticky header cells that are also sticky columns */
+/* Increase z-index for sticky header that are also sticky columns */
 .sticky-table thead .sticky-cell {
   z-index: 15;
 }
@@ -84,20 +104,4 @@
 /* Ensure sticky columns maintain background on hover */
 .sticky-table tbody tr:hover .sticky-cell {
   background-color: hsl(var(--muted)/30);
-}
-
-/* Ensure all cells have consistent sizing */
-.sticky-table th,
-.sticky-table td {
-  min-width: 150px; /* Set minimum width for all cells */
-  max-width: 150px;
-}
-
-/* First two columns are wider */
-.sticky-table th.col-id,
-.sticky-table td.col-id,
-.sticky-table th.col-name,
-.sticky-table td.col-name {
-  min-width: 180px;
-  max-width: 180px;
 }
