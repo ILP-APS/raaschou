@@ -34,6 +34,11 @@ export const useFokusarkTable = (initialData: string[][]) => {
       // Calculate using the formula: ((Tilbud - Montage) - Underleverandør) * 0.25
       const materialer = ((tilbud - montageValue) - underleverandorValue) * 0.25;
       
+      // Check for NaN and return '0' if the calculation resulted in NaN
+      if (isNaN(materialer)) {
+        return '0';
+      }
+      
       // Format the result with the Danish number format
       return materialer.toLocaleString('da-DK');
     } catch (error) {
