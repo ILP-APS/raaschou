@@ -1,4 +1,5 @@
-import React, { useState, CSSProperties } from 'react';
+
+import React, { useState } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -8,8 +9,7 @@ import {
   createColumnHelper,
   flexRender,
   SortingState,
-  ColumnDef,
-  Column
+  ColumnDef
 } from '@tanstack/react-table';
 import {
   Table,
@@ -19,7 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Pagination,
@@ -97,27 +96,6 @@ const generateSampleData = (): FokusarkRow[] => {
   return data;
 };
 
-// Helper function to apply pinning styles to columns
-const getCommonPinningStyles = (column: Column<FokusarkRow>): CSSProperties => {
-  const isPinned = column.getIsPinned();
-  const isLastLeftPinnedColumn = isPinned === 'left' && column.getIsLastColumn('left');
-  const isFirstRightPinnedColumn = isPinned === 'right' && column.getIsFirstColumn('right');
-
-  return {
-    boxShadow: isLastLeftPinnedColumn
-      ? '-4px 0 4px -4px gray inset'
-      : isFirstRightPinnedColumn
-        ? '4px 0 4px -4px gray inset'
-        : undefined,
-    left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
-    right: isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
-    opacity: isPinned ? 0.95 : 1,
-    position: isPinned ? 'sticky' : 'relative',
-    width: column.getSize(),
-    zIndex: isPinned ? 1 : 0,
-  };
-};
-
 export default function FrozenDataTable() {
   const [data] = useState<FokusarkRow[]>(() => generateSampleData());
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -126,19 +104,17 @@ export default function FrozenDataTable() {
   // Create a column helper based on our data type
   const columnHelper = createColumnHelper<FokusarkRow>();
   
-  // Define columns with column helper, enabling pinning
+  // Define columns with column helper
   const columns = React.useMemo<ColumnDef<FokusarkRow>[]>(
     () => [
       columnHelper.accessor('nr', {
         header: 'Nr.',
         cell: info => info.getValue(),
-        enablePinning: true,
         size: 80,
       }),
       columnHelper.accessor('navn', {
         header: 'Navn',
         cell: info => info.getValue(),
-        enablePinning: true,
         size: 250,
       }),
       columnHelper.accessor('ansvarlig', {
@@ -280,9 +256,6 @@ export default function FrozenDataTable() {
     state: {
       sorting,
       globalFilter,
-      columnPinning: {
-        left: ['nr', 'navn']
-      }
     },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
@@ -308,20 +281,11 @@ export default function FrozenDataTable() {
         />
       </div>
       
-      <div className="table-container border rounded-md overflow-auto" style={{ maxHeight: '500px' }}>
+      <div className="border rounded-md overflow-auto" style={{ maxHeight: '500px' }}>
         <style jsx>{`
-          .table-container {
-            overflow: auto;
-            position: relative;
-          }
-          
           table {
             border-collapse: separate;
             border-spacing: 0;
-          }
-          
-          th, td {
-            box-sizing: border-box;
           }
           
           /* Resize handle styles */
@@ -368,7 +332,6 @@ export default function FrozenDataTable() {
                 {headerGroup.headers.map(header => (
                   <TableHead
                     key={header.id}
-                    style={getCommonPinningStyles(header.column)}
                     onClick={header.column.getToggleSortingHandler()}
                     className="relative"
                   >
@@ -398,7 +361,6 @@ export default function FrozenDataTable() {
                   {row.getVisibleCells().map((cell) => (
                     <TableCell 
                       key={cell.id}
-                      style={getCommonPinningStyles(cell.column)}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
