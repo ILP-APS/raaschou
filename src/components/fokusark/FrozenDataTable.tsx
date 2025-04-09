@@ -67,13 +67,23 @@ type FokusarkRow = {
   estTimerIftFaerdigPct: string;
   plusMinusTimer: string;
   afsatFragt: string;
+  col1: string; // Additional columns
+  col2: string;
+  col3: string;
+  col4: string;
+  col5: string;
+  col6: string;
+  col7: string;
+  col8: string;
+  col9: string;
+  col10: string;
   isSubAppointment: boolean;
 };
 
 // Generate sample data for the table
 const generateSampleData = (): FokusarkRow[] => {
   const data: FokusarkRow[] = [];
-  for (let i = 1; i <= 50; i++) {
+  for (let i = 1; i <= 60; i++) { // Increased to 60 rows for more data
     const row: FokusarkRow = {
       id: i,
       nr: `A-${100 + i}`,
@@ -99,6 +109,17 @@ const generateSampleData = (): FokusarkRow[] => {
       estTimerIftFaerdigPct: (Math.random() * 300).toFixed(2).replace('.', ','),
       plusMinusTimer: (Math.random() * 50 - 25).toFixed(2).replace('.', ','),
       afsatFragt: (Math.random() * 5000).toFixed(2).replace('.', ','),
+      // Additional columns with dummy data
+      col1: `Value ${(Math.random() * 1000).toFixed(0)}`,
+      col2: `Value ${(Math.random() * 1000).toFixed(0)}`,
+      col3: `Value ${(Math.random() * 1000).toFixed(0)}`,
+      col4: `Value ${(Math.random() * 1000).toFixed(0)}`,
+      col5: `Value ${(Math.random() * 1000).toFixed(0)}`,
+      col6: `Value ${(Math.random() * 1000).toFixed(0)}`,
+      col7: `Value ${(Math.random() * 1000).toFixed(0)}`,
+      col8: `Value ${(Math.random() * 1000).toFixed(0)}`,
+      col9: `Value ${(Math.random() * 1000).toFixed(0)}`,
+      col10: `Value ${(Math.random() * 1000).toFixed(0)}`,
       isSubAppointment: i % 3 === 0
     };
     data.push(row);
@@ -167,6 +188,93 @@ export default function FrozenDataTable() {
         ),
         size: 120,
       }),
+      columnHelper.accessor('montage', {
+        header: 'Montage',
+        cell: info => (
+          <div className="text-right font-mono">
+            kr. {info.getValue()}
+          </div>
+        ),
+        size: 120,
+      }),
+      columnHelper.accessor('underleverandor', {
+        header: 'Underleverandør',
+        cell: info => (
+          <div className="text-right font-mono">
+            kr. {info.getValue()}
+          </div>
+        ),
+        size: 150,
+      }),
+      columnHelper.accessor('materialer', {
+        header: 'Materialer',
+        cell: info => (
+          <div className="text-right font-mono">
+            kr. {info.getValue()}
+          </div>
+        ),
+        size: 120,
+      }),
+      columnHelper.accessor('projektering', {
+        header: 'Projektering',
+        cell: info => (
+          <div className="text-right font-mono">
+            kr. {info.getValue()}
+          </div>
+        ),
+        size: 120,
+      }),
+      // Adding 10 additional columns
+      columnHelper.accessor('col1', {
+        header: 'Column 1',
+        cell: info => info.getValue(),
+        size: 120,
+      }),
+      columnHelper.accessor('col2', {
+        header: 'Column 2',
+        cell: info => info.getValue(),
+        size: 120,
+      }),
+      columnHelper.accessor('col3', {
+        header: 'Column 3',
+        cell: info => info.getValue(),
+        size: 120,
+      }),
+      columnHelper.accessor('col4', {
+        header: 'Column 4',
+        cell: info => info.getValue(),
+        size: 120,
+      }),
+      columnHelper.accessor('col5', {
+        header: 'Column 5',
+        cell: info => info.getValue(),
+        size: 120,
+      }),
+      columnHelper.accessor('col6', {
+        header: 'Column 6',
+        cell: info => info.getValue(),
+        size: 120,
+      }),
+      columnHelper.accessor('col7', {
+        header: 'Column 7',
+        cell: info => info.getValue(),
+        size: 120,
+      }),
+      columnHelper.accessor('col8', {
+        header: 'Column 8',
+        cell: info => info.getValue(),
+        size: 120,
+      }),
+      columnHelper.accessor('col9', {
+        header: 'Column 9',
+        cell: info => info.getValue(),
+        size: 120,
+      }),
+      columnHelper.accessor('col10', {
+        header: 'Column 10',
+        cell: info => info.getValue(),
+        size: 120,
+      }),
       {
         id: 'actions',
         cell: ({ row }) => {
@@ -216,7 +324,7 @@ export default function FrozenDataTable() {
     getFilteredRowModel: getFilteredRowModel(),
     initialState: {
       pagination: {
-        pageSize: 5,
+        pageSize: 10, // Increased page size
       },
     },
   });
@@ -252,60 +360,64 @@ export default function FrozenDataTable() {
         </div>
       </div>
       
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead 
-                    key={header.id}
-                    onClick={header.column.getToggleSortingHandler()}
-                    className="bg-muted/30"
-                  >
-                    <div className="flex items-center justify-between">
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                      {header.column.getCanSort() && (
-                        <div className="pl-1">
-                          {{
-                            asc: <ChevronUp className="h-4 w-4" />,
-                            desc: <ChevronDown className="h-4 w-4" />
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </div>
-                      )}
-                    </div>
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() ? "selected" : undefined}
-                  className={row.original.isSubAppointment ? 'bg-muted/20' : ''}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell 
-                      key={cell.id}
-                      className="py-3"
+      <div className="rounded-md border overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead 
+                      key={header.id}
+                      onClick={header.column.getToggleSortingHandler()}
+                      className="bg-muted/30"
+                      style={{ width: header.getSize() !== 0 ? header.getSize() : undefined }}
                     >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+                      <div className="flex items-center justify-between">
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {header.column.getCanSort() && (
+                          <div className="pl-1">
+                            {{
+                              asc: <ChevronUp className="h-4 w-4" />,
+                              desc: <ChevronDown className="h-4 w-4" />
+                            }[header.column.getIsSorted() as string] ?? null}
+                          </div>
+                        )}
+                      </div>
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() ? "selected" : undefined}
+                    className={row.original.isSubAppointment ? 'bg-muted/20' : ''}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell 
+                        key={cell.id}
+                        className="py-3"
+                        style={{ width: cell.column.getSize() !== 0 ? cell.column.getSize() : undefined }}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
       
       <div className="flex items-center justify-between py-4">
