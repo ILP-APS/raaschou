@@ -26,7 +26,11 @@ export const transformApiDataToAppointments = (tableData: string[][]): FokusarkA
       tilbud: parseNumber(row[3]),
       montage: parseNumber(row[4]),
       underleverandor: parseNumber(row[5]),
-      is_sub_appointment: isSubApp
+      is_sub_appointment: isSubApp,
+      // Initialize with empty values
+      montage2: null,
+      underleverandor2: null,
+      materialer: null
     };
     
     // Add Montage 2 and Underleverandor 2 if they contain actual values
@@ -57,16 +61,16 @@ export const transformAppointmentsToDisplayData = (appointments: FokusarkAppoint
     row[0] = appointment.appointment_number;
     row[1] = appointment.subject || 'N/A';
     row[2] = appointment.responsible_person || 'Unknown';
-    row[3] = formatNumberToDanish(appointment.tilbud);
-    row[4] = formatNumberToDanish(appointment.montage);
-    row[5] = formatNumberToDanish(appointment.underleverandor);
-    row[6] = appointment.montage2 ? formatNumberToDanish(appointment.montage2) : `R${row[0]}C7`;
-    row[7] = appointment.underleverandor2 ? formatNumberToDanish(appointment.underleverandor2) : `R${row[0]}C8`;
+    row[3] = formatNumberToDanish(appointment.tilbud || 0);
+    row[4] = formatNumberToDanish(appointment.montage || 0);
+    row[5] = formatNumberToDanish(appointment.underleverandor || 0);
+    row[6] = appointment.montage2 !== null ? formatNumberToDanish(appointment.montage2) : '';
+    row[7] = appointment.underleverandor2 !== null ? formatNumberToDanish(appointment.underleverandor2) : '';
     row[8] = formatNumberToDanish(appointment.materialer || 0);
     
     // Add placeholder data for remaining columns
-    for (let i = 9; i < 23; i++) {
-      row[i] = `R${row[0]}C${i+1}`;
+    for (let i = 9; i < 24; i++) {
+      row[i] = '';
     }
     
     // Add visual indication for sub-appointments
@@ -81,7 +85,7 @@ export const transformAppointmentsToDisplayData = (appointments: FokusarkAppoint
  */
 export const formatNumberToDanish = (value: number): string => {
   // Check for NaN
-  if (isNaN(value)) return '0';
+  if (isNaN(value)) return '0,00';
 
   return value.toLocaleString('da-DK', {
     minimumFractionDigits: 2,
@@ -94,7 +98,10 @@ export const formatNumberToDanish = (value: number): string => {
  */
 export const loadFokusarkAppointments = async (): Promise<FokusarkAppointment[]> => {
   try {
-    return await fetchFokusarkAppointments();
+    console.log('Loading fokusark appointments from Supabase...');
+    const appointments = await fetchFokusarkAppointments();
+    console.log(`Loaded ${appointments.length} appointments from Supabase`);
+    return appointments;
   } catch (error) {
     console.error('Error loading fokusark appointments:', error);
     throw error;
@@ -106,11 +113,16 @@ export const loadFokusarkAppointments = async (): Promise<FokusarkAppointment[]>
  */
 export const saveApiDataToSupabase = async (tableData: string[][]): Promise<FokusarkAppointment[]> => {
   try {
+    console.log('Saving appointment data to Supabase...');
+    console.log('Table data rows:', tableData.length);
+    
     // Transform the API data to appointments
     const appointments = transformApiDataToAppointments(tableData);
+    console.log('Transformed appointments:', appointments.length);
     
     // Save all appointments in a batch operation
-    await batchUpsertFokusarkAppointments(appointments);
+    const result = await batchUpsertFokusarkAppointments(appointments);
+    console.log('Batch upsert result:', result);
     
     // Return the saved appointments
     return await loadFokusarkAppointments();
@@ -129,6 +141,7 @@ export const updateAppointmentField = async (
   value: any
 ): Promise<FokusarkAppointment> => {
   try {
+    console.log(`Updating ${field} for appointment ${appointmentNumber} to ${value}`);
     return await updateFokusarkAppointmentField(appointmentNumber, field, value);
   } catch (error) {
     console.error(`Error updating ${field} for appointment ${appointmentNumber}:`, error);

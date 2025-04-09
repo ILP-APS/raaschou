@@ -29,12 +29,14 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       try {
         setIsLoading(true);
+        console.log('Initializing Fokusark data...');
         
         // First, try to load existing data from Supabase
         let appointmentsData: FokusarkAppointment[] = [];
         
         try {
           appointmentsData = await loadFokusarkAppointments();
+          console.log(`Loaded ${appointmentsData.length} existing appointments`);
         } catch (error) {
           console.error('Error loading existing appointment data:', error);
           // Continue with empty array if load fails
@@ -48,7 +50,10 @@ export const useFokusarkTable = (initialData: string[][]) => {
           });
           
           try {
+            console.log('No existing data found. Saving initial data...');
             appointmentsData = await saveApiDataToSupabase(initialData);
+            console.log(`Successfully saved ${appointmentsData.length} appointments`);
+            
             toast({
               title: "Database initialized",
               description: `Successfully saved ${appointmentsData.length} appointments`,
@@ -57,7 +62,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
             console.error('Error saving initial data to Supabase:', error);
             toast({
               title: "Error initializing database",
-              description: "Could not save initial data to database",
+              description: "Could not save initial data to database. See console for details.",
               variant: "destructive",
             });
             
@@ -129,6 +134,8 @@ export const useFokusarkTable = (initialData: string[][]) => {
     
     // Save to Supabase
     try {
+      console.log(`Updating ${fieldName} for appointment ${appointmentNumber} to ${parsedValue}`);
+      
       // Update the field in Supabase
       const updatedAppointment = await updateAppointmentField(
         appointmentNumber, 
