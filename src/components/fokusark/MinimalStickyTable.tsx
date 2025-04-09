@@ -134,68 +134,61 @@ export default function MinimalStickyTable() {
       }}>
         <TableHeader>
           <TableRow>
-            <TableHead
-              colSpan={3}
-              style={{
-                position: 'relative',
-                backgroundColor: headerBgColor,
-                textAlign: 'center',
-                fontWeight: 'bold',
-                borderBottom: '1px solid hsl(var(--border))',
-                height: headerGroupHeight
-              }}
-            >
-              <div style={{ 
-                width: '100%', 
-                height: '100%', 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center',
-                position: 'absolute',
-                top: 0,
-                left: 0
-              }}>
-                Info
-              </div>
+            {headerGroups.map((group, groupIndex) => {
+              const isInfoGroup = group.id === 'Info';
               
-              <div
-                style={{
-                  position: 'sticky',
-                  left: 0,
-                  top: 0,
-                  width: '260px',
-                  height: '100%',
-                  backgroundColor: headerBgColor,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  zIndex: 1,
-                  boxShadow: '2px 0 5px -2px rgba(0,0,0,0.15)'
-                }}
-              >
-                Info
-              </div>
-            </TableHead>
-            
-            {headerGroups.slice(1).map((group) => (
-              <TableHead
-                key={`group-${group.id}`}
-                colSpan={group.colSpan}
-                style={{
-                  position: 'static',
-                  top: 0,
-                  zIndex: 50,
-                  backgroundColor: headerBgColor,
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  boxShadow: '0 2px 0 0 rgba(0,0,0,0.1)',
-                  borderBottom: '1px solid hsl(var(--border))',
-                  height: headerGroupHeight
-                }}
-              >
-                {group.title}
-              </TableHead>
-            ))}
+              return (
+                <TableHead
+                  key={`group-${group.id}`}
+                  colSpan={group.colSpan}
+                  style={{
+                    position: isInfoGroup ? 'relative' : 'static',
+                    top: 0,
+                    zIndex: isInfoGroup ? 100 : 50,
+                    backgroundColor: headerBgColor,
+                    textAlign: 'center',
+                    fontWeight: 'bold',
+                    boxShadow: '0 2px 0 0 rgba(0,0,0,0.1)',
+                    borderBottom: '1px solid hsl(var(--border))',
+                    height: headerGroupHeight
+                  }}
+                >
+                  {!isInfoGroup && group.title}
+                  
+                  {isInfoGroup && (
+                    <>
+                      <div style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center'
+                      }}>
+                        {group.title}
+                      </div>
+                      
+                      <div
+                        style={{
+                          position: 'sticky',
+                          left: 0,
+                          top: 0,
+                          width: '260px',
+                          height: '100%',
+                          backgroundColor: headerBgColor,
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          zIndex: 1,
+                          boxShadow: '2px 0 5px -2px rgba(0,0,0,0.15)'
+                        }}
+                      >
+                        {group.title}
+                      </div>
+                    </>
+                  )}
+                </TableHead>
+              );
+            })}
           </TableRow>
           
           <TableRow>
