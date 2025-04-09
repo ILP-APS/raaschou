@@ -1,7 +1,8 @@
 
-import React from "react";
+import React, { useContext } from "react";
 import RefreshRealizedHoursButton from "./buttons/RefreshRealizedHoursButton";
 import RecalculateValuesButton from "./buttons/RecalculateValuesButton";
+import { FokusarkDataContext } from "@/contexts/FokusarkDataContext";
 
 interface TableActionsProps {
   tableData: string[][];

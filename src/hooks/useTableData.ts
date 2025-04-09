@@ -1,8 +1,7 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAppointments } from "./useAppointments";
 import { useUsers } from "./useUsers";
-import { Appointment } from "@/types/appointment";
 import { 
   createUserMap, 
   getAppointmentDetail, 
@@ -17,11 +16,17 @@ import { updateRealizedHours } from "@/api/fokusarkAppointmentsApi";
 export const useTableData = () => {
   const [tableData, setTableData] = useState<string[][]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { appointments, isLoading: isLoadingAppointments, error: appointmentsError } = useAppointments();
   const { users, isLoading: isLoadingUsers, error: usersError } = useUsers();
   const { toast } = useToast();
   
   const isLoading = isLoadingAppointments || isLoadingUsers || isProcessing;
+  
+  // Function to manually trigger a data refresh
+  const refetchData = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
   
   useEffect(() => {
     const buildTableData = async () => {
@@ -39,97 +44,87 @@ export const useTableData = () => {
         const userMap = createUserMap(users);
         
         const processedData: string[][] = [];
+        const batchSize = 10;
+        const appointmentBatches = [];
         
-        for (const appointment of appointments) {
-          try {
-            const details = await getAppointmentDetail(appointment.hnAppointmentID);
-            
-            if (details.done) {
-              continue;
-            }
-            
-            const responsibleUserName = userMap.get(details.responsibleHnUserID) || 'Unknown';
-            
-            const { offerTotal, montageTotal, underleverandorTotal } = 
-              await getOfferLineItems(details.hnOfferID);
-            
-            // Get realized hours from API
-            const realizedHours = await getRealizedHours(appointment.hnAppointmentID);
-            console.log(`[Realized hours API] Got data for ${appointment.appointmentNumber}:`, realizedHours);
-            
+        // Create batches of appointments
+        for (let i = 0; i < appointments.length; i += batchSize) {
+          appointmentBatches.push(appointments.slice(i, i + batchSize));
+        }
+        
+        // Process each batch
+        for (const batch of appointmentBatches) {
+          const batchPromises = batch.map(async (appointment) => {
             try {
-              // Parse realized hours from API (these are already formatted strings)
-              const projekteringNum = parseFloat(realizedHours.projektering.replace(/\./g, '').replace(',', '.')) || 0;
-              const produktionNum = parseFloat(realizedHours.produktion.replace(/\./g, '').replace(',', '.')) || 0;
-              const montageNum = parseFloat(realizedHours.montage.replace(/\./g, '').replace(',', '.')) || 0;
-              const totalNum = parseFloat(realizedHours.total.replace(/\./g, '').replace(',', '.')) || 0;
+              const details = await getAppointmentDetail(appointment.hnAppointmentID);
               
-              console.log(`[Realized hours API] Parsed values for ${appointment.appointmentNumber}:`, {
-                projektering: projekteringNum,
-                produktion: produktionNum, // API value for realized production
-                montage: montageNum,
-                total: totalNum
-              });
+              if (details.done) {
+                return null;
+              }
               
-              // Store realized hours in database - ensure we're using the correct columns
-              await updateRealizedHours(
+              const responsibleUserName = userMap.get(details.responsibleHnUserID) || 'Unknown';
+              
+              const { offerTotal, montageTotal, underleverandorTotal } = 
+                await getOfferLineItems(details.hnOfferID);
+              
+              // Get realized hours from API
+              const realizedHours = await getRealizedHours(appointment.hnAppointmentID);
+              
+              const offerTotalNumber = parseFloat(offerTotal.replace(/[^0-9,]/g, '').replace(',', '.'));
+              
+              if (offerTotalNumber <= 40000) {
+                return null;
+              }
+              
+              // Build the row of data
+              const row = [
                 appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
-                projekteringNum,
-                produktionNum, // API produktion value goes to produktion_realized field
-                montageNum,
-                totalNum
+                details.subject || 'N/A',
+                responsibleUserName,
+                offerTotal,
+                montageTotal,
+                underleverandorTotal,
+              ];
+              
+              row.push('0', '0');
+              
+              // For columns 8-11 (materialer, projektering, produktion, montage)
+              // These are calculated fields, not from API
+              for (let i = 8; i < 12; i++) {
+                row.push(`R${processedData.length + 1}C${i + 1}`);
+              }
+              
+              // Add the realized values from the API (columns 12-15)
+              row.push(
+                realizedHours.projektering, 
+                realizedHours.produktion,
+                realizedHours.montage, 
+                realizedHours.total
               );
               
-              console.log(`[Realized hours API] Updated realized hours in Supabase for appointment ${appointment.appointmentNumber}`);
-            } catch (updateError) {
-              console.error(`Error updating realized hours for ${appointment.appointmentNumber}:`, updateError);
+              // Add remaining placeholder columns
+              for (let i = 16; i < 23; i++) {
+                row.push(`R${processedData.length + 1}C${i + 1}`);
+              }
+              
+              const isSubApp = isSubAppointment(appointment.appointmentNumber);
+              row.push(isSubApp ? 'sub-appointment' : 'parent-appointment');
+              
+              return row;
+            } catch (error) {
+              console.error(`Error processing appointment ${appointment.hnAppointmentID}:`, error);
+              return null;
             }
-            
-            const offerTotalNumber = parseFloat(offerTotal.replace(/[^0-9,]/g, '').replace(',', '.'));
-            
-            if (offerTotalNumber <= 40000) {
-              continue;
+          });
+          
+          const batchResults = await Promise.all(batchPromises);
+          
+          // Filter out null results and add valid rows to processedData
+          batchResults.forEach(row => {
+            if (row !== null) {
+              processedData.push(row);
             }
-            
-            // Build the row of data
-            const row = [
-              appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
-              details.subject || 'N/A',
-              responsibleUserName,
-              offerTotal,
-              montageTotal,
-              underleverandorTotal,
-            ];
-            
-            row.push('0', '0');
-            
-            // For columns 8-11 (materialer, projektering, produktion, montage)
-            // These are calculated fields, not from API
-            for (let i = 8; i < 12; i++) {
-              row.push(`R${processedData.length + 1}C${i + 1}`);
-            }
-            
-            // Add the realized values from the API (columns 12-15)
-            row.push(
-              realizedHours.projektering, 
-              realizedHours.produktion, // API value for realized production
-              realizedHours.montage, 
-              realizedHours.total
-            );
-            
-            // Add remaining placeholder columns
-            for (let i = 16; i < 23; i++) {
-              row.push(`R${processedData.length + 1}C${i + 1}`);
-            }
-            
-            const isSubApp = isSubAppointment(appointment.appointmentNumber);
-            row.push(isSubApp ? 'sub-appointment' : 'parent-appointment');
-            
-            processedData.push(row);
-          } catch (error) {
-            console.error(`Error processing appointment ${appointment.hnAppointmentID}:`, error);
-            continue;
-          }
+          });
         }
         
         if (processedData.length === 0) {
@@ -142,8 +137,8 @@ export const useTableData = () => {
         } else {
           setTableData(processedData);
           toast({
-            title: "Filtered data loaded",
-            description: `Loaded ${processedData.length} appointments that are not done and have offer > 40,000.`,
+            title: "Data loaded",
+            description: `Loaded ${processedData.length} appointments.`,
             variant: "default",
           });
         }
@@ -161,7 +156,7 @@ export const useTableData = () => {
     };
     
     buildTableData();
-  }, [appointments, users, isLoadingAppointments, isLoadingUsers, appointmentsError, usersError, toast]);
+  }, [appointments, users, isLoadingAppointments, isLoadingUsers, appointmentsError, usersError, toast, refreshTrigger]);
   
-  return { tableData, isLoading: isLoading, error: appointmentsError || usersError };
+  return { tableData, isLoading, error: appointmentsError || usersError, refetchData };
 };

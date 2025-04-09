@@ -44,7 +44,7 @@ export function getWorkTypeCategory(workTypeId: number): WorkCategory {
 }
 
 /**
- * Calculate realized hours from appointment line work data
+ * Optimized version of calculateRealizedHours to reduce unnecessary calculations
  * Groups hours by category (projektering, produktion, montage)
  */
 export function calculateRealizedHours(lineWorkData: any[]): {
@@ -62,35 +62,27 @@ export function calculateRealizedHours(lineWorkData: any[]): {
   };
   
   // If no data provided, return zeros
-  if (!lineWorkData || !Array.isArray(lineWorkData)) {
-    console.warn('No line work data provided or invalid format');
+  if (!lineWorkData || !Array.isArray(lineWorkData) || lineWorkData.length === 0) {
     return hours;
   }
   
   console.log(`Processing ${lineWorkData.length} line work entries`);
   
-  // Sum up hours by work type category
-  lineWorkData.forEach(entry => {
+  // Optimize the loop by avoiding multiple lookups and calculations inside the loop
+  for (const entry of lineWorkData) {
     // Skip entries with missing data
-    if (!entry || !entry.hnWorkTypeID || typeof entry.units !== 'number') {
-      console.warn('Skipping invalid line work entry:', entry);
-      return;
+    if (!entry?.hnWorkTypeID || typeof entry.units !== 'number') {
+      continue;
     }
     
     const workTypeId = entry.hnWorkTypeID;
     const units = entry.units || 0;
     
-    // Get category for this work type
-    const category = getWorkTypeCategory(workTypeId);
+    // Get category for this work type using direct map lookup (faster)
+    const category = workTypeCategoryMap[workTypeId] || 'other';
     
-    // Add units to appropriate category
-    if (category === 'projektering') {
-      hours.projektering += units;
-    } else if (category === 'produktion') {
-      hours.produktion += units;
-    } else if (category === 'montage') {
-      hours.montage += units;
-    }
+    // Add units to appropriate category using single-step increment
+    hours[category] += units;
     
     // Log detailed info for debugging specific appointments
     if (entry.hnAppointmentID === 24375) {
@@ -99,7 +91,7 @@ export function calculateRealizedHours(lineWorkData: any[]): {
     
     // Add to total regardless of category
     hours.total += units;
-  });
+  }
   
   console.log('Calculated realized hours:', hours);
   

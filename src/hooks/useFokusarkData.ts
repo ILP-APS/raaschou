@@ -1,10 +1,10 @@
 
 import { useTableData } from "./useTableData";
 import { useUsers } from "./useUsers";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export const useFokusarkData = () => {
-  const { tableData: initialData, isLoading: isLoadingInitial } = useTableData();
+  const { tableData: initialData, isLoading: isLoadingInitial, refetchData } = useTableData();
   const { users } = useUsers();
   const [isDataReady, setIsDataReady] = useState(false);
   
@@ -15,9 +15,17 @@ export const useFokusarkData = () => {
     }
   }, [initialData, isLoadingInitial, isDataReady]);
   
+  // Expose function to manually trigger a data refresh
+  const refreshData = useCallback(() => {
+    if (refetchData) {
+      refetchData();
+    }
+  }, [refetchData]);
+  
   return { 
     tableData: initialData, 
     isLoading: isLoadingInitial || !isDataReady, 
-    users 
+    users,
+    refreshData
   };
 };
