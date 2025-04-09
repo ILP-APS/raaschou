@@ -54,60 +54,6 @@ const generateData = (): DataItem[] => {
 
 const data = generateData();
 
-// Column definitions with pinned columns
-const columns: ColumnDef<DataItem>[] = [
-  {
-    accessorKey: 'col1',
-    header: 'Nr.',
-    meta: { width: 100, isSticky: true, stickyIndex: 0 },
-  },
-  {
-    accessorKey: 'col2',
-    header: 'Navn',
-    meta: { width: 150, isSticky: true, stickyIndex: 1 },
-  },
-  {
-    accessorKey: 'col3',
-    header: 'Column 3',
-    meta: { width: 150 },
-  },
-  {
-    accessorKey: 'col4',
-    header: 'Column 4',
-    meta: { width: 150 },
-  },
-  {
-    accessorKey: 'col5',
-    header: 'Column 5',
-    meta: { width: 150 },
-  },
-  {
-    accessorKey: 'col6',
-    header: 'Column 6',
-    meta: { width: 150 },
-  },
-  {
-    accessorKey: 'col7',
-    header: 'Column 7',
-    meta: { width: 150 },
-  },
-  {
-    accessorKey: 'col8',
-    header: 'Column 8',
-    meta: { width: 150 },
-  },
-  {
-    accessorKey: 'col9',
-    header: 'Column 9',
-    meta: { width: 150 },
-  },
-  {
-    accessorKey: 'col10',
-    header: 'Column 10',
-    meta: { width: 150 },
-  },
-];
-
 export default function StickyTable() {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
@@ -117,7 +63,71 @@ export default function StickyTable() {
   const subheaderBgColor = isDarkMode ? 'hsl(var(--muted)/50)' : '#f5f5f5';
   const rowBgColor = isDarkMode ? 'hsl(var(--background))' : 'white';
   
-  // Initialize table
+  // Column definitions with pinning
+  const columns: ColumnDef<DataItem>[] = [
+    {
+      accessorKey: 'col1',
+      header: 'Nr.',
+      size: 100,
+      enablePinning: true,
+    },
+    {
+      accessorKey: 'col2',
+      header: 'Navn',
+      size: 150,
+      enablePinning: true,
+    },
+    {
+      accessorKey: 'col3',
+      header: 'Column 3',
+      size: 150,
+      enablePinning: true,
+    },
+    {
+      accessorKey: 'col4',
+      header: 'Column 4',
+      size: 150,
+      enablePinning: true,
+    },
+    {
+      accessorKey: 'col5',
+      header: 'Column 5',
+      size: 150,
+      enablePinning: true,
+    },
+    {
+      accessorKey: 'col6',
+      header: 'Column 6',
+      size: 150,
+      enablePinning: true,
+    },
+    {
+      accessorKey: 'col7',
+      header: 'Column 7',
+      size: 150,
+      enablePinning: true,
+    },
+    {
+      accessorKey: 'col8',
+      header: 'Column 8',
+      size: 150,
+      enablePinning: true,
+    },
+    {
+      accessorKey: 'col9',
+      header: 'Column 9',
+      size: 150,
+      enablePinning: true,
+    },
+    {
+      accessorKey: 'col10',
+      header: 'Column 10',
+      size: 150,
+      enablePinning: true,
+    },
+  ];
+
+  // Initialize table with column pinning
   const table = useReactTable({
     data,
     columns,
@@ -127,100 +137,166 @@ export default function StickyTable() {
       pagination: {
         pageSize: 10,
       },
+      columnPinning: {
+        left: ['col1', 'col2'], // Pin first and second columns to the left
+      }
+    },
+    // This is needed to maintain the columnPinning state
+    state: {
+      columnPinning: {
+        left: ['col1', 'col2'], // Pin first and second columns to the left
+      }
     },
   });
-
-  // Get sticky column class based on column index
-  const getStickyColumnClass = (colIndex: number) => {
-    const column = columns[colIndex];
-    if (!column || !column.meta) return '';
-    
-    const { isSticky, stickyIndex } = column.meta as any;
-    
-    if (!isSticky) return '';
-    
-    return `sticky-column-${stickyIndex}`;
-  };
 
   return (
     <div className="w-full space-y-4">
       <div className="rounded-md border overflow-hidden">
-        {/* Define CSS variables for dynamic styling */}
         <div 
-          className="sticky-table-container"
-          style={
-            {
-              '--header-bg-color': headerBgColor,
-              '--subheader-bg-color': subheaderBgColor,
-            } as React.CSSProperties
-          }
+          className="overflow-x-auto"
+          style={{
+            maxHeight: '500px',
+            '--header-bg-color': headerBgColor,
+            '--subheader-bg-color': subheaderBgColor,
+          } as React.CSSProperties}
         >
-          <Table className="sticky-table">
+          <Table>
             <TableHeader>
               {/* Header row */}
               <TableRow>
-                {table.getHeaderGroups()[0].headers.map((header, index) => {
-                  const width = (header.column.columnDef.meta as any)?.width || 150;
-                  const stickyClass = getStickyColumnClass(index);
-                  
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className={`sticky-header-cell ${stickyClass}`}
-                      style={{
-                        width: `${width}px`,
-                        minWidth: `${width}px`,
-                      }}
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  );
-                })}
+                {table.getLeftHeaderGroups()[0].headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    style={{
+                      width: `${header.getSize()}px`,
+                      backgroundColor: headerBgColor,
+                      position: 'sticky',
+                      left: `${header.getStart('left')}px`,
+                      zIndex: 3,
+                    }}
+                  >
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+                
+                {table.getCenterHeaderGroups()[0].headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    style={{
+                      width: `${header.getSize()}px`,
+                      backgroundColor: headerBgColor,
+                    }}
+                  >
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+                
+                {table.getRightHeaderGroups()[0].headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    style={{
+                      width: `${header.getSize()}px`,
+                      backgroundColor: headerBgColor,
+                      position: 'sticky',
+                      right: `${header.getStart('right')}px`,
+                      zIndex: 3,
+                    }}
+                  >
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
               </TableRow>
               
               {/* Subheader row */}
               <TableRow>
-                {table.getHeaderGroups()[0].headers.map((header, index) => {
-                  const width = (header.column.columnDef.meta as any)?.width || 150;
-                  const stickyClass = getStickyColumnClass(index);
-                  
-                  return (
-                    <TableHead
-                      key={`subheader-${header.id}`}
-                      className={`sticky-subheader-cell ${stickyClass}`}
-                      style={{
-                        width: `${width}px`,
-                        minWidth: `${width}px`,
-                      }}
-                    >
-                      {`Sub ${index + 1}`}
-                    </TableHead>
-                  );
-                })}
+                {table.getLeftHeaderGroups()[0].headers.map((header, index) => (
+                  <TableHead
+                    key={`subheader-left-${header.id}`}
+                    style={{
+                      width: `${header.getSize()}px`,
+                      backgroundColor: subheaderBgColor,
+                      position: 'sticky',
+                      left: `${header.getStart('left')}px`,
+                      zIndex: 3,
+                    }}
+                  >
+                    {`Sub ${index + 1}`}
+                  </TableHead>
+                ))}
+                
+                {table.getCenterHeaderGroups()[0].headers.map((header, index) => (
+                  <TableHead
+                    key={`subheader-center-${header.id}`}
+                    style={{
+                      width: `${header.getSize()}px`,
+                      backgroundColor: subheaderBgColor,
+                    }}
+                  >
+                    {`Sub ${index + table.getLeftHeaderGroups()[0].headers.length + 1}`}
+                  </TableHead>
+                ))}
+                
+                {table.getRightHeaderGroups()[0].headers.map((header, index) => (
+                  <TableHead
+                    key={`subheader-right-${header.id}`}
+                    style={{
+                      width: `${header.getSize()}px`,
+                      backgroundColor: subheaderBgColor,
+                      position: 'sticky',
+                      right: `${header.getStart('right')}px`,
+                      zIndex: 3,
+                    }}
+                  >
+                    {`Sub ${index + table.getLeftHeaderGroups()[0].headers.length + table.getCenterHeaderGroups()[0].headers.length + 1}`}
+                  </TableHead>
+                ))}
               </TableRow>
             </TableHeader>
             
             <TableBody>
               {table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell, index) => {
-                    const width = (cell.column.columnDef.meta as any)?.width || 150;
-                    const stickyClass = getStickyColumnClass(index);
-                    
-                    return (
-                      <TableCell
-                        key={cell.id}
-                        className={stickyClass}
-                        style={{
-                          width: `${width}px`,
-                          minWidth: `${width}px`,
-                          backgroundColor: rowBgColor,
-                        }}
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    );
-                  })}
+                  {row.getLeftVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      style={{
+                        width: `${cell.column.getSize()}px`,
+                        backgroundColor: rowBgColor,
+                        position: 'sticky',
+                        left: `${cell.column.getStart('left')}px`,
+                        zIndex: 1,
+                      }}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                  
+                  {row.getCenterVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      style={{
+                        width: `${cell.column.getSize()}px`,
+                        backgroundColor: rowBgColor,
+                      }}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                  
+                  {row.getRightVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      style={{
+                        width: `${cell.column.getSize()}px`,
+                        backgroundColor: rowBgColor,
+                        position: 'sticky',
+                        right: `${cell.column.getStart('right')}px`,
+                        zIndex: 1,
+                      }}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))}
             </TableBody>

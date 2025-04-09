@@ -15,56 +15,6 @@
   width: 100%;
 }
 
-/* Header styles */
-.sticky-header-cell {
-  position: sticky !important;
-  top: 0;
-  z-index: 2;
-  background-color: var(--header-bg-color) !important;
-}
-
-.sticky-subheader-cell {
-  position: sticky !important;
-  top: 41px; /* Match the height of the first header row */
-  z-index: 2;
-  background-color: var(--subheader-bg-color) !important;
-}
-
-/* Sticky column styles */
-.sticky-column-0 {
-  position: sticky !important;
-  left: 0px;
-  z-index: 1;
-  background-color: inherit !important;
-}
-
-.sticky-column-1 {
-  position: sticky !important;
-  left: 100px; /* Width of first column */
-  z-index: 1;
-  background-color: inherit !important;
-}
-
-/* Increase z-index for intersection cells */
-.sticky-header-cell.sticky-column-0,
-.sticky-subheader-cell.sticky-column-0,
-.sticky-header-cell.sticky-column-1,
-.sticky-subheader-cell.sticky-column-1 {
-  z-index: 3;
-}
-
-/* Visual indicator for sticky columns */
-.sticky-column-1::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 100%;
-  width: 4px;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-  pointer-events: none;
-}
-
 /* Scrollbar styles */
 .sticky-table-container::-webkit-scrollbar {
   height: 8px;
