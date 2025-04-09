@@ -28,6 +28,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
+  PaginationEllipsis,
 } from '@/components/ui/pagination';
 import { ChevronDown, ChevronUp, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -342,7 +343,11 @@ export default function FrozenDataTable() {
               </PaginationItem>
             ))}
             
-            {table.getPageCount() > 5 && <PaginationEllipsis />}
+            {table.getPageCount() > 5 && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
             
             <PaginationItem>
               <PaginationNext
