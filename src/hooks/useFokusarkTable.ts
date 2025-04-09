@@ -13,7 +13,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   
-  // Calculate Est 1 based on the formula: (Tilbud - Montage) - Underleverandør * 0.25
+  // Calculate Est 1 based on the updated formula: ((Tilbud - Montage) - Underleverandør) * 0.25
   const calculateEst1 = (row: string[]): string => {
     try {
       // Get values from relevant columns (indices 3, 4, 5 for Tilbud, Montage, Underleverandør)
@@ -21,8 +21,8 @@ export const useFokusarkTable = (initialData: string[][]) => {
       const montage = parseFloat(row[4]?.replace(/\./g, '').replace(',', '.') || '0');
       const underleverandor = parseFloat(row[5]?.replace(/\./g, '').replace(',', '.') || '0');
       
-      // Calculate using the formula
-      const est1 = (tilbud - montage) - (underleverandor * 0.25);
+      // Calculate using the updated formula: ((Tilbud - Montage) - Underleverandør) * 0.25
+      const est1 = ((tilbud - montage) - underleverandor) * 0.25;
       
       // Format the result with the Danish number format
       return est1.toLocaleString('da-DK');
