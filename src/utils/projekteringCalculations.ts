@@ -15,7 +15,8 @@ export const calculateProjektering = (row: string[]): string => {
     console.log("Raw input for Projektering calculation:", {
       tilbud: tilbudStr,
       montage: montageStr,
-      montage2: montage2Str
+      montage2: montage2Str,
+      appointment: row[0] // Log the appointment number for debugging
     });
     
     // Parse values to numbers
@@ -36,7 +37,8 @@ export const calculateProjektering = (row: string[]): string => {
     
     console.log("Using values for Projektering calculation:", {
       tilbud,
-      montage: montageValue
+      montageValue,
+      appointment: row[0]
     });
     
     // Perform the calculation using the formula: ((tilbud-Montage)*0.10)/830
@@ -47,19 +49,20 @@ export const calculateProjektering = (row: string[]): string => {
     console.log("Projektering calculation steps:", {
       step1_tilbud_minus_montage: step1,
       step2_multiply_by_010: step2,
-      step3_divide_by_830: projektering
+      step3_divide_by_830: projektering,
+      appointment: row[0]
     });
     
     // Check for NaN and return '0' if the calculation resulted in NaN
     if (isNaN(projektering)) {
-      console.log("Projektering result is NaN, returning 0");
+      console.log(`Projektering result is NaN for appointment ${row[0]}, returning 0`);
       return '0';
     }
     
     // Format the result with the Danish number format
     return formatDanishNumber(projektering);
   } catch (error) {
-    console.error('Error calculating Projektering:', error);
+    console.error(`Error calculating Projektering for appointment ${row[0]}:`, error);
     return '0';
   }
 };

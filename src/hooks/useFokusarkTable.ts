@@ -7,7 +7,11 @@ import {
   updateAppointmentField, 
   transformAppointmentsToDisplayData 
 } from "@/services/fokusarkAppointmentService";
-import { parseNumber } from "@/utils/fokusarkCalculations";
+import { 
+  parseNumber, 
+  formatDanishNumber, 
+  calculateProjektering 
+} from "@/utils/fokusarkCalculations";
 import { FokusarkAppointment } from "@/api/fokusarkAppointmentsApi";
 
 export interface FokusarkTableData {
@@ -201,28 +205,36 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       // Calculate Projektering and update UI if Tilbud or Montage values changed
       if (colIndex === 3 || colIndex === 4 || colIndex === 6) {
-        // Calculate the projektering value using the formula ((tilbud-Montage)*0.10)/830
-        const tilbud = parseNumber(tableData[rowIndex][3]);
-        const montage = colIndex === 6 && value ? parseNumber(value) : parseNumber(tableData[rowIndex][4]);
+        console.log("Tilbud or Montage value changed, recalculating Projektering");
         
-        const projektering = ((tilbud - montage) * 0.10) / 830;
+        // Get the current row data with the updated value
+        const updatedRow = [...tableData[rowIndex]];
+        updatedRow[colIndex] = value; // Make sure we're using the latest value
+        
+        // Use the common calculation function for consistency
+        const projekteringValue = calculateProjektering(updatedRow);
+        
+        console.log(`Calculated new projektering value: ${projekteringValue} for appointment ${appointmentNumber}`);
         
         // Update the UI with the new calculated value
         setTableData(prevData => {
           const newData = [...prevData];
           const rowCopy = [...newData[rowIndex]];
           // Update the projektering column (index 9)
-          rowCopy[9] = formatDanishNumber(projektering);
+          rowCopy[9] = projekteringValue;
           newData[rowIndex] = rowCopy;
           return newData;
         });
         
         // Also update Supabase with the calculated value
+        const projekteringNumericValue = parseNumber(projekteringValue);
         await updateAppointmentField(
           appointmentNumber, 
           'projektering_1', 
-          projektering
+          projekteringNumericValue
         );
+        
+        console.log(`Updated projektering_1 in database to ${projekteringNumericValue}`);
       }
       
       // Show a toast notification

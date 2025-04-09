@@ -18,10 +18,13 @@ export const applyMaterialerCalculations = (data: string[][]): string[][] => {
  * Apply Projektering calculation to all rows in a dataset
  */
 export const applyProjekteringCalculations = (data: string[][]): string[][] => {
+  console.log("Running batch projektering calculations on data rows:", data.length);
   return data.map(row => {
     const rowCopy = [...row];
     // Projektering is at index 9
-    rowCopy[9] = calculateProjektering(row);
+    const projekteringValue = calculateProjektering(row);
+    rowCopy[9] = projekteringValue;
+    console.log(`Calculated projektering for appointment ${row[0]}: ${projekteringValue}`);
     return rowCopy;
   });
 };
