@@ -34,7 +34,6 @@ export const tableContainerStyles = `
   
   /* Ensure vertical scroll container works correctly */
   .table-vertical-scroll {
-    height: 600px;
     overflow-y: auto;
     overflow-x: hidden;
     position: relative;
@@ -95,7 +94,6 @@ export const tableContainerStyles = `
   thead tr:first-child th {
     border-bottom: 1px solid hsl(var(--border));
     text-align: left;
-    z-index: 40; /* Higher z-index for the first header row */
   }
   
   /* Remove vertical borders in header rows */
@@ -112,42 +110,52 @@ export const tableContainerStyles = `
   thead tr:first-child th[colspan="2"]:first-child {
     position: sticky;
     left: 0;
-    z-index: 30;
-    background-color: white;
     width: 300px; /* Combined width of Nr. and Navn columns */
   }
   
-  /* Make the header sticky */
+  /* Make the header sticky - IMPROVED STICKY HEADER STYLING */
   thead {
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 40;
     background-color: white;
   }
 
-  /* Fix header rows to stay visible when scrolling */
+  /* First header row - the column groups */
   thead tr:first-child th {
     position: sticky;
     top: 0;
-    z-index: 30;
+    z-index: 40;
     background-color: white;
   }
   
-  /* Second header row sticks below the first one */
+  /* Second header row */
   thead tr:nth-child(2) th {
     position: sticky;
-    top: 41px; /* Height of the first header row (adjust if needed) */
-    z-index: 20;
+    top: 41px; /* Height of the first header row */
+    z-index: 40;
     background-color: white;
     border-bottom: 1px solid hsl(var(--border));
   }
   
-  /* Handle overlap of sticky headers and sticky columns */
+  /* Corner case - sticky column headers should be above other sticky elements */
   thead tr:first-child th:first-child,
   thead tr:first-child th:nth-child(2),
   thead tr:nth-child(2) th:first-child,
   thead tr:nth-child(2) th:nth-child(2) {
     z-index: 50 !important; /* Ensure corner cells are above all others */
+  }
+
+  /* Fix for Firefox - ensure sticky headers work properly */
+  @-moz-document url-prefix() {
+    thead tr:first-child th {
+      top: 0;
+      position: sticky;
+    }
+    thead tr:nth-child(2) th {
+      top: 41px;
+      position: sticky;
+    }
   }
   
   /* Ensure the table has proper right border */
@@ -164,5 +172,13 @@ export const tableContainerStyles = `
   tr td:last-child,
   tr th:last-child {
     border-right: 1px solid hsl(var(--border));
+  }
+
+  /* Improve table layout */
+  table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    min-width: 100%;
   }
 `;

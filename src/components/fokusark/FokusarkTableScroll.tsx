@@ -69,13 +69,20 @@ const FokusarkTableScroll: React.FC<FokusarkTableScrollProps> = ({ children }) =
         className="table-vertical-scroll"
         style={{ 
           position: "relative",
-          overflow: "hidden" // Prevent overflow from breaking the sticky headers
+          maxHeight: "calc(100vh - 220px)", // Set a maximum height for vertical scrolling
+          overflowY: "auto",
+          overflowX: "hidden" // Prevent horizontal overflow
         }}
       >
-        {/* Horizontal scroll container - THIS IS THE ONLY ELEMENT THAT SHOULD SCROLL HORIZONTALLY */}
+        {/* Horizontal scroll container */}
         <div 
           ref={tableScrollRef}
           className="table-scroll-container"
+          style={{
+            overflowX: "auto",
+            overflowY: "hidden", // Prevent vertical scroll in this container
+            position: "relative"
+          }}
         >
           {children}
         </div>

@@ -27,7 +27,7 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
       <style>{tableContainerStyles}</style>
       <div className="rounded-md border w-full overflow-hidden main-content">
         <FokusarkTableScroll>
-          <table className="table-auto border-collapse divide-y divide-border">
+          <table className="table-auto w-full border-collapse divide-y divide-border">
             <FokusarkTableHeader columnCount={columnCount} />
             <FokusarkTableBody 
               data={tableData} 
