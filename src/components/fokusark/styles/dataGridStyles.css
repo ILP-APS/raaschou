@@ -70,3 +70,44 @@
 .font-medium {
   font-weight: 500;
 }
+
+/* Add sticky header styles */
+.fokusark-table-scroll-container {
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: calc(100vh - 220px);
+}
+
+.fokusark-table-wrapper th {
+  position: sticky;
+  top: 0;
+  background-color: hsl(var(--background));
+  z-index: 10;
+}
+
+/* Ensure frozen columns stay on top */
+.frozen-columns th {
+  z-index: 30;
+}
+
+/* First data row styling - make it sticky */
+.sticky-first-row {
+  position: sticky;
+  top: 49px; /* Height of the header row + 1px border */
+  background-color: hsl(var(--background));
+  z-index: 9;
+  border-bottom: 2px solid hsl(var(--primary));
+  font-weight: 500;
+}
+
+.frozen-columns .sticky-first-row {
+  z-index: 29;
+}
+
+/* Add a subtle highlight to the sticky row */
+.sticky-first-row td {
+  background-color: hsl(var(--muted)/10);
+}
+

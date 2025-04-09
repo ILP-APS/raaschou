@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { tableContainerStyles } from '@/components/FokusarkTableStyles';
 
-// Define the data type for our table
 type FokusarkRow = {
   id: number;
   nr: string;
@@ -35,7 +34,7 @@ type FokusarkRow = {
   estTimerIftFaerdigPct: string;
   plusMinusTimer: string;
   afsatFragt: string;
-  col1: string; // Additional columns
+  col1: string;
   col2: string;
   col3: string;
   col4: string;
@@ -48,7 +47,6 @@ type FokusarkRow = {
   isSubAppointment: boolean;
 };
 
-// Generate sample data for the table
 const generateSampleData = (): FokusarkRow[] => {
   const data: FokusarkRow[] = [];
   for (let i = 1; i <= 60; i++) {
@@ -353,11 +351,14 @@ export default function FrozenDataTable() {
                 ))}
               </TableHeader>
               <TableBody>
-                {frozenTable.getRowModel().rows.map(row => (
+                {frozenTable.getRowModel().rows.map((row, index) => (
                   <TableRow 
                     key={row.id} 
                     data-state={row.getIsSelected() ? "selected" : undefined} 
-                    className={row.original.isSubAppointment ? 'bg-muted/20' : ''}
+                    className={`
+                      ${row.original.isSubAppointment ? 'bg-muted/20' : ''}
+                      ${index === 0 ? 'sticky-first-row' : ''}
+                    `}
                   >
                     {row.getVisibleCells().map(cell => (
                       <TableCell 
@@ -400,11 +401,14 @@ export default function FrozenDataTable() {
               ))}
             </TableHeader>
             <TableBody>
-              {scrollableTable.getRowModel().rows.map(row => (
+              {scrollableTable.getRowModel().rows.map((row, index) => (
                 <TableRow 
                   key={row.id} 
                   data-state={row.getIsSelected() ? "selected" : undefined} 
-                  className={row.original.isSubAppointment ? 'bg-muted/20' : ''}
+                  className={`
+                    ${row.original.isSubAppointment ? 'bg-muted/20' : ''}
+                    ${index === 0 ? 'sticky-first-row' : ''}
+                  `}
                 >
                   {row.getVisibleCells().map(cell => (
                     <TableCell 
