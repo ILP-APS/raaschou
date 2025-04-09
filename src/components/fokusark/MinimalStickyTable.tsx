@@ -212,9 +212,9 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
           {/* Regular header row */}
           <TableRow>
             {table.getFlatHeaders().map((header, index) => {
-              const columnMeta = header.column.columnDef.meta as ColumnMeta || {};
-              const isSticky = columnMeta.sticky || false;
-              const stickyIndex = columnMeta.index || 0;
+              const meta = header.column.columnDef.meta as ColumnMeta | undefined;
+              const isSticky = meta?.sticky || false;
+              const stickyIndex = meta?.index || 0;
               const isIdCol = index === 0;
               const isNameCol = index === 1;
               
@@ -250,9 +250,9 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
             return (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell, cellIndex) => {
-                  const columnMeta = cell.column.columnDef.meta as ColumnMeta || {};
-                  const isSticky = columnMeta.sticky || false;
-                  const stickyIndex = columnMeta.index || 0;
+                  const meta = cell.column.columnDef.meta as ColumnMeta | undefined;
+                  const isSticky = meta?.sticky || false;
+                  const stickyIndex = meta?.index || 0;
                   const isIdCol = cellIndex === 0;
                   const isNameCol = cellIndex === 1;
                   
