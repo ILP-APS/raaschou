@@ -60,21 +60,6 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
     }
   };
 
-  // Function to get column class based on index
-  const getColumnClass = (index: number): string => {
-    // Base classes for header cells - note we've removed "sticky top-[48px]" as it's now handled in CSS
-    let classes = "px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap bg-background";
-    
-    // Add sticky left positioning for first two columns only
-    if (index === 0) {
-      classes += " sticky left-0 z-20 bg-white"; // Solid white background
-    } else if (index === 1) {
-      classes += " sticky left-[100px] z-20 bg-white"; // Solid white background
-    }
-    
-    return classes;
-  };
-
   // Function to get column group information
   const getColumnGroup = (index: number): { name: string, colSpan: number } | null => {
     if (index === 0) {
@@ -106,27 +91,19 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
       const group = getColumnGroup(currentIndex);
       
       if (group) {
-        // Determine if this is the "Aftale" group that needs special styling
-        const isAftaleGroup = currentIndex === 0;
-        
-        // Add a grouped header cell
         groups.push(
           <th 
             key={`group-${currentIndex}`} 
             colSpan={group.colSpan}
-            className={`px-4 py-2 text-left text-sm font-medium text-foreground uppercase tracking-wider whitespace-nowrap bg-muted/30
-              ${isAftaleGroup ? 'sticky left-0 z-30 bg-white' : ''}`}
           >
             {group.name}
           </th>
         );
         currentIndex += group.colSpan;
       } else {
-        // Add an empty header cell
         groups.push(
           <th 
-            key={`group-${currentIndex}`} 
-            className="px-4 py-2 bg-muted/30 text-left"
+            key={`group-${currentIndex}`}
           >
             &nbsp;
           </th>
@@ -139,18 +116,15 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
   };
 
   return (
-    <thead className="bg-muted/50">
-      {/* Column group row - without borders */}
-      <tr className="border-b border-border header-row-1">
+    <thead>
+      {/* Column group row */}
+      <tr>
         {renderColumnGroups()}
       </tr>
-      {/* Regular header row - without borders between columns */}
-      <tr className="border-b border-border header-row-2">
+      {/* Regular header row */}
+      <tr>
         {Array.from({ length: columnCount }, (_, index) => (
-          <th 
-            key={index} 
-            className={getColumnClass(index)}
-          >
+          <th key={index}>
             {getColumnName(index)}
           </th>
         ))}

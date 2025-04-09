@@ -1,184 +1,153 @@
 
-// CSS styles for table container - focused on fixing the horizontal scroll
+// CSS styles for table container - focused on fixing the sticky header
 export const tableContainerStyles = `
-  /* The parent container that holds the table */
-  .table-scroll-container {
+  /* Main table container */
+  .fokusark-table-container {
+    position: relative;
     width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    position: relative; /* Create a stacking context */
-    z-index: 1; /* Ensure proper stacking */
-    border-radius: 0 0 0.5rem 0.5rem; /* Match the bottom corners with the container */
-  }
-
-  /* Hide scrollbar when not hovering */
-  .table-scroll-container:not(:hover)::-webkit-scrollbar {
-    height: 0;
-    display: none;
+    overflow: auto;
+    max-height: calc(100vh - 220px);
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
   }
   
-  .table-scroll-container:not(:hover) {
-    scrollbar-width: none;
+  /* Custom scrollbar styling */
+  .fokusark-table-container::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
   }
   
-  /* Show scrollbar on hover */
-  .table-scroll-container:hover::-webkit-scrollbar {
-    display: block;
-    height: 6px;
-  }
-  
-  .table-scroll-container:hover::-webkit-scrollbar-thumb {
+  .fokusark-table-container::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 3px;
+    border-radius: 4px;
   }
   
-  /* Ensure vertical scroll container works correctly */
-  .table-vertical-scroll {
-    overflow-y: auto;
-    overflow-x: hidden;
-    position: relative;
+  .fokusark-table-container::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0.05);
   }
-
-  /* Main content styles - hard block horizontal scrolling outside the table */
-  .main-content {
-    overflow-x: hidden !important;
+  
+  /* Table styling */
+  table {
+    border-collapse: separate;
+    border-spacing: 0;
     width: 100%;
-    position: relative;
   }
   
-  /* Headers and other content should absolutely never scroll horizontally */
-  .content-wrapper {
-    overflow-x: hidden !important;
-    max-width: 100%;
+  /* Make thead sticky at the top */
+  table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: white;
   }
   
-  /* Prevent any horizontal scrolling at the page level */
-  .page-container {
-    overflow-x: hidden !important;
-    max-width: 100vw;
+  /* First header row - make sticky at top: 0 */
+  table thead tr:first-child th {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: white;
+    border-bottom: 1px solid hsl(var(--border));
   }
   
-  /* Ensure sticky columns work correctly with appropriate shadows */
-  tr:hover td.sticky {
-    background-color: white !important;
+  /* Second header row - make sticky right below first row */
+  table thead tr:nth-child(2) th {
+    position: sticky;
+    top: 41px; /* Height of the first row */
+    z-index: 20;
+    background-color: white;
+    border-bottom: 1px solid hsl(var(--border));
   }
   
-  /* Add shadow to the right of sticky columns */
-  td.sticky:after,
-  th.sticky:after {
+  /* Sticky left columns */
+  table th:first-child,
+  table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    background-color: white;
+  }
+  
+  table th:nth-child(2),
+  table td:nth-child(2) {
+    position: sticky;
+    left: 100px; /* Width of first column */
+    z-index: 5;
+    background-color: white;
+  }
+  
+  /* Corner cells - need highest z-index */
+  table thead tr:first-child th:first-child,
+  table thead tr:first-child th:nth-child(2),
+  table thead tr:nth-child(2) th:first-child,
+  table thead tr:nth-child(2) th:nth-child(2) {
+    z-index: 30;
+  }
+  
+  /* Firefox-specific fixes */
+  @-moz-document url-prefix() {
+    table thead tr:first-child th {
+      top: 0;
+      position: sticky;
+    }
+    table thead tr:nth-child(2) th {
+      top: 41px;
+      position: sticky;
+    }
+  }
+  
+  /* Column width adjustments */
+  table th:nth-child(1), 
+  table td:nth-child(1) {
+    min-width: 100px;
+    width: 100px;
+  }
+  
+  table th:nth-child(2),
+  table td:nth-child(2) {
+    min-width: 200px;
+    width: 200px;
+  }
+  
+  table th:nth-child(n+3),
+  table td:nth-child(n+3) {
+    min-width: 120px;
+  }
+  
+  /* Cell styling */
+  table th,
+  table td {
+    padding: 12px;
+    text-align: left;
+    border-right: none;
+    border-bottom: 1px solid hsl(var(--border));
+    background-clip: padding-box;
+  }
+  
+  /* Add shadow to sticky columns */
+  table th:nth-child(2)::after,
+  table td:nth-child(2)::after {
     content: '';
     position: absolute;
     top: 0;
     right: 0;
     bottom: 0;
     width: 4px;
-    background: linear-gradient(90deg, rgba(0,0,0,0.1), transparent);
     pointer-events: none;
+    background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
   }
   
-  /* Adjust the column widths to ensure proper display */
-  table th:nth-child(1) {
-    min-width: 100px; /* Width for Nr. column */
+  /* Row hover effect */
+  table tbody tr:hover {
+    background-color: hsl(var(--muted)/50);
   }
   
-  table th:nth-child(2) {
-    min-width: 200px; /* Width for Navn column */
+  /* Sub-appointment styling */
+  table tbody tr[data-sub-appointment="true"] {
+    background-color: hsl(var(--muted)/20);
   }
   
-  /* Standard column width for data columns */
-  table th:nth-child(n+3) {
-    min-width: 120px;
-  }
-  
-  /* Make sure column groups are properly aligned with their columns */
-  thead tr:first-child th {
-    border-bottom: 1px solid hsl(var(--border));
-    text-align: left;
-  }
-  
-  /* Remove vertical borders in header rows */
-  thead th {
-    border-right: none !important;
-  }
-  
-  /* Remove the vertical separator lines between header groups */
-  thead tr:first-child th:not(:first-child)::before {
-    display: none;
-  }
-  
-  /* Ensure the grouped headers stay fixed when scrolling */
-  thead tr:first-child th[colspan="2"]:first-child {
-    position: sticky;
-    left: 0;
-    width: 300px; /* Combined width of Nr. and Navn columns */
-  }
-  
-  /* Make the header sticky - IMPROVED STICKY HEADER STYLING */
-  thead {
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    background-color: white;
-  }
-
-  /* First header row - the column groups */
-  thead tr:first-child th {
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    background-color: white;
-  }
-  
-  /* Second header row */
-  thead tr:nth-child(2) th {
-    position: sticky;
-    top: 41px; /* Height of the first header row */
-    z-index: 40;
-    background-color: white;
-    border-bottom: 1px solid hsl(var(--border));
-  }
-  
-  /* Corner case - sticky column headers should be above other sticky elements */
-  thead tr:first-child th:first-child,
-  thead tr:first-child th:nth-child(2),
-  thead tr:nth-child(2) th:first-child,
-  thead tr:nth-child(2) th:nth-child(2) {
-    z-index: 50 !important; /* Ensure corner cells are above all others */
-  }
-
-  /* Fix for Firefox - ensure sticky headers work properly */
-  @-moz-document url-prefix() {
-    thead tr:first-child th {
-      top: 0;
-      position: sticky;
-    }
-    thead tr:nth-child(2) th {
-      top: 41px;
-      position: sticky;
-    }
-  }
-  
-  /* Ensure the table has proper right border */
-  .table-scroll-container {
-    border-right: 1px solid hsl(var(--border));
-  }
-  
-  /* Make the bottom border of the last row visible */
-  tbody tr:last-child td {
-    border-bottom: 1px solid hsl(var(--border));
-  }
-  
-  /* Add right border to the last cell in each row */
-  tr td:last-child,
-  tr th:last-child {
-    border-right: 1px solid hsl(var(--border));
-  }
-
-  /* Improve table layout */
-  table {
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-    min-width: 100%;
+  table tbody tr[data-sub-appointment="true"] td:first-child {
+    padding-left: 20px;
   }
 `;
