@@ -21,7 +21,7 @@ export const useFieldMapping = () => {
       case 9:
         return 'projektering_1';
       case 10:
-        return 'produktion';
+        return 'produktion'; // Estimated produktion (calculated)
       case 11:
         return 'montage_3';
       case 12:

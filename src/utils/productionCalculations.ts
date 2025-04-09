@@ -18,7 +18,7 @@ export const calculateProduktion = (row: string[]): string => {
     const materialerStr = row[8] || '0'; // Materialer at index 8
     const projekteringStr = row[9] || '0'; // Projektering at index 9
     
-    console.log(`[DEBUG] Produktion calculation for ${appointmentNumber}:`, {
+    console.log(`[DEBUG ESTIMATED PRODUCTION] Produktion calculation for ${appointmentNumber}:`, {
       rawInputs: {
         tilbud: tilbudStr,
         montage: montageStr,
@@ -56,7 +56,7 @@ export const calculateProduktion = (row: string[]): string => {
     const montageValue = hasMontage2Value ? montage2 : montage;
     const underleverandorValue = hasUnderleverandor2Value ? underleverandor2 : underleverandor;
     
-    console.log(`[DEBUG] Parsed values for ${appointmentNumber}:`, {
+    console.log(`[DEBUG ESTIMATED PRODUCTION] Parsed values for ${appointmentNumber}:`, {
       tilbud,
       montage,
       montage2,
@@ -74,7 +74,7 @@ export const calculateProduktion = (row: string[]): string => {
     const step2 = step1 / 750;
     const produktion = step2 - projektering;
     
-    console.log(`[DEBUG] Produktion calculation steps for ${appointmentNumber}:`, {
+    console.log(`[DEBUG ESTIMATED PRODUCTION] Produktion calculation steps for ${appointmentNumber}:`, {
       step1_subtraction: step1,
       step2_divide_by_750: step2,
       final_result: produktion
@@ -88,7 +88,7 @@ export const calculateProduktion = (row: string[]): string => {
     
     // Format the result with the Danish number format
     const formattedValue = formatDanishNumber(produktion);
-    console.log(`[DEBUG] Final formatted produktion for ${appointmentNumber}: ${formattedValue}`);
+    console.log(`[DEBUG ESTIMATED PRODUCTION] Final formatted produktion for ${appointmentNumber}: ${formattedValue}`);
     return formattedValue;
   } catch (error) {
     console.error(`[ERROR] Error calculating Produktion for ${row[0]}:`, error);

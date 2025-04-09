@@ -35,15 +35,16 @@ const RefreshRealizedHoursButton: React.FC = () => {
             
             console.log(`Parsed values for ${appointment.appointment_number}:`, {
               projektering: projekteringNum,
-              produktion: produktionNum,
+              produktion: produktionNum, // API value
               montage: montageNum,
               total: totalNum
             });
             
+            // Update the realized hours in database - this should go to the correct columns
             await updateRealizedHours(
               appointment.appointment_number,
               projekteringNum,
-              produktionNum,
+              produktionNum, // This is the realized production from API
               montageNum,
               totalNum
             );

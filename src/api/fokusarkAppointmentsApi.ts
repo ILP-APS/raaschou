@@ -130,14 +130,14 @@ export async function updateRealizedHours(
 ) {
   console.log(`Updating realized hours for ${appointmentNumber}:`, {
     projektering_2: projektering,
-    produktion_realized: produktion,
+    produktion_realized: produktion, // Make sure this is the column we're targeting
     montage_3: montage,
     total: total
   });
   
   const updateData = {
     projektering_2: projektering,
-    produktion_realized: produktion,
+    produktion_realized: produktion, // Correct column name for realized production
     montage_3: montage,
     total: total
   };

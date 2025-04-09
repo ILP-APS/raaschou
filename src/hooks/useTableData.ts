@@ -53,10 +53,12 @@ export const useTableData = () => {
             const { offerTotal, montageTotal, underleverandorTotal } = 
               await getOfferLineItems(details.hnOfferID);
             
+            // Get realized hours from API
             const realizedHours = await getRealizedHours(appointment.hnAppointmentID);
             console.log(`Realized hours for ${appointment.appointmentNumber}:`, realizedHours);
             
             try {
+              // Parse realized hours from API
               const projekteringNum = parseFloat(realizedHours.projektering.replace(/\./g, '').replace(',', '.')) || 0;
               const produktionNum = parseFloat(realizedHours.produktion.replace(/\./g, '').replace(',', '.')) || 0;
               const montageNum = parseFloat(realizedHours.montage.replace(/\./g, '').replace(',', '.')) || 0;
@@ -69,10 +71,11 @@ export const useTableData = () => {
                 total: totalNum
               });
               
+              // Store realized hours in database - ensure we're using the correct columns
               await updateRealizedHours(
                 appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
                 projekteringNum,
-                produktionNum,
+                produktionNum, // This is the realized production from API
                 montageNum,
                 totalNum
               );
@@ -88,6 +91,7 @@ export const useTableData = () => {
               continue;
             }
             
+            // Build the row of data
             const row = [
               appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
               details.subject || 'N/A',
@@ -99,12 +103,21 @@ export const useTableData = () => {
             
             row.push('0', '0');
             
+            // For columns 8-11 (materialer, projektering, produktion, montage)
+            // These are calculated fields, not from API
             for (let i = 8; i < 12; i++) {
               row.push(`R${processedData.length + 1}C${i + 1}`);
             }
             
-            row.push(realizedHours.projektering, realizedHours.produktion, realizedHours.montage, realizedHours.total);
+            // Add the realized values from the API (columns 12-15)
+            row.push(
+              realizedHours.projektering, 
+              realizedHours.produktion, // This should come from the API, not calculation
+              realizedHours.montage, 
+              realizedHours.total
+            );
             
+            // Add remaining placeholder columns
             for (let i = 16; i < 23; i++) {
               row.push(`R${processedData.length + 1}C${i + 1}`);
             }

@@ -73,8 +73,8 @@ export const calculateTimerTilbage = (row: string[]): string => {
 // Calculate Produktion Timer Tilbage (Estimeret Produktion - Realiseret Produktion)
 export const calculateProduktionTimerTilbage = (row: string[]): string => {
   // Get values from column 10 (produktion - Estimeret) and column 13 (produktion_realized - Realiseret)
-  const estimatedProduktion = parseNumber(row[10]);
-  const realizedProduktion = parseNumber(row[13]);
+  const estimatedProduktion = parseNumber(row[10]);  // Estimated (from formula)
+  const realizedProduktion = parseNumber(row[13]);   // Realized (from API)
   
   console.log(`Calculating Produktion Timer Tilbage:`, {
     estimatedProduktion: estimatedProduktion,
