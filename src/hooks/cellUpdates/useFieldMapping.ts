@@ -27,11 +27,11 @@ export const useFieldMapping = () => {
       case 12:
         return 'projektering_2'; // Realized projektering
       case 13:
-        return 'produktion_2'; // Realized produktion
+        return 'produktion'; // Using the existing produktion field, not produktion_2
       case 14:
-        return 'realized_montage'; // Changed from montage_4 to match database schema
+        return 'montage_3'; // Using the existing montage_3 field, not realized_montage
       case 15:
-        return 'realized_total'; // Realized total
+        return 'total'; // Using the existing total field, not realized_total
       case 16:
         return 'timer_tilbage_1';
       case 17:

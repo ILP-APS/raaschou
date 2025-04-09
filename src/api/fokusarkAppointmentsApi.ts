@@ -16,8 +16,6 @@ export interface FokusarkAppointment {
   montage_3?: number | null;
   total?: number | null;
   projektering_2?: number | null;
-  produktion_2?: number | null;
-  realized_total?: number | null;
   timer_tilbage_1?: number | null;
   faerdig_pct_ex_montage_nu?: number | null;
   faerdig_pct_ex_montage_foer?: number | null;
@@ -130,16 +128,16 @@ export async function updateRealizedHours(
 ) {
   console.log(`Updating realized hours for ${appointmentNumber}:`, {
     projektering_2: projektering,
-    produktion_2: produktion,
-    realized_montage: montage,
-    realized_total: total
+    produktion: produktion,
+    montage_3: montage,
+    total: total
   });
   
   const updateData = {
     projektering_2: projektering,
-    produktion_2: produktion,
-    realized_montage: montage,
-    realized_total: total
+    produktion: produktion,
+    montage_3: montage,
+    total: total
   };
   
   const { data, error } = await (supabase
