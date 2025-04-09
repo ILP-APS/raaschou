@@ -94,6 +94,7 @@ export const tableContainerStyles = `
     left: 0;
     z-index: 30;
     background-color: hsl(var(--background));
+    box-shadow: 2px 0 0 0 hsl(var(--border));
   }
   
   /* Two-row header styling */
@@ -177,5 +178,35 @@ export const tableContainerStyles = `
   
   .dark .fokusark-table-scroll-container::-webkit-scrollbar-track {
     background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Sticky first row styling */
+  .sticky-first-row {
+    position: sticky !important;
+    top: 41px; /* Match the header height */
+    z-index: 9;
+    box-shadow: 0 1px 0 0 hsl(var(--border));
+  }
+  
+  .frozen-table .sticky-first-row td,
+  .fokusark-table .sticky-first-row td {
+    background-color: hsl(var(--muted)/10);
+    font-weight: 500;
+  }
+  
+  /* Ensure frozen columns in sticky rows have proper z-index */
+  .frozen-table .sticky-first-row {
+    z-index: 29;
+  }
+  
+  /* Add visual indicator on the right edge of frozen columns */
+  .frozen-table th:last-child,
+  .frozen-table td:last-child {
+    box-shadow: inset -2px 0 0 0 rgba(0,0,0,0.08);
+  }
+  
+  .dark .frozen-table th:last-child,
+  .dark .frozen-table td:last-child {
+    box-shadow: inset -2px 0 0 0 rgba(255,255,255,0.1);
   }
 `;
