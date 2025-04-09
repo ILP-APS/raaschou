@@ -1,10 +1,9 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Calculator } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadFokusarkAppointments, updateAppointmentField } from "@/services/fokusark/appointmentDbService";
-import { calculateProjektering, calculateProduktion, calculateMontage, calculateTimerTilbage, parseNumber, calculateTotal } from "@/utils/fokusarkCalculations";
+import { calculateProjektering, calculateProduktion, calculateMontage, calculateTimerTilbage, parseNumber, calculateTotal, formatDanishNumber } from "@/utils/fokusarkCalculations";
 
 interface RecalculateValuesButtonProps {
   tableData: string[][];
@@ -94,7 +93,6 @@ const RecalculateValuesButton: React.FC<RecalculateValuesButtonProps> = ({ table
             
             updatedRowData[11] = montageValue;
             
-            // Calculate the total based on updated projektering, produktion, and montage values
             const totalValue = calculateTotal(updatedRowData);
             const totalNumeric = parseNumber(totalValue);
             
@@ -110,8 +108,6 @@ const RecalculateValuesButton: React.FC<RecalculateValuesButtonProps> = ({ table
               totalNumeric
             );
             
-            // Calculate timer tilbage based on projektering and realiseret projektering
-            // Ensure we have the realiseret projektering value in the row data
             updatedRowData[12] = formatDanishNumber(appointment.projektering_2 || 0);
             
             const timerTilbageValue = calculateTimerTilbage(updatedRowData);
