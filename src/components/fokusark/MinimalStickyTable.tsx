@@ -157,13 +157,19 @@ export default function MinimalStickyTable() {
                   
                   {isInfoGroup && (
                     <>
-                      <div style={{ 
-                        width: '100%', 
-                        height: '100%', 
-                        display: 'flex', 
-                        justifyContent: 'center', 
-                        alignItems: 'center'
-                      }}>
+                      <div 
+                        style={{ 
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          display: 'flex', 
+                          justifyContent: 'center', 
+                          alignItems: 'center',
+                          backgroundColor: headerBgColor
+                        }}
+                      >
                         {group.title}
                       </div>
                       
@@ -172,7 +178,7 @@ export default function MinimalStickyTable() {
                           position: 'sticky',
                           left: 0,
                           top: 0,
-                          width: '260px',
+                          width: '410px',
                           height: '100%',
                           backgroundColor: headerBgColor,
                           display: 'flex',
