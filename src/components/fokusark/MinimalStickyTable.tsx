@@ -147,49 +147,39 @@ export default function MinimalStickyTable() {
         borderCollapse: 'separate'
       }}>
         <TableHeader>
-          {/* Header group row with split Info group */}
+          {/* Header group row with new approach for Info group */}
           <TableRow>
-            {/* Sticky part of Info group (covering ID and Name only) */}
             <TableHead
-              key="sticky-info-group"
-              colSpan={2} // Only span the 2 sticky columns
+              key="info-group"
+              colSpan={3}
               style={{
-                position: 'sticky',
-                top: 0,
-                left: 0,
+                position: 'relative', // Use relative instead of sticky for the container
                 zIndex: 60,
                 backgroundColor: getBgColor(),
                 textAlign: 'center',
                 fontWeight: 'bold',
-                boxShadow: '2px 2px 5px -2px rgba(0,0,0,0.15)',
                 borderBottom: '1px solid hsl(var(--border))',
-                borderRight: 'none', // Remove right border for visual continuity
-                width: '260px', // 80px + 180px
-                minWidth: '260px'
+                padding: 0 // Remove padding to allow absolute positioning inside
               }}
             >
-              Info
-            </TableHead>
-            
-            {/* Non-sticky part of Info group (just the Type column) */}
-            <TableHead
-              key="non-sticky-info-group"
-              colSpan={1} // Just the Type column
-              style={{
-                position: 'static',
-                top: 0,
-                zIndex: 50,
-                backgroundColor: getBgColor(),
-                textAlign: 'center',
-                fontWeight: 'bold',
-                boxShadow: '0 2px 0 0 rgba(0,0,0,0.1)',
-                borderBottom: '1px solid hsl(var(--border))',
-                borderLeft: 'none', // Remove left border for visual continuity
-                color: 'transparent', // Hide text to create appearance of a single group
-                userSelect: 'none' // Prevent text selection of invisible text
-              }}
-            >
-              Info
+              {/* Use an absolutely positioned div inside for the sticky text */}
+              <div
+                style={{
+                  position: 'sticky',
+                  left: 0,
+                  top: 0,
+                  width: '260px', // Width of ID + Name columns
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: getBgColor(),
+                  zIndex: 61,
+                  boxShadow: '2px 0 5px -2px rgba(0,0,0,0.15)'
+                }}
+              >
+                Info
+              </div>
             </TableHead>
             
             {/* The rest of the header groups */}
@@ -225,7 +215,7 @@ export default function MinimalStickyTable() {
                   style={{
                     minWidth: '150px',
                     width: index === 0 ? '80px' : index === 1 ? '180px' : '150px',
-                    position: 'sticky',
+                    position: isSticky ? 'sticky' : undefined,
                     top: headerGroupHeight, // Position below the group header
                     left: isSticky ? getLeftPosition(stickyIndex) : undefined,
                     zIndex: isSticky ? 45 : 40,
