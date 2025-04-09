@@ -9,6 +9,57 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      fokusark_appointments: {
+        Row: {
+          appointment_number: string
+          created_at: string
+          hn_appointment_id: number | null
+          id: string
+          is_sub_appointment: boolean | null
+          materialer: number | null
+          montage: number | null
+          montage2: number | null
+          responsible_person: string | null
+          subject: string | null
+          tilbud: number | null
+          underleverandor: number | null
+          underleverandor2: number | null
+          updated_at: string
+        }
+        Insert: {
+          appointment_number: string
+          created_at?: string
+          hn_appointment_id?: number | null
+          id?: string
+          is_sub_appointment?: boolean | null
+          materialer?: number | null
+          montage?: number | null
+          montage2?: number | null
+          responsible_person?: string | null
+          subject?: string | null
+          tilbud?: number | null
+          underleverandor?: number | null
+          underleverandor2?: number | null
+          updated_at?: string
+        }
+        Update: {
+          appointment_number?: string
+          created_at?: string
+          hn_appointment_id?: number | null
+          id?: string
+          is_sub_appointment?: boolean | null
+          materialer?: number | null
+          montage?: number | null
+          montage2?: number | null
+          responsible_person?: string | null
+          subject?: string | null
+          tilbud?: number | null
+          underleverandor?: number | null
+          underleverandor2?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fokusark_cells: {
         Row: {
           col_index: number

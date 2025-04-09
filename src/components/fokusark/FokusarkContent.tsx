@@ -15,6 +15,10 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
         <p className="text-sm text-muted-foreground mb-6">
           This table displays open appointments from e-regnskab with Nr., Subject, and Responsible Person.
           Only showing appointments that are not done and have a Tilbud value greater than 40,000 DKK.
+          <br />
+          <span className="text-primary font-medium">
+            Materialer calculations are now automatically handled by the database.
+          </span>
         </p>
       </div>
       
