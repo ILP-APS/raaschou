@@ -86,7 +86,8 @@ export const calculateMaterialer = (row: string[]): string => {
       useUnderleverandor2
     });
     
-    // Calculate using the corrected formula: ((Tilbud - Montage) - Underleverandør) * 0.25
+    // Calculate using the formula: ((Tilbud - Montage) - Underleverandør) * 0.25
+    // FIX: Ensure we're using the correct values and calculation
     const materialer = ((tilbud - montageValue) - underleverandorValue) * 0.25;
     
     console.log("Materialer calculation result:", materialer);
