@@ -27,14 +27,16 @@ const RecalculateValuesButton: React.FC<RecalculateValuesButtonProps> = ({ table
       for (const appointment of appointments) {
         const appointmentNumber = appointment.appointment_number;
         
-        const rowData = tableData.find(row => row[0] === appointmentNumber);
+        const rowData = tableData.find(row => row[0] === appointmentNumber.toString());
         
         if (rowData) {
           console.log(`Recalculating values for ${appointmentNumber}`, {
             currentValues: {
               projektering_1: appointment.projektering_1,
               produktion: appointment.produktion,
-              montage_3: appointment.montage_3
+              montage_3: appointment.montage_3,
+              projektering_2: appointment.projektering_2,
+              timer_tilbage_1: appointment.timer_tilbage_1
             },
             rowData
           });
@@ -109,13 +111,18 @@ const RecalculateValuesButton: React.FC<RecalculateValuesButtonProps> = ({ table
             );
             
             // Calculate timer tilbage based on projektering and realiseret projektering
+            // Ensure we have the realiseret projektering value in the row data
+            updatedRowData[12] = formatDanishNumber(appointment.projektering_2 || 0);
+            
             const timerTilbageValue = calculateTimerTilbage(updatedRowData);
             const timerTilbageNumeric = parseNumber(timerTilbageValue);
             
             console.log(`Recalculating timer tilbage for ${appointmentNumber}:`, {
               calculated: timerTilbageValue,
               numeric: timerTilbageNumeric,
-              current: appointment.timer_tilbage_1
+              current: appointment.timer_tilbage_1,
+              projektering_1: projekteringNumeric,
+              projektering_2: appointment.projektering_2
             });
             
             await updateAppointmentField(

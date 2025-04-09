@@ -60,8 +60,12 @@ export const calculateTimerTilbage = (row: string[]): string => {
   const estimatedProjektering = parseNumber(row[9]);
   const realizedProjektering = parseNumber(row[12]);
   
+  console.log(`Calculating Timer Tilbage: ${estimatedProjektering} - ${realizedProjektering}`);
+  
   // Calculate the difference
   const timerTilbage = estimatedProjektering - realizedProjektering;
+  
+  console.log(`Timer Tilbage result: ${timerTilbage}`);
   
   return formatDanishNumber(timerTilbage);
 };
