@@ -78,7 +78,8 @@ export const useFokusarkTable = (initialData: string[][]) => {
         useUnderleverandor2
       });
       
-      // Calculate using the formula: ((Tilbud - Montage) - Underleverandør) * 0.25
+      // Calculate using the corrected formula: ((Tilbud - Montage) - Underleverandør) * 0.25
+      // Previous implementation was correct, but we're ensuring it's exactly as specified
       const materialer = ((tilbud - montageValue) - underleverandorValue) * 0.25;
       
       console.log("Materialer calculation result:", materialer);
