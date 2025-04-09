@@ -16,16 +16,18 @@ export default function FokusarkPage() {
   return (
     <SidebarProvider>
       <FokusarkDataProvider>
-        <AppSidebar />
-        <SidebarInset>
-          <div className="flex flex-col h-screen page-container">
-            <FokusarkHeader />
-            <FokusarkContent 
-              tableData={tableData} 
-              isLoading={isLoading} 
-            />
-          </div>
-        </SidebarInset>
+        <div className="flex w-full relative">
+          <AppSidebar />
+          <SidebarInset>
+            <div className="flex flex-col h-screen page-container">
+              <FokusarkHeader />
+              <FokusarkContent 
+                tableData={tableData} 
+                isLoading={isLoading} 
+              />
+            </div>
+          </SidebarInset>
+        </div>
       </FokusarkDataProvider>
     </SidebarProvider>
   );

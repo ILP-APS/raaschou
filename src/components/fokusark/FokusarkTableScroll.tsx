@@ -39,7 +39,7 @@ const FokusarkTableScroll: React.FC<FokusarkTableScrollProps> = ({ children }) =
   return (
     <div 
       ref={scrollContainerRef}
-      className="fokusark-table-container"
+      className="fokusark-table-container relative z-0"
     >
       {children}
     </div>

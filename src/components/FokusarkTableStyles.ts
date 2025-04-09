@@ -37,7 +37,7 @@ export const tableContainerStyles = `
   table thead {
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 2;
     background-color: white;
   }
   
@@ -45,7 +45,7 @@ export const tableContainerStyles = `
   table thead tr:first-child th {
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 2;
     background-color: white;
     border-bottom: 1px solid hsl(var(--border));
   }
@@ -54,7 +54,7 @@ export const tableContainerStyles = `
   table thead tr:nth-child(2) th {
     position: sticky;
     top: 41px; /* Height of the first row */
-    z-index: 20;
+    z-index: 2;
     background-color: white;
     border-bottom: 1px solid hsl(var(--border));
   }
@@ -64,7 +64,7 @@ export const tableContainerStyles = `
   table td:first-child {
     position: sticky;
     left: 0;
-    z-index: 5;
+    z-index: 1;
     background-color: white;
   }
   
@@ -72,7 +72,7 @@ export const tableContainerStyles = `
   table td:nth-child(2) {
     position: sticky;
     left: 100px; /* Width of first column */
-    z-index: 5;
+    z-index: 1;
     background-color: white;
   }
   
@@ -81,7 +81,7 @@ export const tableContainerStyles = `
   table thead tr:first-child th:nth-child(2),
   table thead tr:nth-child(2) th:first-child,
   table thead tr:nth-child(2) th:nth-child(2) {
-    z-index: 30;
+    z-index: 3;
   }
   
   /* Firefox-specific fixes */
