@@ -1,100 +1,79 @@
 
-/* React Data Grid custom styling */
-.rdg-dark {
-  --rdg-background-color: hsl(var(--background));
-  --rdg-header-background-color: hsl(var(--background));
-  --rdg-row-hover-background-color: hsl(var(--muted)/50);
-  --rdg-row-selected-background-color: hsl(var(--muted)/30);
-  --rdg-border-color: hsl(var(--border));
-  --rdg-header-row-color: hsl(var(--foreground));
-  --rdg-summary-row-background-color: hsl(var(--muted)/20);
+/* Fokusark data grid styles for the shadcn-based implementation */
+
+/* Main container class */
+.fokusark-data-grid {
+  height: 70vh;
+  width: 100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.fokusark-table-container {
+  position: relative;
+  width: 100%;
   color: hsl(var(--foreground));
 }
 
-/* Common styles for both light and dark mode */
-.rdg {
-  block-size: 100%;
-  border-radius: 0.5rem;
-  overflow: auto;
-  border: 1px solid hsl(var(--border));
+/* Apply dark mode styles */
+.fokusark-table-container.dark {
+  --shadow-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Frozen column shadow */
-.rdg [aria-frozen="true"] {
-  z-index: 1;
+.fokusark-table-container:not(.dark) {
+  --shadow-color: rgba(0, 0, 0, 0.15);
 }
 
-.rdg [aria-frozen="true"]:after {
-  content: '';
-  position: absolute;
-  top: 0;
-  inset-inline-end: 0;
-  height: 100%;
-  width: 5px;
-  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.15);
-  pointer-events: none;
+/* Custom scrollbar styling */
+.fokusark-table-container::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
 }
 
-.dark .rdg [aria-frozen="true"]:after {
-  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.3);
+.fokusark-table-container::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground)/0.3);
+  border-radius: 4px;
+}
+
+.fokusark-table-container::-webkit-scrollbar-track {
+  background-color: hsl(var(--muted)/0.2);
+}
+
+/* Fix Firefox scrollbar issues */
+@-moz-document url-prefix() {
+  .fokusark-table-container {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground)/0.3) hsl(var(--muted)/0.2);
+  }
+}
+
+/* Sticky header styles */
+.fokusark-table-container th {
+  background-color: hsl(var(--muted)/30);
+  font-weight: 600;
+  border-bottom: 1px solid hsl(var(--border));
 }
 
 /* Sub-appointment styling */
-.rdg-row.bg-muted\/20 .rdg-cell:first-child {
-  padding-left: 20px;
+.fokusark-table-container tr.bg-muted\/20 {
+  background-color: hsl(var(--muted)/20);
 }
 
-/* Column group headers */
-.rdg-header-row:first-child .rdg-cell {
-  border-bottom: none;
+/* Editable cell styling */
+.fokusark-table-container input {
+  background-color: transparent;
+  width: 100%;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
 }
 
-.rdg-header-row:nth-child(2) .rdg-cell {
-  border-top: none;
-}
-
-/* Row height for consistency */
-.rdg-row {
-  height: 48px;
-}
-
-/* Custom editable cell styling */
-.rdg-cell[aria-selected="true"] {
+.fokusark-table-container input:focus {
   outline: 2px solid hsl(var(--primary));
-  outline-offset: -2px;
+  outline-offset: -1px;
+  background-color: hsl(var(--muted)/10);
 }
 
-/* Set the frozen columns with correct backgrounds */
-.rdg-header-row .rdg-cell[aria-frozen="true"],
-.rdg-row .rdg-cell[aria-frozen="true"] {
-  background-color: hsl(var(--background));
-}
-
-/* Add border to header cells */
-.rdg-header-row .rdg-cell {
-  background-color: hsl(var(--muted)/30);
-  border-right: 1px solid hsl(var(--border));
-  border-bottom: 1px solid hsl(var(--border));
-  font-weight: 600;
-}
-
-/* Make header cells sticky */
-.rdg-header-row {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-}
-
-/* Ensure frozen headers are on top */
-.rdg-header-row .rdg-cell[aria-frozen="true"] {
-  z-index: 4;
-}
-
-/* Add shadow to frozen column edge */
-.rdg-cell[aria-frozen="true"]:last-of-type {
-  box-shadow: inset -2px 0 0 0 rgba(0,0,0,0.1);
-}
-
-.dark .rdg-cell[aria-frozen="true"]:last-of-type {
-  box-shadow: inset -2px 0 0 0 rgba(255,255,255,0.1);
+/* Special cell styling for money values */
+.fokusark-table-container .text-right.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }

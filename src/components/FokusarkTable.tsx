@@ -33,7 +33,7 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   console.log("Rendering FokusarkTable with data:", data.length, "rows");
 
   return (
-    <div className="rounded-md w-full relative shadow-md border border-border">
+    <div className="rounded-md w-full relative">
       <FokusarkDataGrid 
         data={data}
         onCellChange={(rowIndex, colIndex, value) => {

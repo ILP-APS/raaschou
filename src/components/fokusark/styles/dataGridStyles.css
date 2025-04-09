@@ -1,5 +1,6 @@
+/* Basic DataGrid styles - This file is retained for compatibility but will be phased out */
+/* The new styles are in FokusarkDataGridStyles.css */
 
-/* Basic DataGrid styles */
 .rdg {
   --color: hsl(var(--foreground));
   --border-color: hsl(var(--border));
