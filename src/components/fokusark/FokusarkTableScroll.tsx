@@ -17,7 +17,6 @@ const FokusarkTableScroll: React.FC<FokusarkTableScrollProps> = ({ children }) =
       if (scrollContainer.contains(e.target as Node)) {
         // Let horizontal scrolling work naturally
         if (e.deltaX !== 0) {
-          e.stopPropagation();
           return;
         }
         
@@ -31,7 +30,6 @@ const FokusarkTableScroll: React.FC<FokusarkTableScrollProps> = ({ children }) =
     
     // For touch devices, sync the positions of sticky elements
     const handleScroll = () => {
-      const scrollTop = scrollContainer.scrollTop;
       const scrollLeft = scrollContainer.scrollLeft;
       
       // Force repaint sticky elements by setting a small transform
@@ -42,10 +40,20 @@ const FokusarkTableScroll: React.FC<FokusarkTableScrollProps> = ({ children }) =
       [...headers, ...stickyColumns].forEach((el) => {
         (el as HTMLElement).style.transform = 'translateZ(0)';
       });
+      
+      // Add or remove class when scrolling horizontally
+      if (scrollLeft > 0) {
+        scrollContainer.classList.add('is-scrolling');
+      } else {
+        scrollContainer.classList.remove('is-scrolling');
+      }
     };
     
     scrollContainer.addEventListener('wheel', handleWheel, { passive: false });
     scrollContainer.addEventListener('scroll', handleScroll);
+    
+    // Initial scroll position check
+    handleScroll();
     
     return () => {
       scrollContainer.removeEventListener('wheel', handleWheel);

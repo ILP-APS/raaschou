@@ -29,7 +29,8 @@ export const tableContainerStyles = `
   /* Table styling */
   table {
     border-collapse: collapse;
-    width: 100%;
+    width: max-content;
+    min-width: 100%;
     table-layout: fixed;
   }
   
@@ -67,6 +68,7 @@ export const tableContainerStyles = `
     width: 100px;
     z-index: 11;
     background-color: white;
+    box-shadow: 1px 0 1px rgba(0,0,0,0.07);
   }
   
   /* Second column - Navn */
@@ -79,13 +81,24 @@ export const tableContainerStyles = `
     background-color: white;
   }
   
+  /* Add box shadow to second column when scrolling */
+  .is-scrolling .fokusark-col-1::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 4px;
+    pointer-events: none;
+    background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
+  }
+  
   /* Z-index boost for sticky intersections (corners) */
   thead tr:first-child .fokusark-col-0,
   thead tr:first-child .fokusark-col-1,
   thead tr:nth-child(2) .fokusark-col-0,
   thead tr:nth-child(2) .fokusark-col-1 {
     z-index: 13;
-    box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
   }
   
   /* Other columns */
@@ -104,18 +117,6 @@ export const tableContainerStyles = `
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-  
-  /* Sticky column shadow effect */
-  .fokusark-col-1::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 4px;
-    pointer-events: none;
-    background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
   }
   
   /* Row hover effect */
