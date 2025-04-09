@@ -12,18 +12,20 @@ export const addRemainingColumns = (appointment: FokusarkAppointment, row: strin
   row[16] = formatDanishNumber(timerTilbage);
   
   // Calculate produktion timer tilbage as produktion - produktion_realized
-  const produktionTimerTilbage = (appointment.produktion || 0) - (appointment.produktion_realized || 0);
-  row[17] = formatDanishNumber(produktionTimerTilbage);
+  const produktionValue = appointment.produktion || 0;
+  const produktionRealizedValue = appointment.produktion_realized || 0;
+  const produktionTimerTilbage = produktionValue - produktionRealizedValue;
   
-  // Special debug for appointment 24258
-  if (appointment.appointment_number === '24258') {
-    console.log(`[CRITICAL DEBUG] Adding produktion timer tilbage for 24258:`, {
-      produktion: appointment.produktion, // estimated/calculated
-      produktion_realized: appointment.produktion_realized, // from API
-      difference: (appointment.produktion || 0) - (appointment.produktion_realized || 0),
-      formatted_difference: formatDanishNumber((appointment.produktion || 0) - (appointment.produktion_realized || 0))
-    });
-  }
+  // Add debugging for all rows to help identify issues
+  console.log(`[DEBUG] Produktion Timer Tilbage for ${appointment.appointment_number}:`, {
+    produktion: produktionValue,
+    produktion_realized: produktionRealizedValue,
+    difference: produktionTimerTilbage,
+    formatted: formatDanishNumber(produktionTimerTilbage)
+  });
+  
+  // Assign the formatted value to the correct column
+  row[17] = formatDanishNumber(produktionTimerTilbage);
   
   // Add production columns in the new rearranged order
   row[18] = formatValueOrEmpty(appointment.faerdig_pct_ex_montage_nu);
@@ -34,4 +36,3 @@ export const addRemainingColumns = (appointment: FokusarkAppointment, row: strin
   // Add afsat fragt (transport) column
   row[22] = formatValueOrEmpty(appointment.afsat_fragt);
 };
-

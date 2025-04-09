@@ -116,7 +116,11 @@ export const useRecalculationHandler = ({
     
     // Handle produktion timer tilbage recalculation if needed
     if (recalcNeeded.produktionTimerTilbage) {
+      console.log(`Explicitly need to recalculate Produktion Timer Tilbage for ${appointmentNumber}`);
       await recalculateAndUpdateProduktionTimerTilbage(appointmentNumber, rowIndex, newRowData);
+    } else if (recalcNeeded.produktion) {
+      // Also recalculate when produktion changes (already handled above)
+      console.log(`Will recalculate Produktion Timer Tilbage because produktion changed for ${appointmentNumber}`);
     }
     
     // Always recalculate the total when any of the values change that affect it

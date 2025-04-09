@@ -19,14 +19,6 @@ export const addRealizedValues = (appointment: FokusarkAppointment, row: string[
   // For column 13 (realized produktion - explicitly from API)
   row[13] = formatValueOrEmpty(appointment.produktion_realized);
   
-  // Special debug for appointment 24258
-  if (appointment.appointment_number === '24258') {
-    console.log(`[CRITICAL DEBUG] Adding realized produktion for 24258:`, {
-      produktion_realized_value: appointment.produktion_realized,
-      formatted: formatValueOrEmpty(appointment.produktion_realized)
-    });
-  }
-  
   row[14] = formatValueOrEmpty(appointment.montage_3);
   
   // Calculate and add total
@@ -35,4 +27,3 @@ export const addRealizedValues = (appointment: FokusarkAppointment, row: string[
                 (appointment.montage_3 || 0);
   row[15] = formatDanishNumber(total);
 };
-
