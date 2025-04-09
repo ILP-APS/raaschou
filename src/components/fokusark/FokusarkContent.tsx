@@ -88,11 +88,13 @@ const FokusarkContent: React.FC = () => {
               {/* First two columns don't have groups */}
               <TableHead 
                 className="col-id"
+                style={{backgroundColor: 'hsl(var(--muted))'}}
               >
                 &nbsp;
               </TableHead>
               <TableHead 
                 className="col-name last-sticky-cell"
+                style={{backgroundColor: 'hsl(var(--muted))'}}
               >
                 &nbsp;
               </TableHead>

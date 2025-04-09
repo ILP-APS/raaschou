@@ -26,7 +26,6 @@
   padding: 0.75rem;
   border-right: 1px solid hsl(var(--border));
   border-bottom: 1px solid hsl(var(--border));
-  background-color: inherit;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -74,8 +73,8 @@
 }
 
 /* Ensure sticky columns retain their background color */
-.sticky-table tbody tr .col-id,
-.sticky-table tbody tr .col-name {
+.sticky-table tbody tr td.col-id,
+.sticky-table tbody tr td.col-name {
   background-color: hsl(var(--background));
 }
 
@@ -102,9 +101,15 @@
 }
 
 /* Ensure sticky columns maintain background on hover */
-.sticky-table tbody tr:hover .col-id,
-.sticky-table tbody tr:hover .col-name {
+.sticky-table tbody tr:hover td.col-id,
+.sticky-table tbody tr:hover td.col-name {
   background-color: hsl(var(--muted)/30);
+}
+
+/* Even row background for sticky columns */
+.sticky-table tbody tr:nth-child(even) td.col-id,
+.sticky-table tbody tr:nth-child(even) td.col-name {
+  background-color: hsl(var(--muted)/10);
 }
 
 /* Force horizontal scrollbar to be visible */
