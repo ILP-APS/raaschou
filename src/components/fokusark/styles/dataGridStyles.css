@@ -93,6 +93,7 @@
   position: sticky;
   top: 0;
   left: 0;
+  background-color: hsl(var(--background));
 }
 
 /* First data row styling - make it sticky */
@@ -119,6 +120,7 @@
   position: sticky !important;
   left: 0;
   z-index: 20;
+  background-color: hsl(var(--background));
 }
 
 /* Add visual indicator for frozen columns */

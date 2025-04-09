@@ -16,6 +16,7 @@
   block-size: 100%;
   border-radius: 0.5rem;
   overflow: auto;
+  border: 1px solid hsl(var(--border));
 }
 
 /* Frozen column shadow */
@@ -61,4 +62,39 @@
 .rdg-cell[aria-selected="true"] {
   outline: 2px solid hsl(var(--primary));
   outline-offset: -2px;
+}
+
+/* Set the frozen columns with correct backgrounds */
+.rdg-header-row .rdg-cell[aria-frozen="true"],
+.rdg-row .rdg-cell[aria-frozen="true"] {
+  background-color: hsl(var(--background));
+}
+
+/* Add border to header cells */
+.rdg-header-row .rdg-cell {
+  background-color: hsl(var(--muted)/30);
+  border-right: 1px solid hsl(var(--border));
+  border-bottom: 1px solid hsl(var(--border));
+  font-weight: 600;
+}
+
+/* Make header cells sticky */
+.rdg-header-row {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+/* Ensure frozen headers are on top */
+.rdg-header-row .rdg-cell[aria-frozen="true"] {
+  z-index: 4;
+}
+
+/* Add shadow to frozen column edge */
+.rdg-cell[aria-frozen="true"]:last-of-type {
+  box-shadow: inset -2px 0 0 0 rgba(0,0,0,0.1);
+}
+
+.dark .rdg-cell[aria-frozen="true"]:last-of-type {
+  box-shadow: inset -2px 0 0 0 rgba(255,255,255,0.1);
 }
