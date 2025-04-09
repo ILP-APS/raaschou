@@ -1,8 +1,10 @@
+
 import React from 'react';
 import {
   flexRender,
   getCoreRowModel,
   useReactTable,
+  ColumnDef
 } from '@tanstack/react-table';
 import {
   Table,
@@ -13,6 +15,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useTheme } from 'next-themes';
+
+// Define custom column meta type to support our sticky properties
+interface ColumnMeta {
+  sticky?: boolean;
+  index?: number;
+  group?: string;
+}
 
 interface MinimalStickyTableProps {
   tableData?: string[][];
@@ -37,10 +46,9 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
         name: `Project ${i + 1}`,
         type: `Type ${i % 4 + 1}`,
         // Add sample data for other columns
-        ...Array.from({ length: 20 }).reduce((acc, _, j) => {
-          acc[`col${j}`] = `Value ${i}-${j}`;
-          return acc;
-        }, {} as Record<string, string>)
+        ...Object.fromEntries(
+          Array.from({ length: 20 }).map((_, j) => [`col${j}`, `Value ${i}-${j}`])
+        )
       }));
     }
     
@@ -62,29 +70,29 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   }, [tableData]);
   
   // Define columns with proper grouping
-  const columns = React.useMemo(() => [
+  const columns = React.useMemo<ColumnDef<Record<string, string>, unknown>[]>(() => [
     // Group 1: Info (3 cols)
     { 
       accessorKey: 'id', 
       header: 'ID', 
-      meta: { sticky: true, index: 0, group: 'Info' } 
+      meta: { sticky: true, index: 0, group: 'Info' } as ColumnMeta
     },
     { 
       accessorKey: 'name', 
       header: 'Name', 
-      meta: { sticky: true, index: 1, group: 'Info' } 
+      meta: { sticky: true, index: 1, group: 'Info' } as ColumnMeta
     },
     { 
       accessorKey: 'type', 
       header: 'Type', 
-      meta: { group: 'Info' } 
+      meta: { group: 'Info' } as ColumnMeta
     },
     
     // Other columns
     ...Array.from({ length: 20 }).map((_, i) => ({
       accessorKey: `col${i}`,
       header: `Column ${i + 1}`,
-      meta: { group: `Group ${Math.floor(i / 4) + 1}` }
+      meta: { group: `Group ${Math.floor(i / 4) + 1}` } as ColumnMeta
     }))
   ], []);
 
@@ -204,8 +212,8 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
           {/* Regular header row */}
           <TableRow>
             {table.getFlatHeaders().map((header, index) => {
-              const columnMeta = header.column.columnDef.meta || {};
-              const isSticky = !!columnMeta.sticky;
+              const columnMeta = header.column.columnDef.meta as ColumnMeta || {};
+              const isSticky = columnMeta.sticky || false;
               const stickyIndex = columnMeta.index || 0;
               const isIdCol = index === 0;
               const isNameCol = index === 1;
@@ -242,8 +250,8 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
             return (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell, cellIndex) => {
-                  const columnMeta = cell.column.columnDef.meta || {};
-                  const isSticky = !!columnMeta.sticky;
+                  const columnMeta = cell.column.columnDef.meta as ColumnMeta || {};
+                  const isSticky = columnMeta.sticky || false;
                   const stickyIndex = columnMeta.index || 0;
                   const isIdCol = cellIndex === 0;
                   const isNameCol = cellIndex === 1;
