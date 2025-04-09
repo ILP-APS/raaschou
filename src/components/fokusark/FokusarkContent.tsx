@@ -12,7 +12,7 @@ const FokusarkContent: React.FC = () => {
       </div>
       
       <div className="p-6 rounded-lg border border-border bg-card text-card-foreground shadow-sm">
-        <h3 className="text-lg font-medium mb-4">Frozen Data Table Example</h3>
+        <h3 className="text-lg font-medium mb-4">Fokusark Data Table</h3>
         <FrozenDataTable />
       </div>
     </div>
