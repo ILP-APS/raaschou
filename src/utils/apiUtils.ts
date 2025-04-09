@@ -82,12 +82,27 @@ export const fetchAppointmentLineWork = async (appointmentId: number) => {
   );
   
   if (!res.ok) {
-    console.error(`Failed to fetch line work data for appointment ID: ${appointmentId}`);
+    console.error(`Failed to fetch line work data for appointment ID: ${appointmentId}`, {
+      status: res.status,
+      statusText: res.statusText
+    });
     throw new Error(`Failed to fetch line work for appointment ID: ${appointmentId}`);
   }
   
   const data = await res.json();
-  console.log(`Received line work data for appointment ID ${appointmentId}:`, data);
+  
+  // Add special logging for appointment 24375
+  if (appointmentId === 24375) {
+    console.log(`[SPECIAL DEBUG] Received line work data for appointment ID 24375:`, {
+      entryCount: data.length,
+      firstFew: data.slice(0, 3)
+    });
+  } else {
+    console.log(`Received line work data for appointment ID ${appointmentId}:`, {
+      entryCount: data.length
+    });
+  }
+  
   return data;
 };
 

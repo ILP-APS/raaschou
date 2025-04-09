@@ -26,6 +26,7 @@ const RefreshRealizedHoursButton: React.FC = () => {
       
       const appointments = await loadFokusarkAppointments();
       let updatedCount = 0;
+      let errorCount = 0;
       
       for (const appointment of appointments) {
         if (appointment.hn_appointment_id) {
@@ -40,6 +41,14 @@ const RefreshRealizedHoursButton: React.FC = () => {
             
             console.log(`Calculated realized hours for ${appointment.appointment_number}:`, realizedHours);
             
+            // Special debug for appointment 24375
+            if (appointment.appointment_number === '24375') {
+              console.log(`[SPECIAL DEBUG] Appointment 24375 realized hours:`, {
+                lineWorkDataCount: lineWorkData.length,
+                calculatedHours: realizedHours
+              });
+            }
+            
             // Format the hours for display
             const formattedHours = {
               projektering: formatDanishNumber(realizedHours.projektering),
@@ -50,11 +59,11 @@ const RefreshRealizedHoursButton: React.FC = () => {
             
             console.log(`Formatted realized hours for ${appointment.appointment_number}:`, formattedHours);
             
-            // Update the realized hours in database - explicitly storing API value in produktion_realized
+            // Update the realized hours in database - explicitly storing API raw values
             await updateRealizedHours(
               appointment.appointment_number,
               realizedHours.projektering,
-              realizedHours.produktion, // Store API value in produktion_realized column
+              realizedHours.produktion, 
               realizedHours.montage,
               realizedHours.total
             );
@@ -63,6 +72,7 @@ const RefreshRealizedHoursButton: React.FC = () => {
             updatedCount++;
           } catch (error) {
             console.error(`Error updating realized hours for ${appointment.appointment_number}:`, error);
+            errorCount++;
           }
         } else {
           console.log(`Skipping appointment ${appointment.appointment_number} - no hn_appointment_id`);
@@ -71,7 +81,7 @@ const RefreshRealizedHoursButton: React.FC = () => {
       
       toast({
         title: "Refresh complete",
-        description: `Updated realized hours for ${updatedCount} appointments.`,
+        description: `Updated realized hours for ${updatedCount} appointments. Errors: ${errorCount}`,
       });
       
       // Reload the page to see the updated data
