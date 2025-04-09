@@ -13,6 +13,35 @@ export const useFokusarkTable = (initialData: string[][]) => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   
+  // Calculate Est 1 based on the formula: (Tilbud - Montage) - Underleverandør * 0.25
+  const calculateEst1 = (row: string[]): string => {
+    try {
+      // Get values from relevant columns (indices 3, 4, 5 for Tilbud, Montage, Underleverandør)
+      const tilbud = parseFloat(row[3]?.replace(/\./g, '').replace(',', '.') || '0');
+      const montage = parseFloat(row[4]?.replace(/\./g, '').replace(',', '.') || '0');
+      const underleverandor = parseFloat(row[5]?.replace(/\./g, '').replace(',', '.') || '0');
+      
+      // Calculate using the formula
+      const est1 = (tilbud - montage) - (underleverandor * 0.25);
+      
+      // Format the result with the Danish number format
+      return est1.toLocaleString('da-DK');
+    } catch (error) {
+      console.error('Error calculating Est 1:', error);
+      return '0';
+    }
+  };
+  
+  // Apply Est 1 calculation to all rows
+  const applyEst1Calculations = (data: string[][]): string[][] => {
+    return data.map(row => {
+      const rowCopy = [...row];
+      // Est 1 is at index 8
+      rowCopy[8] = calculateEst1(row);
+      return rowCopy;
+    });
+  };
+  
   // Load data and saved values from Supabase when component mounts
   useEffect(() => {
     async function fetchSavedData() {
@@ -39,7 +68,10 @@ export const useFokusarkTable = (initialData: string[][]) => {
           });
         }
         
-        setTableData(dataToUse);
+        // Apply Est 1 calculations to all rows
+        const dataWithEst1 = applyEst1Calculations(dataToUse);
+        
+        setTableData(dataWithEst1);
       } catch (error) {
         console.error('Error loading saved cell data:', error);
         toast({
@@ -47,7 +79,10 @@ export const useFokusarkTable = (initialData: string[][]) => {
           description: "Could not load saved data. Using default values.",
           variant: "destructive",
         });
-        setTableData(initialData);
+        
+        // Even with the error, apply Est 1 calculations
+        const dataWithEst1 = applyEst1Calculations(initialData);
+        setTableData(dataWithEst1);
       } finally {
         setIsLoading(false);
       }
@@ -67,6 +102,12 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       // Update the specific cell
       rowCopy[colIndex] = value;
+      
+      // If we're updating any of the columns used in Est 1 calculation (Tilbud, Montage, Underleverandør),
+      // we need to recalculate Est 1
+      if (colIndex === 3 || colIndex === 4 || colIndex === 5) {
+        rowCopy[8] = calculateEst1(rowCopy);
+      }
       
       // Update the row in the data
       newData[rowIndex] = rowCopy;
