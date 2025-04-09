@@ -92,49 +92,37 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount, 
 
   // Generate column groups for the first header row
   const renderColumnGroups = () => {
-    const groups = [];
-    let currentIndex = 0;
-
-    // If we're rendering the frozen columns, we only need the first group
     if (isFrozen) {
-      const group = getColumnGroup(0);
-      if (group) {
-        return [
-          <th 
-            key="group-0" 
-            colSpan={group.colSpan}
-            className="group-header"
-          >
-            {group.name}
-          </th>
-        ];
-      }
-      return [];
-    }
-
-    // For the main table, render all groups
-    while (currentIndex < columnCount) {
-      const group = getColumnGroup(currentIndex);
+      // For frozen columns, just render the first group
+      return [
+        <th 
+          key="group-frozen" 
+          colSpan={2}
+          className="group-header"
+        >
+          Aftale
+        </th>
+      ];
+    } else {
+      // For the main table, render all groups except the first one
+      const groups = [];
+      let currentIndex = 2; // Start from the third column (index 2)
       
-      if (group) {
-        // For the main table, we need to adjust for the frozen columns
-        if (currentIndex < 2) {
-          currentIndex += group.colSpan;
-          continue; // Skip the frozen columns in the main table
-        }
+      while (currentIndex < columnCount + 2) { // +2 because we're skipping the first two columns
+        const group = getColumnGroup(currentIndex);
         
-        groups.push(
-          <th 
-            key={`group-${currentIndex}`} 
-            colSpan={group.colSpan}
-            className="group-header"
-          >
-            {group.name}
-          </th>
-        );
-        currentIndex += group.colSpan;
-      } else {
-        if (currentIndex >= 2) { // Skip the frozen columns in the main table
+        if (group) {
+          groups.push(
+            <th 
+              key={`group-${currentIndex}`} 
+              colSpan={group.colSpan}
+              className="group-header"
+            >
+              {group.name}
+            </th>
+          );
+          currentIndex += group.colSpan;
+        } else {
           groups.push(
             <th 
               key={`group-${currentIndex}`}
@@ -143,15 +131,15 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount, 
               &nbsp;
             </th>
           );
+          currentIndex += 1;
         }
-        currentIndex += 1;
       }
+      
+      return groups;
     }
-    
-    return groups;
   };
 
-  // Render the column headers depending on whether this is the frozen section or main table
+  // Render the column headers
   const renderColumnHeaders = () => {
     if (isFrozen) {
       // For the frozen section, only render the first two columns
@@ -162,16 +150,15 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount, 
       ));
     } else {
       // For the main table, render all columns except the first two
-      return Array.from({ length: columnCount }, (_, index) => {
-        // Skip the first two columns in the main table
-        if (index < 2) return null;
-        
-        return (
-          <th key={index} className={`${getColumnClass(index)} column-header`}>
-            {getColumnName(index)}
+      const headers = [];
+      for (let i = 2; i < columnCount + 2; i++) {
+        headers.push(
+          <th key={i} className={`${getColumnClass(i)} column-header`}>
+            {getColumnName(i)}
           </th>
         );
-      }).filter(Boolean); // Remove nulls
+      }
+      return headers;
     }
   };
 

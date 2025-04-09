@@ -13,15 +13,17 @@ const FokusarkTableScroll: React.FC<FokusarkTableScrollProps> = ({ children }) =
     if (!scrollContainer) return;
     
     const handleScroll = () => {
-      // Update the scroll position of the fixed columns header
+      // Get the scroll position
       const scrollLeft = scrollContainer.scrollLeft;
-      document.documentElement.style.setProperty('--table-scroll-position', `${scrollLeft}px`);
       
-      // Add/remove scrolling class for shadow effects
-      if (scrollLeft > 0) {
-        scrollContainer.classList.add('is-scrolling');
-      } else {
-        scrollContainer.classList.remove('is-scrolling');
+      // Find the frozen columns container and apply shadow based on scroll position
+      const frozenColumns = document.querySelector('.frozen-columns') as HTMLElement;
+      if (frozenColumns) {
+        if (scrollLeft > 0) {
+          frozenColumns.classList.add('with-shadow');
+        } else {
+          frozenColumns.classList.remove('with-shadow');
+        }
       }
     };
     

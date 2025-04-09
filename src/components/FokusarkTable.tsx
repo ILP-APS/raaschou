@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import FokusarkTableHeader from "./FokusarkTableHeader";
 import FokusarkTableBody from "./FokusarkTableBody";
 import FokusarkTableScroll from "./fokusark/FokusarkTableScroll";
@@ -13,6 +13,7 @@ interface FokusarkTableProps {
 
 const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   const { tableData, isLoading, handleCellChange } = useFokusarkTable(data);
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   
   // Determine the number of columns based on the first row of data
   const columnCount = tableData.length > 0 ? tableData[0].length - 1 : 0; // Subtract 1 for the row type indicator
@@ -21,6 +22,11 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   if (isLoading) {
     return <FokusarkTableLoading />;
   }
+
+  // Handle row hover synchronization between tables
+  const handleRowHover = (index: number | null) => {
+    setHoveredRow(index);
+  };
 
   return (
     <>
@@ -37,6 +43,8 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
                   onCellChange={handleCellChange}
                   columnCount={2}
                   isFrozen={true}
+                  hoveredRow={hoveredRow}
+                  onRowHover={handleRowHover}
                 />
               </table>
             </div>
@@ -48,6 +56,8 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
                 data={tableData} 
                 onCellChange={handleCellChange}
                 columnCount={columnCount}
+                hoveredRow={hoveredRow}
+                onRowHover={handleRowHover}
               />
             </table>
           </div>

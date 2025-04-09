@@ -6,13 +6,17 @@ interface FokusarkTableBodyProps {
   onCellChange?: (rowIndex: number, colIndex: number, value: string) => void;
   columnCount?: number;
   isFrozen?: boolean;
+  hoveredRow?: number | null;
+  onRowHover?: (index: number | null) => void;
 }
 
 const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ 
   data, 
   onCellChange,
   columnCount = 26, // Default value
-  isFrozen = false 
+  isFrozen = false,
+  hoveredRow,
+  onRowHover
 }) => {
   // Function to ensure all rows have the same number of columns
   const normalizeRow = (row: string[], expectedLength: number): string[] => {
@@ -40,16 +44,16 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({
     // Only these columns are editable: 
     // - Montage 2 (index 6)
     // - Underleverandør 2 (index 7)
-    // - Færdig % ex montage nu (index 18) - Updated index
-    // - Færdig % ex montage før (index 19) - Updated index
+    // - Færdig % ex montage nu (index 18)
+    // - Færdig % ex montage før (index 19)
     return [6, 7, 18, 19].includes(columnIndex);
   };
 
   // Function to check if a column should be treated as percentage
   const isPercentageColumn = (columnIndex: number): boolean => {
     // These columns are percentages:
-    // - Færdig % ex montage nu (index 18) - Updated index
-    // - Færdig % ex montage før (index 19) - Updated index
+    // - Færdig % ex montage nu (index 18)
+    // - Færdig % ex montage før (index 19)
     return [18, 19].includes(columnIndex);
   };
 
@@ -79,9 +83,9 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({
 
   // Function to get cell class based on column index
   const getCellClass = (index: number): string => {
-    if (index === 0) return "fixed-col-0";
-    if (index === 1) return "fixed-col-1";
-    return "table-col";
+    if (index === 0) return "col-0";
+    if (index === 1) return "col-1";
+    return "col-scrollable";
   };
 
   // Function to render a cell - special handling for editable cells
@@ -123,8 +127,23 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({
     );
   };
 
-  // Determine the expected number of columns (excluding the row type indicator)
-  const expectedColumns = 26; // Increased by 1 to account for the new column
+  // Determine which columns to render based on whether this is the frozen section or main table
+  const renderTableCells = (row: string[], rowIndex: number, isSubAppointment: boolean) => {
+    if (isFrozen) {
+      // For frozen table, only render the first two columns
+      return [0, 1].map(colIndex => renderCell(rowIndex, colIndex, row[colIndex], isSubAppointment));
+    } else {
+      // For main table, render all columns except the first two
+      return row.map((cell, cellIndex) => {
+        // Skip the first two columns (they're in the frozen table)
+        if (cellIndex < 2) return null;
+        return renderCell(rowIndex, cellIndex, cell, isSubAppointment);
+      }).filter(Boolean); // Filter out nulls
+    }
+  };
+
+  // Expected number of columns
+  const expectedColumns = 26;
 
   return (
     <tbody className="bg-background divide-y divide-border">
@@ -141,13 +160,16 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({
         
         return (
           <tr 
-            key={rowIndex} 
-            className={`hover:bg-muted/50 ${isSubAppointment ? 'pl-4 bg-muted/20' : ''}`}
+            key={rowIndex}
+            className={`
+              ${hoveredRow === rowIndex ? 'bg-muted/50' : ''}
+              ${isSubAppointment ? 'pl-4 bg-muted/20' : ''}
+            `}
             data-sub-appointment={isSubAppointment}
+            onMouseEnter={() => onRowHover?.(rowIndex)}
+            onMouseLeave={() => onRowHover?.(null)}
           >
-            {displayRow.map((cell, cellIndex) => 
-              renderCell(rowIndex, cellIndex, cell, isSubAppointment)
-            )}
+            {renderTableCells(displayRow, rowIndex, isSubAppointment)}
           </tr>
         );
       })}

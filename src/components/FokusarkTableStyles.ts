@@ -5,7 +5,6 @@ export const tableContainerStyles = `
   :root {
     --frozen-col-0-width: 100px;
     --frozen-col-1-width: 250px;
-    --table-scroll-position: 0px;
   }
   
   /* Main container */
@@ -17,36 +16,42 @@ export const tableContainerStyles = `
     max-height: calc(100vh - 220px);
     border: 1px solid hsl(var(--border));
     border-radius: 0.5rem;
-    -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
   }
   
   /* Table container with frozen columns */
   .fokusark-table-wrapper {
+    display: flex;
     position: relative;
-    width: 100%;
+    min-width: 100%;
   }
   
   /* Main table styling */
   .fokusark-table {
-    width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     table-layout: fixed;
+    width: 100%;
+    margin-left: calc(var(--frozen-col-0-width) + var(--frozen-col-1-width));
   }
   
   /* Frozen columns container */
   .frozen-columns {
     position: absolute;
-    top: 0;
     left: 0;
+    top: 0;
     width: calc(var(--frozen-col-0-width) + var(--frozen-col-1-width));
     z-index: 20;
-    background: hsl(var(--background));
-    overflow: hidden;
-    border-right: 2px solid hsl(var(--border));
-    box-shadow: 2px 0 5px rgba(0,0,0,0.15);
+    background-color: hsl(var(--background));
     height: 100%;
-    pointer-events: none; /* Let events pass through */
+    overflow: hidden;
+  }
+  
+  .frozen-columns.with-shadow {
+    box-shadow: 6px 0 5px -5px rgba(0,0,0,0.15);
+  }
+  
+  .dark .frozen-columns.with-shadow {
+    box-shadow: 6px 0 5px -5px rgba(0,0,0,0.3);
   }
   
   /* Frozen table styling */
@@ -55,7 +60,6 @@ export const tableContainerStyles = `
     border-spacing: 0;
     table-layout: fixed;
     width: 100%;
-    pointer-events: auto; /* Re-enable pointer events */
   }
   
   /* Column widths */
@@ -113,16 +117,16 @@ export const tableContainerStyles = `
     text-overflow: ellipsis;
   }
   
-  /* Row hover effect */
+  /* Row hover effect - synchronized between tables */
   .fokusark-table tbody tr:hover,
   .frozen-table tbody tr:hover {
     background-color: hsl(var(--muted)/50);
   }
   
-  /* Make sure rows in both tables have same height */
+  /* Ensure row heights match in both tables */
   .frozen-table tr,
   .fokusark-table tr {
-    height: 48px; /* Set a fixed height for all rows */
+    height: 48px; /* Fixed height for all rows */
   }
   
   /* Sub-appointment styling */
@@ -134,7 +138,14 @@ export const tableContainerStyles = `
     padding-left: 20px;
   }
   
-  /* Custom scrollbar styling */
+  /* Fix Firefox scrollbar issues */
+  @-moz-document url-prefix() {
+    .fokusark-table-scroll-container {
+      scrollbar-width: thin;
+    }
+  }
+  
+  /* Custom scrollbar styling for other browsers */
   .fokusark-table-scroll-container::-webkit-scrollbar {
     height: 8px;
     width: 8px;
@@ -151,9 +162,7 @@ export const tableContainerStyles = `
   
   /* Dark mode support */
   .dark .frozen-columns {
-    background: hsl(var(--background));
-    border-right: 2px solid hsl(var(--border));
-    box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+    background-color: hsl(var(--background));
   }
   
   .dark .fokusark-table thead th,
