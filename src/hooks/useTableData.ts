@@ -56,10 +56,10 @@ export const useTableData = () => {
             console.log(`Realized hours for ${appointment.appointmentNumber}:`, realizedHours);
             
             try {
-              const projekteringNum = parseFloat(realizedHours.projektering.replace('.', '').replace(',', '.')) || 0;
-              const produktionNum = parseFloat(realizedHours.produktion.replace('.', '').replace(',', '.')) || 0;
-              const montageNum = parseFloat(realizedHours.montage.replace('.', '').replace(',', '.')) || 0;
-              const totalNum = parseFloat(realizedHours.total.replace('.', '').replace(',', '.')) || 0;
+              const projekteringNum = parseFloat(realizedHours.projektering.replace(/\./g, '').replace(',', '.')) || 0;
+              const produktionNum = parseFloat(realizedHours.produktion.replace(/\./g, '').replace(',', '.')) || 0;
+              const montageNum = parseFloat(realizedHours.montage.replace(/\./g, '').replace(',', '.')) || 0;
+              const totalNum = parseFloat(realizedHours.total.replace(/\./g, '').replace(',', '.')) || 0;
               
               console.log(`Storing realized hours for ${appointment.appointmentNumber}:`, {
                 projektering: projekteringNum,

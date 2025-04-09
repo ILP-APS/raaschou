@@ -106,19 +106,40 @@ export const transformAppointmentsToDisplayData = (appointments: FokusarkAppoint
     row[7] = appointment.underleverandor2 !== null ? formatDanishNumber(appointment.underleverandor2) : '';
     row[8] = formatDanishNumber(appointment.materialer || 0);
     
-    // Add the new columns
+    // Add estimated columns (Estimeret section)
     row[9] = appointment.projektering_1 !== null ? formatDanishNumber(appointment.projektering_1) : '';
     row[10] = appointment.produktion !== null ? formatDanishNumber(appointment.produktion) : '';
     row[11] = appointment.montage_3 !== null ? formatDanishNumber(appointment.montage_3) : '';
-    row[12] = ''; // Real 1 (placeholder)
-    row[13] = ''; // Real 2 (placeholder)
-    row[14] = ''; // Real 3 (placeholder)
-    row[15] = ''; // Real 4 (placeholder)
+    
+    // Add realized columns (Realiseret section)
+    row[12] = appointment.projektering_2 !== null ? formatDanishNumber(appointment.projektering_2) : '';
+    row[13] = appointment.produktion !== null ? formatDanishNumber(appointment.produktion) : '';
+    row[14] = appointment.montage_3 !== null ? formatDanishNumber(appointment.montage_3) : '';
+    row[15] = appointment.total !== null ? formatDanishNumber(appointment.total) : '';
+    
+    // Add remaining columns
     row[16] = appointment.timer_tilbage_1 !== null ? formatDanishNumber(appointment.timer_tilbage_1) : '';
     
-    // Placeholder data for remaining columns
-    for (let i = 17; i < 24; i++) {
-      row[i] = '';
+    // Placeholder data for remaining columns if they're not provided
+    for (let i = 17; i < 23; i++) {
+      const fieldName = (() => {
+        switch (i) {
+          case 17: return 'faerdig_pct_ex_montage_nu';
+          case 18: return 'faerdig_pct_ex_montage_foer';
+          case 19: return 'est_timer_ift_faerdig_pct';
+          case 20: return 'plus_minus_timer';
+          case 21: return 'timer_tilbage_2';
+          case 22: return 'afsat_fragt';
+          default: return null;
+        }
+      })();
+      
+      if (fieldName && appointment[fieldName as keyof FokusarkAppointment] !== null) {
+        const value = appointment[fieldName as keyof FokusarkAppointment];
+        row[i] = typeof value === 'number' ? formatDanishNumber(value) : String(value);
+      } else {
+        row[i] = '';
+      }
     }
     
     // Add visual indication for sub-appointments

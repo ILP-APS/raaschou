@@ -133,10 +133,10 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
             console.log(`Got realized hours for ${appointment.appointment_number}:`, realizedHours);
             
             // Convert the formatted string values back to numbers for storage
-            const projekteringNum = parseFloat(realizedHours.projektering.replace('.', '').replace(',', '.')) || 0;
-            const produktionNum = parseFloat(realizedHours.produktion.replace('.', '').replace(',', '.')) || 0;
-            const montageNum = parseFloat(realizedHours.montage.replace('.', '').replace(',', '.')) || 0;
-            const totalNum = parseFloat(realizedHours.total.replace('.', '').replace(',', '.')) || 0;
+            const projekteringNum = parseFloat(realizedHours.projektering.replace(/\./g, '').replace(',', '.')) || 0;
+            const produktionNum = parseFloat(realizedHours.produktion.replace(/\./g, '').replace(',', '.')) || 0;
+            const montageNum = parseFloat(realizedHours.montage.replace(/\./g, '').replace(',', '.')) || 0;
+            const totalNum = parseFloat(realizedHours.total.replace(/\./g, '').replace(',', '.')) || 0;
             
             console.log(`Parsed values for ${appointment.appointment_number}:`, {
               projektering: projekteringNum,

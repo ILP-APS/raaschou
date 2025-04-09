@@ -27,11 +27,11 @@ export const useFieldMapping = () => {
       case 12:
         return 'projektering_2'; // Realized projektering
       case 13:
-        return 'produktion'; // Using the existing produktion field, not produktion_2
+        return 'produktion'; // Using the existing produktion field for realized produktion
       case 14:
-        return 'montage_3'; // Using the existing montage_3 field, not realized_montage
+        return 'montage_3'; // Using the existing montage_3 field for realized montage
       case 15:
-        return 'total'; // Using the existing total field, not realized_total
+        return 'total'; // Using the existing total field for realized total
       case 16:
         return 'timer_tilbage_1';
       case 17:
