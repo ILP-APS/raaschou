@@ -5,7 +5,7 @@ import { useFokusarkData } from "@/hooks/useFokusarkData";
 import MinimalStickyTable from "./MinimalStickyTable";
 
 const FokusarkContent: React.FC = () => {
-  const { isLoading, data } = useFokusarkData();
+  const { isLoading, tableData } = useFokusarkData();
   
   if (isLoading) {
     return (
@@ -29,7 +29,7 @@ const FokusarkContent: React.FC = () => {
       </div>
       
       {/* Pass the data to MinimalStickyTable */}
-      <MinimalStickyTable tableData={data} />
+      <MinimalStickyTable tableData={tableData} />
     </div>
   );
 };

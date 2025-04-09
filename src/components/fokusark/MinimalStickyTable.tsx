@@ -16,6 +16,12 @@ import {
 } from '@/components/ui/table';
 import { useTheme } from 'next-themes';
 
+// Define the column meta type to include our custom properties
+interface ColumnMeta {
+  sticky?: boolean;
+  index?: number;
+}
+
 interface MinimalStickyTableProps {
   tableData?: string[][];
 }
@@ -59,17 +65,17 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     });
   }, [tableData]);
   
-  // Define columns - much simpler approach
+  // Define columns with proper typing for custom meta properties
   const columns = React.useMemo<ColumnDef<Record<string, string>, any>[]>(() => [
     { 
       accessorKey: 'id', 
       header: 'ID', 
-      meta: { sticky: true, index: 0 } 
+      meta: { sticky: true, index: 0 } as ColumnMeta
     },
     { 
       accessorKey: 'name', 
       header: 'Name', 
-      meta: { sticky: true, index: 1 } 
+      meta: { sticky: true, index: 1 } as ColumnMeta
     },
     { 
       accessorKey: 'type', 
@@ -123,8 +129,9 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
         <TableHeader>
           <TableRow>
             {table.getFlatHeaders().map((header, index) => {
-              const isSticky = !!header.column.columnDef.meta?.sticky;
-              const stickyIndex = header.column.columnDef.meta?.index as number || 0;
+              const columnMeta = header.column.columnDef.meta as ColumnMeta | undefined;
+              const isSticky = !!columnMeta?.sticky;
+              const stickyIndex = columnMeta?.index || 0;
               const isIdCol = index === 0;
               
               return (
@@ -156,8 +163,9 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
             return (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell, cellIndex) => {
-                  const isSticky = !!cell.column.columnDef.meta?.sticky;
-                  const stickyIndex = cell.column.columnDef.meta?.index as number || 0;
+                  const columnMeta = cell.column.columnDef.meta as ColumnMeta | undefined;
+                  const isSticky = !!columnMeta?.sticky;
+                  const stickyIndex = columnMeta?.index || 0;
                   const isIdCol = cellIndex === 0;
                   
                   return (
