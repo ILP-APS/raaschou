@@ -87,7 +87,7 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
     } else if (index === 12) {
       return { name: "Realiseret", colSpan: 4 }; // 4 columns: Projektering, Produktion, Montage, Total
     } else if (index === 16) {
-      return { name: "Timer", colSpan: 6 }; // 6 columns
+      return { name: "Produktion", colSpan: 6 }; // Changed from "Timer" to "Produktion"
     } else if (index === 22) {
       return { name: "Transport", colSpan: 1 }; // Transport group
     }
