@@ -1,7 +1,7 @@
 
 import { FokusarkAppointment } from "@/api/fokusarkAppointmentsApi";
 import { recalculateAllFields } from "@/utils/fokusarkCalculations";
-import { transformApiDataToAppointments } from "./transformationUtils";
+import { transformApiDataToAppointments } from "./transformation";
 import { loadFokusarkAppointments, saveAppointmentBatch } from "./appointmentDbService";
 
 /**
@@ -26,3 +26,4 @@ export const saveApiDataToSupabase = async (tableData: string[][]): Promise<Foku
     throw error;
   }
 };
+

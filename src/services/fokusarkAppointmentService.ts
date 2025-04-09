@@ -8,7 +8,7 @@
 export { 
   transformApiDataToAppointments,
   transformAppointmentsToDisplayData 
-} from "./fokusark/transformationUtils";
+} from "./fokusark/transformation";
 
 // Re-export database operations
 export { 
@@ -25,3 +25,4 @@ export {
 // Re-export the formatting utility that was previously in this file
 // but now moved to utils/formatUtils.ts
 export { formatDanishNumber } from "@/utils/formatUtils";
+
