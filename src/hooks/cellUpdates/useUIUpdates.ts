@@ -1,4 +1,3 @@
-
 import { FokusarkAppointment } from "@/api/fokusarkAppointmentsApi";
 import { formatDanishNumber } from "@/utils/formatUtils";
 import { Dispatch, SetStateAction } from 'react';
@@ -79,7 +78,19 @@ export const useUIUpdates = (
     setTableData(prevData => {
       const newData = [...prevData];
       const rowCopy = [...newData[rowIndex]];
-      // Update the timer tilbage column (index 16)
+      // Update the timer tilbage column (index 17)
+      rowCopy[17] = value;
+      newData[rowIndex] = rowCopy;
+      return newData;
+    });
+  };
+  
+  // Update projektering rest cell in the UI
+  const updateProjekteringRestUI = (rowIndex: number, value: string) => {
+    setTableData(prevData => {
+      const newData = [...prevData];
+      const rowCopy = [...newData[rowIndex]];
+      // Update the projektering rest column (index 16)
       rowCopy[16] = value;
       newData[rowIndex] = rowCopy;
       return newData;
@@ -104,6 +115,7 @@ export const useUIUpdates = (
     updateProduktionUI,
     updateMontageUI,
     updateTimerTilbageUI,
+    updateProjekteringRestUI,
     updateCellUI
   };
 };

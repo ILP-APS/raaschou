@@ -1,4 +1,3 @@
-
 import { useToast } from "@/hooks/use-toast";
 import { updateAppointmentField, loadFokusarkAppointments, transformAppointmentsToDisplayData } from "@/services/fokusarkAppointmentService";
 import { parseNumber, calculateTotal, calculateTimerTilbage } from "@/utils/fokusarkCalculations";

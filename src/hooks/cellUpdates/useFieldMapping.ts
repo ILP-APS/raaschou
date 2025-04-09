@@ -33,18 +33,20 @@ export const useFieldMapping = () => {
       case 15:
         return 'total'; // Using the existing total field for realized total
       case 16:
-        return 'timer_tilbage_1';
+        return 'projektering_rest'; // New field for projektering rest
       case 17:
-        return 'faerdig_pct_ex_montage_nu';
+        return 'timer_tilbage_1';
       case 18:
-        return 'faerdig_pct_ex_montage_foer';
+        return 'faerdig_pct_ex_montage_nu';
       case 19:
-        return 'est_timer_ift_faerdig_pct';
+        return 'faerdig_pct_ex_montage_foer';
       case 20:
-        return 'plus_minus_timer';
+        return 'est_timer_ift_faerdig_pct';
       case 21:
-        return 'timer_tilbage_2';
+        return 'plus_minus_timer';
       case 22:
+        return 'timer_tilbage_2';
+      case 23:
         return 'afsat_fragt';
       default:
         return null;
@@ -87,18 +89,20 @@ export const useFieldMapping = () => {
       case 15:
         return 'Real. Total';
       case 16:
-        return 'Timer tilbage';
+        return 'Projektering'; // New column display name
       case 17:
-        return 'Færdig % ex montage nu';
-      case 18:
-        return 'Færdig % ex montage før';
-      case 19:
-        return 'Est timer ift færdig %';
-      case 20:
-        return '+/- timer';
-      case 21:
         return 'Timer tilbage';
+      case 18:
+        return 'Færdig % ex montage nu';
+      case 19:
+        return 'Færdig % ex montage før';
+      case 20:
+        return 'Est timer ift færdig %';
+      case 21:
+        return '+/- timer';
       case 22:
+        return 'Timer tilbage';
+      case 23:
         return 'Afsat fragt';
       default:
         return `Kolonne ${columnIndex + 1}`;

@@ -53,9 +53,9 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
     // Only these columns are editable: 
     // - Montage 2 (index 6)
     // - Underleverandør 2 (index 7)
-    // - Færdig % ex montage nu (index 17)
-    // - Færdig % ex montage før (index 18)
-    return [6, 7, 17, 18].includes(columnIndex);
+    // - Færdig % ex montage nu (index 18)
+    // - Færdig % ex montage før (index 19)
+    return [6, 7, 18, 19].includes(columnIndex);
   };
 
   // Function to render a cell - special handling for editable cells
@@ -85,7 +85,7 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
   };
 
   // Determine the expected number of columns (excluding the row type indicator)
-  const expectedColumns = 25;
+  const expectedColumns = 26; // Increased by 1 to account for the new column
 
   return (
     <tbody className="bg-background divide-y divide-border">
