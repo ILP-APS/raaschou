@@ -127,11 +127,11 @@ export const useCalculations = () => {
     // Update Supabase with the calculated value
     await updateAppointmentField(
       appointmentNumber, 
-      'produktion_rest', 
+      'timer_tilbage_2', 
       produktionTimerTilbageNumericValue
     );
     
-    console.log(`Updated produktion_rest in database to ${produktionTimerTilbageNumericValue}`);
+    console.log(`Updated timer_tilbage_2 in database to ${produktionTimerTilbageNumericValue}`);
     
     return { produktionTimerTilbageValue, produktionTimerTilbageNumericValue };
   };

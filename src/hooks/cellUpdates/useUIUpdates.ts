@@ -98,6 +98,18 @@ export const useUIUpdates = (
     });
   };
   
+  // Update produktion timer tilbage cell in the UI (column 17)
+  const updateProduktionTimerTilbageUI = (rowIndex: number, value: string) => {
+    setTableData(prevData => {
+      const newData = [...prevData];
+      const rowCopy = [...newData[rowIndex]];
+      // Update the produktion timer tilbage column (index 17)
+      rowCopy[17] = value;
+      newData[rowIndex] = rowCopy;
+      return newData;
+    });
+  };
+  
   // Update a cell value directly
   const updateCellUI = (rowIndex: number, colIndex: number, value: string) => {
     setTableData(prevData => {
@@ -117,6 +129,7 @@ export const useUIUpdates = (
     updateMontageUI,
     updateTimerTilbageUI,
     updateProjekteringRestUI,
+    updateProduktionTimerTilbageUI,
     updateCellUI
   };
 };

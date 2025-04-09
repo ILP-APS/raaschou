@@ -24,12 +24,12 @@ export const useCellChange = ({
 }: UseCellChangeProps) => {
   const { toast } = useToast();
   const { getFieldNameForColumn, getColumnDisplayName } = useFieldMapping();
-  const { updateMaterialerUI, updateTotalUI, updateProjekteringUI, updateProduktionUI, updateMontageUI, updateCellUI, updateTimerTilbageUI, updateProjekteringRestUI } = useUIUpdates(tableData, setTableData);
-  const { recalculateProjektering, recalculateProduktion, recalculateMontage, recalculateTimerTilbage } = useCalculations();
+  const { updateMaterialerUI, updateTotalUI, updateProjekteringUI, updateProduktionUI, updateMontageUI, updateCellUI, updateTimerTilbageUI, updateProjekteringRestUI, updateProduktionTimerTilbageUI } = useUIUpdates(tableData, setTableData);
+  const { recalculateProjektering, recalculateProduktion, recalculateMontage, recalculateTimerTilbage, recalculateProduktionTimerTilbage } = useCalculations();
   
   // Helper function to determine if a column should be treated as percentage
   const isPercentageColumn = (colIndex: number): boolean => {
-    return [18, 19].includes(colIndex); // Updated from [19, 20] to [18, 19]
+    return [18, 19].includes(colIndex); 
   };
 
   const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {
@@ -79,6 +79,7 @@ export const useCellChange = ({
       const shouldRecalculateProduktion = [3, 4, 5, 6, 7, 8, 9].includes(colIndex); 
       const shouldRecalculateMontage = [4, 6].includes(colIndex);
       const shouldRecalculateTimerTilbage = [9, 12].includes(colIndex); // Projektering or Realiseret Projektering changed
+      const shouldRecalculateProduktionTimerTilbage = [10, 13].includes(colIndex); // Produktion or Realiseret Produktion changed
       
       // Calculate values that depend on the changed value
       if (shouldRecalculateProjektering) {
@@ -104,6 +105,13 @@ export const useCellChange = ({
           const { produktionValue } = await recalculateProduktion(appointmentNumber, updatedRow);
           updateProduktionUI(rowIndex, produktionValue);
           updatedRow[10] = produktionValue;
+          
+          // Also recalculate produktion timer tilbage if produktion changed
+          if (shouldRecalculateProduktionTimerTilbage || true) {
+            const { produktionTimerTilbageValue } = await recalculateProduktionTimerTilbage(appointmentNumber, updatedRow);
+            updateProduktionTimerTilbageUI(rowIndex, produktionTimerTilbageValue);
+            updatedRow[17] = produktionTimerTilbageValue;
+          }
         } catch (error) {
           console.error(`Failed to recalculate produktion for ${appointmentNumber}:`, error);
         }
@@ -128,6 +136,17 @@ export const useCellChange = ({
           updateProjekteringRestUI(rowIndex, timerTilbageValue);
         } catch (error) {
           console.error(`Failed to recalculate timer tilbage for ${appointmentNumber}:`, error);
+        }
+      }
+      
+      // Handle recalculation of produktion timer tilbage
+      if (shouldRecalculateProduktionTimerTilbage) {
+        console.log(`Need to recalculate Produktion Timer Tilbage for ${appointmentNumber} due to column ${colIndex} change`);
+        try {
+          const { produktionTimerTilbageValue } = await recalculateProduktionTimerTilbage(appointmentNumber, updatedRow);
+          updateProduktionTimerTilbageUI(rowIndex, produktionTimerTilbageValue);
+        } catch (error) {
+          console.error(`Failed to recalculate produktion timer tilbage for ${appointmentNumber}:`, error);
         }
       }
       
