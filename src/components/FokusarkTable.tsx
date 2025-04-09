@@ -4,13 +4,18 @@ import FokusarkTableHeader from "./FokusarkTableHeader";
 import FokusarkTableBody from "./FokusarkTableBody";
 import { tableContainerStyles } from "./FokusarkTableStyles";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FokusarkTableProps {
   data: string[][];
 }
 
 interface SavedCellData {
-  [key: string]: string; // Format: "rowIndex-colIndex": "value"
+  id?: number;
+  row_index: number;
+  col_index: number;
+  value: string;
+  created_at?: string;
 }
 
 const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
@@ -20,40 +25,59 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   
   // Create a state copy of the data to allow for editing
   const [tableData, setTableData] = useState<string[][]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Load data and saved values from localStorage when component mounts
+  // Load data and saved values from Supabase when component mounts
   useEffect(() => {
-    if (!data.length) return;
-    
-    // Get fresh copy of data
-    const initialData = [...data];
-    
-    // Try to load saved cell values from localStorage
-    try {
-      const savedCells = localStorage.getItem('fokusarkEditableCells');
-      if (savedCells) {
-        const savedCellsData: SavedCellData = JSON.parse(savedCells);
+    async function fetchSavedData() {
+      if (!data.length) return;
+      
+      // Get fresh copy of data
+      const initialData = [...data];
+      
+      try {
+        setIsLoading(true);
+        // Fetch saved values from Supabase
+        const { data: savedCells, error } = await supabase
+          .from('fokusark_cells')
+          .select('*');
         
-        // Apply saved values to the data
-        Object.entries(savedCellsData).forEach(([key, value]) => {
-          const [rowIndex, colIndex] = key.split('-').map(Number);
-          if (rowIndex < initialData.length) {
-            // Create a copy of the row if it exists
-            const rowCopy = [...initialData[rowIndex]];
-            rowCopy[colIndex] = value;
-            initialData[rowIndex] = rowCopy;
-          }
+        if (error) {
+          throw error;
+        }
+        
+        if (savedCells && savedCells.length > 0) {
+          // Apply saved values to the data
+          savedCells.forEach((cell: SavedCellData) => {
+            const { row_index, col_index, value } = cell;
+            if (row_index < initialData.length) {
+              // Create a copy of the row if it exists
+              const rowCopy = [...initialData[row_index]];
+              rowCopy[col_index] = value;
+              initialData[row_index] = rowCopy;
+            }
+          });
+        }
+        
+        setTableData(initialData);
+      } catch (error) {
+        console.error('Error loading saved cell data:', error);
+        toast({
+          title: "Error loading data",
+          description: "Could not load saved data. Using default values.",
+          variant: "destructive",
         });
+        setTableData(data);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error loading saved cell data:', error);
     }
     
-    setTableData(initialData);
-  }, [data]);
+    fetchSavedData();
+  }, [data, toast]);
   
   // Handle cell value changes
-  const handleCellChange = (rowIndex: number, colIndex: number, value: string) => {
+  const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {
     setTableData(prevData => {
       const newData = [...prevData];
       
@@ -69,17 +93,34 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
       return newData;
     });
     
-    // Save to localStorage
+    // Save to Supabase
     try {
-      // Get current saved data or initialize empty object
-      const savedCells = localStorage.getItem('fokusarkEditableCells');
-      const savedCellsData: SavedCellData = savedCells ? JSON.parse(savedCells) : {};
+      // Check if a record already exists for this cell
+      const { data: existingData, error: fetchError } = await supabase
+        .from('fokusark_cells')
+        .select('*')
+        .eq('row_index', rowIndex)
+        .eq('col_index', colIndex);
       
-      // Update with new value
-      savedCellsData[`${rowIndex}-${colIndex}`] = value;
+      if (fetchError) throw fetchError;
       
-      // Save back to localStorage
-      localStorage.setItem('fokusarkEditableCells', JSON.stringify(savedCellsData));
+      let result;
+      
+      if (existingData && existingData.length > 0) {
+        // Update existing record
+        result = await supabase
+          .from('fokusark_cells')
+          .update({ value })
+          .eq('row_index', rowIndex)
+          .eq('col_index', colIndex);
+      } else {
+        // Insert new record
+        result = await supabase
+          .from('fokusark_cells')
+          .insert([{ row_index: rowIndex, col_index: colIndex, value }]);
+      }
+      
+      if (result.error) throw result.error;
       
       // Show a toast notification
       const columnName = colIndex === 6 ? "Montage 2" : "Underleverandør 2";
@@ -91,7 +132,7 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
       console.error('Error saving cell data:', error);
       toast({
         title: "Error saving data",
-        description: "Could not save your changes. Please try again.",
+        description: "Could not save your changes to the database. Please try again.",
         variant: "destructive",
       });
     }
@@ -151,6 +192,18 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
       document.removeEventListener('wheel', preventDocumentScroll);
     };
   }, []);
+
+  // Show loading state while fetching data
+  if (isLoading) {
+    return (
+      <div className="rounded-md border w-full overflow-hidden main-content flex items-center justify-center p-8">
+        <div className="flex flex-col items-center gap-2">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p className="text-sm text-muted-foreground">Loading saved data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
