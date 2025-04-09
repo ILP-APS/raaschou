@@ -71,10 +71,11 @@ export const calculateMaterialer = (row: string[]): string => {
     });
     
     // Determine which values to use in calculation
-    // Only use Montage 2 and Underleverandør 2 if they are actual numbers (not placeholders like "R1C7")
     const useMontage2 = montage2Str && /\d/.test(montage2Str);
     const useUnderleverandor2 = underleverandor2Str && /\d/.test(underleverandor2Str);
     
+    // Important: Fix - Always use original montage and underleverandor values unless Mont 2 and Underlev 2 
+    // contain actual numeric values (not placeholders)
     const montageValue = useMontage2 ? montage2 : montage;
     const underleverandorValue = useUnderleverandor2 ? underleverandor2 : underleverandor;
     
@@ -86,8 +87,14 @@ export const calculateMaterialer = (row: string[]): string => {
       useUnderleverandor2
     });
     
+    // Debug the actual calculation
+    console.log("Calculation steps:", {
+      step1_tilbud_minus_montage: tilbud - montageValue,
+      step2_minus_underleverandor: (tilbud - montageValue) - underleverandorValue,
+      step3_multiply_by_025: ((tilbud - montageValue) - underleverandorValue) * 0.25
+    });
+    
     // Calculate using the formula: ((Tilbud - Montage) - Underleverandør) * 0.25
-    // FIX: Ensure we're using the correct values and calculation
     const materialer = ((tilbud - montageValue) - underleverandorValue) * 0.25;
     
     console.log("Materialer calculation result:", materialer);
