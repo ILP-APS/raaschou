@@ -26,6 +26,7 @@ export type Database = {
           montage2: number | null
           plus_minus_timer: number | null
           produktion: number | null
+          produktion_realized: number | null
           projektering_1: number | null
           projektering_2: number | null
           responsible_person: string | null
@@ -54,6 +55,7 @@ export type Database = {
           montage2?: number | null
           plus_minus_timer?: number | null
           produktion?: number | null
+          produktion_realized?: number | null
           projektering_1?: number | null
           projektering_2?: number | null
           responsible_person?: string | null
@@ -82,6 +84,7 @@ export type Database = {
           montage2?: number | null
           plus_minus_timer?: number | null
           produktion?: number | null
+          produktion_realized?: number | null
           projektering_1?: number | null
           projektering_2?: number | null
           responsible_person?: string | null

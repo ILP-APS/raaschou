@@ -27,7 +27,7 @@ export const useFieldMapping = () => {
       case 12:
         return 'projektering_2'; // Realized projektering
       case 13:
-        return 'produktion'; // Realized produktion field
+        return 'produktion_realized'; // Realized produktion field - NOW CORRECTLY MAPPED
       case 14:
         return 'montage_3'; // Realized montage field
       case 15:

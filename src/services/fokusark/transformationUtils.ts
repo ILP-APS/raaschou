@@ -128,7 +128,7 @@ const addEstimatedValues = (appointment: FokusarkAppointment, row: string[]): vo
  */
 const addRealizedValues = (appointment: FokusarkAppointment, row: string[]): void => {
   row[12] = formatValueOrEmpty(appointment.projektering_2);
-  row[13] = formatValueOrEmpty(appointment.produktion);
+  row[13] = formatValueOrEmpty(appointment.produktion_realized);
   row[14] = formatValueOrEmpty(appointment.montage_3);
   
   // Calculate and add total
