@@ -14,48 +14,39 @@ import {
 } from '@/components/ui/table';
 import { useTheme } from 'next-themes';
 
-// Define columns with proper grouping
 const columns = [
-  // Group 1: Info (3 cols)
   { accessorKey: 'id', header: 'ID', meta: { sticky: true, index: 0, group: 'Info' } },
   { accessorKey: 'name', header: 'Name', meta: { sticky: true, index: 1, group: 'Info' } },
   { accessorKey: 'type', header: 'Type', meta: { group: 'Info' } },
   
-  // Group 2: Budget Group A (5 cols)
   { accessorKey: 'budA1', header: 'Budget 1', meta: { group: 'Budget Group A' } },
   { accessorKey: 'budA2', header: 'Budget 2', meta: { group: 'Budget Group A' } },
   { accessorKey: 'budA3', header: 'Budget 3', meta: { group: 'Budget Group A' } },
   { accessorKey: 'budA4', header: 'Budget 4', meta: { group: 'Budget Group A' } },
   { accessorKey: 'budA5', header: 'Budget 5', meta: { group: 'Budget Group A' } },
   
-  // Group 3: Budget Group B (4 cols)
   { accessorKey: 'budB1', header: 'Budget 6', meta: { group: 'Budget Group B' } },
   { accessorKey: 'budB2', header: 'Budget 7', meta: { group: 'Budget Group B' } },
   { accessorKey: 'budB3', header: 'Budget 8', meta: { group: 'Budget Group B' } },
   { accessorKey: 'budB4', header: 'Budget 9', meta: { group: 'Budget Group B' } },
   
-  // Group 4: Budget Group C (4 cols)
   { accessorKey: 'budC1', header: 'Budget 10', meta: { group: 'Budget Group C' } },
   { accessorKey: 'budC2', header: 'Budget 11', meta: { group: 'Budget Group C' } },
   { accessorKey: 'budC3', header: 'Budget 12', meta: { group: 'Budget Group C' } },
   { accessorKey: 'budC4', header: 'Budget 13', meta: { group: 'Budget Group C' } },
   
-  // Group 5: Special (1 col)
   { accessorKey: 'special', header: 'Special', meta: { group: 'Special' } },
   
-  // Group 6: Budget Group D (5 cols)
   { accessorKey: 'budD1', header: 'Budget 14', meta: { group: 'Budget Group D' } },
   { accessorKey: 'budD2', header: 'Budget 15', meta: { group: 'Budget Group D' } },
   { accessorKey: 'budD3', header: 'Budget 16', meta: { group: 'Budget Group D' } },
   { accessorKey: 'budD4', header: 'Budget 17', meta: { group: 'Budget Group D' } },
   { accessorKey: 'budD5', header: 'Budget 18', meta: { group: 'Budget Group D' } },
   
-  // Group 7: Summary (2 cols)
   { accessorKey: 'sum1', header: 'Total', meta: { group: 'Summary' } },
   { accessorKey: 'sum2', header: 'Average', meta: { group: 'Summary' } }
 ];
 
-// Define the header groups explicitly
 const headerGroups = [
   { id: 'Info', title: 'Info', colSpan: 3 },
   { id: 'Budget Group A', title: 'Budget Group A', colSpan: 5 },
@@ -66,7 +57,6 @@ const headerGroups = [
   { id: 'Summary', title: 'Summary', colSpan: 2 }
 ];
 
-// Generate sample data with all columns
 const data = Array.from({ length: 50 }).map((_, i) => {
   const rowData: Record<string, string> = {
     id: `${i + 1}`,
@@ -74,7 +64,6 @@ const data = Array.from({ length: 50 }).map((_, i) => {
     type: `Type ${i % 4 + 1}`,
   };
   
-  // Add all budget columns
   for (let j = 1; j <= 5; j++) {
     rowData[`budA${j}`] = `Bud-A${i + 1}-${j}`;
   }
@@ -109,14 +98,12 @@ export default function MinimalStickyTable() {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // Function to calculate left position for each sticky column
   const getLeftPosition = (index: number) => {
     if (index === 0) return 0;
-    if (index === 1) return '80px'; // Width of first column
+    if (index === 1) return '80px';
     return undefined;
   };
 
-  // Get background color based on theme
   const getBgColor = (isEvenRow: boolean = false) => {
     if (isDarkMode) {
       return isEvenRow ? 'hsl(var(--muted)/20)' : 'hsl(var(--background))';
@@ -125,7 +112,6 @@ export default function MinimalStickyTable() {
     }
   };
 
-  // Header group row height
   const headerGroupHeight = '40px';
   const headerBgColor = getBgColor();
 
@@ -133,8 +119,8 @@ export default function MinimalStickyTable() {
     <div style={{
       position: 'relative',
       width: '100%',
-      maxWidth: '800px', // Restrict container width to force horizontal scrolling
-      height: '400px', // Fixed height to force vertical scrolling
+      maxWidth: '800px',
+      height: '400px',
       overflowX: 'auto',
       overflowY: 'auto',
       maxHeight: '70vh',
@@ -143,13 +129,11 @@ export default function MinimalStickyTable() {
     }}>
       <Table style={{ 
         width: 'auto', 
-        minWidth: '2400px', // Sufficient width for all 24 columns
+        minWidth: '2400px',
         borderCollapse: 'separate'
       }}>
         <TableHeader>
-          {/* Header group row */}
           <TableRow>
-            {/* Info group spanning all 3 columns */}
             <TableHead
               colSpan={3}
               style={{
@@ -161,18 +145,25 @@ export default function MinimalStickyTable() {
                 height: headerGroupHeight
               }}
             >
-              {/* Full width text */}
-              <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <div style={{ 
+                width: '100%', 
+                height: '100%', 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                position: 'absolute',
+                top: 0,
+                left: 0
+              }}>
                 Info
               </div>
               
-              {/* Sticky overlay that appears when scrolling */}
               <div
                 style={{
                   position: 'sticky',
                   left: 0,
                   top: 0,
-                  width: '260px', // Width of ID + Name columns (80px + 180px)
+                  width: '260px',
                   height: '100%',
                   backgroundColor: headerBgColor,
                   display: 'flex',
@@ -186,7 +177,6 @@ export default function MinimalStickyTable() {
               </div>
             </TableHead>
             
-            {/* The rest of the header groups */}
             {headerGroups.slice(1).map((group) => (
               <TableHead
                 key={`group-${group.id}`}
@@ -208,7 +198,6 @@ export default function MinimalStickyTable() {
             ))}
           </TableRow>
           
-          {/* Regular header row */}
           <TableRow>
             {table.getFlatHeaders().map((header, index) => {
               const isSticky = !!(header.column.columnDef.meta as any)?.sticky;
@@ -221,7 +210,7 @@ export default function MinimalStickyTable() {
                     minWidth: '150px',
                     width: index === 0 ? '80px' : index === 1 ? '180px' : '150px',
                     position: 'sticky',
-                    top: headerGroupHeight, // Position below the group header
+                    top: headerGroupHeight,
                     left: isSticky ? getLeftPosition(stickyIndex) : undefined,
                     zIndex: isSticky ? 45 : 40,
                     backgroundColor: headerBgColor,
