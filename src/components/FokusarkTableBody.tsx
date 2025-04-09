@@ -1,11 +1,12 @@
-
 import React from "react";
+import { Input } from "@/components/ui/input";
 
 interface FokusarkTableBodyProps {
   data: string[][];
+  onCellChange?: (rowIndex: number, colIndex: number, value: string) => void;
 }
 
-const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data }) => {
+const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChange }) => {
   // Function to get cell class based on column index
   const getCellClass = (index: number, isSubAppointment: boolean): string => {
     let classes = "px-4 py-3 whitespace-nowrap text-sm";
@@ -46,6 +47,32 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data }) => {
     return normalizedRow;
   };
 
+  // Function to render a cell - special handling for editable cells
+  const renderCell = (rowIndex: number, cellIndex: number, cellValue: string, isSubAppointment: boolean) => {
+    // If it's the "Montage 2" column (index 6), make it editable
+    if (cellIndex === 6) {
+      return (
+        <td key={cellIndex} className={getCellClass(cellIndex, isSubAppointment)}>
+          <Input
+            value={cellValue}
+            onChange={(e) => onCellChange?.(rowIndex, cellIndex, e.target.value)}
+            className="h-8 w-full border-0 bg-transparent focus:ring-1 focus:ring-primary"
+          />
+        </td>
+      );
+    }
+    
+    // Otherwise, render a regular cell
+    return (
+      <td 
+        key={cellIndex} 
+        className={getCellClass(cellIndex, isSubAppointment)}
+      >
+        {cellValue}
+      </td>
+    );
+  };
+
   // Determine the expected number of columns (excluding the row type indicator)
   const expectedColumns = 25; // Adjusted from 24 to 25 (added Mont 2 back)
 
@@ -67,14 +94,9 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data }) => {
             key={rowIndex} 
             className={`hover:bg-muted/50 ${isSubAppointment ? 'pl-4 bg-muted/20' : ''}`}
           >
-            {displayRow.map((cell, cellIndex) => (
-              <td 
-                key={cellIndex} 
-                className={getCellClass(cellIndex, isSubAppointment)}
-              >
-                {cell}
-              </td>
-            ))}
+            {displayRow.map((cell, cellIndex) => 
+              renderCell(rowIndex, cellIndex, cell, isSubAppointment)
+            )}
           </tr>
         );
       })}

@@ -1,8 +1,9 @@
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import FokusarkTableHeader from "./FokusarkTableHeader";
 import FokusarkTableBody from "./FokusarkTableBody";
 import { tableContainerStyles } from "./FokusarkTableStyles";
+import { useToast } from "@/hooks/use-toast";
 
 interface FokusarkTableProps {
   data: string[][];
@@ -11,9 +12,42 @@ interface FokusarkTableProps {
 const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const tableVerticalScrollRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+  
+  // Create a state copy of the data to allow for editing
+  const [tableData, setTableData] = useState<string[][]>([...data]);
+  
+  // Update the table data when the prop changes
+  useEffect(() => {
+    setTableData([...data]);
+  }, [data]);
+  
+  // Handle cell value changes
+  const handleCellChange = (rowIndex: number, colIndex: number, value: string) => {
+    setTableData(prevData => {
+      const newData = [...prevData];
+      
+      // Create a copy of the row
+      const rowCopy = [...newData[rowIndex]];
+      
+      // Update the specific cell
+      rowCopy[colIndex] = value;
+      
+      // Update the row in the data
+      newData[rowIndex] = rowCopy;
+      
+      // Show a toast notification
+      toast({
+        title: "Cell updated",
+        description: `Updated Montage 2 value for row ${rowIndex + 1}`,
+      });
+      
+      return newData;
+    });
+  };
   
   // Determine the number of columns based on the first row of data
-  const columnCount = data.length > 0 ? data[0].length : 0;
+  const columnCount = tableData.length > 0 ? tableData[0].length : 0;
   
   // Set up wheel event handling for horizontal scrolling
   useEffect(() => {
@@ -83,7 +117,10 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
           >
             <table className="table-auto border-collapse divide-y divide-border">
               <FokusarkTableHeader columnCount={columnCount} />
-              <FokusarkTableBody data={data} />
+              <FokusarkTableBody 
+                data={tableData} 
+                onCellChange={handleCellChange}
+              />
             </table>
           </div>
         </div>
