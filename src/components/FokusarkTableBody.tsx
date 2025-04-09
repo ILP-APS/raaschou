@@ -1,6 +1,6 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
+import { calculateProjektering } from "@/utils/fokusarkCalculations";
 
 interface FokusarkTableBodyProps {
   data: string[][];

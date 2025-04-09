@@ -199,6 +199,32 @@ export const useFokusarkTable = (initialData: string[][]) => {
         });
       }
       
+      // Calculate Projektering and update UI if Tilbud or Montage values changed
+      if (colIndex === 3 || colIndex === 4 || colIndex === 6) {
+        // Calculate the projektering value using the formula ((tilbud-Montage)*0.10)/830
+        const tilbud = parseNumber(tableData[rowIndex][3]);
+        const montage = colIndex === 6 && value ? parseNumber(value) : parseNumber(tableData[rowIndex][4]);
+        
+        const projektering = ((tilbud - montage) * 0.10) / 830;
+        
+        // Update the UI with the new calculated value
+        setTableData(prevData => {
+          const newData = [...prevData];
+          const rowCopy = [...newData[rowIndex]];
+          // Update the projektering column (index 9)
+          rowCopy[9] = formatDanishNumber(projektering);
+          newData[rowIndex] = rowCopy;
+          return newData;
+        });
+        
+        // Also update Supabase with the calculated value
+        await updateAppointmentField(
+          appointmentNumber, 
+          'projektering_1', 
+          projektering
+        );
+      }
+      
       // Show a toast notification
       toast({
         title: "Updated successfully",
