@@ -87,9 +87,11 @@
   z-index: 10;
 }
 
-/* Ensure frozen columns stay on top */
+/* Ensure frozen columns stay on top - increase z-index for frozen headers */
 .frozen-columns th {
   z-index: 30;
+  position: sticky;
+  top: 0;
 }
 
 /* First data row styling - make it sticky */
@@ -111,3 +113,9 @@
   background-color: hsl(var(--muted)/10);
 }
 
+/* Ensure the frozen columns section always stays visible */
+.frozen-columns {
+  position: sticky !important;
+  left: 0;
+  z-index: 20;
+}

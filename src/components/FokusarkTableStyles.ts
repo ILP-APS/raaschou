@@ -36,7 +36,7 @@ export const tableContainerStyles = `
   
   /* Frozen columns container */
   .frozen-columns {
-    position: absolute;
+    position: sticky;
     left: 0;
     top: 0;
     width: calc(var(--frozen-col-0-width) + var(--frozen-col-1-width));
@@ -79,7 +79,7 @@ export const tableContainerStyles = `
     min-width: 120px;
   }
   
-  /* Headers styling */
+  /* Headers styling - ensure they stay fixed at the top */
   .fokusark-table thead th {
     position: sticky;
     top: 0;
@@ -87,10 +87,11 @@ export const tableContainerStyles = `
     background-color: hsl(var(--background));
   }
   
-  /* Frozen table headers need higher z-index */
+  /* Frozen table headers need higher z-index and left position */
   .frozen-table thead th {
     position: sticky;
     top: 0;
+    left: 0;
     z-index: 30;
     background-color: hsl(var(--background));
   }
