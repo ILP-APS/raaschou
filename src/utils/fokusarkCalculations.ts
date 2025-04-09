@@ -38,8 +38,6 @@ export const formatDanishNumber = (value: number): string => {
  */
 export const calculateMaterialer = (row: string[]): string => {
   try {
-    console.log("Calculating Materialer for row:", JSON.stringify(row));
-    
     // Get values from relevant columns
     const tilbudStr = row[3] || '0';
     const montageStr = row[4] || '0';
@@ -47,7 +45,7 @@ export const calculateMaterialer = (row: string[]): string => {
     const montage2Str = row[6] || '';
     const underleverandor2Str = row[7] || '';
     
-    console.log("Raw values:", {
+    console.log("Raw input for Materialer calculation:", {
       tilbud: tilbudStr,
       montage: montageStr,
       underleverandor: underleverandorStr,
@@ -59,45 +57,54 @@ export const calculateMaterialer = (row: string[]): string => {
     const tilbud = parseNumber(tilbudStr);
     const montage = parseNumber(montageStr);
     const underleverandor = parseNumber(underleverandorStr);
-    const montage2 = parseNumber(montage2Str);
-    const underleverandor2 = parseNumber(underleverandor2Str);
+    
+    // For Montage 2 and Underleverandør 2, check if they actually contain numeric values
+    // and not just placeholders like "R1C7"
+    let montage2 = 0;
+    let underleverandor2 = 0;
+    
+    const hasMontage2Value = montage2Str && /\d/.test(montage2Str) && !/R\d+C\d+/.test(montage2Str);
+    const hasUnderleverandor2Value = underleverandor2Str && /\d/.test(underleverandor2Str) && !/R\d+C\d+/.test(underleverandor2Str);
+    
+    if (hasMontage2Value) {
+      montage2 = parseNumber(montage2Str);
+    }
+    
+    if (hasUnderleverandor2Value) {
+      underleverandor2 = parseNumber(underleverandor2Str);
+    }
     
     console.log("Parsed values:", {
       tilbud,
       montage,
       underleverandor,
       montage2,
-      underleverandor2
+      underleverandor2,
+      hasMontage2Value,
+      hasUnderleverandor2Value
     });
     
-    // Determine which values to use in calculation
-    const useMontage2 = montage2Str && /\d/.test(montage2Str);
-    const useUnderleverandor2 = underleverandor2Str && /\d/.test(underleverandor2Str);
+    // Determine which values to use in calculation - ONLY use Montage 2 and Underleverandør 2
+    // if they actually contain valid numeric values (not placeholders)
+    const montageValue = hasMontage2Value ? montage2 : montage;
+    const underleverandorValue = hasUnderleverandor2Value ? underleverandor2 : underleverandor;
     
-    // Important: Fix - Always use original montage and underleverandor values unless Mont 2 and Underlev 2 
-    // contain actual numeric values (not placeholders)
-    const montageValue = useMontage2 ? montage2 : montage;
-    const underleverandorValue = useUnderleverandor2 ? underleverandor2 : underleverandor;
-    
-    console.log("Using values:", {
+    console.log("Using values for calculation:", {
       tilbud,
       montage: montageValue,
-      underleverandor: underleverandorValue,
-      useMontage2,
-      useUnderleverandor2
+      underleverandor: underleverandorValue
     });
     
-    // Debug the actual calculation
+    // Perform the calculation using the formula: ((Tilbud - Montage) - Underleverandør) * 0.25
+    const step1 = tilbud - montageValue;
+    const step2 = step1 - underleverandorValue;
+    const materialer = step2 * 0.25;
+    
     console.log("Calculation steps:", {
-      step1_tilbud_minus_montage: tilbud - montageValue,
-      step2_minus_underleverandor: (tilbud - montageValue) - underleverandorValue,
-      step3_multiply_by_025: ((tilbud - montageValue) - underleverandorValue) * 0.25
+      step1_tilbud_minus_montage: step1,
+      step2_minus_underleverandor: step2,
+      step3_multiply_by_025: materialer
     });
-    
-    // Calculate using the formula: ((Tilbud - Montage) - Underleverandør) * 0.25
-    const materialer = ((tilbud - montageValue) - underleverandorValue) * 0.25;
-    
-    console.log("Materialer calculation result:", materialer);
     
     // Check for NaN and return '0' if the calculation resulted in NaN
     if (isNaN(materialer)) {
