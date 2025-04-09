@@ -2,6 +2,7 @@
 /* Styles for the sticky table */
 .sticky-table-container {
   position: relative;
+  overflow: auto;
 }
 
 /* Custom scrollbar styles */
@@ -47,6 +48,7 @@
 .sticky-table-container td[style*="position: sticky"][style*="left:"],
 .sticky-table-container th[style*="position: sticky"][style*="left:"] {
   z-index: 20 !important;
+  position: sticky !important;
 }
 
 /* Improve corner cells (intersections of sticky headers and columns) */

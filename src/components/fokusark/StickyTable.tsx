@@ -130,7 +130,8 @@ export default function StickyTable() {
   const getColumnOffset = (index: number): number => {
     let offset = 0;
     for (let i = 0; i < index; i++) {
-      if ((columns[i].meta as ColumnMeta)?.frozen) {
+      // Ensure we're only counting frozen columns before the current one
+      if (i < columns.length && (columns[i].meta as ColumnMeta)?.frozen) {
         offset += 150; // Fixed column width
       }
     }
@@ -162,7 +163,8 @@ export default function StickyTable() {
                 }}
               >
                 {table.getFlatHeaders().map((header, index) => {
-                  const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
+                  const meta = header.column.columnDef.meta as ColumnMeta | undefined;
+                  const isFrozen = Boolean(meta?.frozen);
                   const leftOffset = isFrozen ? getColumnOffset(index) : undefined;
                   
                   return (
@@ -195,7 +197,8 @@ export default function StickyTable() {
                 }}
               >
                 {table.getFlatHeaders().map((header, index) => {
-                  const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
+                  const meta = header.column.columnDef.meta as ColumnMeta | undefined;
+                  const isFrozen = Boolean(meta?.frozen);
                   const leftOffset = isFrozen ? getColumnOffset(index) : undefined;
                   
                   return (
@@ -222,7 +225,8 @@ export default function StickyTable() {
               {table.getRowModel().rows.map(row => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell, index) => {
-                    const isFrozen = !!(cell.column.columnDef.meta as ColumnMeta)?.frozen;
+                    const meta = cell.column.columnDef.meta as ColumnMeta | undefined;
+                    const isFrozen = Boolean(meta?.frozen);
                     const leftOffset = isFrozen ? getColumnOffset(index) : undefined;
                     
                     return (
