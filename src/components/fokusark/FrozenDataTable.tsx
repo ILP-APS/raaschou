@@ -282,7 +282,7 @@ export default function FrozenDataTable() {
       </div>
       
       <div className="border rounded-md overflow-auto" style={{ maxHeight: '500px' }}>
-        <style jsx>{`
+        <style>{`
           table {
             border-collapse: separate;
             border-spacing: 0;
