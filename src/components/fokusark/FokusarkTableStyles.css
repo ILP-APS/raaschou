@@ -14,6 +14,7 @@
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
+  min-width: max-content; /* Ensures table expands to fit all columns */
 }
 
 /* Common cell styling */
@@ -24,6 +25,9 @@
   border-bottom: 1px solid hsl(var(--border));
   background-color: inherit;
   box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Header styling */
@@ -86,9 +90,6 @@
 .sticky-table td {
   min-width: 120px;
   max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* First two columns are wider */

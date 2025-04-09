@@ -56,14 +56,14 @@ const FokusarkContent: React.FC = () => {
   }, []);
   
   return (
-    <div className="flex flex-col gap-4 md:p-6 overflow-hidden content-wrapper">
-      <div className="flex flex-col gap-4 content-wrapper">
+    <div className="flex flex-col gap-4 md:p-6 overflow-hidden h-full">
+      <div className="flex flex-col gap-4">
         <h2 className="text-2xl font-semibold tracking-tight">Fokusark</h2>
         <FokusarkDescription />
       </div>
       
-      <div className="rounded-lg shadow-sm">
-        <div className="sticky-table-container" ref={tableContainerRef}>
+      <div className="rounded-lg shadow-sm flex-1 overflow-hidden">
+        <div className="sticky-table-container h-full" ref={tableContainerRef}>
           <Table className="sticky-table">
             <TableHeader>
               {/* Group Headers Row */}
