@@ -38,6 +38,9 @@ export {
   recalculateAllFields
 } from './batchCalculations';
 
+// Import necessary formatting utilities directly for internal use
+import { parseNumber, formatDanishNumber } from './numberFormatUtils';
+
 // Calculate the total from projektering, produktion, and montage
 export const calculateTotal = (row: string[]): string => {
   // Get values from columns 9 (projektering_1), 10 (produktion), and 11 (montage_3)
