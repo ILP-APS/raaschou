@@ -74,18 +74,12 @@ const FokusarkContent: React.FC = () => {
       header: "ID",
       meta: { sticky: true, group: "Info" } as ColumnMeta,
       cell: info => (
-        <div
-          style={{
-            position: 'sticky',
-            left: 0,
-            zIndex: 20,
-            backgroundColor: isDarkMode ? 'hsl(var(--background))' : 'hsl(var(--background))',
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center'
-          }}
-        >
+        <div style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center'
+        }}>
           {info.getValue() as string}
         </div>
       )
@@ -95,18 +89,12 @@ const FokusarkContent: React.FC = () => {
       header: "Name",
       meta: { sticky: true, group: "Info" } as ColumnMeta,
       cell: info => (
-        <div
-          style={{
-            position: 'sticky',
-            left: '80px', // Width of the first column
-            zIndex: 20,
-            backgroundColor: isDarkMode ? 'hsl(var(--background))' : 'hsl(var(--background))',
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center'
-          }}
-        >
+        <div style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center'
+        }}>
           {info.getValue() as string}
         </div>
       )
@@ -168,23 +156,24 @@ const FokusarkContent: React.FC = () => {
           position: 'relative',
           overflow: 'auto',
           maxHeight: '70vh',
+          width: '100%',
           border: '1px solid hsl(var(--border))',
           borderRadius: '0.5rem',
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
         }}
       >
-        <Table>
+        <Table style={{ tableLayout: 'fixed', borderCollapse: 'separate' }}>
           <TableHeader>
             {/* Group header row */}
             <TableRow>
-              {/* Empty cells for ID and Name columns with explicit sticky styles */}
+              {/* Corner cell for ID and Name columns with explicit sticky styles */}
               <TableHead 
                 colSpan={2}
                 style={{ 
                   position: 'sticky',
                   top: 0,
                   left: 0,
-                  zIndex: 40,
+                  zIndex: 50,
                   minWidth: "260px",
                   width: "260px",
                   backgroundColor: isDarkMode ? 'hsl(var(--muted)/80)' : 'hsl(var(--muted)/80)'
@@ -215,6 +204,8 @@ const FokusarkContent: React.FC = () => {
             <TableRow>
               {table.getFlatHeaders().map((header, index) => {
                 const isSticky = !!(header.column.columnDef.meta as ColumnMeta)?.sticky;
+                const leftPos = index === 0 ? 0 : index === 1 ? '80px' : 'auto';
+                const cellWidth = index === 0 ? '80px' : index === 1 ? '180px' : '160px';
                 
                 return (
                   <TableHead
@@ -222,12 +213,14 @@ const FokusarkContent: React.FC = () => {
                     style={{
                       position: isSticky ? 'sticky' : 'static',
                       top: '41px',
-                      left: index === 0 ? 0 : index === 1 ? '80px' : 'auto',
-                      zIndex: isSticky ? 35 : 30,
-                      minWidth: index === 0 ? '80px' : index === 1 ? '180px' : '160px',
-                      width: index === 0 ? '80px' : index === 1 ? '180px' : '160px',
+                      left: leftPos,
+                      zIndex: isSticky ? 40 : 30,
+                      minWidth: cellWidth,
+                      width: cellWidth,
                       backgroundColor: isDarkMode ? 'hsl(var(--muted))' : 'hsl(var(--muted))',
-                      boxShadow: isSticky ? '4px 0 4px -2px rgba(0,0,0,0.15)' : 'none'
+                      boxShadow: isSticky ? '4px 0 4px -2px rgba(0,0,0,0.15)' : 'none',
+                      willChange: isSticky ? 'position, left' : 'auto',
+                      transition: 'none'
                     }}
                   >
                     {flexRender(
@@ -249,18 +242,22 @@ const FokusarkContent: React.FC = () => {
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell, cellIndex) => {
                     const isSticky = !!(cell.column.columnDef.meta as ColumnMeta)?.sticky;
+                    const leftPos = cellIndex === 0 ? 0 : cellIndex === 1 ? '80px' : 'auto';
+                    const cellWidth = cellIndex === 0 ? '80px' : cellIndex === 1 ? '180px' : '160px';
                     
                     return (
                       <TableCell
                         key={cell.id}
                         style={{
                           position: isSticky ? 'sticky' : 'static',
-                          left: cellIndex === 0 ? 0 : cellIndex === 1 ? '80px' : 'auto',
+                          left: leftPos,
                           zIndex: isSticky ? 20 : 10,
-                          minWidth: cellIndex === 0 ? '80px' : cellIndex === 1 ? '180px' : '160px',
-                          width: cellIndex === 0 ? '80px' : cellIndex === 1 ? '180px' : '160px',
+                          minWidth: cellWidth,
+                          width: cellWidth,
                           backgroundColor: bgColor,
-                          boxShadow: isSticky ? '4px 0 4px -2px rgba(0,0,0,0.15)' : 'none'
+                          boxShadow: isSticky ? '4px 0 4px -2px rgba(0,0,0,0.15)' : 'none',
+                          willChange: isSticky ? 'position, left' : 'auto',
+                          transition: 'none'
                         }}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
