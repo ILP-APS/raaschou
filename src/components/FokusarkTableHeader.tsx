@@ -82,6 +82,13 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
     return null;
   };
 
+  // Get the appropriate CSS class for the column
+  const getColumnClass = (index: number): string => {
+    if (index === 0) return "fokusark-col-0";
+    if (index === 1) return "fokusark-col-1";
+    return "fokusark-col-n";
+  };
+
   // Generate column groups for the first header row
   const renderColumnGroups = () => {
     const groups = [];
@@ -95,6 +102,7 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
           <th 
             key={`group-${currentIndex}`} 
             colSpan={group.colSpan}
+            className={getColumnClass(currentIndex)}
           >
             {group.name}
           </th>
@@ -104,6 +112,7 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
         groups.push(
           <th 
             key={`group-${currentIndex}`}
+            className={getColumnClass(currentIndex)}
           >
             &nbsp;
           </th>
@@ -124,7 +133,7 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
       {/* Regular header row */}
       <tr>
         {Array.from({ length: columnCount }, (_, index) => (
-          <th key={index}>
+          <th key={index} className={getColumnClass(index)}>
             {getColumnName(index)}
           </th>
         ))}

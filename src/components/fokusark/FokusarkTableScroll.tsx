@@ -29,10 +29,27 @@ const FokusarkTableScroll: React.FC<FokusarkTableScrollProps> = ({ children }) =
       }
     };
     
+    // For touch devices, sync the positions of sticky elements
+    const handleScroll = () => {
+      const scrollTop = scrollContainer.scrollTop;
+      const scrollLeft = scrollContainer.scrollLeft;
+      
+      // Force repaint sticky elements by setting a small transform
+      const headers = scrollContainer.querySelectorAll('thead th');
+      const stickyColumns = scrollContainer.querySelectorAll('.fokusark-col-0, .fokusark-col-1');
+      
+      // Apply a minimal transform to force a repaint, which helps with rendering issues
+      [...headers, ...stickyColumns].forEach((el) => {
+        (el as HTMLElement).style.transform = 'translateZ(0)';
+      });
+    };
+    
     scrollContainer.addEventListener('wheel', handleWheel, { passive: false });
+    scrollContainer.addEventListener('scroll', handleScroll);
     
     return () => {
       scrollContainer.removeEventListener('wheel', handleWheel);
+      scrollContainer.removeEventListener('scroll', handleScroll);
     };
   }, []);
 

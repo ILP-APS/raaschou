@@ -70,12 +70,19 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
     }
   };
 
+  // Function to get cell class based on column index
+  const getCellClass = (index: number): string => {
+    if (index === 0) return "fokusark-col-0";
+    if (index === 1) return "fokusark-col-1";
+    return "fokusark-col-n";
+  };
+
   // Function to render a cell - special handling for editable cells
   const renderCell = (rowIndex: number, cellIndex: number, cellValue: string, isSubAppointment: boolean) => {
     // If it's an editable column, make it editable
     if (isEditableColumn(cellIndex)) {
       return (
-        <td key={cellIndex} className={getCellClass(cellIndex, isSubAppointment)}>
+        <td key={cellIndex} className={getCellClass(cellIndex)}>
           <Input
             value={cellValue}
             onChange={(e) => {
@@ -102,30 +109,11 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
     return (
       <td 
         key={cellIndex} 
-        className={getCellClass(cellIndex, isSubAppointment)}
+        className={getCellClass(cellIndex)}
       >
         {cellValue}
       </td>
     );
-  };
-
-  // Function to get cell class based on column index
-  const getCellClass = (index: number, isSubAppointment: boolean): string => {
-    let classes = "px-4 py-3 whitespace-nowrap text-sm";
-    
-    // Add indentation for sub-appointments first column
-    if (isSubAppointment && index === 0) {
-      classes += " pl-8";
-    }
-    
-    // Add sticky left positioning for first two columns only
-    if (index === 0) {
-      classes += " sticky left-0 z-10 bg-white dark:bg-background"; // Solid background
-    } else if (index === 1) {
-      classes += " sticky left-[100px] z-10 bg-white dark:bg-background"; // Solid background
-    }
-    
-    return classes;
   };
 
   // Determine the expected number of columns (excluding the row type indicator)

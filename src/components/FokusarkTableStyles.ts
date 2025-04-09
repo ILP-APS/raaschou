@@ -1,5 +1,5 @@
 
-// CSS styles for table container - focused on fixing the sticky header
+// CSS styles for table container - focused on fixing the sticky header and columns
 export const tableContainerStyles = `
   /* Main table container */
   .fokusark-table-container {
@@ -28,24 +28,23 @@ export const tableContainerStyles = `
   
   /* Table styling */
   table {
-    border-collapse: separate;
-    border-spacing: 0;
+    border-collapse: collapse;
     width: 100%;
+    table-layout: fixed;
   }
   
-  /* Make thead sticky at the top */
+  /* Make headers sticky at the top */
   table thead {
     position: sticky;
     top: 0;
-    z-index: 2;
-    background-color: white;
+    z-index: 10;
   }
   
   /* First header row - make sticky at top: 0 */
   table thead tr:first-child th {
     position: sticky;
     top: 0;
-    z-index: 2;
+    z-index: 12;
     background-color: white;
     border-bottom: 1px solid hsl(var(--border));
   }
@@ -54,70 +53,43 @@ export const tableContainerStyles = `
   table thead tr:nth-child(2) th {
     position: sticky;
     top: 41px; /* Height of the first row */
-    z-index: 2;
+    z-index: 12;
     background-color: white;
     border-bottom: 1px solid hsl(var(--border));
   }
-  
-  /* Sticky left columns */
-  table th:first-child,
-  table td:first-child {
+
+  /* Column width and positioning */
+  /* First column - Nr. */
+  .fokusark-col-0 {
     position: sticky;
     left: 0;
-    z-index: 1;
-    background-color: white;
-  }
-  
-  table th:nth-child(2),
-  table td:nth-child(2) {
-    position: sticky;
-    left: 100px; /* Width of first column */
-    z-index: 1;
-    background-color: white;
-  }
-  
-  /* Corner cells - need highest z-index */
-  table thead tr:first-child th:first-child,
-  table thead tr:first-child th:nth-child(2),
-  table thead tr:nth-child(2) th:first-child,
-  table thead tr:nth-child(2) th:nth-child(2) {
-    z-index: 3;
-    background-color: white;
-  }
-  
-  /* Firefox-specific fixes */
-  @-moz-document url-prefix() {
-    table thead tr:first-child th {
-      top: 0;
-      position: sticky;
-    }
-    table thead tr:nth-child(2) th {
-      top: 41px;
-      position: sticky;
-    }
-    table thead tr:first-child th:first-child,
-    table thead tr:first-child th:nth-child(2),
-    table thead tr:nth-child(2) th:first-child,
-    table thead tr:nth-child(2) th:nth-child(2) {
-      z-index: 3;
-    }
-  }
-  
-  /* Column width adjustments */
-  table th:nth-child(1), 
-  table td:nth-child(1) {
     min-width: 100px;
     width: 100px;
+    z-index: 11;
+    background-color: white;
   }
   
-  table th:nth-child(2),
-  table td:nth-child(2) {
+  /* Second column - Navn */
+  .fokusark-col-1 {
+    position: sticky;
+    left: 100px;
     min-width: 200px;
     width: 200px;
+    z-index: 11;
+    background-color: white;
   }
   
-  table th:nth-child(n+3),
-  table td:nth-child(n+3) {
+  /* Z-index boost for sticky intersections (corners) */
+  thead tr:first-child .fokusark-col-0,
+  thead tr:first-child .fokusark-col-1,
+  thead tr:nth-child(2) .fokusark-col-0,
+  thead tr:nth-child(2) .fokusark-col-1 {
+    z-index: 13;
+    box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
+  }
+  
+  /* Other columns */
+  .fokusark-col-n {
     min-width: 120px;
   }
   
@@ -129,11 +101,13 @@ export const tableContainerStyles = `
     border-right: none;
     border-bottom: 1px solid hsl(var(--border));
     background-clip: padding-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   
-  /* Add shadow to sticky columns */
-  table th:nth-child(2)::after,
-  table td:nth-child(2)::after {
+  /* Sticky column shadow effect */
+  .fokusark-col-1::after {
     content: '';
     position: absolute;
     top: 0;
@@ -154,28 +128,41 @@ export const tableContainerStyles = `
     background-color: hsl(var(--muted)/20);
   }
   
-  table tbody tr[data-sub-appointment="true"] td:first-child {
+  table tbody tr[data-sub-appointment="true"] td.fokusark-col-0 {
     padding-left: 20px;
   }
   
   /* Dark mode support */
-  .dark table thead,
-  .dark table th:first-child,
-  .dark table td:first-child,
-  .dark table th:nth-child(2),
-  .dark table td:nth-child(2),
-  .dark table thead tr:first-child th,
-  .dark table thead tr:nth-child(2) th {
+  .dark table thead tr th,
+  .dark .fokusark-col-0,
+  .dark .fokusark-col-1 {
     background-color: hsl(var(--background));
   }
   
   /* Add visual borders to clearly delineate fixed regions */
-  table th:nth-child(2),
-  table td:nth-child(2) {
+  .fokusark-col-1 {
     border-right: 1px solid hsl(var(--border));
   }
   
   table thead tr:nth-child(2) th {
     border-bottom: 2px solid hsl(var(--border));
+  }
+  
+  /* Firefox-specific fixes */
+  @-moz-document url-prefix() {
+    table thead tr:first-child th {
+      top: 0;
+    }
+    
+    table thead tr:nth-child(2) th {
+      top: 41px;
+    }
+    
+    thead tr:first-child .fokusark-col-0,
+    thead tr:first-child .fokusark-col-1,
+    thead tr:nth-child(2) .fokusark-col-0,
+    thead tr:nth-child(2) .fokusark-col-1 {
+      z-index: 13;
+    }
   }
 `;
