@@ -93,6 +93,7 @@ export const useCellChange = ({
           if (shouldRecalculateTimerTilbage || true) {
             const { timerTilbageValue } = await recalculateTimerTilbage(appointmentNumber, updatedRow);
             updateProjekteringRestUI(rowIndex, timerTilbageValue);
+            updatedRow[16] = timerTilbageValue;
           }
         } catch (error) {
           console.error(`Failed to recalculate projektering for ${appointmentNumber}:`, error);
@@ -128,23 +129,25 @@ export const useCellChange = ({
         }
       }
       
-      // Handle recalculation of timer tilbage
+      // Handle recalculation of timer tilbage (projektering)
       if (shouldRecalculateTimerTilbage) {
         console.log(`Need to recalculate Timer Tilbage for ${appointmentNumber} due to column ${colIndex} change`);
         try {
           const { timerTilbageValue } = await recalculateTimerTilbage(appointmentNumber, updatedRow);
-          updateProjekteringRestUI(rowIndex, timerTilbageValue);
+          updateTimerTilbageUI(rowIndex, timerTilbageValue);
+          updatedRow[16] = timerTilbageValue;
         } catch (error) {
           console.error(`Failed to recalculate timer tilbage for ${appointmentNumber}:`, error);
         }
       }
       
-      // Handle recalculation of produktion timer tilbage
+      // Handle recalculation of produktion timer tilbage (should run whenever produktion or realized produktion changes)
       if (shouldRecalculateProduktionTimerTilbage) {
         console.log(`Need to recalculate Produktion Timer Tilbage for ${appointmentNumber} due to column ${colIndex} change`);
         try {
           const { produktionTimerTilbageValue } = await recalculateProduktionTimerTilbage(appointmentNumber, updatedRow);
           updateProduktionTimerTilbageUI(rowIndex, produktionTimerTilbageValue);
+          updatedRow[17] = produktionTimerTilbageValue;
         } catch (error) {
           console.error(`Failed to recalculate produktion timer tilbage for ${appointmentNumber}:`, error);
         }

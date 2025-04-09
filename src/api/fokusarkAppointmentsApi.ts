@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface FokusarkAppointment {
@@ -18,12 +17,11 @@ export interface FokusarkAppointment {
   total?: number | null;
   projektering_2?: number | null;
   timer_tilbage_1?: number | null;
-  produktion_rest?: number | null; // Add the new field for produktion timer tilbage
+  timer_tilbage_2?: number | null;
   faerdig_pct_ex_montage_nu?: number | null;
   faerdig_pct_ex_montage_foer?: number | null;
   est_timer_ift_faerdig_pct?: number | null;
   plus_minus_timer?: number | null;
-  timer_tilbage_2?: number | null;
   afsat_fragt?: number | null;
   is_sub_appointment?: boolean | null;
   hn_appointment_id?: number | null;
