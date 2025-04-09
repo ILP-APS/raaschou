@@ -33,6 +33,13 @@ export const formatDanishNumber = (value: number): string => {
 };
 
 /**
+ * Check if a value contains a numeric value and not just a placeholder like "R1C7"
+ */
+export const hasRealValue = (value: string): boolean => {
+  return value && /\d/.test(value) && !/R\d+C\d+/.test(value);
+}
+
+/**
  * Calculate Materialer based on the formula: ((Tilbud - Montage) - Underleverandør) * 0.25
  * If Montage 2 and Underleverandør 2 have numeric values, use them, otherwise use the original columns
  */
@@ -63,8 +70,8 @@ export const calculateMaterialer = (row: string[]): string => {
     let montage2 = 0;
     let underleverandor2 = 0;
     
-    const hasMontage2Value = montage2Str && /\d/.test(montage2Str) && !/R\d+C\d+/.test(montage2Str);
-    const hasUnderleverandor2Value = underleverandor2Str && /\d/.test(underleverandor2Str) && !/R\d+C\d+/.test(underleverandor2Str);
+    const hasMontage2Value = hasRealValue(montage2Str);
+    const hasUnderleverandor2Value = hasRealValue(underleverandor2Str);
     
     if (hasMontage2Value) {
       montage2 = parseNumber(montage2Str);
@@ -144,7 +151,7 @@ export const calculateProjektering = (row: string[]): string => {
     // For Montage 2, check if it actually contains a numeric value
     // and not just a placeholder like "R1C7"
     let montage2 = 0;
-    const hasMontage2Value = montage2Str && /\d/.test(montage2Str) && !/R\d+C\d+/.test(montage2Str);
+    const hasMontage2Value = hasRealValue(montage2Str);
     
     if (hasMontage2Value) {
       montage2 = parseNumber(montage2Str);
