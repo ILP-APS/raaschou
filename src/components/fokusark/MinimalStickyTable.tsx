@@ -115,6 +115,12 @@ export default function MinimalStickyTable() {
 
   const headerGroupHeight = '40px';
   const headerBgColor = getBgColor();
+  
+  // Calculate the combined width of ID, Name, and Type columns
+  const idWidth = 80; // ID column width
+  const nameWidth = 180; // Name column width
+  const typeWidth = 150; // Type column width
+  const infoColumnsTotalWidth = idWidth + nameWidth + typeWidth;
 
   return (
     <div style={{
@@ -181,7 +187,7 @@ export default function MinimalStickyTable() {
                           position: 'sticky',
                           left: 0,
                           top: 0,
-                          width: '260px', // This needs to cover ID + Name columns
+                          width: `${infoColumnsTotalWidth}px`, // Set to the combined width of ID, Name, and Type columns
                           height: '100%',
                           backgroundColor: headerBgColor,
                           display: 'flex',
