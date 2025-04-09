@@ -13,31 +13,41 @@ export const useFokusarkTable = (initialData: string[][]) => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   
-  // Calculate Est 1 based on the updated formula: ((Tilbud - Montage) - Underleverandør) * 0.25
-  const calculateEst1 = (row: string[]): string => {
+  // Calculate Materialer based on the updated formula and column preference:
+  // If Montage 2 and Underleverandør 2 have values, use them, otherwise use the original columns
+  // Formula: ((Tilbud - Montage) - Underleverandør) * 0.25
+  const calculateMaterialer = (row: string[]): string => {
     try {
-      // Get values from relevant columns (indices 3, 4, 5 for Tilbud, Montage, Underleverandør)
+      // Get values from relevant columns
       const tilbud = parseFloat(row[3]?.replace(/\./g, '').replace(',', '.') || '0');
-      const montage = parseFloat(row[4]?.replace(/\./g, '').replace(',', '.') || '0');
-      const underleverandor = parseFloat(row[5]?.replace(/\./g, '').replace(',', '.') || '0');
       
-      // Calculate using the updated formula: ((Tilbud - Montage) - Underleverandør) * 0.25
-      const est1 = ((tilbud - montage) - underleverandor) * 0.25;
+      // Check if Montage 2 (index 6) has a value, otherwise use Montage (index 4)
+      const montageValue = row[6] && row[6].trim() !== '' 
+        ? parseFloat(row[6]?.replace(/\./g, '').replace(',', '.') || '0')
+        : parseFloat(row[4]?.replace(/\./g, '').replace(',', '.') || '0');
+      
+      // Check if Underleverandør 2 (index 7) has a value, otherwise use Underleverandør (index 5)
+      const underleverandorValue = row[7] && row[7].trim() !== '' 
+        ? parseFloat(row[7]?.replace(/\./g, '').replace(',', '.') || '0')
+        : parseFloat(row[5]?.replace(/\./g, '').replace(',', '.') || '0');
+      
+      // Calculate using the formula: ((Tilbud - Montage) - Underleverandør) * 0.25
+      const materialer = ((tilbud - montageValue) - underleverandorValue) * 0.25;
       
       // Format the result with the Danish number format
-      return est1.toLocaleString('da-DK');
+      return materialer.toLocaleString('da-DK');
     } catch (error) {
-      console.error('Error calculating Est 1:', error);
+      console.error('Error calculating Materialer:', error);
       return '0';
     }
   };
   
-  // Apply Est 1 calculation to all rows
-  const applyEst1Calculations = (data: string[][]): string[][] => {
+  // Apply Materialer calculation to all rows
+  const applyMaterialerCalculations = (data: string[][]): string[][] => {
     return data.map(row => {
       const rowCopy = [...row];
-      // Est 1 is at index 8
-      rowCopy[8] = calculateEst1(row);
+      // Materialer is at index 8
+      rowCopy[8] = calculateMaterialer(row);
       return rowCopy;
     });
   };
@@ -68,10 +78,10 @@ export const useFokusarkTable = (initialData: string[][]) => {
           });
         }
         
-        // Apply Est 1 calculations to all rows
-        const dataWithEst1 = applyEst1Calculations(dataToUse);
+        // Apply Materialer calculations to all rows
+        const dataWithMaterialer = applyMaterialerCalculations(dataToUse);
         
-        setTableData(dataWithEst1);
+        setTableData(dataWithMaterialer);
       } catch (error) {
         console.error('Error loading saved cell data:', error);
         toast({
@@ -80,9 +90,9 @@ export const useFokusarkTable = (initialData: string[][]) => {
           variant: "destructive",
         });
         
-        // Even with the error, apply Est 1 calculations
-        const dataWithEst1 = applyEst1Calculations(initialData);
-        setTableData(dataWithEst1);
+        // Even with the error, apply Materialer calculations
+        const dataWithMaterialer = applyMaterialerCalculations(initialData);
+        setTableData(dataWithMaterialer);
       } finally {
         setIsLoading(false);
       }
@@ -103,10 +113,10 @@ export const useFokusarkTable = (initialData: string[][]) => {
       // Update the specific cell
       rowCopy[colIndex] = value;
       
-      // If we're updating any of the columns used in Est 1 calculation (Tilbud, Montage, Underleverandør),
-      // we need to recalculate Est 1
-      if (colIndex === 3 || colIndex === 4 || colIndex === 5) {
-        rowCopy[8] = calculateEst1(rowCopy);
+      // If we're updating Montage 2, Underleverandør 2, Tilbud, Montage, or Underleverandør,
+      // we need to recalculate Materialer
+      if (colIndex === 3 || colIndex === 4 || colIndex === 5 || colIndex === 6 || colIndex === 7) {
+        rowCopy[8] = calculateMaterialer(rowCopy);
       }
       
       // Update the row in the data
