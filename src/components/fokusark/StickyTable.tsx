@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -67,6 +67,7 @@ const data = generateData();
 export default function StickyTable() {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
+  const [isSplit, setIsSplit] = useState(true); // Always use split mode for this implementation
   
   // Define CSS variables for colors
   const headerBgColor = isDarkMode ? 'hsl(var(--muted))' : 'white';
@@ -191,162 +192,119 @@ export default function StickyTable() {
     },
   });
 
-  return (
-    <div className="w-full space-y-4">
-      <div className="rounded-md border overflow-hidden">
-        <div 
-          className="sticky-table-container"
-          style={{
-            '--header-bg-color': headerBgColor,
-            '--subheader-bg-color': subheaderBgColor,
-          } as React.CSSProperties}
-        >
-          <Table className="sticky-table">
-            <TableHeader>
-              {/* Header row */}
-              <TableRow>
-                {table.getLeftHeaderGroups()[0].headers.map((header) => (
+  // Function to render a table section (left, center, or right)
+  const renderTableSection = (
+    section: 'left' | 'center' | 'right',
+    className: string,
+    style: React.CSSProperties = {}
+  ) => {
+    // Get the appropriate header groups and cell accessor based on section
+    const getHeaderGroups = () => {
+      switch (section) {
+        case 'left': return table.getLeftHeaderGroups();
+        case 'center': return table.getCenterHeaderGroups();
+        case 'right': return table.getRightHeaderGroups();
+        default: return table.getHeaderGroups();
+      }
+    };
+
+    const getCells = (row: any) => {
+      switch (section) {
+        case 'left': return row.getLeftVisibleCells();
+        case 'center': return row.getCenterVisibleCells();
+        case 'right': return row.getRightVisibleCells();
+        default: return row.getVisibleCells();
+      }
+    };
+
+    // Only render if there are headers in this section
+    const headerGroups = getHeaderGroups();
+    if (headerGroups.length === 0 || headerGroups[0].headers.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className={`table-section ${className}`} style={style}>
+        <Table>
+          <TableHeader>
+            {/* Header row */}
+            {headerGroups.map(headerGroup => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
                   <TableHead
                     key={header.id}
                     style={{
                       width: `${header.getSize()}px`,
+                      minWidth: `${header.getSize()}px`,
                       backgroundColor: headerBgColor,
-                      position: 'sticky',
-                      left: `${header.getStart('left')}px`,
-                      zIndex: 3,
-                    }}
-                  >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-                
-                {table.getCenterHeaderGroups()[0].headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    style={{
-                      width: `${header.getSize()}px`,
-                      backgroundColor: headerBgColor,
-                    }}
-                  >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-                
-                {table.getRightHeaderGroups()[0].headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    style={{
-                      width: `${header.getSize()}px`,
-                      backgroundColor: headerBgColor,
-                      position: 'sticky',
-                      right: `${header.getStart('right')}px`,
-                      zIndex: 3,
                     }}
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
-              
-              {/* Subheader row */}
-              <TableRow>
-                {table.getLeftHeaderGroups()[0].headers.map((header, index) => (
+            ))}
+            
+            {/* Subheader row */}
+            {headerGroups.map((headerGroup, groupIndex) => (
+              <TableRow key={`subheader-${groupIndex}`}>
+                {headerGroup.headers.map((header, index) => (
                   <TableHead
-                    key={`subheader-left-${header.id}`}
+                    key={`subheader-${section}-${header.id}`}
                     style={{
                       width: `${header.getSize()}px`,
+                      minWidth: `${header.getSize()}px`,
                       backgroundColor: subheaderBgColor,
-                      position: 'sticky',
-                      left: `${header.getStart('left')}px`,
-                      zIndex: 3,
                     }}
                   >
                     {`Sub ${index + 1}`}
                   </TableHead>
                 ))}
-                
-                {table.getCenterHeaderGroups()[0].headers.map((header, index) => (
-                  <TableHead
-                    key={`subheader-center-${header.id}`}
+              </TableRow>
+            ))}
+          </TableHeader>
+          
+          <TableBody>
+            {table.getRowModel().rows.map(row => (
+              <TableRow key={`${section}-${row.id}`}>
+                {getCells(row).map(cell => (
+                  <TableCell
+                    key={cell.id}
                     style={{
-                      width: `${header.getSize()}px`,
-                      backgroundColor: subheaderBgColor,
+                      width: `${cell.column.getSize()}px`,
+                      minWidth: `${cell.column.getSize()}px`,
+                      backgroundColor: rowBgColor,
                     }}
                   >
-                    {`Sub ${index + table.getLeftHeaderGroups()[0].headers.length + 1}`}
-                  </TableHead>
-                ))}
-                
-                {table.getRightHeaderGroups()[0].headers.map((header, index) => (
-                  <TableHead
-                    key={`subheader-right-${header.id}`}
-                    style={{
-                      width: `${header.getSize()}px`,
-                      backgroundColor: subheaderBgColor,
-                      position: 'sticky',
-                      right: `${header.getStart('right')}px`,
-                      zIndex: 3,
-                    }}
-                  >
-                    {`Sub ${index + table.getLeftHeaderGroups()[0].headers.length + table.getCenterHeaderGroups()[0].headers.length + 1}`}
-                  </TableHead>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
                 ))}
               </TableRow>
-            </TableHeader>
-            
-            <TableBody>
-              {table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getLeftVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      style={{
-                        width: `${cell.column.getSize()}px`,
-                        backgroundColor: rowBgColor,
-                        position: 'sticky',
-                        left: `${cell.column.getStart('left')}px`,
-                        zIndex: 1,
-                      }}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                  
-                  {row.getCenterVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      style={{
-                        width: `${cell.column.getSize()}px`,
-                        backgroundColor: rowBgColor,
-                      }}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                  
-                  {row.getRightVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      style={{
-                        width: `${cell.column.getSize()}px`,
-                        backgroundColor: rowBgColor,
-                        position: 'sticky',
-                        right: `${cell.column.getStart('right')}px`,
-                        zIndex: 1,
-                      }}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  };
+
+  return (
+    <div className="w-full space-y-4">
+      <div className="sticky-table-container">
+        <div className="table-split-container">
+          {renderTableSection('left', 'table-section-left')}
+          {renderTableSection('center', 'table-section-center')}
+          {renderTableSection('right', 'table-section-right')}
         </div>
       </div>
       
-      {/* Pagination controls */}
-      <div className="flex items-center justify-end space-x-2">
+      <div className="flex justify-end space-x-2 items-center">
+        <div className="text-sm text-muted-foreground mr-4">
+          Left pinned: {table.getState().columnPinning.left?.join(', ')}
+          {' | '}
+          Right pinned: {table.getState().columnPinning.right?.join(', ')}
+        </div>
+        
+        {/* Pagination controls */}
         <Button
           variant="outline"
           size="sm"

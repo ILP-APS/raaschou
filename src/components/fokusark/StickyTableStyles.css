@@ -38,27 +38,28 @@
   }
 }
 
-/* Add a shadow effect to indicate there's more content */
-.sticky-table-container::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 100%;
-  width: 15px;
-  pointer-events: none;
-  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.05));
+/* Table split container styles */
+.table-split-container {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
 }
 
-/* Left shadow for right-scrolled content */
-.sticky-table-container::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 15px;
-  pointer-events: none;
-  z-index: 2;
-  background: linear-gradient(to left, transparent, rgba(0, 0, 0, 0.05));
+.table-section {
+  border: 1px solid hsl(var(--border));
+}
+
+.table-section-left, .table-section-right {
+  flex-shrink: 0;
+  z-index: 10; /* Higher z-index for pinned sections */
+  background-color: hsl(var(--background));
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.table-section-center {
+  flex-grow: 1;
+  flex-shrink: 1;
+  overflow-x: auto;
+  min-width: 0; /* Allow table to shrink below min-content width */
 }
