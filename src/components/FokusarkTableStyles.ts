@@ -95,6 +95,7 @@ export const tableContainerStyles = `
   thead tr:first-child th {
     border-bottom: 1px solid hsl(var(--border));
     text-align: left;
+    z-index: 40; /* Higher z-index for the first header row */
   }
   
   /* Remove vertical borders in header rows */
@@ -114,6 +115,14 @@ export const tableContainerStyles = `
     z-index: 30;
     background-color: white;
     width: 300px; /* Combined width of Nr. and Navn columns */
+  }
+  
+  /* Make the header sticky */
+  thead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: white;
   }
   
   /* Fix the table end appearance */
