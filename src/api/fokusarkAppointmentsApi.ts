@@ -17,6 +17,9 @@ export interface FokusarkAppointment {
   montage_3?: number | null;
   total?: number | null;
   projektering_2?: number | null;
+  produktion_2?: number | null;
+  montage_4?: number | null;
+  realized_total?: number | null;
   timer_tilbage_1?: number | null;
   faerdig_pct_ex_montage_nu?: number | null;
   faerdig_pct_ex_montage_foer?: number | null;

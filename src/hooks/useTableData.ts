@@ -7,6 +7,7 @@ import {
   createUserMap, 
   getAppointmentDetail, 
   getOfferLineItems,
+  getRealizedHours,
   isSubAppointment 
 } from "@/utils/appointmentUtils";
 import { generateTableData } from "@/utils/tableData";
@@ -60,6 +61,10 @@ export const useTableData = () => {
             const { offerTotal, montageTotal, underleverandorTotal } = 
               await getOfferLineItems(details.hnOfferID);
             
+            // Get the realized hours
+            const { projektering, produktion, montage, total } = 
+              await getRealizedHours(appointment.hnAppointmentID);
+              
             // Parse the offerTotal to a number for comparison
             // Remove any non-numeric characters (except decimal point) and convert to number
             const offerTotalNumber = parseFloat(offerTotal.replace(/[^0-9,]/g, '').replace(',', '.'));
@@ -80,8 +85,19 @@ export const useTableData = () => {
               underleverandorTotal,
             ];
             
-            // Add remaining columns with placeholder data (updated range to include Mont 2)
-            for (let i = 6; i < 23; i++) {
+            // Add placeholders for Montage 2 and Underleverandør 2
+            row.push('0', '0');
+            
+            // Add estimated values (these are placeholders for now)
+            for (let i = 8; i < 12; i++) {
+              row.push(`R${processedData.length + 1}C${i + 1}`);
+            }
+            
+            // Add the realized hours
+            row.push(projektering, produktion, montage, total);
+            
+            // Add remaining columns with placeholder data
+            for (let i = 16; i < 23; i++) {
               row.push(`R${processedData.length + 1}C${i + 1}`);
             }
             

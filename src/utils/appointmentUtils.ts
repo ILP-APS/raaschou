@@ -1,10 +1,11 @@
-
 import { 
   AppointmentDetail, 
   OfferLineItem, 
   User 
 } from "@/types/appointment";
-import { fetchAppointmentDetail, fetchOfferLineItems } from "@/utils/apiUtils";
+import { fetchAppointmentDetail, fetchOfferLineItems, fetchAppointmentLineWork } from "@/utils/apiUtils";
+import { calculateRealizedHours } from "@/utils/workTypeMapping";
+import { formatDanishNumber } from "@/utils/formatUtils";
 
 // Create a map of user IDs to names for quick lookup
 export const createUserMap = (users: User[]): Map<number, string> => {
@@ -78,6 +79,40 @@ export const getOfferLineItems = async (offerId: number | null): Promise<{
       offerTotal: 'Error',
       montageTotal: 'Error',
       underleverandorTotal: 'Error',
+    };
+  }
+};
+
+/**
+ * Fetches and calculates realized hours for an appointment
+ */
+export const getRealizedHours = async (appointmentId: number): Promise<{
+  projektering: string;
+  produktion: string;
+  montage: string;
+  total: string;
+}> => {
+  try {
+    // Fetch the line work data for the appointment
+    const lineWorkData = await fetchAppointmentLineWork(appointmentId);
+    
+    // Calculate the realized hours by category
+    const { projektering, produktion, montage, total } = calculateRealizedHours(lineWorkData);
+    
+    // Format the values with Danish number format
+    return {
+      projektering: formatDanishNumber(projektering),
+      produktion: formatDanishNumber(produktion),
+      montage: formatDanishNumber(montage),
+      total: formatDanishNumber(total)
+    };
+  } catch (error) {
+    console.error(`Error fetching realized hours for appointment ID ${appointmentId}:`, error);
+    return {
+      projektering: '0',
+      produktion: '0',
+      montage: '0',
+      total: '0'
     };
   }
 };
