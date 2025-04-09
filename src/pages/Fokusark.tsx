@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/sidebar";
 import FokusarkHeader from "@/components/fokusark/FokusarkHeader";
 import FokusarkContent from "@/components/fokusark/FokusarkContent";
-import "@/components/fokusark/FokusarkTableStyles.css";
 
 export default function FokusarkPage() {
   return (
@@ -17,7 +16,7 @@ export default function FokusarkPage() {
         <SidebarInset>
           <div className="flex flex-col h-full">
             <FokusarkHeader />
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-hidden">
               <FokusarkContent />
             </div>
           </div>

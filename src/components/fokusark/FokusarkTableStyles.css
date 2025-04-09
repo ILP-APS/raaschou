@@ -26,62 +26,52 @@
   white-space: nowrap;
 }
 
-/* Fix the first column */
-.sticky-table th:first-child,
-.sticky-table td:first-child {
-  position: -webkit-sticky;
-  position: sticky;
+/* Styles for sticky positioning */
+.sticky-cell {
+  position: -webkit-sticky !important;
+  position: sticky !important;
+  background-color: hsl(var(--background)) !important;
+  z-index: 10;
+}
+
+/* Sticky header cells need higher z-index */
+th.sticky-cell {
+  z-index: 30 !important;
+}
+
+/* First column styling */
+.sticky-col-0 {
   left: 0;
-  z-index: 2;
-  background-color: hsl(var(--background));
+  min-width: 80px;
+  width: 80px;
+  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
 }
 
-/* Fix the second column */
-.sticky-table th:nth-child(2),
-.sticky-table td:nth-child(2) {
-  position: -webkit-sticky;
-  position: sticky;
-  left: 80px; /* Width of first column */
-  z-index: 2;
-  background-color: hsl(var(--background));
+/* Second column styling */
+.sticky-col-1 {
+  left: 80px; /* Width of the first column */
+  min-width: 180px;
+  width: 180px;
+  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
 }
 
-/* Add shadow to show stickiness */
-.sticky-table th:nth-child(2),
-.sticky-table td:nth-child(2) {
-  box-shadow: 5px 0 5px -5px rgba(0,0,0,0.1);
-}
-
-/* Fixed header */
+/* Header styling */
 .sticky-table thead th {
   position: -webkit-sticky;
   position: sticky;
   top: 0;
-  z-index: 3;
+  z-index: 20;
   background-color: hsl(var(--muted));
 }
 
 /* Corner cells (header + first/second column) need higher z-index */
-.sticky-table thead th:first-child,
-.sticky-table thead th:nth-child(2) {
-  z-index: 4;
+.sticky-table thead th.sticky-cell {
+  z-index: 40;
 }
 
-/* Column widths */
-.sticky-table th:first-child,
-.sticky-table td:first-child {
-  min-width: 80px;
-  width: 80px;
-}
-
-.sticky-table th:nth-child(2),
-.sticky-table td:nth-child(2) {
-  min-width: 180px;
-  width: 180px;
-}
-
-.sticky-table th:not(:first-child):not(:nth-child(2)),
-.sticky-table td:not(:first-child):not(:nth-child(2)) {
+/* Default column widths */
+.sticky-table th:not(.sticky-col-0):not(.sticky-col-1),
+.sticky-table td:not(.sticky-col-0):not(.sticky-col-1) {
   min-width: 160px;
   width: 160px;
 }
@@ -96,14 +86,12 @@
 }
 
 /* Ensure background colors are applied for sticky columns too */
-.sticky-table tbody tr:nth-child(even) td:first-child,
-.sticky-table tbody tr:nth-child(even) td:nth-child(2) {
-  background-color: hsl(var(--muted)/10);
+.sticky-table tbody tr:nth-child(even) td.sticky-cell {
+  background-color: hsl(var(--muted)/10) !important;
 }
 
-.sticky-table tbody tr:hover td:first-child,
-.sticky-table tbody tr:hover td:nth-child(2) {
-  background-color: hsl(var(--muted)/20);
+.sticky-table tbody tr:hover td.sticky-cell {
+  background-color: hsl(var(--muted)/20) !important;
 }
 
 /* Group header row styling */

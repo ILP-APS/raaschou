@@ -3,6 +3,12 @@ import React from "react";
 import FokusarkDescription from "./FokusarkDescription";
 import { useFokusarkData } from "@/hooks/useFokusarkData";
 import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+  ColumnDef
+} from "@tanstack/react-table";
+import {
   Table,
   TableBody,
   TableCell,
@@ -12,20 +18,21 @@ import {
 } from "@/components/ui/table";
 import "./FokusarkTableStyles.css";
 
-type ColumnData = {
-  id: string;
-  header: string;
+// Define column metadata type
+interface ColumnMeta {
+  sticky?: boolean;
   group?: string;
+}
+
+// Define row data type
+interface FokusarkRow {
+  [key: string]: string | number;
+  id: string;
+  name: string;
 }
 
 const FokusarkContent: React.FC = () => {
   const { tableData, isLoading } = useFokusarkData();
-  
-  // Fixed columns first (ID and Name)
-  const columns: ColumnData[] = [
-    { id: "id", header: "ID" },
-    { id: "name", header: "Name" }
-  ];
   
   // Define column groups
   const groups = [
@@ -37,46 +44,77 @@ const FokusarkContent: React.FC = () => {
     { name: "Avvik", cols: 3 }
   ];
   
-  // Generate columns for each group
-  let colNum = 1;
-  groups.forEach(group => {
-    for (let i = 1; i <= group.cols; i++) {
-      columns.push({
-        id: `col_${colNum}`,
-        header: `C${colNum}`,
-        group: group.name
-      });
-      colNum++;
-    }
-  });
-  
   // Generate rows of data
-  const rows = [];
+  const rows: FokusarkRow[] = [];
   for (let i = 1; i <= 30; i++) {
-    const row: Record<string, any> = {
+    const row: FokusarkRow = {
       id: `${i}`,
       name: `Project ${i}`
     };
     
-    columns.forEach(col => {
-      if (col.id !== "id" && col.id !== "name") {
-        row[col.id] = `${col.group?.substring(0, 3)}-${i}-${col.id.split('_')[1]}`;
+    // Add data for each column
+    let colNum = 1;
+    groups.forEach(group => {
+      for (let j = 1; j <= group.cols; j++) {
+        row[`col_${colNum}`] = `${group.name.substring(0, 3)}-${i}-${colNum}`;
+        colNum++;
       }
     });
     
     rows.push(row);
   }
   
-  // Get unique groups
+  // Define columns
+  const columns: ColumnDef<FokusarkRow>[] = [
+    {
+      accessorKey: "id",
+      header: "ID",
+      meta: { sticky: true } as ColumnMeta
+    },
+    {
+      accessorKey: "name",
+      header: "Name",
+      meta: { sticky: true } as ColumnMeta
+    }
+  ];
+  
+  // Add columns for each group
+  let colNum = 1;
+  groups.forEach(group => {
+    for (let i = 1; i <= group.cols; i++) {
+      columns.push({
+        accessorKey: `col_${colNum}`,
+        header: `C${colNum}`,
+        meta: { group: group.name } as ColumnMeta
+      });
+      colNum++;
+    }
+  });
+  
+  // Create the table instance
+  const table = useReactTable({
+    data: rows,
+    columns,
+    getCoreRowModel: getCoreRowModel()
+  });
+  
+  // Calculate the left position for sticky columns
+  const getLeftPosition = (columnIndex: number) => {
+    if (columnIndex === 0) return 0;
+    if (columnIndex === 1) return 80; // Width of first column
+    return undefined;
+  };
+  
+  // Get unique groups for the header row
   const uniqueGroups = Array.from(
-    new Set(columns.filter(col => col.group).map(col => col.group))
+    new Set(columns.filter(col => (col.meta as ColumnMeta)?.group).map(col => (col.meta as ColumnMeta)?.group))
   );
   
-  // Get column span for each group
+  // Calculate column spans for each group
   const groupSpans: Record<string, number> = {};
   uniqueGroups.forEach(group => {
     if (group) {
-      groupSpans[group] = columns.filter(col => col.group === group).length;
+      groupSpans[group] = columns.filter(col => (col.meta as ColumnMeta)?.group === group).length;
     }
   });
   
@@ -107,7 +145,18 @@ const FokusarkContent: React.FC = () => {
             {/* Group header row */}
             <TableRow>
               {/* Empty cells for ID and Name columns */}
-              <TableHead colSpan={2}>&nbsp;</TableHead>
+              <TableHead 
+                colSpan={2}
+                className="sticky-cell sticky-col-0"
+                style={{ 
+                  left: 0,
+                  minWidth: "260px", // Combined width of first two columns
+                  width: "260px",
+                  zIndex: 40
+                }}
+              >
+                &nbsp;
+              </TableHead>
               
               {/* Group headers */}
               {uniqueGroups.map((group, index) => (
@@ -119,22 +168,55 @@ const FokusarkContent: React.FC = () => {
             
             {/* Column header row */}
             <TableRow>
-              {columns.map((column, index) => (
-                <TableHead key={`header-${index}`}>
-                  {column.header}
-                </TableHead>
-              ))}
+              {table.getFlatHeaders().map((header, index) => {
+                const isSticky = !!(header.column.columnDef.meta as ColumnMeta)?.sticky;
+                
+                return (
+                  <TableHead
+                    key={header.id}
+                    className={`
+                      ${isSticky ? 'sticky-cell' : ''}
+                      ${index === 0 ? 'sticky-col-0' : ''}
+                      ${index === 1 ? 'sticky-col-1' : ''}
+                    `}
+                    style={{
+                      position: isSticky ? 'sticky' : 'static',
+                      left: isSticky ? getLeftPosition(index) : undefined
+                    }}
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </TableHead>
+                );
+              })}
             </TableRow>
           </TableHeader>
           
           <TableBody>
-            {rows.map((row, rowIndex) => (
-              <TableRow key={`row-${rowIndex}`}>
-                {columns.map((column, colIndex) => (
-                  <TableCell key={`cell-${rowIndex}-${colIndex}`}>
-                    {row[column.id]}
-                  </TableCell>
-                ))}
+            {table.getRowModel().rows.map(row => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell, index) => {
+                  const isSticky = !!(cell.column.columnDef.meta as ColumnMeta)?.sticky;
+                  
+                  return (
+                    <TableCell
+                      key={cell.id}
+                      className={`
+                        ${isSticky ? 'sticky-cell' : ''}
+                        ${index === 0 ? 'sticky-col-0' : ''}
+                        ${index === 1 ? 'sticky-col-1' : ''}
+                      `}
+                      style={{
+                        position: isSticky ? 'sticky' : 'static',
+                        left: isSticky ? getLeftPosition(index) : undefined
+                      }}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  );
+                })}
               </TableRow>
             ))}
           </TableBody>
