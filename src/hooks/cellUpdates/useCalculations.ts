@@ -1,5 +1,5 @@
 
-import { calculateProjektering, calculateProduktion, calculateMontage, calculateTimerTilbage, parseNumber } from "@/utils/fokusarkCalculations";
+import { calculateProjektering, calculateProduktion, calculateMontage, calculateTimerTilbage, calculateProduktionTimerTilbage, parseNumber } from "@/utils/fokusarkCalculations";
 import { updateAppointmentField } from "@/services/fokusarkAppointmentService";
 
 /**
@@ -111,10 +111,36 @@ export const useCalculations = () => {
     return { timerTilbageValue, timerTilbageNumericValue };
   };
   
+  // Recalculate Produktion Timer Tilbage (Produktion - Realiseret Produktion)
+  const recalculateProduktionTimerTilbage = async (
+    appointmentNumber: string,
+    updatedRow: string[]
+  ) => {
+    console.log("Recalculating Produktion Timer Tilbage");
+    
+    // Use the calculation function for produktion timer tilbage
+    const produktionTimerTilbageValue = calculateProduktionTimerTilbage(updatedRow);
+    const produktionTimerTilbageNumericValue = parseNumber(produktionTimerTilbageValue);
+    
+    console.log(`Calculated new produktion timer tilbage value: ${produktionTimerTilbageValue} (${produktionTimerTilbageNumericValue}) for appointment ${appointmentNumber}`);
+    
+    // Update Supabase with the calculated value
+    await updateAppointmentField(
+      appointmentNumber, 
+      'produktion_rest', 
+      produktionTimerTilbageNumericValue
+    );
+    
+    console.log(`Updated produktion_rest in database to ${produktionTimerTilbageNumericValue}`);
+    
+    return { produktionTimerTilbageValue, produktionTimerTilbageNumericValue };
+  };
+  
   return { 
     recalculateProjektering, 
     recalculateProduktion,
     recalculateMontage,
-    recalculateTimerTilbage 
+    recalculateTimerTilbage,
+    recalculateProduktionTimerTilbage
   };
 };

@@ -1,9 +1,10 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Calculator } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadFokusarkAppointments, updateAppointmentField } from "@/services/fokusark/appointmentDbService";
-import { calculateProjektering, calculateProduktion, calculateMontage, calculateTimerTilbage, parseNumber, calculateTotal, formatDanishNumber } from "@/utils/fokusarkCalculations";
+import { calculateProjektering, calculateProduktion, calculateMontage, calculateTimerTilbage, calculateProduktionTimerTilbage, parseNumber, calculateTotal, formatDanishNumber } from "@/utils/fokusarkCalculations";
 
 interface RecalculateValuesButtonProps {
   tableData: string[][];
@@ -111,11 +112,11 @@ const RecalculateValuesButton: React.FC<RecalculateValuesButtonProps> = ({ table
             updatedRowData[12] = formatDanishNumber(appointment.projektering_2 || 0);
             
             const timerTilbageValue = calculateTimerTilbage(updatedRowData);
-            const timerTilbageNumeric = parseNumber(timerTilbageValue);
+            const timerTilbageNumericValue = parseNumber(timerTilbageValue);
             
             console.log(`Recalculating timer tilbage for ${appointmentNumber}:`, {
               calculated: timerTilbageValue,
-              numeric: timerTilbageNumeric,
+              numeric: timerTilbageNumericValue,
               current: appointment.timer_tilbage_1,
               projektering_1: projekteringNumeric,
               projektering_2: appointment.projektering_2
@@ -124,7 +125,27 @@ const RecalculateValuesButton: React.FC<RecalculateValuesButtonProps> = ({ table
             await updateAppointmentField(
               appointmentNumber,
               'timer_tilbage_1',
-              timerTilbageNumeric
+              timerTilbageNumericValue
+            );
+            
+            // Add produktion timer tilbage calculation
+            updatedRowData[13] = formatDanishNumber(appointment.produktion || 0); // Realized produktion
+            
+            const produktionTimerTilbageValue = calculateProduktionTimerTilbage(updatedRowData);
+            const produktionTimerTilbageNumeric = parseNumber(produktionTimerTilbageValue);
+            
+            console.log(`Recalculating produktion timer tilbage for ${appointmentNumber}:`, {
+              calculated: produktionTimerTilbageValue,
+              numeric: produktionTimerTilbageNumeric,
+              current: appointment.produktion_rest,
+              produktion: produktionNumeric,
+              realized_produktion: appointment.produktion
+            });
+            
+            await updateAppointmentField(
+              appointmentNumber,
+              'produktion_rest',
+              produktionTimerTilbageNumeric
             );
             
             updatedCount++;

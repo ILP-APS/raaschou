@@ -69,3 +69,19 @@ export const calculateTimerTilbage = (row: string[]): string => {
   
   return formatDanishNumber(timerTilbage);
 };
+
+// Calculate Produktion Timer Tilbage (Estimeret Produktion - Realiseret Produktion)
+export const calculateProduktionTimerTilbage = (row: string[]): string => {
+  // Get values from column 10 (produktion - Estimeret) and column 13 (produktion - Realiseret)
+  const estimatedProduktion = parseNumber(row[10]);
+  const realizedProduktion = parseNumber(row[13]);
+  
+  console.log(`Calculating Produktion Timer Tilbage: ${estimatedProduktion} - ${realizedProduktion}`);
+  
+  // Calculate the difference
+  const produktionTimerTilbage = estimatedProduktion - realizedProduktion;
+  
+  console.log(`Produktion Timer Tilbage result: ${produktionTimerTilbage}`);
+  
+  return formatDanishNumber(produktionTimerTilbage);
+};
