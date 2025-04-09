@@ -20,7 +20,7 @@
   background-color: hsl(var(--primary)/70);
 }
 
-/* Sticky column styles */
+/* Sticky column styles - now relying more on inline styles */
 .sticky-header {
   position: sticky !important;
   z-index: 30 !important;
@@ -43,11 +43,7 @@
   box-shadow: 2px 0 5px -2px rgba(255,255,255,0.1);
 }
 
-/* Override any conflicting styles */
-.sticky-col-0, .sticky-col-1 {
-  position: sticky !important;
-}
-
+/* These are now primarily handled with inline styles */
 .sticky-col-0 {
   left: 0 !important;
 }
@@ -56,11 +52,15 @@
   left: 80px !important;
 }
 
-/* Ensure sticky columns always stay on top */
+/* Z-index hierarchy for different elements */
+thead th[style*="position: sticky"] {
+  z-index: 40 !important;
+}
+
 thead th.sticky-col-0, thead th.sticky-col-1 {
   z-index: 40 !important;
 }
 
-tbody td.sticky-col-0, tbody td.sticky-col-1 {
+tbody td[style*="position: sticky"] {
   z-index: 20 !important;
 }
