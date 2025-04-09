@@ -131,6 +131,9 @@ export default function MinimalStickyTable() {
   const groupRowHeight = '40px';
   const columnHeaderHeight = '40px';
   const totalHeaderHeight = '120px'; // Sum of all three header rows
+  
+  // Header background color
+  const headerBgColor = isDarkMode ? 'hsl(var(--background))' : 'hsl(var(--background))';
 
   return (
     <div style={{
@@ -161,7 +164,7 @@ export default function MinimalStickyTable() {
                 top: 0,
                 left: 0,
                 zIndex: 60,
-                backgroundColor: getBgColor(),
+                backgroundColor: headerBgColor,
                 borderBottom: 'none',
                 borderTop: '1px solid hsl(var(--border))',
                 borderLeft: '1px solid hsl(var(--border))',
@@ -183,7 +186,7 @@ export default function MinimalStickyTable() {
                 top: 0,
                 left: '80px',
                 zIndex: 60,
-                backgroundColor: getBgColor(),
+                backgroundColor: headerBgColor,
                 borderBottom: 'none',
                 borderTop: '1px solid hsl(var(--border))',
                 borderRight: '1px solid hsl(var(--border))',
@@ -200,7 +203,7 @@ export default function MinimalStickyTable() {
             <TableHead
               colSpan={columns.length - 2}
               style={{
-                backgroundColor: getBgColor(),
+                backgroundColor: headerBgColor,
                 borderBottom: 'none',
                 borderTop: '1px solid hsl(var(--border))',
                 borderRight: '1px solid hsl(var(--border))',
@@ -214,7 +217,7 @@ export default function MinimalStickyTable() {
           
           {/* Group header row */}
           <TableRow>
-            {/* Sticky Info group spanning first two columns */}
+            {/* Sticky Info group spanning first two columns - UPDATED WITH FIX */}
             <TableHead
               colSpan={2}
               style={{
@@ -222,12 +225,14 @@ export default function MinimalStickyTable() {
                 top: emptyRowHeight,
                 left: 0,
                 zIndex: 60,
-                backgroundColor: getBgColor(),
+                backgroundColor: headerBgColor,
                 fontWeight: 'bold',
                 textAlign: 'center',
                 borderBottom: '1px solid hsl(var(--border))',
-                boxShadow: '2px 2px 5px -2px rgba(0,0,0,0.15)',
-                height: groupRowHeight
+                width: '260px', // Total width of ID (80px) + Name (180px) columns
+                maxWidth: '260px',
+                overflow: 'hidden', // This prevents content from sticking out
+                boxShadow: '2px 0 5px -2px rgba(0,0,0,0.15)'
               }}
             >
               Info
@@ -237,7 +242,7 @@ export default function MinimalStickyTable() {
             <TableHead
               colSpan={1}
               style={{
-                backgroundColor: getBgColor(),
+                backgroundColor: headerBgColor,
                 fontWeight: 'bold',
                 textAlign: 'center',
                 borderBottom: '1px solid hsl(var(--border))',
@@ -254,7 +259,7 @@ export default function MinimalStickyTable() {
                 key={`group-${group.id}`}
                 colSpan={group.colSpan}
                 style={{
-                  backgroundColor: getBgColor(),
+                  backgroundColor: headerBgColor,
                   fontWeight: 'bold',
                   textAlign: 'center',
                   borderBottom: '1px solid hsl(var(--border))',
@@ -282,7 +287,7 @@ export default function MinimalStickyTable() {
                     top: `calc(${emptyRowHeight} + ${groupRowHeight})`, // Position below both rows above
                     left: isSticky ? getLeftPosition(stickyIndex) : undefined,
                     zIndex: isSticky ? 45 : 40,
-                    backgroundColor: getBgColor(),
+                    backgroundColor: headerBgColor,
                     boxShadow: isSticky 
                       ? '2px 2px 5px -2px rgba(0,0,0,0.15)'
                       : '0 2px 5px -2px rgba(0,0,0,0.15)',
