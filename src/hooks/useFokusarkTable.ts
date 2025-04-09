@@ -114,8 +114,20 @@ export const useFokusarkTable = (initialData: string[][]) => {
         return 'produktion';
       case 11:
         return 'montage_3';
-      case 16:
+      case 14:
         return 'timer_tilbage_1';
+      case 15:
+        return 'faerdig_pct_ex_montage_nu';
+      case 16:
+        return 'faerdig_pct_ex_montage_foer';
+      case 17:
+        return 'est_timer_ift_faerdig_pct';
+      case 18:
+        return 'plus_minus_timer';
+      case 19:
+        return 'timer_tilbage_2';
+      case 20:
+        return 'afsat_fragt';
       default:
         return null;
     }
@@ -177,8 +189,14 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       // If total was updated by the trigger, update it in the UI
       if (updatedAppointment.total !== null) {
-        // This column might not be visible in the current UI but would be available in the data
-        console.log(`Total updated to ${updatedAppointment.total}`);
+        setTableData(prevData => {
+          const newData = [...prevData];
+          const rowCopy = [...newData[rowIndex]];
+          // Update the total column (index 12)
+          rowCopy[12] = formatDanishNumber(updatedAppointment.total || 0);
+          newData[rowIndex] = rowCopy;
+          return newData;
+        });
       }
       
       // Show a toast notification
@@ -217,9 +235,21 @@ export const useFokusarkTable = (initialData: string[][]) => {
       case 10:
         return 'Produktion';
       case 11:
-        return 'Montage 3';
-      case 16:
+        return 'Montage';
+      case 14:
         return 'Timer tilbage';
+      case 15:
+        return 'Færdig % ex montage nu';
+      case 16:
+        return 'Færdig % ex montage før';
+      case 17:
+        return 'Est timer ift færdig %';
+      case 18:
+        return '+/- timer';
+      case 19:
+        return 'Timer tilbage';
+      case 20:
+        return 'Afsat fragt';
       default:
         return `Column ${colIndex + 1}`;
     }

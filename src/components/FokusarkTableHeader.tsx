@@ -28,35 +28,35 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
       case 8:
         return "Materialer";
       case 9:
-        return "Est 2";
+        return "Projektering";
       case 10:
-        return "Est 3";
+        return "Produktion";
       case 11:
-        return "Est 4";
+        return "Montage";
       case 12:
-        return "Real 1";
+        return "Total";
       case 13:
-        return "Real 2";
+        return "Projektering";
       case 14:
-        return "Real 3";
-      case 15:
-        return "Real 4";
-      case 16:
         return "Timer tilbage";
+      case 15:
+        return "Færdig % ex montage nu";
+      case 16:
+        return "Færdig % ex montage før";
       case 17:
-        return "Prod 1";
+        return "Est timer ift færdig %";
       case 18:
-        return "Prod 2";
+        return "+/- timer";
       case 19:
-        return "Prod 3";
+        return "Timer tilbage";
       case 20:
-        return "Prod 4";
+        return "Afsat fragt";
       case 21:
-        return "Prod 5";
+        return "Prod 1";
       case 22:
-        return "Mont 1";
+        return "Prod 2";
       case 23:
-        return "Mont 2";
+        return "Mont 1";
       default:
         return `Column ${index + 1}`;
     }
@@ -87,13 +87,13 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
     } else if (index === 8) {
       return { name: "Estimeret", colSpan: 4 }; // 4 columns
     } else if (index === 12) {
-      return { name: "Realiseret", colSpan: 4 }; // 4 columns
-    } else if (index === 16) {
-      return { name: "Timer tilbage", colSpan: 1 }; // Group for Timer tilbage
-    } else if (index === 17) {
-      return { name: "Produktion", colSpan: 5 }; // 5 columns
-    } else if (index === 22) {
-      return { name: "Montage", colSpan: 2 }; // Keep Montage with 2 columns
+      return { name: "Realiseret", colSpan: 8 }; // Updated to 8 columns
+    } else if (index === 20) {
+      return { name: "Transport", colSpan: 1 }; // Transport group
+    } else if (index === 21) {
+      return { name: "Produktion", colSpan: 2 }; // 2 columns
+    } else if (index === 23) {
+      return { name: "Montage", colSpan: 1 }; // Keep Montage with 1 column
     }
     return null;
   };

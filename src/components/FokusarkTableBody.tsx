@@ -50,8 +50,9 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
 
   // Function to check if a cell is editable based on its column index
   const isEditableColumn = (columnIndex: number): boolean => {
-    // Editable columns: Montage 2, Underleverandør 2, Projektering, Produktion, Montage 3, Timer tilbage
-    return [6, 7, 9, 10, 11, 16].includes(columnIndex);
+    // Editable columns: Montage 2, Underleverandør 2, Projektering, Produktion, Montage, Timer tilbage,
+    // Færdig % ex montage nu, Færdig % ex montage før, Est timer ift færdig %, +/- timer, Timer tilbage, Afsat fragt
+    return [6, 7, 9, 10, 11, 14, 15, 16, 17, 18, 19, 20].includes(columnIndex);
   };
 
   // Function to render a cell - special handling for editable cells
