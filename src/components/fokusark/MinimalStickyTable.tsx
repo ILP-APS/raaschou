@@ -236,19 +236,6 @@ export default function MinimalStickyTable() {
               </div>
             </TableHead>
             
-            <TableHead
-              colSpan={1}
-              style={{
-                backgroundColor: headerBgColor,
-                fontWeight: 'bold',
-                textAlign: 'center',
-                borderBottom: '1px solid hsl(var(--border))',
-                height: groupRowHeight
-              }}
-            >
-              <span style={{ color: 'transparent', userSelect: 'none' }}>Info</span>
-            </TableHead>
-            
             {headerGroups.map((group, groupIndex) => (
               group.id !== 'Info' && (
                 <TableHead
@@ -280,7 +267,7 @@ export default function MinimalStickyTable() {
                     minWidth: '150px',
                     width: index === 0 ? '80px' : index === 1 ? '180px' : '150px',
                     position: isSticky ? 'sticky' : undefined,
-                    top: groupRowHeight,
+                    top: groupRowHeight + emptyRowHeight,
                     left: isSticky ? getLeftPosition(stickyIndex) : undefined,
                     zIndex: isSticky ? 45 : 40,
                     backgroundColor: headerBgColor,
