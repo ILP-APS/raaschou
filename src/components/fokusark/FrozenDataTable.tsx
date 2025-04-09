@@ -7,6 +7,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   SortingState,
+  ColumnDef,
 } from '@tanstack/react-table';
 import {
   Table,
@@ -19,8 +20,23 @@ import {
 import { Button } from '@/components/ui/button';
 import { ArrowUpDown } from 'lucide-react';
 
+// Define the data type for our rows
+interface DataItem {
+  id: number;
+  col1: string;
+  col2: string;
+  col3: string;
+  col4: string;
+  col5: string;
+}
+
+// Define custom metadata for our columns
+interface ColumnMeta {
+  frozen?: boolean;
+}
+
 // Sample data - replace with your own
-const data = [
+const data: DataItem[] = [
   { id: 1, col1: "A1", col2: "B1", col3: "C1", col4: "D1", col5: "E1" },
   { id: 2, col1: "A2", col2: "B2", col3: "C2", col4: "D2", col5: "E2" },
   { id: 3, col1: "A3", col2: "B3", col3: "C3", col4: "D3", col5: "E3" },
@@ -31,8 +47,8 @@ const data = [
   { id: 8, col1: "A8", col2: "B8", col3: "C8", col4: "D8", col5: "E8" },
 ];
 
-// Define columns
-const columns = [
+// Define columns with proper typing
+const columns: ColumnDef<DataItem, keyof DataItem>[] = [
   {
     accessorKey: 'col1',
     header: ({ column }) => (
@@ -43,12 +59,12 @@ const columns = [
         </Button>
       </div>
     ),
-    meta: { frozen: true },
+    meta: { frozen: true } as ColumnMeta,
   },
   {
     accessorKey: 'col2',
     header: 'Column 2',
-    meta: { frozen: true },
+    meta: { frozen: true } as ColumnMeta,
   },
   {
     accessorKey: 'col3',
@@ -90,7 +106,7 @@ export default function FrozenDataTable() {
               {table.getHeaderGroups()[0].headers.map((header) => (
                 <TableHead
                   key={header.id}
-                  className={header.column.columnDef.meta?.frozen ? 'sticky left-0 z-30 bg-background' : ''}
+                  className={(header.column.columnDef.meta as ColumnMeta)?.frozen ? 'sticky left-0 z-30 bg-background' : ''}
                   style={{ minWidth: '150px' }}
                 >
                   {header.isPlaceholder
@@ -104,7 +120,7 @@ export default function FrozenDataTable() {
               {table.getHeaderGroups()[0].headers.map((header) => (
                 <TableHead
                   key={`subheader-${header.id}`}
-                  className={header.column.columnDef.meta?.frozen ? 'sticky left-0 z-30 bg-muted/50' : ''}
+                  className={(header.column.columnDef.meta as ColumnMeta)?.frozen ? 'sticky left-0 z-30 bg-muted/50' : ''}
                   style={{ minWidth: '150px' }}
                 >
                   Sub-header {header.index + 1}
@@ -118,7 +134,7 @@ export default function FrozenDataTable() {
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
-                    className={cell.column.columnDef.meta?.frozen ? 'sticky left-0 z-10 bg-background' : ''}
+                    className={(cell.column.columnDef.meta as ColumnMeta)?.frozen ? 'sticky left-0 z-10 bg-background' : ''}
                     style={{ minWidth: '150px' }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
