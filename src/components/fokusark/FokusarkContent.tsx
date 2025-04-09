@@ -40,6 +40,20 @@ const FokusarkContent: React.FC = () => {
         <div className="w-full">
           <Table>
             <TableHeader className="bg-muted/50">
+              {/* First Header Row - Group Headers */}
+              <TableRow>
+                {Array.from({ length: 5 }, (_, i) => (
+                  <TableHead 
+                    key={`group-header-${i}`} 
+                    className="font-medium whitespace-nowrap text-center border-r"
+                    colSpan={5}
+                  >
+                    Group {i+1}
+                  </TableHead>
+                ))}
+              </TableRow>
+              
+              {/* Second Header Row - Column Headers */}
               <TableRow>
                 {Array.from({ length: 25 }, (_, i) => (
                   <TableHead key={`header-${i}`} className="font-medium whitespace-nowrap">
