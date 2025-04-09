@@ -13,10 +13,10 @@ export const calculateProjektering = (row: string[]): string => {
     const montage2Str = row[6] || '';
     
     console.log("Raw input for Projektering calculation:", {
+      appointmentNumber: row[0],
       tilbud: tilbudStr,
       montage: montageStr,
-      montage2: montage2Str,
-      appointment: row[0] // Log the appointment number for debugging
+      montage2: montage2Str
     });
     
     // Parse values to numbers
@@ -36,22 +36,17 @@ export const calculateProjektering = (row: string[]): string => {
     // Determine which montage value to use in the calculation
     const montageValue = hasMontage2Value ? montage2 : montage;
     
-    console.log("Using values for Projektering calculation:", {
-      tilbud,
-      montageValue,
-      appointment: row[0]
-    });
-    
     // Perform the calculation using the formula: ((tilbud-Montage)*0.10)/830
     const step1 = tilbud - montageValue;
     const step2 = step1 * 0.10;
     const projektering = step2 / 830;
     
-    console.log("Projektering calculation steps:", {
+    console.log("Projektering calculation steps for appointment " + row[0] + ":", {
+      tilbud,
+      montageValue,
       step1_tilbud_minus_montage: step1,
       step2_multiply_by_010: step2,
-      step3_divide_by_830: projektering,
-      appointment: row[0]
+      step3_divide_by_830: projektering
     });
     
     // Check for NaN and return '0' if the calculation resulted in NaN

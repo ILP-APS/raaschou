@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import FokusarkTable from "@/components/FokusarkTable";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,42 @@ interface FokusarkContentProps {
 
 const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading }) => {
   const { toast } = useToast();
+  
+  // Debug function to check specific calculation
+  useEffect(() => {
+    if (tableData.length > 0) {
+      // Find appointment 24371
+      const targetAppointment = tableData.find(row => row[0] === '24371');
+      if (targetAppointment) {
+        console.log("Found target appointment 24371:", targetAppointment);
+        // Manually calculate
+        const tilbud = parseNumber(targetAppointment[3]);
+        const montage = parseNumber(targetAppointment[4]);
+        const montage2 = parseNumber(targetAppointment[6]);
+        
+        const montageValue = montage2 > 0 ? montage2 : montage;
+        console.log("24371 Calculation values:", { tilbud, montage, montage2, montageValue });
+        
+        const step1 = tilbud - montageValue;
+        const step2 = step1 * 0.10;
+        const projektering = step2 / 830;
+        
+        console.log("24371 Manual calculation:", {
+          step1_tilbud_minus_montage: step1,
+          step2_multiply_by_010: step2,
+          step3_divide_by_830: projektering,
+          formatted: projektering.toLocaleString('da-DK', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })
+        });
+        
+        // Calculate using the official function
+        const officialResult = calculateProjektering(targetAppointment);
+        console.log("24371 Official calculation result:", officialResult);
+      }
+    }
+  }, [tableData]);
   
   const handleRecalculateValues = async () => {
     try {
