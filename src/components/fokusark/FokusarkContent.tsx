@@ -152,6 +152,7 @@ const FokusarkContent: React.FC = () => {
       </div>
       
       <div 
+        className="fokusark-table-container"
         style={{ 
           position: 'relative',
           overflow: 'auto',
@@ -162,7 +163,6 @@ const FokusarkContent: React.FC = () => {
           borderRadius: '0.5rem',
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
         }}
-        className="fokusark-table-container"
       >
         <Table style={{ 
           tableLayout: 'fixed', 
@@ -176,11 +176,8 @@ const FokusarkContent: React.FC = () => {
               {/* Corner cell for ID and Name columns with explicit sticky styles */}
               <TableHead 
                 colSpan={2}
+                className="sticky-corner sticky-col-0"
                 style={{ 
-                  position: 'sticky',
-                  top: 0,
-                  left: 0,
-                  zIndex: 50,
                   minWidth: "260px",
                   width: "260px",
                   backgroundColor: isDarkMode ? 'hsl(var(--muted)/80)' : 'hsl(var(--muted)/80)'
@@ -194,10 +191,8 @@ const FokusarkContent: React.FC = () => {
                 <TableHead 
                   key={`group-${index}`} 
                   colSpan={group.cols}
+                  className="sticky-header"
                   style={{
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 30,
                     backgroundColor: isDarkMode ? 'hsl(var(--muted)/80)' : 'hsl(var(--muted)/80)',
                     textAlign: 'center'
                   }}
@@ -211,23 +206,19 @@ const FokusarkContent: React.FC = () => {
             <TableRow>
               {table.getFlatHeaders().map((header, index) => {
                 const isSticky = !!(header.column.columnDef.meta as ColumnMeta)?.sticky;
-                const leftPos = index === 0 ? 0 : index === 1 ? '80px' : 'auto';
+                const stickyClass = isSticky ? 
+                  (index === 0 ? "sticky-column sticky-col-0" : "sticky-column sticky-col-1") : "";
                 const cellWidth = index === 0 ? '80px' : index === 1 ? '180px' : '160px';
                 
                 return (
                   <TableHead
                     key={header.id}
+                    className={stickyClass}
                     style={{
-                      position: isSticky ? 'sticky' : 'static',
-                      top: '41px',
-                      left: leftPos,
-                      zIndex: isSticky ? 40 : 30,
                       minWidth: cellWidth,
                       width: cellWidth,
                       backgroundColor: isDarkMode ? 'hsl(var(--muted))' : 'hsl(var(--muted))',
-                      boxShadow: isSticky ? '4px 0 4px -2px rgba(0,0,0,0.15)' : 'none',
-                      willChange: isSticky ? 'position, left' : 'auto',
-                      transition: 'none'
+                      top: '41px',
                     }}
                   >
                     {flexRender(
@@ -249,22 +240,18 @@ const FokusarkContent: React.FC = () => {
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell, cellIndex) => {
                     const isSticky = !!(cell.column.columnDef.meta as ColumnMeta)?.sticky;
-                    const leftPos = cellIndex === 0 ? 0 : cellIndex === 1 ? '80px' : 'auto';
+                    const stickyClass = isSticky ? 
+                      (cellIndex === 0 ? "sticky-column sticky-col-0" : "sticky-column sticky-col-1") : "";
                     const cellWidth = cellIndex === 0 ? '80px' : cellIndex === 1 ? '180px' : '160px';
                     
                     return (
                       <TableCell
                         key={cell.id}
+                        className={stickyClass}
                         style={{
-                          position: isSticky ? 'sticky' : 'static',
-                          left: leftPos,
-                          zIndex: isSticky ? 20 : 10,
                           minWidth: cellWidth,
                           width: cellWidth,
                           backgroundColor: bgColor,
-                          boxShadow: isSticky ? '4px 0 4px -2px rgba(0,0,0,0.15)' : 'none',
-                          willChange: isSticky ? 'position, left' : 'auto',
-                          transition: 'none'
                         }}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
