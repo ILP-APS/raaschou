@@ -72,11 +72,6 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
 
   // Function to render a cell - special handling for editable cells
   const renderCell = (rowIndex: number, cellIndex: number, cellValue: string, isSubAppointment: boolean) => {
-    // Log cell values for debugging (temporarily)
-    if (cellIndex === 17) {
-      console.log(`Rendering cell at row ${rowIndex}, column ${cellIndex} with value: '${cellValue}'`);
-    }
-    
     // If it's an editable column, make it editable
     if (isEditableColumn(cellIndex)) {
       return (
@@ -125,9 +120,9 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
     
     // Add sticky left positioning for first two columns only
     if (index === 0) {
-      classes += " sticky left-0 z-10 bg-white"; // Solid white background
+      classes += " sticky left-0 z-10 bg-white dark:bg-background"; // Solid background
     } else if (index === 1) {
-      classes += " sticky left-[100px] z-10 bg-white"; // Solid white background
+      classes += " sticky left-[100px] z-10 bg-white dark:bg-background"; // Solid background
     }
     
     return classes;
@@ -153,6 +148,7 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
           <tr 
             key={rowIndex} 
             className={`hover:bg-muted/50 ${isSubAppointment ? 'pl-4 bg-muted/20' : ''}`}
+            data-sub-appointment={isSubAppointment}
           >
             {displayRow.map((cell, cellIndex) => 
               renderCell(rowIndex, cellIndex, cell, isSubAppointment)

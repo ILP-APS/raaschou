@@ -82,6 +82,7 @@ export const tableContainerStyles = `
   table thead tr:nth-child(2) th:first-child,
   table thead tr:nth-child(2) th:nth-child(2) {
     z-index: 3;
+    background-color: white;
   }
   
   /* Firefox-specific fixes */
@@ -93,6 +94,12 @@ export const tableContainerStyles = `
     table thead tr:nth-child(2) th {
       top: 41px;
       position: sticky;
+    }
+    table thead tr:first-child th:first-child,
+    table thead tr:first-child th:nth-child(2),
+    table thead tr:nth-child(2) th:first-child,
+    table thead tr:nth-child(2) th:nth-child(2) {
+      z-index: 3;
     }
   }
   
@@ -149,5 +156,26 @@ export const tableContainerStyles = `
   
   table tbody tr[data-sub-appointment="true"] td:first-child {
     padding-left: 20px;
+  }
+  
+  /* Dark mode support */
+  .dark table thead,
+  .dark table th:first-child,
+  .dark table td:first-child,
+  .dark table th:nth-child(2),
+  .dark table td:nth-child(2),
+  .dark table thead tr:first-child th,
+  .dark table thead tr:nth-child(2) th {
+    background-color: hsl(var(--background));
+  }
+  
+  /* Add visual borders to clearly delineate fixed regions */
+  table th:nth-child(2),
+  table td:nth-child(2) {
+    border-right: 1px solid hsl(var(--border));
+  }
+  
+  table thead tr:nth-child(2) th {
+    border-bottom: 2px solid hsl(var(--border));
   }
 `;
