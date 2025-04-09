@@ -56,7 +56,7 @@ const FokusarkContent: React.FC = () => {
                     key="group-header-col1"
                     className="font-medium whitespace-nowrap text-center border-r"
                     style={{ 
-                      position: 'sticky',
+                      position: 'sticky' as const,
                       left: 0,
                       zIndex: 40,
                       width: '150px',
@@ -72,8 +72,8 @@ const FokusarkContent: React.FC = () => {
                     key="group-header-col2"
                     className="font-medium whitespace-nowrap text-center border-r"
                     style={{ 
-                      position: 'sticky',
-                      left: '150px',
+                      position: 'sticky' as const,
+                      left: 150,
                       zIndex: 40,
                       width: '150px',
                       minWidth: '150px',
@@ -144,7 +144,7 @@ const FokusarkContent: React.FC = () => {
                     
                     // Set background and z-index for sticky columns
                     const stickyStyles = i < 2 ? {
-                      position: 'sticky',
+                      position: 'sticky' as const,
                       left: leftPosition,
                       zIndex: 30,
                       backgroundColor: 'hsl(var(--muted)/50)',
@@ -185,7 +185,7 @@ const FokusarkContent: React.FC = () => {
                         
                         // Apply sticky styles only to the first two columns
                         const cellStyles = cellIndex < 2 ? {
-                          position: 'sticky',
+                          position: 'sticky' as const,
                           left: leftPosition,
                           zIndex: 20,
                           backgroundColor: rowBgColor,
