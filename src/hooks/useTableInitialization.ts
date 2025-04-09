@@ -22,8 +22,7 @@ export const useTableInitialization = (initialData: string[][]) => {
   // Load data and process it via Supabase when component mounts
   useEffect(() => {
     async function initializeData() {
-      if (!initialData.length || isInitialized) return;
-      
+      // Always try to load data, even if initialData is empty
       try {
         setIsLoading(true);
         console.log('Initializing Fokusark data...');
@@ -39,8 +38,8 @@ export const useTableInitialization = (initialData: string[][]) => {
           // Continue with empty array if load fails
         }
         
-        // If no data in Supabase yet, save the initial API data
-        if (appointmentsData.length === 0) {
+        // If no data in Supabase yet and we have initialData, save it
+        if (appointmentsData.length === 0 && initialData && initialData.length > 0) {
           toast({
             title: "Initializing database",
             description: "Saving appointment data to database for the first time",
@@ -73,18 +72,31 @@ export const useTableInitialization = (initialData: string[][]) => {
             setIsInitialized(true);
             return;
           }
-        } else {
+        } else if (appointmentsData.length === 0 && (!initialData || initialData.length === 0)) {
+          // No data in database and no initial data provided
+          console.log('No existing data found and no initial data provided');
+          toast({
+            title: "No data available",
+            description: "No data in database and no initial data provided. Try refreshing the data.",
+          });
+          
+          setTableData([]);
+          setIsLoading(false);
+          setIsInitialized(true);
+          return;
+        } else if (appointmentsData.length > 0) {
+          // We have data from the database, use it
+          console.log(`Using ${appointmentsData.length} appointments from database`);
+          
           // Ensure all appointments have projektering calculated correctly
           try {
-            console.log('Verifying all appointments have projektering calculated...');
-            
             // Get display data format
             let displayData = transformAppointmentsToDisplayData(appointmentsData);
             
             // Check if any projektering fields need recalculation
             let needsRecalculation = false;
             for (const row of displayData) {
-              const projekteringValue = parseFloat(row[9].replace(/\./g, '').replace(',', '.')) || 0;
+              const projekteringValue = parseFloat(row[9]?.replace(/\./g, '')?.replace(',', '.')) || 0;
               if (projekteringValue === 0) {
                 needsRecalculation = true;
                 break;
@@ -106,6 +118,7 @@ export const useTableInitialization = (initialData: string[][]) => {
         
         // Transform appointments to display format
         const displayData = transformAppointmentsToDisplayData(appointmentsData);
+        console.log('Transformed display data:', displayData.length, 'rows');
         setTableData(displayData);
         
         // Mark as initialized
@@ -118,15 +131,19 @@ export const useTableInitialization = (initialData: string[][]) => {
           variant: "destructive",
         });
         
-        // Fall back to using initialData directly
-        setTableData(initialData);
+        // Fall back to using initialData directly if available
+        if (initialData && initialData.length > 0) {
+          setTableData(initialData);
+        } else {
+          setTableData([]);
+        }
       } finally {
         setIsLoading(false);
       }
     }
     
     initializeData();
-  }, [initialData, isInitialized, toast]);
+  }, [initialData, toast]);
   
   return { tableData, appointments, setAppointments, setTableData, isLoading, isInitialized };
 };

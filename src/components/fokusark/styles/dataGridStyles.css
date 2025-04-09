@@ -5,6 +5,7 @@
   border: 1px solid hsl(var(--border));
   border-radius: 0.5rem;
   overflow: hidden;
+  position: relative;
 }
 
 .rdg {
@@ -13,6 +14,7 @@
   height: 100%;
   font-family: var(--font-sans, 'Geist', sans-serif);
   background-color: hsl(var(--background));
+  width: 100%; /* Ensure the grid takes full width */
 }
 
 .rdg-header-row {
@@ -25,6 +27,7 @@
   border-bottom: 1px solid hsl(var(--border));
   padding: 0 12px;
   color: hsl(var(--foreground));
+  position: relative;
 }
 
 .rdg-row:hover {
@@ -111,4 +114,37 @@
 /* Add a subtle highlight to headers */
 .rdg-header-row {
   border-bottom: 2px solid hsl(var(--border));
+}
+
+/* No data message styling */
+.fokusark-data-grid .no-data-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  width: 80%;
+  max-width: 500px;
+}
+
+/* Fix frozen column z-index */
+.rdg-header-row .rdg-cell[aria-frozen="true"] {
+  z-index: 2;
+}
+
+/* Fix for column resizing and cell content overflow */
+.rdg-cell-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Improve visibility of sort indicators */
+.rdg-sort-arrow {
+  fill: hsl(var(--primary));
+}
+
+/* Extra background color for the table to ensure it's visible */
+.rdg-root {
+  background-color: hsl(var(--background));
 }

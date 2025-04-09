@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import DataGrid, { SortColumn } from "react-data-grid";
 import "./styles/dataGridStyles.css";
 import { useTheme } from "next-themes";
@@ -19,11 +19,19 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
   
   // State for sorting
   const [sortColumns, setSortColumns] = useState<SortColumn[]>([]);
-  const [rows, setRows] = useState<FokusarkRow[]>(transformDataToRows(data));
+  const [rows, setRows] = useState<FokusarkRow[]>([]);
 
   // Update rows when data changes
-  React.useEffect(() => {
-    setRows(transformDataToRows(data));
+  useEffect(() => {
+    console.log("FokusarkDataGrid received data:", data?.length || 0, "rows");
+    if (data && data.length > 0) {
+      const transformedRows = transformDataToRows(data);
+      console.log("Transformed to", transformedRows.length, "grid rows");
+      setRows(transformedRows);
+    } else {
+      console.log("No data to transform");
+      setRows([]);
+    }
   }, [data]);
 
   // Handle cell value changes
@@ -38,25 +46,36 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
 
   return (
     <div className="fokusark-data-grid">
-      <DataGrid
-        className={isDarkMode ? "rdg-dark" : ""}
-        columns={getColumns()}
-        rows={rows}
-        rowRenderer={SubAppointmentRow}
-        rowHeight={48}
-        headerRowHeight={41}
-        sortColumns={sortColumns}
-        onSortColumnsChange={setSortColumns}
-        onRowsChange={(updatedRows, { indexes, column }) => {
-          setRows(updatedRows);
-          if (column && indexes.length === 1) {
-            const rowIndex = indexes[0];
-            const columnKey = column.key;
-            handleCellChange(rowIndex, columnKey, String(updatedRows[rowIndex][columnKey]));
-          }
-        }}
-        enableVirtualization
-      />
+      {rows.length > 0 ? (
+        <DataGrid
+          className={isDarkMode ? "rdg-dark" : ""}
+          columns={getColumns()}
+          rows={rows}
+          rowRenderer={SubAppointmentRow}
+          rowHeight={48}
+          headerRowHeight={41}
+          sortColumns={sortColumns}
+          onSortColumnsChange={setSortColumns}
+          onRowsChange={(updatedRows, { indexes, column }) => {
+            setRows(updatedRows);
+            if (column && indexes.length === 1) {
+              const rowIndex = indexes[0];
+              const columnKey = column.key;
+              handleCellChange(rowIndex, columnKey, String(updatedRows[rowIndex][columnKey]));
+            }
+          }}
+          enableVirtualization
+        />
+      ) : (
+        <div className="flex items-center justify-center h-64 w-full">
+          <div className="text-center">
+            <h3 className="text-lg font-medium mb-2">No data to display</h3>
+            <p className="text-muted-foreground">
+              Try refreshing the page or using the "Refresh Realized Hours" button.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
