@@ -1,9 +1,12 @@
 
 import React from "react";
 import FokusarkDescription from "./FokusarkDescription";
-import FrozenDataTable from "./FrozenDataTable";
+import ShadcnFokusarkTable from "./ShadcnFokusarkTable";
+import { useFokusarkData } from "@/hooks/useFokusarkData";
 
 const FokusarkContent: React.FC = () => {
+  const { tableData, isLoading, refreshData } = useFokusarkData();
+  
   return (
     <div className="flex flex-col gap-4 p-4 md:p-6 overflow-y-auto content-wrapper">
       <div className="flex flex-col gap-4 content-wrapper">
@@ -12,7 +15,18 @@ const FokusarkContent: React.FC = () => {
       </div>
       
       <div className="p-6 rounded-lg border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
-        <FrozenDataTable />
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          </div>
+        ) : (
+          <ShadcnFokusarkTable 
+            data={tableData}
+            onCellChange={(rowIndex, colIndex, value) => {
+              console.log("Cell changed:", rowIndex, colIndex, value);
+            }}
+          />
+        )}
       </div>
     </div>
   );
