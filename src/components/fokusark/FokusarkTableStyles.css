@@ -6,6 +6,7 @@
   overflow: auto;
   border-radius: 0.5rem;
   border: 1px solid hsl(var(--border));
+  width: 100%; /* Ensure container takes full width */
 }
 
 /* Core table styles */

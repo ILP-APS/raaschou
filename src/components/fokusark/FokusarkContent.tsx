@@ -10,6 +10,7 @@ import {
   TableRow,
   TableHead
 } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import "./FokusarkTableStyles.css";
 
 const FokusarkContent: React.FC = () => {
@@ -67,8 +68,8 @@ const FokusarkContent: React.FC = () => {
         <FokusarkDescription />
       </div>
       
-      <div className="rounded-lg shadow-sm flex-1 overflow-hidden">
-        <div className="sticky-table-container h-full" ref={tableContainerRef}>
+      <div className="rounded-lg shadow-sm flex-1 overflow-hidden"> 
+        <div className="sticky-table-container" ref={tableContainerRef}>
           <Table className="sticky-table">
             <TableHeader>
               {/* Group Headers Row */}
