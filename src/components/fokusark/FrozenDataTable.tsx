@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, CSSProperties } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -9,6 +10,7 @@ import {
   flexRender,
   SortingState,
   ColumnDef,
+  Column
 } from '@tanstack/react-table';
 import {
   Table,
@@ -96,13 +98,30 @@ const generateSampleData = (): FokusarkRow[] => {
   return data;
 };
 
-// Create a column helper based on our data type
-const columnHelper = createColumnHelper<FokusarkRow>();
+// Helper function to apply pinning styles to columns
+const getPinningStyles = (column: Column<FokusarkRow>): CSSProperties => {
+  const isPinned = column.getIsPinned();
+  const isLastLeftPinnedColumn = isPinned === 'left' && column.getIsLastColumn('left');
+
+  return {
+    position: isPinned ? 'sticky' : 'relative',
+    left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
+    right: isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
+    backgroundColor: 'hsl(var(--background))',
+    boxShadow: isLastLeftPinnedColumn
+      ? '4px 0 4px -4px rgba(0,0,0,0.15)'
+      : undefined,
+    zIndex: isPinned ? 1 : 0
+  };
+};
 
 export default function FrozenDataTable() {
   const [data] = useState<FokusarkRow[]>(() => generateSampleData());
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
+  
+  // Create a column helper based on our data type
+  const columnHelper = createColumnHelper<FokusarkRow>();
   
   // Define columns with column helper
   const columns = React.useMemo<ColumnDef<FokusarkRow>[]>(
@@ -110,18 +129,13 @@ export default function FrozenDataTable() {
       columnHelper.accessor('nr', {
         header: 'Nr.',
         cell: info => info.getValue(),
-        meta: {
-          className: 'sticky left-0 bg-background z-10 min-w-[100px]',
-          headerClassName: 'sticky left-0 bg-muted z-20'
-        },
+        enablePinning: true,
       }),
       columnHelper.accessor('navn', {
         header: 'Navn',
         cell: info => info.getValue(),
-        meta: {
-          className: 'sticky left-[100px] bg-background z-10 min-w-[250px]',
-          headerClassName: 'sticky left-[100px] bg-muted z-20'
-        },
+        enablePinning: true,
+        size: 250,
       }),
       columnHelper.accessor('ansvarlig', {
         header: 'Ansvarlig',
@@ -241,6 +255,9 @@ export default function FrozenDataTable() {
     state: {
       sorting,
       globalFilter,
+      columnPinning: {
+        left: ['nr', 'navn']
+      }
     },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
@@ -268,96 +285,114 @@ export default function FrozenDataTable() {
       
       <div className="border rounded-md relative overflow-auto" style={{ maxHeight: '500px' }}>
         <style dangerouslySetInnerHTML={{ __html: `
-          .sticky {
-            position: sticky;
-            z-index: 10;
+          /* Table specific styles for pinning */
+          table {
+            border-collapse: separate;
+            border-spacing: 0;
           }
-          
-          .left-0 {
-            left: 0;
+
+          .table-container {
+            overflow: auto;
+            position: relative;
           }
-          
-          .left-\\[100px\\] {
-            left: 100px;
+
+          th, td {
+            box-sizing: border-box;
           }
-          
-          .bg-background {
-            background-color: hsl(var(--background));
-          }
-          
-          .bg-muted {
-            background-color: hsl(var(--muted));
-          }
-          
-          .left-\\[100px\\]::after {
-            content: '';
+
+          /* Resize handle styles */
+          .resizer {
             position: absolute;
+            right: 0;
             top: 0;
-            right: -8px;
-            width: 8px;
             height: 100%;
-            box-shadow: inset -8px 0 8px -8px rgba(0,0,0,0.15);
-            pointer-events: none;
+            width: 5px;
+            background: rgba(0, 0, 0, 0.1);
+            cursor: col-resize;
+            user-select: none;
+            touch-action: none;
+            opacity: 0;
           }
           
-          .dark .left-\\[100px\\]::after {
-            box-shadow: inset -8px 0 8px -8px rgba(0,0,0,0.3);
+          .resizer:hover {
+            opacity: 1;
+          }
+          
+          .resizer.isResizing {
+            background: rgba(0, 0, 0, 0.2);
+            opacity: 1;
+          }
+          
+          /* Dark mode adjustments */
+          .dark .resizer {
+            background: rgba(255, 255, 255, 0.1);
+          }
+          
+          .dark .resizer.isResizing {
+            background: rgba(255, 255, 255, 0.2);
+          }
+          
+          /* Sub-appointment styling */
+          .bg-muted\\/20 td:first-child {
+            padding-left: 20px;
           }
         ` }} />
         
-        <Table>
-          <TableHeader className="sticky top-0 bg-muted z-10">
-            {table.getHeaderGroups().map(headerGroup => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <TableHead
-                    key={header.id}
-                    className={(header.column.columnDef.meta as any)?.headerClassName}
-                    onClick={header.column.getToggleSortingHandler()}
-                    style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
-                  >
-                    <div className="flex items-center justify-between">
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                      {header.column.getCanSort() && (
-                        <div className="pl-1">
-                          {{
-                            asc: <ChevronUp className="h-4 w-4" />,
-                            desc: <ChevronDown className="h-4 w-4" />
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </div>
-                      )}
-                    </div>
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  className={row.original.isSubAppointment ? 'bg-muted/20' : ''}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell 
-                      key={cell.id}
-                      className={(cell.column.columnDef.meta as any)?.className}
+        <div className="table-container">
+          <Table>
+            <TableHeader className="sticky top-0 bg-muted z-10">
+              {table.getHeaderGroups().map(headerGroup => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <TableHead
+                      key={header.id}
+                      style={getPinningStyles(header.column)}
+                      onClick={header.column.getToggleSortingHandler()}
+                      className="relative"
                     >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+                      <div className="flex items-center justify-between">
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {header.column.getCanSort() && (
+                          <div className="pl-1">
+                            {{
+                              asc: <ChevronUp className="h-4 w-4" />,
+                              desc: <ChevronDown className="h-4 w-4" />
+                            }[header.column.getIsSorted() as string] ?? null}
+                          </div>
+                        )}
+                      </div>
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    className={row.original.isSubAppointment ? 'bg-muted/20' : ''}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell 
+                        key={cell.id}
+                        style={getPinningStyles(cell.column)}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
       
       <div className="flex items-center justify-between py-4">
