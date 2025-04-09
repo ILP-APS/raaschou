@@ -163,7 +163,7 @@ export default function MinimalStickyTable() {
                 fontWeight: 'bold',
                 boxShadow: '2px 2px 5px -2px rgba(0,0,0,0.15)',
                 borderBottom: '1px solid hsl(var(--border))',
-                // Width should match the combined width of ID and Name columns
+                borderRight: 'none', // Remove right border for visual continuity
                 width: '260px', // 80px + 180px
                 minWidth: '260px'
               }}
@@ -183,7 +183,10 @@ export default function MinimalStickyTable() {
                 textAlign: 'center',
                 fontWeight: 'bold',
                 boxShadow: '0 2px 0 0 rgba(0,0,0,0.1)',
-                borderBottom: '1px solid hsl(var(--border))'
+                borderBottom: '1px solid hsl(var(--border))',
+                borderLeft: 'none', // Remove left border for visual continuity
+                color: 'transparent', // Hide text to create appearance of a single group
+                userSelect: 'none' // Prevent text selection of invisible text
               }}
             >
               Info
