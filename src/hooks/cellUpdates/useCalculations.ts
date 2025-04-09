@@ -44,16 +44,21 @@ export const useCalculations = () => {
     
     console.log(`Calculated new produktion value: ${produktionValue} (${produktionNumericValue}) for appointment ${appointmentNumber}`);
     
-    // Update Supabase with the calculated value
-    await updateAppointmentField(
-      appointmentNumber, 
-      'produktion', 
-      produktionNumericValue
-    );
-    
-    console.log(`Updated produktion in database to ${produktionNumericValue}`);
-    
-    return { produktionValue, produktionNumericValue };
+    try {
+      // Update Supabase with the calculated value
+      await updateAppointmentField(
+        appointmentNumber, 
+        'produktion', 
+        produktionNumericValue
+      );
+      
+      console.log(`Updated produktion in database to ${produktionNumericValue}`);
+      
+      return { produktionValue, produktionNumericValue };
+    } catch (error) {
+      console.error(`Error updating produktion for ${appointmentNumber}:`, error);
+      throw error;
+    }
   };
   
   return { recalculateProjektering, recalculateProduktion };

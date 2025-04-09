@@ -70,42 +70,43 @@ export const useCellChange = ({
       updateMaterialerUI(rowIndex, updatedAppointment);
       updateTotalUI(rowIndex, updatedAppointment);
       
-      // Recalculate Projektering if Tilbud or Montage values changed
-      if (colIndex === 3 || colIndex === 4 || colIndex === 6) {
-        // Get the current row data with the updated value
-        const updatedRow = [...tableData[rowIndex]];
-        updatedRow[colIndex] = value; // Make sure we're using the latest value
-        
-        // Recalculate and update projektering
-        const { projekteringValue } = await recalculateProjektering(appointmentNumber, updatedRow);
-        
-        // Update UI with new projektering value
-        updateProjekteringUI(rowIndex, projekteringValue);
-        
-        // After updating projektering, also update produktion which depends on it
-        // Get the updated row with the new projektering value
-        const updatedRowWithProjektering = [...tableData[rowIndex]];
-        updatedRowWithProjektering[colIndex] = value;
-        updatedRowWithProjektering[9] = projekteringValue;
-        
-        // Recalculate and update produktion
-        const { produktionValue } = await recalculateProduktion(appointmentNumber, updatedRowWithProjektering);
-        
-        // Update UI with new produktion value
-        updateProduktionUI(rowIndex, produktionValue);
+      // Determine which columns need recalculation
+      const shouldRecalculateProjektering = [3, 4, 6].includes(colIndex); // Tilbud or Montage or Montage2 changed
+      const shouldRecalculateProduktion = [8, 9].includes(colIndex) || shouldRecalculateProjektering; // Materialer or Projektering changed
+      
+      // Get the current row data with the updated value
+      const updatedRow = [...tableData[rowIndex]];
+      updatedRow[colIndex] = value; // Make sure we're using the latest value
+      
+      // Step 1: Recalculate projektering if needed
+      if (shouldRecalculateProjektering) {
+        console.log(`Need to recalculate Projektering for ${appointmentNumber} due to column ${colIndex} change`);
+        try {
+          // Recalculate and update projektering
+          const { projekteringValue } = await recalculateProjektering(appointmentNumber, updatedRow);
+          
+          // Update UI with new projektering value
+          updateProjekteringUI(rowIndex, projekteringValue);
+          
+          // Update the row with new projektering value for next calculations
+          updatedRow[9] = projekteringValue;
+        } catch (error) {
+          console.error(`Failed to recalculate projektering for ${appointmentNumber}:`, error);
+        }
       }
       
-      // Similarly, calculate Produktion if Materialer or Projektering changed
-      if (colIndex === 8 || colIndex === 9) {
-        // Get the current row data with the updated value
-        const updatedRow = [...tableData[rowIndex]];
-        updatedRow[colIndex] = value; // Make sure we're using the latest value
-        
-        // Recalculate and update produktion
-        const { produktionValue } = await recalculateProduktion(appointmentNumber, updatedRow);
-        
-        // Update UI with new produktion value
-        updateProduktionUI(rowIndex, produktionValue);
+      // Step 2: Recalculate produktion if needed
+      if (shouldRecalculateProduktion) {
+        console.log(`Need to recalculate Produktion for ${appointmentNumber} due to column ${colIndex} change`);
+        try {
+          // Recalculate and update produktion
+          const { produktionValue } = await recalculateProduktion(appointmentNumber, updatedRow);
+          
+          // Update UI with new produktion value
+          updateProduktionUI(rowIndex, produktionValue);
+        } catch (error) {
+          console.error(`Failed to recalculate produktion for ${appointmentNumber}:`, error);
+        }
       }
       
       // Show a toast notification

@@ -18,15 +18,16 @@ export const calculateProduktion = (row: string[]): string => {
     const materialerStr = row[8] || '0'; // Materialer at index 8
     const projekteringStr = row[9] || '0'; // Projektering at index 9
     
-    console.log("Raw input for Produktion calculation:", {
-      appointmentNumber,
-      tilbud: tilbudStr,
-      montage: montageStr,
-      underleverandor: underleverandorStr,
-      montage2: montage2Str,
-      underleverandor2: underleverandor2Str,
-      materialer: materialerStr,
-      projektering: projekteringStr
+    console.log(`[DEBUG] Produktion calculation for ${appointmentNumber}:`, {
+      rawInputs: {
+        tilbud: tilbudStr,
+        montage: montageStr,
+        underleverandor: underleverandorStr,
+        montage2: montage2Str,
+        underleverandor2: underleverandor2Str,
+        materialer: materialerStr,
+        projektering: projekteringStr
+      }
     });
     
     // Parse values to numbers
@@ -55,9 +56,13 @@ export const calculateProduktion = (row: string[]): string => {
     const montageValue = hasMontage2Value ? montage2 : montage;
     const underleverandorValue = hasUnderleverandor2Value ? underleverandor2 : underleverandor;
     
-    console.log("Parsed values for calculation:", {
+    console.log(`[DEBUG] Parsed values for ${appointmentNumber}:`, {
       tilbud,
+      montage,
+      montage2,
       montageValue,
+      underleverandor,
+      underleverandor2,
       underleverandorValue,
       materialer,
       projektering
@@ -69,24 +74,24 @@ export const calculateProduktion = (row: string[]): string => {
     const step2 = step1 / 750;
     const produktion = step2 - projektering;
     
-    console.log("Produktion calculation steps for appointment " + appointmentNumber + ":", {
+    console.log(`[DEBUG] Produktion calculation steps for ${appointmentNumber}:`, {
       step1_subtraction: step1,
       step2_divide_by_750: step2,
-      step3_subtract_projektering: produktion
+      final_result: produktion
     });
     
     // Check for NaN and return '0' if the calculation resulted in NaN
-    if (isNaN(produktion) || produktion === 0) {
-      console.log(`Produktion result is NaN or 0 for appointment ${appointmentNumber}, returning 0`);
-      return '0';
+    if (isNaN(produktion)) {
+      console.log(`[ERROR] Produktion result is NaN for ${appointmentNumber}, returning 0`);
+      return '0,00';
     }
     
     // Format the result with the Danish number format
     const formattedValue = formatDanishNumber(produktion);
-    console.log(`Final formatted produktion for appointment ${appointmentNumber}: ${formattedValue}`);
+    console.log(`[DEBUG] Final formatted produktion for ${appointmentNumber}: ${formattedValue}`);
     return formattedValue;
   } catch (error) {
-    console.error(`Error calculating Produktion for appointment ${row[0]}:`, error);
-    return '0';
+    console.error(`[ERROR] Error calculating Produktion for ${row[0]}:`, error);
+    return '0,00';
   }
 };
