@@ -29,7 +29,7 @@ export const useCellChange = ({
   
   // Helper function to determine if a column should be treated as percentage
   const isPercentageColumn = (colIndex: number): boolean => {
-    return [19, 20].includes(colIndex); // Færdig % ex montage nu, Færdig % ex montage før
+    return [18, 19].includes(colIndex); // Updated from [19, 20] to [18, 19]
   };
 
   const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {

@@ -44,15 +44,15 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
       case 16:
         return "Projektering"; // Changed from "Timer tilbage" to "Projektering"
       case 17:
-        return "Færdig % ex montage nu";
+        return "Timer tilbage"; // Rearranged from position 21
       case 18:
-        return "Færdig % ex montage før";
+        return "Færdig % ex montage nu"; // Rearranged from position 17
       case 19:
-        return "Est timer ift færdig %";
+        return "Færdig % ex montage før"; // Rearranged from position 18
       case 20:
-        return "+/- timer";
+        return "Est timer ift færdig %"; // Rearranged from position 19
       case 21:
-        return "Timer tilbage";
+        return "+/- timer"; // Rearranged from position 20
       case 22:
         return "Afsat fragt";
       default:
@@ -87,11 +87,11 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
     } else if (index === 12) {
       return { name: "Realiseret", colSpan: 4 }; // 4 columns: Projektering, Produktion, Montage, Total
     } else if (index === 16) {
-      return { name: "Timer tilbage", colSpan: 1 }; // Just one column: now renamed to "Projektering"
+      return { name: "Timer tilbage", colSpan: 1 }; // Just one column: Projektering
     } else if (index === 17) {
-      return { name: "Produktion", colSpan: 5 }; // Shifted by 1 and reduced by 1
+      return { name: "Produktion", colSpan: 5 }; // Timer tilbage + the 4 metrics in new order
     } else if (index === 22) {
-      return { name: "Transport", colSpan: 1 }; // Transport group (shifted by 2)
+      return { name: "Transport", colSpan: 1 }; // Transport group
     }
     return null;
   };

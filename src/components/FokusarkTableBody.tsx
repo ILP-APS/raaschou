@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Input } from "@/components/ui/input";
 
@@ -52,17 +53,17 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
     // Only these columns are editable: 
     // - Montage 2 (index 6)
     // - Underleverandør 2 (index 7)
-    // - Færdig % ex montage nu (index 19)
-    // - Færdig % ex montage før (index 20)
-    return [6, 7, 19, 20].includes(columnIndex);
+    // - Færdig % ex montage nu (index 18) - Updated index
+    // - Færdig % ex montage før (index 19) - Updated index
+    return [6, 7, 18, 19].includes(columnIndex);
   };
 
   // Function to check if a column should be treated as percentage
   const isPercentageColumn = (columnIndex: number): boolean => {
     // These columns are percentages:
-    // - Færdig % ex montage nu (index 19)
-    // - Færdig % ex montage før (index 20)
-    return [19, 20].includes(columnIndex);
+    // - Færdig % ex montage nu (index 18) - Updated index
+    // - Færdig % ex montage før (index 19) - Updated index
+    return [18, 19].includes(columnIndex);
   };
 
   // Handle percentage input changes

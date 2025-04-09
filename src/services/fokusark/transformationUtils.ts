@@ -1,4 +1,3 @@
-
 import { FokusarkAppointment } from "@/api/fokusarkAppointmentsApi";
 import { parseNumber } from "@/utils/numberFormatUtils";
 import { formatDanishNumber } from "@/utils/formatUtils";
@@ -147,21 +146,15 @@ const addRemainingColumns = (appointment: FokusarkAppointment, row: string[]): v
   const timerTilbage = (appointment.projektering_1 || 0) - (appointment.projektering_2 || 0);
   row[16] = formatDanishNumber(timerTilbage);
   
-  // Add remaining production columns
-  const productionFields = [
-    'faerdig_pct_ex_montage_nu',
-    'faerdig_pct_ex_montage_foer',
-    'est_timer_ift_faerdig_pct',
-    'plus_minus_timer',
-    'timer_tilbage_2',
-    'afsat_fragt'
-  ];
+  // Add production columns in the new rearranged order
+  row[17] = formatValueOrEmpty(appointment.timer_tilbage_2); // Timer tilbage (moved from position 21)
+  row[18] = formatValueOrEmpty(appointment.faerdig_pct_ex_montage_nu); // Moved from position 17
+  row[19] = formatValueOrEmpty(appointment.faerdig_pct_ex_montage_foer); // Moved from position 18
+  row[20] = formatValueOrEmpty(appointment.est_timer_ift_faerdig_pct); // Moved from position 19
+  row[21] = formatValueOrEmpty(appointment.plus_minus_timer); // Moved from position 20
   
-  productionFields.forEach((fieldName, index) => {
-    const value = appointment[fieldName as keyof FokusarkAppointment];
-    row[17 + index] = value !== null ? 
-      (typeof value === 'number' ? formatDanishNumber(value) : String(value)) : '';
-  });
+  // Add afsat fragt (transport) column
+  row[22] = formatValueOrEmpty(appointment.afsat_fragt);
 };
 
 /**
