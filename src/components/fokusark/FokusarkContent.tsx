@@ -86,16 +86,10 @@ const FokusarkContent: React.FC = () => {
             {/* Group Headers Row */}
             <TableRow>
               {/* First two columns don't have groups */}
-              <TableHead 
-                className="col-id"
-                style={{backgroundColor: 'hsl(var(--muted))'}}
-              >
+              <TableHead className="col-id">
                 &nbsp;
               </TableHead>
-              <TableHead 
-                className="col-name last-sticky-cell"
-                style={{backgroundColor: 'hsl(var(--muted))'}}
-              >
+              <TableHead className="col-name last-sticky-cell">
                 &nbsp;
               </TableHead>
               
