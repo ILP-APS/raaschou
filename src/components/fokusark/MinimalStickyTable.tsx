@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   flexRender,
@@ -157,6 +158,7 @@ export default function MinimalStickyTable() {
                   
                   {isInfoGroup && (
                     <>
+                      {/* Full-width overlay for the Info header */}
                       <div 
                         style={{ 
                           position: 'absolute',
@@ -173,12 +175,13 @@ export default function MinimalStickyTable() {
                         {group.title}
                       </div>
                       
+                      {/* Sticky overlay that stays in place when scrolling horizontally */}
                       <div
                         style={{
                           position: 'sticky',
                           left: 0,
                           top: 0,
-                          width: '410px',
+                          width: '260px', // This needs to cover ID + Name columns
                           height: '100%',
                           backgroundColor: headerBgColor,
                           display: 'flex',
