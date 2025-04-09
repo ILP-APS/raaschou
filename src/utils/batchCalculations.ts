@@ -1,3 +1,4 @@
+
 import { calculateMaterialer } from './materialsCalculations';
 import { calculateProjektering } from './projekteringCalculations';
 import { calculateProduktion } from './productionCalculations';
@@ -34,7 +35,7 @@ export const applyProjekteringCalculations = (data: string[][]): string[][] => {
       const tilbud = parseNumber(row[3]);
       const montage = parseNumber(row[4]);
       const montage2Str = row[6];
-      const hasMontage2Value = !/^R\d+C\d+$/.test(montage2Str) && montage2Str.trim() !== '';
+      const hasMontage2Value = hasRealValue(montage2Str);
       const montage2 = hasMontage2Value ? parseNumber(montage2Str) : 0;
       
       console.log(`Parsed values: Tilbud=${tilbud}, Montage=${montage}, Montage2=${montage2}, Using Montage2=${hasMontage2Value}`);

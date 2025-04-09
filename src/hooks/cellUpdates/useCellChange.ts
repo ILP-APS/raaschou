@@ -72,7 +72,9 @@ export const useCellChange = ({
       
       // Determine which columns need recalculation
       const shouldRecalculateProjektering = [3, 4, 6].includes(colIndex); // Tilbud or Montage or Montage2 changed
-      const shouldRecalculateProduktion = [8, 9].includes(colIndex) || shouldRecalculateProjektering; // Materialer or Projektering changed
+      // Update produktion when Underleverandør 2 (col 7) changes too
+      const shouldRecalculateProduktion = [3, 4, 5, 6, 7, 8, 9].includes(colIndex); 
+      // Kolumne 5 is Underleverandør og kolumne 7 is Underleverandør 2
       
       // Get the current row data with the updated value
       const updatedRow = [...tableData[rowIndex]];
