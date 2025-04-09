@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -54,17 +54,17 @@ const generateData = (): DataItem[] => {
 
 const data = generateData();
 
-// Column definitions
+// Column definitions with pinned columns
 const columns: ColumnDef<DataItem>[] = [
   {
     accessorKey: 'col1',
     header: 'Nr.',
-    meta: { width: 100, isPinned: true, pinnedIndex: 0 },
+    meta: { width: 100, isSticky: true, stickyIndex: 0 },
   },
   {
     accessorKey: 'col2',
     header: 'Navn',
-    meta: { width: 150, isPinned: true, pinnedIndex: 1 },
+    meta: { width: 150, isSticky: true, stickyIndex: 1 },
   },
   {
     accessorKey: 'col3',
@@ -130,16 +130,16 @@ export default function StickyTable() {
     },
   });
 
-  // Function to determine if a column is pinned and get its classes
-  const getPinnedCellClasses = (colIndex: number) => {
+  // Get sticky column class based on column index
+  const getStickyColumnClass = (colIndex: number) => {
     const column = columns[colIndex];
     if (!column || !column.meta) return '';
     
-    const { isPinned, pinnedIndex } = column.meta as any;
+    const { isSticky, stickyIndex } = column.meta as any;
     
-    if (!isPinned) return '';
+    if (!isSticky) return '';
     
-    return `left-pinned-cell left-pinned-cell-${pinnedIndex + 1}`;
+    return `sticky-column-${stickyIndex}`;
   };
 
   return (
@@ -157,20 +157,19 @@ export default function StickyTable() {
         >
           <Table className="sticky-table">
             <TableHeader>
-              {/* First sticky header row */}
+              {/* Header row */}
               <TableRow>
                 {table.getHeaderGroups()[0].headers.map((header, index) => {
                   const width = (header.column.columnDef.meta as any)?.width || 150;
-                  const pinnedClass = getPinnedCellClasses(index);
+                  const stickyClass = getStickyColumnClass(index);
                   
                   return (
                     <TableHead
                       key={header.id}
-                      className={`sticky-header-cell ${pinnedClass}`}
+                      className={`sticky-header-cell ${stickyClass}`}
                       style={{
                         width: `${width}px`,
                         minWidth: `${width}px`,
-                        backgroundColor: headerBgColor,
                       }}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
@@ -179,20 +178,19 @@ export default function StickyTable() {
                 })}
               </TableRow>
               
-              {/* Second sticky header row */}
+              {/* Subheader row */}
               <TableRow>
                 {table.getHeaderGroups()[0].headers.map((header, index) => {
                   const width = (header.column.columnDef.meta as any)?.width || 150;
-                  const pinnedClass = getPinnedCellClasses(index);
+                  const stickyClass = getStickyColumnClass(index);
                   
                   return (
                     <TableHead
                       key={`subheader-${header.id}`}
-                      className={`sticky-subheader-cell ${pinnedClass}`}
+                      className={`sticky-subheader-cell ${stickyClass}`}
                       style={{
                         width: `${width}px`,
                         minWidth: `${width}px`,
-                        backgroundColor: subheaderBgColor,
                       }}
                     >
                       {`Sub ${index + 1}`}
@@ -207,12 +205,12 @@ export default function StickyTable() {
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell, index) => {
                     const width = (cell.column.columnDef.meta as any)?.width || 150;
-                    const pinnedClass = getPinnedCellClasses(index);
+                    const stickyClass = getStickyColumnClass(index);
                     
                     return (
                       <TableCell
                         key={cell.id}
-                        className={pinnedClass}
+                        className={stickyClass}
                         style={{
                           width: `${width}px`,
                           minWidth: `${width}px`,
