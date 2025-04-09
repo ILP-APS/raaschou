@@ -1,11 +1,10 @@
 
 import React from "react";
 import FokusarkDescription from "./FokusarkDescription";
-import ShadcnFokusarkTable from "./ShadcnFokusarkTable";
 import { useFokusarkData } from "@/hooks/useFokusarkData";
 
 const FokusarkContent: React.FC = () => {
-  const { tableData, isLoading, refreshData } = useFokusarkData();
+  const { isLoading } = useFokusarkData();
   
   return (
     <div className="flex flex-col gap-4 p-4 md:p-6 overflow-y-auto content-wrapper">
@@ -20,12 +19,9 @@ const FokusarkContent: React.FC = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
           </div>
         ) : (
-          <ShadcnFokusarkTable 
-            data={tableData}
-            onCellChange={(rowIndex, colIndex, value) => {
-              console.log("Cell changed:", rowIndex, colIndex, value);
-            }}
-          />
+          <div className="flex items-center justify-center h-64">
+            <p className="text-muted-foreground">Table will be implemented here.</p>
+          </div>
         )}
       </div>
     </div>

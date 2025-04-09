@@ -1,7 +1,6 @@
 
 import React from "react";
 import { useFokusarkData } from "@/hooks/useFokusarkData";
-import FokusarkDataGrid from "./fokusark/FokusarkDataGrid";
 import FokusarkTableLoading from "./fokusark/FokusarkTableLoading";
 
 interface FokusarkTableProps {
@@ -30,16 +29,11 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
     );
   }
 
-  console.log("Rendering FokusarkTable with data:", data.length, "rows");
-
   return (
     <div className="rounded-md w-full relative">
-      <FokusarkDataGrid 
-        data={data}
-        onCellChange={(rowIndex, colIndex, value) => {
-          console.log("Cell changed:", rowIndex, colIndex, value);
-        }}
-      />
+      <div className="text-center p-8">
+        <p>Table implementation removed.</p>
+      </div>
     </div>
   );
 };

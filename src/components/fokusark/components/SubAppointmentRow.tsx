@@ -1,28 +1,17 @@
 
 import React from "react";
-import { RowRendererProps } from "react-data-grid";
-import { FokusarkRow } from "../utils/dataGridUtils";
 
-// Define a proper type alias that explicitly includes all the properties we need
-type SubAppointmentRowProps<R> = RowRendererProps<R>;
+interface SubAppointmentRowProps {
+  isSubAppointment?: boolean;
+}
 
-const SubAppointmentRow: React.FC<SubAppointmentRowProps<FokusarkRow>> = ({
-  row,
-  className,
-  style,
-  ...props
-}) => {
-  const isSubAppointment = row.isSubAppointment;
-  
+const SubAppointmentRow: React.FC<SubAppointmentRowProps> = ({ isSubAppointment }) => {
   return (
-    <div
-      {...props}
-      className={`rdg-row ${isSubAppointment ? 'bg-muted/20' : ''} ${className}`}
-      style={{
-        ...style,
-        paddingLeft: isSubAppointment ? '20px' : undefined
-      }}
-    />
+    <div className="p-2 border border-dashed border-muted-foreground rounded">
+      <p className="text-sm text-muted-foreground">
+        SubAppointmentRow component (removed)
+      </p>
+    </div>
   );
 };
 

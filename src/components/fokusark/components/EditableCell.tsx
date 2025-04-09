@@ -1,23 +1,16 @@
 
 import React from "react";
-import { EditorProps } from "react-data-grid";
-import { FokusarkRow } from "../utils/dataGridUtils";
 
-const EditableCell: React.FC<EditorProps<FokusarkRow, unknown>> = ({
-  row,
-  column,
-  onRowChange
-}) => {
+interface EditableCellProps {
+  value?: string;
+  onChange?: (value: string) => void;
+}
+
+const EditableCell: React.FC<EditableCellProps> = ({ value = "", onChange }) => {
   return (
-    <input
-      value={row[column.key] as string}
-      onChange={e => onRowChange({
-        ...row,
-        [column.key]: e.target.value
-      })}
-      className="w-full h-full px-2 bg-transparent focus:ring-1 focus:ring-primary"
-      autoFocus
-    />
+    <div className="p-2 border border-dashed border-muted-foreground rounded">
+      <p className="text-sm text-muted-foreground">Editable cell (removed)</p>
+    </div>
   );
 };
 

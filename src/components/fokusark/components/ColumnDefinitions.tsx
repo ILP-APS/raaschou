@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Column } from "react-data-grid";
 import { FokusarkRow } from "../utils/dataGridUtils";
