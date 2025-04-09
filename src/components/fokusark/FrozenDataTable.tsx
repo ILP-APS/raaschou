@@ -195,6 +195,10 @@ export default function FrozenDataTable() {
       </div>
       
       <div className="relative overflow-auto border rounded-md" style={{ maxHeight: '400px', maxWidth: '100%' }}>
+        <div className="sticky top-0 z-30 left-0 bg-background w-[302px]" style={{ height: '82px' }}>
+          {/* Empty div that covers the top-left corner where both freeze areas intersect */}
+        </div>
+        
         <Table>
           {/* Frozen Header Rows (Top 2) */}
           <TableHeader className="sticky top-0 z-20 bg-background">
