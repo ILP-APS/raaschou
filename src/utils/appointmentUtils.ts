@@ -1,4 +1,3 @@
-
 import { 
   AppointmentDetail, 
   OfferLineItem, 
@@ -94,11 +93,14 @@ export const getRealizedHours = async (appointmentId: number): Promise<{
   total: string;
 }> => {
   try {
+    console.log(`Fetching realized hours for appointment ID ${appointmentId}`);
     // Fetch the line work data for the appointment
     const lineWorkData = await fetchAppointmentLineWork(appointmentId);
+    console.log(`Line work data for appointment ${appointmentId}:`, lineWorkData);
     
     // Calculate the realized hours by category
     const { projektering, produktion, montage, total } = calculateRealizedHours(lineWorkData);
+    console.log(`Calculated hours for appointment ${appointmentId}:`, { projektering, produktion, montage, total });
     
     // Format the values with Danish number format
     return {
@@ -110,10 +112,10 @@ export const getRealizedHours = async (appointmentId: number): Promise<{
   } catch (error) {
     console.error(`Error fetching realized hours for appointment ID ${appointmentId}:`, error);
     return {
-      projektering: '0',
-      produktion: '0',
-      montage: '0',
-      total: '0'
+      projektering: '0,00',
+      produktion: '0,00',
+      montage: '0,00',
+      total: '0,00'
     };
   }
 };

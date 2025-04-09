@@ -65,21 +65,32 @@ export const calculateRealizedHours = (lineWorkData: any[]): {
   let produktion = 0;
   let montage = 0;
   
+  if (!lineWorkData || lineWorkData.length === 0) {
+    console.log("No line work data provided");
+    return { projektering, produktion, montage, total: 0 };
+  }
+  
   // Process each line work item
   for (const item of lineWorkData) {
     const workTypeId = item.hnWorkTypeID;
+    // Parse units as float and default to 0 if NaN
     const units = parseFloat(item.units) || 0;
+    
+    console.log(`Processing work type ${workTypeId} with ${units} units`);
     
     // Categorize and accumulate units
     switch (getWorkTypeCategory(workTypeId)) {
       case WorkTypeCategory.Projektering:
         projektering += units;
+        console.log(`Added ${units} to projektering (now ${projektering})`);
         break;
       case WorkTypeCategory.Produktion:
         produktion += units;
+        console.log(`Added ${units} to produktion (now ${produktion})`);
         break;
       case WorkTypeCategory.Montage:
         montage += units;
+        console.log(`Added ${units} to montage (now ${montage})`);
         break;
       default:
         console.warn(`Unknown work type ID: ${workTypeId}`);
@@ -89,6 +100,7 @@ export const calculateRealizedHours = (lineWorkData: any[]): {
   
   // Calculate the total
   const total = projektering + produktion + montage;
+  console.log(`Total realized hours: ${total}`);
   
   return {
     projektering,

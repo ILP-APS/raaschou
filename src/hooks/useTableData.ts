@@ -12,6 +12,7 @@ import {
 } from "@/utils/appointmentUtils";
 import { generateTableData } from "@/utils/tableData";
 import { useToast } from "@/hooks/use-toast";
+import { updateRealizedHours } from "@/api/fokusarkAppointmentsApi";
 
 export const useTableData = () => {
   const [tableData, setTableData] = useState<string[][]>([]);
@@ -61,10 +62,31 @@ export const useTableData = () => {
             const { offerTotal, montageTotal, underleverandorTotal } = 
               await getOfferLineItems(details.hnOfferID);
             
-            // Get the realized hours
-            const { projektering, produktion, montage, total } = 
-              await getRealizedHours(appointment.hnAppointmentID);
+            // Get the realized hours and store them in Supabase
+            const realizedHours = await getRealizedHours(appointment.hnAppointmentID);
+            console.log(`Realized hours for ${appointment.appointmentNumber}:`, realizedHours);
+            
+            // Update the realized hours in Supabase
+            try {
+              // Convert the formatted string values back to numbers for storage
+              const projekteringNum = parseFloat(realizedHours.projektering.replace('.', '').replace(',', '.')) || 0;
+              const produktionNum = parseFloat(realizedHours.produktion.replace('.', '').replace(',', '.')) || 0;
+              const montageNum = parseFloat(realizedHours.montage.replace('.', '').replace(',', '.')) || 0;
+              const totalNum = parseFloat(realizedHours.total.replace('.', '').replace(',', '.')) || 0;
               
+              await updateRealizedHours(
+                appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
+                projekteringNum,
+                produktionNum,
+                montageNum,
+                totalNum
+              );
+              
+              console.log(`Updated realized hours in Supabase for appointment ${appointment.appointmentNumber}`);
+            } catch (updateError) {
+              console.error(`Error updating realized hours for ${appointment.appointmentNumber}:`, updateError);
+            }
+            
             // Parse the offerTotal to a number for comparison
             // Remove any non-numeric characters (except decimal point) and convert to number
             const offerTotalNumber = parseFloat(offerTotal.replace(/[^0-9,]/g, '').replace(',', '.'));
@@ -94,7 +116,7 @@ export const useTableData = () => {
             }
             
             // Add the realized hours
-            row.push(projektering, produktion, montage, total);
+            row.push(realizedHours.projektering, realizedHours.produktion, realizedHours.montage, realizedHours.total);
             
             // Add remaining columns with placeholder data
             for (let i = 16; i < 23; i++) {
