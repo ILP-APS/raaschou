@@ -1,6 +1,6 @@
 
 import { FokusarkAppointment } from "@/api/fokusarkAppointmentsApi";
-import { parseNumber } from "@/utils/fokusarkCalculations";
+import { parseNumber } from "@/utils/numberFormatUtils";
 import { formatDanishNumber } from "@/utils/formatUtils";
 import { isSubAppointment } from "@/utils/appointmentUtils";
 
@@ -89,61 +89,95 @@ export const transformApiDataToAppointments = (tableData: string[][]): FokusarkA
 };
 
 /**
+ * Format a numeric value for display, returning empty string if null
+ */
+const formatValueOrEmpty = (value: number | null): string => {
+  return value !== null ? formatDanishNumber(value) : '';
+};
+
+/**
+ * Add core appointment data (first 8 columns)
+ */
+const addCoreAppointmentData = (appointment: FokusarkAppointment): string[] => {
+  const row: string[] = [];
+  
+  // Basic columns
+  row[0] = appointment.appointment_number;
+  row[1] = appointment.subject || 'N/A';
+  row[2] = appointment.responsible_person || 'Unknown';
+  row[3] = formatDanishNumber(appointment.tilbud || 0);
+  row[4] = formatDanishNumber(appointment.montage || 0);
+  row[5] = formatDanishNumber(appointment.underleverandor || 0);
+  row[6] = formatValueOrEmpty(appointment.montage2);
+  row[7] = formatValueOrEmpty(appointment.underleverandor2);
+  
+  return row;
+};
+
+/**
+ * Add estimated values (columns 8-11)
+ */
+const addEstimatedValues = (appointment: FokusarkAppointment, row: string[]): void => {
+  row[8] = formatDanishNumber(appointment.materialer || 0);
+  row[9] = formatValueOrEmpty(appointment.projektering_1);
+  row[10] = formatValueOrEmpty(appointment.produktion);
+  row[11] = formatValueOrEmpty(appointment.montage_3);
+};
+
+/**
+ * Add realized values (columns 12-15)
+ */
+const addRealizedValues = (appointment: FokusarkAppointment, row: string[]): void => {
+  row[12] = formatValueOrEmpty(appointment.projektering_2);
+  row[13] = formatValueOrEmpty(appointment.produktion);
+  row[14] = formatValueOrEmpty(appointment.montage_3);
+  
+  // Calculate and add total
+  const total = (appointment.projektering_1 || 0) + 
+                (appointment.produktion || 0) + 
+                (appointment.montage_3 || 0);
+  row[15] = formatDanishNumber(total);
+};
+
+/**
+ * Add remaining columns (timer tilbage and production data)
+ */
+const addRemainingColumns = (appointment: FokusarkAppointment, row: string[]): void => {
+  row[16] = formatValueOrEmpty(appointment.timer_tilbage_1);
+  
+  // Add remaining production columns
+  const productionFields = [
+    'faerdig_pct_ex_montage_nu',
+    'faerdig_pct_ex_montage_foer',
+    'est_timer_ift_faerdig_pct',
+    'plus_minus_timer',
+    'timer_tilbage_2',
+    'afsat_fragt'
+  ];
+  
+  productionFields.forEach((fieldName, index) => {
+    const value = appointment[fieldName as keyof FokusarkAppointment];
+    row[17 + index] = value !== null ? 
+      (typeof value === 'number' ? formatDanishNumber(value) : String(value)) : '';
+  });
+};
+
+/**
  * Transform FokusarkAppointment data from Supabase back to display format
  */
 export const transformAppointmentsToDisplayData = (appointments: FokusarkAppointment[]): string[][] => {
   return appointments.map(appointment => {
-    const row: string[] = [];
+    // Start with core appointment data
+    const row = addCoreAppointmentData(appointment);
     
-    // Add the basic columns
-    row[0] = appointment.appointment_number;
-    row[1] = appointment.subject || 'N/A';
-    row[2] = appointment.responsible_person || 'Unknown';
-    row[3] = formatDanishNumber(appointment.tilbud || 0);
-    row[4] = formatDanishNumber(appointment.montage || 0);
-    row[5] = formatDanishNumber(appointment.underleverandor || 0);
-    row[6] = appointment.montage2 !== null ? formatDanishNumber(appointment.montage2) : '';
-    row[7] = appointment.underleverandor2 !== null ? formatDanishNumber(appointment.underleverandor2) : '';
-    row[8] = formatDanishNumber(appointment.materialer || 0);
+    // Add estimated values
+    addEstimatedValues(appointment, row);
     
-    // Add estimated columns (Estimeret section)
-    row[9] = appointment.projektering_1 !== null ? formatDanishNumber(appointment.projektering_1) : '';
-    row[10] = appointment.produktion !== null ? formatDanishNumber(appointment.produktion) : '';
-    row[11] = appointment.montage_3 !== null ? formatDanishNumber(appointment.montage_3) : '';
-    
-    // Add realized columns (Realiseret section)
-    row[12] = appointment.projektering_2 !== null ? formatDanishNumber(appointment.projektering_2) : '';
-    row[13] = appointment.produktion !== null ? formatDanishNumber(appointment.produktion) : '';
-    row[14] = appointment.montage_3 !== null ? formatDanishNumber(appointment.montage_3) : '';
-    
-    // Add total based on the sum of estimeret values
-    const total = (appointment.projektering_1 || 0) + (appointment.produktion || 0) + (appointment.montage_3 || 0);
-    row[15] = formatDanishNumber(total);
+    // Add realized values
+    addRealizedValues(appointment, row);
     
     // Add remaining columns
-    row[16] = appointment.timer_tilbage_1 !== null ? formatDanishNumber(appointment.timer_tilbage_1) : '';
-    
-    // Placeholder data for remaining columns if they're not provided
-    for (let i = 17; i < 23; i++) {
-      const fieldName = (() => {
-        switch (i) {
-          case 17: return 'faerdig_pct_ex_montage_nu';
-          case 18: return 'faerdig_pct_ex_montage_foer';
-          case 19: return 'est_timer_ift_faerdig_pct';
-          case 20: return 'plus_minus_timer';
-          case 21: return 'timer_tilbage_2';
-          case 22: return 'afsat_fragt';
-          default: return null;
-        }
-      })();
-      
-      if (fieldName && appointment[fieldName as keyof FokusarkAppointment] !== null) {
-        const value = appointment[fieldName as keyof FokusarkAppointment];
-        row[i] = typeof value === 'number' ? formatDanishNumber(value) : String(value);
-      } else {
-        row[i] = '';
-      }
-    }
+    addRemainingColumns(appointment, row);
     
     // Add visual indication for sub-appointments
     row.push(appointment.is_sub_appointment ? 'sub-appointment' : 'parent-appointment');
