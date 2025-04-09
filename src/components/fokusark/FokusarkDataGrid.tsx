@@ -309,7 +309,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
                       minWidth: '150px',
                       position: isFrozen ? 'sticky' : 'static',
                       left: isFrozen ? `${leftOffset}px` : undefined,
-                      zIndex: isFrozen ? 60 : 50,
+                      zIndex: isFrozen ? 100 : 50, // Increased z-index to make them above all other elements
                       backgroundColor: 'hsl(var(--background))',
                       boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : undefined,
                       borderRight: isFrozen ? '1px solid hsl(var(--border))' : undefined,
@@ -326,15 +326,37 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
           <TableBody>
             {table.getRowModel().rows.map((row, rowIndex) => {
               const isSubAppointment = row.original.isSubAppointment;
+              // Make the first row sticky
+              const isFirstDataRow = rowIndex === 0;
+              
               return (
                 <TableRow 
                   key={row.id}
                   className={isSubAppointment ? "bg-muted/20" : ""}
+                  style={{
+                    position: isFirstDataRow ? 'sticky' : 'static',
+                    top: '41px', // Height of the header row
+                    zIndex: isFirstDataRow ? 40 : 30,
+                    backgroundColor: isFirstDataRow 
+                      ? (isSubAppointment ? 'hsl(var(--muted)/20)' : 'hsl(var(--background))')
+                      : undefined,
+                  }}
                 >
                   {row.getVisibleCells().map((cell, cellIndex) => {
                     const columnMeta = cell.column.columnDef.meta as FokusarkColumnMeta | undefined;
                     const isFrozen = columnMeta?.frozen === true;
                     const leftOffset = isFrozen ? getColumnOffset(cellIndex) : undefined;
+                    
+                    // Determine z-index based on both sticky position and frozen status
+                    let zIndex = 30; // Default z-index
+                    
+                    if (isFrozen && isFirstDataRow) {
+                      zIndex = 90; // Highest z-index for frozen cells in the first row
+                    } else if (isFrozen) {
+                      zIndex = 80; // High z-index for frozen cells in other rows
+                    } else if (isFirstDataRow) {
+                      zIndex = 40; // Higher z-index for non-frozen cells in the first row
+                    }
                     
                     return (
                       <TableCell
@@ -342,9 +364,10 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
                         style={{
                           width: '150px',
                           minWidth: '150px',
-                          position: isFrozen ? 'sticky' : 'static',
+                          position: isFrozen || isFirstDataRow ? 'sticky' : 'static',
                           left: isFrozen ? `${leftOffset}px` : undefined,
-                          zIndex: isFrozen ? 40 : 30,
+                          top: isFrozen && isFirstDataRow ? '41px' : undefined, // For first row frozen cells
+                          zIndex,
                           backgroundColor: isSubAppointment ? 'hsl(var(--muted)/20)' : 'hsl(var(--background))',
                           boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : undefined,
                           borderRight: isFrozen ? '1px solid hsl(var(--border))' : undefined,

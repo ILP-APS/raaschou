@@ -56,15 +56,31 @@
 }
 
 /* First row styling - make it sticky */
-.fokusark-table-container tr:first-child {
-  background-color: hsl(var(--background));
+.fokusark-table-container tbody tr:first-child {
+  position: sticky;
+  top: 41px; /* Height of the header row */
+  z-index: 40;
   border-bottom: 1px solid hsl(var(--border));
+  font-weight: 500;
 }
 
 /* Add visual indicator for frozen columns */
 .fokusark-table-container [style*="position: sticky"] {
   z-index: 1;
   background-color: hsl(var(--background));
+}
+
+/* Corner cells - both frozen columns and in the first row */
+.fokusark-table-container th[style*="position: sticky"][style*="left:"] {
+  z-index: 100 !important; /* Header frozen columns always on top */
+}
+
+.fokusark-table-container tbody tr:first-child td[style*="position: sticky"][style*="left:"] {
+  z-index: 90 !important; /* First row frozen columns next highest */
+}
+
+.fokusark-table-container td[style*="position: sticky"][style*="left:"] {
+  z-index: 80 !important; /* Other frozen columns */
 }
 
 .fokusark-table-container [style*="position: sticky"][style*="left:"]:after {
@@ -100,18 +116,4 @@
 /* Special cell styling for money values */
 .fokusark-table-container .text-right.font-mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
-
-/* First data row styling */
-.fokusark-table-container tbody tr:first-child {
-  position: sticky;
-  top: 41px; /* Height of the header row */
-  z-index: 40;
-  border-bottom: 2px solid hsl(var(--primary)/30);
-  font-weight: 500;
-}
-
-/* Fix z-index issues with frozen cells in first row */
-.fokusark-table-container tbody tr:first-child td[style*="position: sticky"][style*="left:"] {
-  z-index: 45;
 }

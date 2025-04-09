@@ -230,7 +230,7 @@ const ShadcnFokusarkTable: React.FC<ShadcnFokusarkTableProps> = ({ data, onCellC
                       minWidth: `${width}px`,
                       position: isFrozen ? 'sticky' : 'static',
                       left: isFrozen ? `${leftOffset}px` : undefined,
-                      zIndex: isFrozen ? 60 : 50,
+                      zIndex: isFrozen ? 100 : 50, // Increased z-index for frozen columns
                       backgroundColor: 'hsl(var(--muted)/50)',
                       boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : undefined,
                       borderRight: isFrozen ? '1px solid hsl(var(--border))' : undefined,
@@ -258,7 +258,9 @@ const ShadcnFokusarkTable: React.FC<ShadcnFokusarkTableProps> = ({ data, onCellC
                     position: isFirstDataRow ? 'sticky' : 'static',
                     top: isFirstDataRow ? '41px' : undefined,
                     zIndex: isFirstDataRow ? 40 : 30,
-                    backgroundColor: isFirstDataRow ? 'hsl(var(--background))' : undefined,
+                    backgroundColor: isFirstDataRow 
+                      ? (isSubAppointment ? 'hsl(var(--muted)/20)' : 'hsl(var(--background))')
+                      : undefined,
                   }}
                 >
                   {row.getVisibleCells().map((cell, cellIndex) => {
@@ -267,17 +269,27 @@ const ShadcnFokusarkTable: React.FC<ShadcnFokusarkTableProps> = ({ data, onCellC
                     const leftOffset = isFrozen ? getColumnOffset(cellIndex) : undefined;
                     const width = colMeta?.width || 150;
                     
+                    // Determine z-index based on both sticky position and frozen status
+                    let zIndex = 30; // Default z-index
+                    
+                    if (isFrozen && isFirstDataRow) {
+                      zIndex = 90; // Highest z-index for frozen cells in the first row
+                    } else if (isFrozen) {
+                      zIndex = 80; // High z-index for frozen cells in other rows
+                    } else if (isFirstDataRow) {
+                      zIndex = 40; // Higher z-index for non-frozen cells in the first row
+                    }
+                    
                     return (
                       <TableCell
                         key={cell.id}
                         style={{
                           width: `${width}px`,
                           minWidth: `${width}px`,
-                          position: isFrozen ? 'sticky' : 'static',
+                          position: isFrozen || isFirstDataRow ? 'sticky' : 'static',
                           left: isFrozen ? `${leftOffset}px` : undefined,
-                          zIndex: (isFirstDataRow && isFrozen) ? 45 : 
-                                  isFirstDataRow ? 40 : 
-                                  isFrozen ? 35 : 30,
+                          top: isFrozen && isFirstDataRow ? '41px' : undefined, // For first row frozen cells
+                          zIndex,
                           backgroundColor: isSubAppointment ? 'hsl(var(--muted)/20)' : 'hsl(var(--background))',
                           boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : undefined,
                           borderRight: isFrozen ? '1px solid hsl(var(--border))' : undefined,
