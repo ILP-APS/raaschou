@@ -128,6 +128,7 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
       for (const appointment of appointments) {
         if (appointment.hn_appointment_id) {
           try {
+            console.log(`Fetching realized hours for appointment ${appointment.appointment_number} (ID: ${appointment.hn_appointment_id})`);
             const realizedHours = await getRealizedHours(appointment.hn_appointment_id);
             console.log(`Got realized hours for ${appointment.appointment_number}:`, realizedHours);
             
@@ -137,6 +138,13 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
             const montageNum = parseFloat(realizedHours.montage.replace('.', '').replace(',', '.')) || 0;
             const totalNum = parseFloat(realizedHours.total.replace('.', '').replace(',', '.')) || 0;
             
+            console.log(`Parsed values for ${appointment.appointment_number}:`, {
+              projektering: projekteringNum,
+              produktion: produktionNum,
+              montage: montageNum,
+              total: totalNum
+            });
+            
             await updateRealizedHours(
               appointment.appointment_number,
               projekteringNum,
@@ -145,10 +153,13 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
               totalNum
             );
             
+            console.log(`Successfully updated realized hours for ${appointment.appointment_number}`);
             updatedCount++;
           } catch (error) {
             console.error(`Error updating realized hours for ${appointment.appointment_number}:`, error);
           }
+        } else {
+          console.log(`Skipping appointment ${appointment.appointment_number} - no hn_appointment_id`);
         }
       }
       

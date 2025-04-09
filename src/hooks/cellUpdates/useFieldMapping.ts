@@ -29,7 +29,7 @@ export const useFieldMapping = () => {
       case 13:
         return 'produktion_2'; // Realized produktion
       case 14:
-        return 'montage_4'; // Realized montage
+        return 'realized_montage'; // Changed from montage_4 to match database schema
       case 15:
         return 'realized_total'; // Realized total
       case 16:

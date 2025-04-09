@@ -49,7 +49,10 @@ const workTypeMap = new Map<number, WorkTypeCategory>([
  * @returns The category of the work type
  */
 export const getWorkTypeCategory = (workTypeId: number): WorkTypeCategory => {
-  return workTypeMap.get(workTypeId) || WorkTypeCategory.Unknown;
+  console.log(`Getting category for work type ID: ${workTypeId}`);
+  const category = workTypeMap.get(workTypeId) || WorkTypeCategory.Unknown;
+  console.log(`Category for work type ID ${workTypeId}: ${category}`);
+  return category;
 };
 
 /**
@@ -69,6 +72,8 @@ export const calculateRealizedHours = (lineWorkData: any[]): {
     console.log("No line work data provided");
     return { projektering, produktion, montage, total: 0 };
   }
+  
+  console.log(`Processing ${lineWorkData.length} line work items`);
   
   // Process each line work item
   for (const item of lineWorkData) {

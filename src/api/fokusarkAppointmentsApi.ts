@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface FokusarkAppointment {
@@ -18,7 +17,6 @@ export interface FokusarkAppointment {
   total?: number | null;
   projektering_2?: number | null;
   produktion_2?: number | null;
-  montage_4?: number | null;
   realized_total?: number | null;
   timer_tilbage_1?: number | null;
   faerdig_pct_ex_montage_nu?: number | null;
@@ -130,10 +128,17 @@ export async function updateRealizedHours(
   montage: number,
   total: number
 ) {
+  console.log(`Updating realized hours for ${appointmentNumber}:`, {
+    projektering_2: projektering,
+    produktion_2: produktion,
+    realized_montage: montage,
+    realized_total: total
+  });
+  
   const updateData = {
     projektering_2: projektering,
     produktion_2: produktion,
-    montage_4: montage,
+    realized_montage: montage,
     realized_total: total
   };
   
