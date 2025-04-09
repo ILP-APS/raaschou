@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -54,70 +54,80 @@ const generateData = (): DataItem[] => {
 
 const data = generateData();
 
+// Column definitions with explicit pinning
+const columns: ColumnDef<DataItem>[] = [
+  {
+    accessorKey: 'col1',
+    header: 'Nr.',
+    meta: { width: 100 },
+    enablePinning: true,
+  },
+  {
+    accessorKey: 'col2',
+    header: 'Navn',
+    meta: { width: 150 },
+    enablePinning: true,
+  },
+  {
+    accessorKey: 'col3',
+    header: 'Column 3',
+    meta: { width: 150 },
+    enablePinning: true,
+  },
+  {
+    accessorKey: 'col4',
+    header: 'Column 4',
+    meta: { width: 150 },
+    enablePinning: true,
+  },
+  {
+    accessorKey: 'col5',
+    header: 'Column 5',
+    meta: { width: 150 },
+    enablePinning: true,
+  },
+  {
+    accessorKey: 'col6',
+    header: 'Column 6',
+    meta: { width: 150 },
+    enablePinning: true,
+  },
+  {
+    accessorKey: 'col7',
+    header: 'Column 7',
+    meta: { width: 150 },
+    enablePinning: true,
+  },
+  {
+    accessorKey: 'col8',
+    header: 'Column 8',
+    meta: { width: 150 },
+    enablePinning: true,
+  },
+  {
+    accessorKey: 'col9',
+    header: 'Column 9',
+    meta: { width: 150 },
+    enablePinning: true,
+  },
+  {
+    accessorKey: 'col10',
+    header: 'Column 10',
+    meta: { width: 150 },
+    enablePinning: true,
+  },
+];
+
 export default function StickyTable() {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   
-  // Define background colors based on theme
+  // Define CSS variables for colors
   const headerBgColor = isDarkMode ? 'hsl(var(--muted))' : 'white';
   const subheaderBgColor = isDarkMode ? 'hsl(var(--muted)/50)' : '#f5f5f5';
   const rowBgColor = isDarkMode ? 'hsl(var(--background))' : 'white';
-  const borderColor = 'hsl(var(--border))';
-
-  // Define columns with enablePinning
-  const columns: ColumnDef<DataItem, any>[] = [
-    {
-      accessorKey: 'col1',
-      header: 'Nr.',
-      enablePinning: true,
-    },
-    {
-      accessorKey: 'col2',
-      header: 'Navn',
-      enablePinning: true,
-    },
-    {
-      accessorKey: 'col3',
-      header: 'Column 3',
-      enablePinning: true,
-    },
-    {
-      accessorKey: 'col4',
-      header: 'Column 4',
-      enablePinning: true,
-    },
-    {
-      accessorKey: 'col5',
-      header: 'Column 5',
-      enablePinning: true,
-    },
-    {
-      accessorKey: 'col6',
-      header: 'Column 6',
-      enablePinning: true,
-    },
-    {
-      accessorKey: 'col7',
-      header: 'Column 7',
-      enablePinning: true,
-    },
-    {
-      accessorKey: 'col8',
-      header: 'Column 8',
-      enablePinning: true,
-    },
-    {
-      accessorKey: 'col9',
-      header: 'Column 9',
-      enablePinning: true,
-    },
-    {
-      accessorKey: 'col10',
-      header: 'Column 10',
-      enablePinning: true,
-    },
-  ];
-
+  
+  // Initialize table with TanStack's useReactTable
   const table = useReactTable({
     data,
     columns,
@@ -138,26 +148,38 @@ export default function StickyTable() {
   return (
     <div className="w-full space-y-4">
       <div className="rounded-md border overflow-hidden">
-        {/* Table container with scrolling */}
-        <div className="sticky-table-container">
+        {/* Define CSS variables for dynamic styling */}
+        <div 
+          className="sticky-table-container"
+          style={
+            {
+              '--header-bg-color': headerBgColor,
+              '--subheader-bg-color': subheaderBgColor,
+            } as React.CSSProperties
+          }
+        >
           <Table className="sticky-table">
             <TableHeader>
               {/* First sticky header row */}
               <TableRow className="sticky-header">
                 {table.getHeaderGroups()[0].headers.map((header) => {
+                  // Handle pinned columns
                   const isPinned = header.column.getIsPinned();
-                  const pinSide = isPinned === 'left' ? 'left' : (isPinned === 'right' ? 'right' : null);
+                  const pinClass = isPinned === 'left' ? 'left-pinned' : (isPinned === 'right' ? 'right-pinned' : '');
+                  const leftPos = isPinned === 'left' ? `${header.column.getStart('left')}px` : undefined;
+                  const rightPos = isPinned === 'right' ? `${header.column.getAfter('right')}px` : undefined;
+                  const width = (header.column.columnDef.meta as any)?.width || 150;
                   
                   return (
                     <TableHead
                       key={header.id}
-                      className={isPinned ? `cell-pinned-${pinSide}` : ""}
+                      className={pinClass}
                       style={{
-                        width: '150px',
-                        minWidth: '150px',
+                        width: `${width}px`,
+                        minWidth: `${width}px`,
+                        left: leftPos,
+                        right: rightPos,
                         backgroundColor: headerBgColor,
-                        left: isPinned === 'left' ? `${header.column.getStart('left')}px` : undefined,
-                        right: isPinned === 'right' ? `${header.column.getAfter('right')}px` : undefined,
                       }}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
@@ -169,19 +191,23 @@ export default function StickyTable() {
               {/* Second sticky header row */}
               <TableRow className="sticky-subheader">
                 {table.getHeaderGroups()[0].headers.map((header) => {
+                  // Handle pinned columns
                   const isPinned = header.column.getIsPinned();
-                  const pinSide = isPinned === 'left' ? 'left' : (isPinned === 'right' ? 'right' : null);
+                  const pinClass = isPinned === 'left' ? 'left-pinned' : (isPinned === 'right' ? 'right-pinned' : '');
+                  const leftPos = isPinned === 'left' ? `${header.column.getStart('left')}px` : undefined;
+                  const rightPos = isPinned === 'right' ? `${header.column.getAfter('right')}px` : undefined;
+                  const width = (header.column.columnDef.meta as any)?.width || 150;
                   
                   return (
                     <TableHead
                       key={`subheader-${header.id}`}
-                      className={isPinned ? `cell-pinned-${pinSide}` : ""}
+                      className={pinClass}
                       style={{
-                        width: '150px',
-                        minWidth: '150px',
+                        width: `${width}px`,
+                        minWidth: `${width}px`,
+                        left: leftPos,
+                        right: rightPos,
                         backgroundColor: subheaderBgColor,
-                        left: isPinned === 'left' ? `${header.column.getStart('left')}px` : undefined,
-                        right: isPinned === 'right' ? `${header.column.getAfter('right')}px` : undefined,
                       }}
                     >
                       {`Sub ${table.getHeaderGroups()[0].headers.indexOf(header) + 1}`}
@@ -195,19 +221,23 @@ export default function StickyTable() {
               {table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => {
+                    // Handle pinned columns
                     const isPinned = cell.column.getIsPinned();
-                    const pinSide = isPinned === 'left' ? 'left' : (isPinned === 'right' ? 'right' : null);
+                    const pinClass = isPinned === 'left' ? 'left-pinned' : (isPinned === 'right' ? 'right-pinned' : '');
+                    const leftPos = isPinned === 'left' ? `${cell.column.getStart('left')}px` : undefined;
+                    const rightPos = isPinned === 'right' ? `${cell.column.getAfter('right')}px` : undefined;
+                    const width = (cell.column.columnDef.meta as any)?.width || 150;
                     
                     return (
                       <TableCell
                         key={cell.id}
-                        className={isPinned ? `cell-pinned-${pinSide}` : ""}
+                        className={pinClass}
                         style={{
-                          width: '150px',
-                          minWidth: '150px',
+                          width: `${width}px`,
+                          minWidth: `${width}px`,
+                          left: leftPos,
+                          right: rightPos,
                           backgroundColor: rowBgColor,
-                          left: isPinned === 'left' ? `${cell.column.getStart('left')}px` : undefined,
-                          right: isPinned === 'right' ? `${cell.column.getAfter('right')}px` : undefined,
                         }}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
