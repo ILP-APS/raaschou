@@ -1,0 +1,42 @@
+
+.fokusark-data-grid {
+  height: calc(100vh - 220px);
+  width: 100%;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+}
+
+.rdg {
+  border-radius: 0.5rem;
+  border: none;
+  height: 100%;
+}
+
+.rdg-header-row {
+  background-color: hsl(var(--background));
+}
+
+.rdg-cell {
+  border-right: 1px solid hsl(var(--border));
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.rdg-row:hover {
+  background-color: hsl(var(--muted)/50);
+}
+
+.rdg-row[aria-selected=true] {
+  background-color: hsl(var(--muted)/30);
+}
+
+/* Dark mode styling */
+.rdg-dark {
+  --rdg-background-color: hsl(var(--background));
+  --rdg-header-background-color: hsl(var(--background));
+  --rdg-row-hover-background-color: hsl(var(--muted)/50);
+  --rdg-row-selected-background-color: hsl(var(--muted)/30);
+  --rdg-border-color: hsl(var(--border));
+  --rdg-header-row-color: hsl(var(--foreground));
+  --rdg-summary-row-background-color: hsl(var(--muted)/20);
+  color: hsl(var(--foreground));
+}
