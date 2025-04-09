@@ -1,11 +1,10 @@
-
 import React from "react";
 import FokusarkTable from "@/components/FokusarkTable";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Calculator } from "lucide-react";
 import { loadFokusarkAppointments, updateAppointmentField } from "@/services/fokusarkAppointmentService";
-import { calculateProjektering, calculateProduktion, parseNumber } from "@/utils/fokusarkCalculations";
+import { calculateProjektering, calculateProduktion, calculateMontage, parseNumber } from "@/utils/fokusarkCalculations";
 
 interface FokusarkContentProps {
   tableData: string[][];
@@ -22,30 +21,26 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
         description: "Please wait while we update the calculations...",
       });
       
-      // Load the current data
       const appointments = await loadFokusarkAppointments();
       
-      // Counter for updated values
       let updatedCount = 0;
       
-      // Process each appointment
       for (const appointment of appointments) {
         const appointmentNumber = appointment.appointment_number;
         
-        // Find the corresponding row in tableData
         const rowData = tableData.find(row => row[0] === appointmentNumber);
         
         if (rowData) {
           console.log(`Recalculating values for ${appointmentNumber}`, {
             currentValues: {
               projektering_1: appointment.projektering_1,
-              produktion: appointment.produktion
+              produktion: appointment.produktion,
+              montage_3: appointment.montage_3
             },
             rowData
           });
           
           try {
-            // Calculate projektering value
             const projekteringValue = calculateProjektering(rowData);
             const projekteringNumeric = parseNumber(projekteringValue);
             
@@ -55,19 +50,15 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
               current: appointment.projektering_1
             });
             
-            // Force update projektering
             await updateAppointmentField(
               appointmentNumber,
               'projektering_1',
               projekteringNumeric
             );
             
-            // After updating projektering, recalculate produktion which depends on it
-            // Get the updated row data with new projektering value
             const updatedRowData = [...rowData];
             updatedRowData[9] = projekteringValue;
             
-            // Calculate produktion value
             const produktionValue = calculateProduktion(updatedRowData);
             const produktionNumeric = parseNumber(produktionValue);
             
@@ -77,11 +68,25 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
               current: appointment.produktion
             });
             
-            // Force update produktion
             await updateAppointmentField(
               appointmentNumber,
               'produktion',
               produktionNumeric
+            );
+            
+            const montageValue = calculateMontage(updatedRowData);
+            const montageNumeric = parseNumber(montageValue);
+            
+            console.log(`Recalculating montage for ${appointmentNumber}:`, {
+              calculated: montageValue,
+              numeric: montageNumeric,
+              current: appointment.montage_3
+            });
+            
+            await updateAppointmentField(
+              appointmentNumber,
+              'montage_3',
+              montageNumeric
             );
             
             updatedCount++;
@@ -96,7 +101,6 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
         description: `Updated ${updatedCount} appointments with new calculated values.`,
       });
       
-      // Force a page reload to show the new values
       window.location.reload();
     } catch (error) {
       console.error("Error recalculating values:", error);

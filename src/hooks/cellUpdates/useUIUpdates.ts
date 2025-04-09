@@ -1,4 +1,3 @@
-
 import { FokusarkAppointment } from "@/api/fokusarkAppointmentsApi";
 import { formatDanishNumber } from "@/utils/formatUtils";
 import { Dispatch, SetStateAction } from 'react';
@@ -62,6 +61,18 @@ export const useUIUpdates = (
     });
   };
   
+  // Update montage cell in the UI
+  const updateMontageUI = (rowIndex: number, value: string) => {
+    setTableData(prevData => {
+      const newData = [...prevData];
+      const rowCopy = [...newData[rowIndex]];
+      // Update the montage column (index 11)
+      rowCopy[11] = value;
+      newData[rowIndex] = rowCopy;
+      return newData;
+    });
+  };
+  
   // Update a cell value directly
   const updateCellUI = (rowIndex: number, colIndex: number, value: string) => {
     setTableData(prevData => {
@@ -78,6 +89,7 @@ export const useUIUpdates = (
     updateTotalUI,
     updateProjekteringUI,
     updateProduktionUI,
+    updateMontageUI,
     updateCellUI
   };
 };

@@ -1,4 +1,3 @@
-
 import { useToast } from "@/hooks/use-toast";
 import { updateAppointmentField, loadFokusarkAppointments, transformAppointmentsToDisplayData } from "@/services/fokusarkAppointmentService";
 import { parseNumber } from "@/utils/fokusarkCalculations";
@@ -24,33 +23,27 @@ export const useCellChange = ({
 }: UseCellChangeProps) => {
   const { toast } = useToast();
   const { getFieldNameForColumn, getColumnDisplayName } = useFieldMapping();
-  const { updateMaterialerUI, updateTotalUI, updateProjekteringUI, updateProduktionUI, updateCellUI } = useUIUpdates(tableData, setTableData);
-  const { recalculateProjektering, recalculateProduktion } = useCalculations();
+  const { updateMaterialerUI, updateTotalUI, updateProjekteringUI, updateProduktionUI, updateMontageUI, updateCellUI } = useUIUpdates(tableData, setTableData);
+  const { recalculateProjektering, recalculateProduktion, recalculateMontage } = useCalculations();
   
-  // Handle cell value changes
   const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {
-    // Get the appointment number from the current row
     const appointmentNumber = tableData[rowIndex][0];
     console.log(`Updating value for appointment ${appointmentNumber}, column ${colIndex}, new value: ${value}`);
     
-    // Update local UI immediately for responsive feedback
     updateCellUI(rowIndex, colIndex, value);
     
-    // Determine which field to update based on column index
     const fieldName = getFieldNameForColumn(colIndex);
     if (!fieldName) {
       console.error(`Unsupported column index for update: ${colIndex}`);
       return;
     }
     
-    // Parse the value
     const parsedValue = parseNumber(value);
     console.log(`Parsed value for ${appointmentNumber}, ${fieldName}: ${parsedValue}`);
     
     try {
       console.log(`Updating ${fieldName} for appointment ${appointmentNumber} to ${parsedValue}`);
       
-      // Update the field in Supabase
       const updatedAppointment = await updateAppointmentField(
         appointmentNumber, 
         fieldName, 
@@ -59,59 +52,53 @@ export const useCellChange = ({
       
       console.log(`Updated appointment ${appointmentNumber} in database:`, updatedAppointment);
       
-      // Update the appointments state with the new data
       setAppointments(prev => 
         prev.map(app => 
           app.appointment_number === appointmentNumber ? updatedAppointment : app
         )
       );
       
-      // UI updates for derived fields
       updateMaterialerUI(rowIndex, updatedAppointment);
       updateTotalUI(rowIndex, updatedAppointment);
       
-      // Determine which columns need recalculation
-      const shouldRecalculateProjektering = [3, 4, 6].includes(colIndex); // Tilbud or Montage or Montage2 changed
-      // Update produktion when Underleverandør 2 (col 7) changes too
+      const shouldRecalculateProjektering = [3, 4, 6].includes(colIndex);
       const shouldRecalculateProduktion = [3, 4, 5, 6, 7, 8, 9].includes(colIndex); 
-      // Kolumne 5 is Underleverandør og kolumne 7 is Underleverandør 2
+      const shouldRecalculateMontage = [4, 6].includes(colIndex);
       
-      // Get the current row data with the updated value
       const updatedRow = [...tableData[rowIndex]];
-      updatedRow[colIndex] = value; // Make sure we're using the latest value
+      updatedRow[colIndex] = value;
       
-      // Step 1: Recalculate projektering if needed
       if (shouldRecalculateProjektering) {
         console.log(`Need to recalculate Projektering for ${appointmentNumber} due to column ${colIndex} change`);
         try {
-          // Recalculate and update projektering
           const { projekteringValue } = await recalculateProjektering(appointmentNumber, updatedRow);
-          
-          // Update UI with new projektering value
           updateProjekteringUI(rowIndex, projekteringValue);
-          
-          // Update the row with new projektering value for next calculations
           updatedRow[9] = projekteringValue;
         } catch (error) {
           console.error(`Failed to recalculate projektering for ${appointmentNumber}:`, error);
         }
       }
       
-      // Step 2: Recalculate produktion if needed
       if (shouldRecalculateProduktion) {
         console.log(`Need to recalculate Produktion for ${appointmentNumber} due to column ${colIndex} change`);
         try {
-          // Recalculate and update produktion
           const { produktionValue } = await recalculateProduktion(appointmentNumber, updatedRow);
-          
-          // Update UI with new produktion value
           updateProduktionUI(rowIndex, produktionValue);
         } catch (error) {
           console.error(`Failed to recalculate produktion for ${appointmentNumber}:`, error);
         }
       }
       
-      // Show a toast notification
+      if (shouldRecalculateMontage) {
+        console.log(`Need to recalculate Montage for ${appointmentNumber} due to column ${colIndex} change`);
+        try {
+          const { montageValue } = await recalculateMontage(appointmentNumber, updatedRow);
+          updateMontageUI(rowIndex, montageValue);
+        } catch (error) {
+          console.error(`Failed to recalculate montage for ${appointmentNumber}:`, error);
+        }
+      }
+      
       toast({
         title: "Updated successfully",
         description: `Updated ${getColumnDisplayName(colIndex)} for ${appointmentNumber}`,
@@ -124,7 +111,6 @@ export const useCellChange = ({
         variant: "destructive",
       });
       
-      // Reload data to ensure UI is consistent with database
       try {
         const reloadedAppointments = await loadFokusarkAppointments();
         setAppointments(reloadedAppointments);

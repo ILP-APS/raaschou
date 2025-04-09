@@ -1,5 +1,4 @@
-
-import { calculateProjektering, calculateProduktion, parseNumber } from "@/utils/fokusarkCalculations";
+import { calculateProjektering, calculateProduktion, calculateMontage, parseNumber } from "@/utils/fokusarkCalculations";
 import { updateAppointmentField } from "@/services/fokusarkAppointmentService";
 
 /**
@@ -61,5 +60,34 @@ export const useCalculations = () => {
     }
   };
   
-  return { recalculateProjektering, recalculateProduktion };
+  // Recalculate Montage when relevant fields change
+  const recalculateMontage = async (
+    appointmentNumber: string,
+    updatedRow: string[]
+  ) => {
+    console.log("Recalculating Montage");
+    
+    // Use the common calculation function for consistency
+    const montageValue = calculateMontage(updatedRow);
+    const montageNumericValue = parseNumber(montageValue);
+    
+    console.log(`Calculated new montage value: ${montageValue} (${montageNumericValue}) for appointment ${appointmentNumber}`);
+    
+    // Update Supabase with the calculated value
+    await updateAppointmentField(
+      appointmentNumber, 
+      'montage_3', 
+      montageNumericValue
+    );
+    
+    console.log(`Updated montage_3 in database to ${montageNumericValue}`);
+    
+    return { montageValue, montageNumericValue };
+  };
+  
+  return { 
+    recalculateProjektering, 
+    recalculateProduktion,
+    recalculateMontage 
+  };
 };

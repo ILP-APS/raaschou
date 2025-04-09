@@ -1,8 +1,8 @@
-
 import { calculateMaterialer } from './materialsCalculations';
 import { calculateProjektering } from './projekteringCalculations';
 import { calculateProduktion } from './productionCalculations';
-import { parseNumber, formatDanishNumber } from './numberFormatUtils';
+import { calculateMontage } from './montageCalculations';
+import { parseNumber, formatDanishNumber, hasRealValue } from './numberFormatUtils';
 
 /**
  * Apply Materialer calculation to all rows in a dataset
@@ -102,6 +102,41 @@ export const applyProduktionCalculations = (data: string[][]): string[][] => {
 };
 
 /**
+ * Apply Montage calculation to all rows in a dataset
+ */
+export const applyMontageCalculations = (data: string[][]): string[][] => {
+  console.log("Running batch montage calculations on data rows:", data.length);
+  return data.map(row => {
+    const rowCopy = [...row];
+    // Montage is at index 11
+    const montageValue = calculateMontage(row);
+    rowCopy[11] = montageValue;
+    
+    // Log detailed calculation for specific appointment number
+    if (row[0] === '24371') {
+      console.log(`DETAILED BATCH CALCULATION for appointment 24371 montage:`);
+      
+      const montageStr = row[4];
+      const montage2Str = row[6];
+      const hasMontage2Value = hasRealValue(montage2Str);
+      const montageValue = hasMontage2Value ? parseNumber(montage2Str) : parseNumber(montageStr);
+      
+      console.log(`Using montage value: ${montageValue}, Using Montage2: ${hasMontage2Value}`);
+      
+      const montageAdjustment = montageValue * 0.08;
+      const adjustedMontage = montageValue - montageAdjustment;
+      const montageResult = adjustedMontage / 630;
+      
+      console.log(`Calculation steps: (${montageValue} - (${montageValue} * 0.08)) / 630 = ${montageResult}`);
+      console.log(`Formatted result: ${formatDanishNumber(montageResult)}`);
+    }
+    
+    console.log(`Calculated montage for appointment ${row[0]}: ${montageValue}`);
+    return rowCopy;
+  });
+};
+
+/**
  * Recalculate all calculated fields for a dataset
  */
 export const recalculateAllFields = (data: string[][]): string[][] => {
@@ -110,10 +145,7 @@ export const recalculateAllFields = (data: string[][]): string[][] => {
   result = applyMaterialerCalculations(result);
   result = applyProjekteringCalculations(result);
   result = applyProduktionCalculations(result);
+  result = applyMontageCalculations(result);
   console.log("Recalculation complete");
   return result;
 };
-
-function hasRealValue(value: string): boolean {
-  return !/^R\d+C\d+$/.test(value) && value.trim() !== '';
-}

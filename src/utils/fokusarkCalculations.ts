@@ -26,6 +26,11 @@ export {
   calculateProduktion
 } from './productionCalculations';
 
+// Re-export montage calculations
+export {
+  calculateMontage
+} from './montageCalculations';
+
 // Re-export batch calculations
 export {
   applyMaterialerCalculations,
