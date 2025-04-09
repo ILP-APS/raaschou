@@ -3,6 +3,7 @@ import React from "react";
 import { RowRendererProps } from "react-data-grid";
 import { FokusarkRow } from "../utils/dataGridUtils";
 
+// Use the RowRendererProps interface from react-data-grid to correctly type our component
 interface SubAppointmentRowProps extends RowRendererProps<FokusarkRow> {}
 
 const SubAppointmentRow: React.FC<SubAppointmentRowProps> = (props) => {

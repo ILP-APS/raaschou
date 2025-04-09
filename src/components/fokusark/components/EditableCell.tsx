@@ -3,7 +3,8 @@ import React from "react";
 import { EditorProps } from "react-data-grid";
 import { FokusarkRow } from "../utils/dataGridUtils";
 
-interface EditableCellProps extends EditorProps<FokusarkRow> {}
+// Use the EditorProps interface from react-data-grid to correctly type our component
+interface EditableCellProps extends EditorProps<FokusarkRow, unknown> {}
 
 const EditableCell: React.FC<EditableCellProps> = (props) => {
   return (
