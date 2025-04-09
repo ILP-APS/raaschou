@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Calculator, RefreshCw } from "lucide-react";
 import { loadFokusarkAppointments, updateAppointmentField } from "@/services/fokusark/appointmentDbService";
-import { calculateProjektering, calculateProduktion, calculateMontage, parseNumber } from "@/utils/fokusarkCalculations";
+import { calculateProjektering, calculateProduktion, calculateMontage, parseNumber, calculateTotal } from "@/utils/fokusarkCalculations";
 import { getRealizedHours } from "@/utils/appointmentUtils";
 import { updateRealizedHours } from "@/api/fokusarkAppointmentsApi";
 
@@ -77,6 +77,8 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
               produktionNumeric
             );
             
+            updatedRowData[10] = produktionValue;
+            
             const montageValue = calculateMontage(updatedRowData);
             const montageNumeric = parseNumber(montageValue);
             
@@ -90,6 +92,24 @@ const FokusarkContent: React.FC<FokusarkContentProps> = ({ tableData, isLoading 
               appointmentNumber,
               'montage_3',
               montageNumeric
+            );
+            
+            updatedRowData[11] = montageValue;
+            
+            // Calculate the total based on updated projektering, produktion, and montage values
+            const totalValue = calculateTotal(updatedRowData);
+            const totalNumeric = parseNumber(totalValue);
+            
+            console.log(`Recalculating total for ${appointmentNumber}:`, {
+              calculated: totalValue,
+              numeric: totalNumeric,
+              current: appointment.total
+            });
+            
+            await updateAppointmentField(
+              appointmentNumber,
+              'total',
+              totalNumeric
             );
             
             updatedCount++;

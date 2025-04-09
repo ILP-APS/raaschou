@@ -37,3 +37,16 @@ export {
   applyProjekteringCalculations,
   recalculateAllFields
 } from './batchCalculations';
+
+// Calculate the total from projektering, produktion, and montage
+export const calculateTotal = (row: string[]): string => {
+  // Get values from columns 9 (projektering_1), 10 (produktion), and 11 (montage_3)
+  const projektering = parseNumber(row[9]);
+  const produktion = parseNumber(row[10]);
+  const montage = parseNumber(row[11]);
+  
+  // Sum them up
+  const total = projektering + produktion + montage;
+  
+  return formatDanishNumber(total);
+};
