@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   flexRender,
@@ -128,6 +127,7 @@ export default function MinimalStickyTable() {
 
   // Header group row height
   const headerGroupHeight = '40px';
+  const headerBgColor = getBgColor();
 
   return (
     <div style={{
@@ -147,49 +147,43 @@ export default function MinimalStickyTable() {
         borderCollapse: 'separate'
       }}>
         <TableHeader>
-          {/* Header group row with split Info group */}
+          {/* Header group row */}
           <TableRow>
-            {/* Sticky part of Info group (covering ID and Name only) */}
+            {/* Info group spanning all 3 columns */}
             <TableHead
-              key="sticky-info-group"
-              colSpan={2} // Only span the 2 sticky columns
+              colSpan={3}
               style={{
-                position: 'sticky',
-                top: 0,
-                left: 0,
-                zIndex: 60,
-                backgroundColor: getBgColor(),
+                position: 'relative',
+                backgroundColor: headerBgColor,
                 textAlign: 'center',
                 fontWeight: 'bold',
-                boxShadow: '2px 2px 5px -2px rgba(0,0,0,0.15)',
                 borderBottom: '1px solid hsl(var(--border))',
-                borderRight: 'none', // Remove right border for visual continuity
-                width: '260px', // 80px + 180px
-                minWidth: '260px'
+                height: headerGroupHeight
               }}
             >
-              Info
-            </TableHead>
-            
-            {/* Non-sticky part of Info group (just the Type column) */}
-            <TableHead
-              key="non-sticky-info-group"
-              colSpan={1} // Just the Type column
-              style={{
-                position: 'static',
-                top: 0,
-                zIndex: 50,
-                backgroundColor: getBgColor(),
-                textAlign: 'center',
-                fontWeight: 'bold',
-                boxShadow: '0 2px 0 0 rgba(0,0,0,0.1)',
-                borderBottom: '1px solid hsl(var(--border))',
-                borderLeft: 'none', // Remove left border for visual continuity
-                color: 'transparent', // Hide text to create appearance of a single group
-                userSelect: 'none' // Prevent text selection of invisible text
-              }}
-            >
-              Info
+              {/* Full width text */}
+              <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                Info
+              </div>
+              
+              {/* Sticky overlay that appears when scrolling */}
+              <div
+                style={{
+                  position: 'sticky',
+                  left: 0,
+                  top: 0,
+                  width: '260px', // Width of ID + Name columns (80px + 180px)
+                  height: '100%',
+                  backgroundColor: headerBgColor,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: 1,
+                  boxShadow: '2px 0 5px -2px rgba(0,0,0,0.15)'
+                }}
+              >
+                Info
+              </div>
             </TableHead>
             
             {/* The rest of the header groups */}
@@ -201,11 +195,12 @@ export default function MinimalStickyTable() {
                   position: 'static',
                   top: 0,
                   zIndex: 50,
-                  backgroundColor: getBgColor(),
+                  backgroundColor: headerBgColor,
                   textAlign: 'center',
                   fontWeight: 'bold',
                   boxShadow: '0 2px 0 0 rgba(0,0,0,0.1)',
-                  borderBottom: '1px solid hsl(var(--border))'
+                  borderBottom: '1px solid hsl(var(--border))',
+                  height: headerGroupHeight
                 }}
               >
                 {group.title}
@@ -229,7 +224,7 @@ export default function MinimalStickyTable() {
                     top: headerGroupHeight, // Position below the group header
                     left: isSticky ? getLeftPosition(stickyIndex) : undefined,
                     zIndex: isSticky ? 45 : 40,
-                    backgroundColor: getBgColor(),
+                    backgroundColor: headerBgColor,
                     boxShadow: isSticky 
                       ? '2px 2px 5px -2px rgba(0,0,0,0.15)'
                       : '0 2px 5px -2px rgba(0,0,0,0.15)'
