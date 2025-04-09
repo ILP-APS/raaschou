@@ -1,5 +1,5 @@
 
-import React, { useRef } from "react";
+import React from "react";
 import FokusarkDescription from "./FokusarkDescription";
 import { useFokusarkData } from "@/hooks/useFokusarkData";
 import {
@@ -12,52 +12,73 @@ import {
 } from "@/components/ui/table";
 import "./FokusarkTableStyles.css";
 
-interface ColumnDefinition {
+type ColumnData = {
   id: string;
   header: string;
-  sticky?: boolean;
-  className?: string;
-  groupName?: string;
+  group?: string;
 }
 
 const FokusarkContent: React.FC = () => {
   const { tableData, isLoading } = useFokusarkData();
-  const tableContainerRef = useRef<HTMLDivElement>(null);
   
-  // Generate columns - explicitly defining many columns to ensure scrolling
-  const columns: ColumnDefinition[] = [
-    { id: "id", header: "ID", sticky: true, className: "col-id" },
-    { id: "name", header: "Name", sticky: true, className: "col-name last-sticky-cell" },
+  // Fixed columns first (ID and Name)
+  const columns: ColumnData[] = [
+    { id: "id", header: "ID" },
+    { id: "name", header: "Name" }
   ];
   
-  // Add many more columns to ensure horizontal scrolling is needed
-  for (let i = 1; i <= 30; i++) {
-    columns.push({
-      id: `col${i}`,
-      header: `Column ${i}`,
-      groupName: `Group ${Math.ceil(i / 4)}`,
-    });
-  }
+  // Define column groups
+  const groups = [
+    { name: "Budsjett", cols: 4 },
+    { name: "Innkjøp", cols: 3 },
+    { name: "Estimert", cols: 4 },
+    { name: "Realisert", cols: 3 },
+    { name: "Prognoser", cols: 5 },
+    { name: "Avvik", cols: 3 }
+  ];
   
-  // Generate sample data for the table
-  const rows = Array.from({ length: 30 }, (_, rowIndex) => {
-    return columns.reduce((acc, column, colIndex) => {
-      acc[column.id] = `R${rowIndex+1}C${colIndex+1}`;
-      return acc;
-    }, {} as Record<string, string>);
+  // Generate columns for each group
+  let colNum = 1;
+  groups.forEach(group => {
+    for (let i = 1; i <= group.cols; i++) {
+      columns.push({
+        id: `col_${colNum}`,
+        header: `C${colNum}`,
+        group: group.name
+      });
+      colNum++;
+    }
   });
   
-  // Organize columns by group
-  const columnGroups = columns.reduce((groups, column) => {
-    if (!column.groupName) return groups;
-    if (!groups[column.groupName]) {
-      groups[column.groupName] = [];
-    }
-    groups[column.groupName].push(column);
-    return groups;
-  }, {} as Record<string, ColumnDefinition[]>);
+  // Generate rows of data
+  const rows = [];
+  for (let i = 1; i <= 30; i++) {
+    const row: Record<string, any> = {
+      id: `${i}`,
+      name: `Project ${i}`
+    };
+    
+    columns.forEach(col => {
+      if (col.id !== "id" && col.id !== "name") {
+        row[col.id] = `${col.group?.substring(0, 3)}-${i}-${col.id.split('_')[1]}`;
+      }
+    });
+    
+    rows.push(row);
+  }
   
-  const groupNames = Object.keys(columnGroups);
+  // Get unique groups
+  const uniqueGroups = Array.from(
+    new Set(columns.filter(col => col.group).map(col => col.group))
+  );
+  
+  // Get column span for each group
+  const groupSpans: Record<string, number> = {};
+  uniqueGroups.forEach(group => {
+    if (group) {
+      groupSpans[group] = columns.filter(col => col.group === group).length;
+    }
+  });
   
   if (isLoading) {
     return (
@@ -74,43 +95,32 @@ const FokusarkContent: React.FC = () => {
   }
   
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6 overflow-hidden h-full">
+    <div className="flex flex-col gap-4 p-4 md:p-6">
       <div className="flex flex-col gap-4 pb-4">
         <h2 className="text-2xl font-semibold tracking-tight">Fokusark</h2>
         <FokusarkDescription />
       </div>
       
-      <div className="sticky-table-container" ref={tableContainerRef}>
+      <div className="sticky-table-container">
         <Table className="sticky-table">
           <TableHeader>
-            {/* Group Headers Row */}
+            {/* Group header row */}
             <TableRow>
-              {/* First two columns don't have groups */}
-              <TableHead className="col-id">
-                &nbsp;
-              </TableHead>
-              <TableHead className="col-name last-sticky-cell">
-                &nbsp;
-              </TableHead>
+              {/* Empty cells for ID and Name columns */}
+              <TableHead colSpan={2}>&nbsp;</TableHead>
               
               {/* Group headers */}
-              {groupNames.map((groupName) => (
-                <TableHead 
-                  key={groupName}
-                  colSpan={columnGroups[groupName].length}
-                >
-                  {groupName}
+              {uniqueGroups.map((group, index) => (
+                <TableHead key={`group-${index}`} colSpan={groupSpans[group as string]}>
+                  {group}
                 </TableHead>
               ))}
             </TableRow>
             
-            {/* Column Headers Row */}
+            {/* Column header row */}
             <TableRow>
-              {columns.map((column) => (
-                <TableHead 
-                  key={column.id}
-                  className={column.className || ""}
-                >
+              {columns.map((column, index) => (
+                <TableHead key={`header-${index}`}>
                   {column.header}
                 </TableHead>
               ))}
@@ -120,11 +130,8 @@ const FokusarkContent: React.FC = () => {
           <TableBody>
             {rows.map((row, rowIndex) => (
               <TableRow key={`row-${rowIndex}`}>
-                {columns.map((column) => (
-                  <TableCell 
-                    key={`${rowIndex}-${column.id}`}
-                    className={column.className || ""}
-                  >
+                {columns.map((column, colIndex) => (
+                  <TableCell key={`cell-${rowIndex}-${colIndex}`}>
                     {row[column.id]}
                   </TableCell>
                 ))}
