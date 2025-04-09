@@ -263,16 +263,22 @@ export default function FrozenDataTable() {
                     data-sub-appointment={false} // Could be dynamic based on your data
                   >
                     <td className="col-0">
-                      {flexRender(
-                        row.getVisibleCells()[0].column.columnDef.cell,
-                        row.getVisibleCells()[0].getContext()
-                      )}
+                      {row.getVisibleCells()[0] ? 
+                        flexRender(
+                          row.getVisibleCells()[0].column.columnDef.cell, 
+                          row.getVisibleCells()[0].getContext()
+                        ) : 
+                        null
+                      }
                     </td>
                     <td className="col-1">
-                      {flexRender(
-                        row.getVisibleCells()[1].column.columnDef.cell,
-                        row.getVisibleCells()[1].getContext()
-                      )}
+                      {row.getVisibleCells()[1] ? 
+                        flexRender(
+                          row.getVisibleCells()[1].column.columnDef.cell, 
+                          row.getVisibleCells()[1].getContext()
+                        ) : 
+                        null
+                      }
                     </td>
                   </tr>
                 ))}
@@ -308,9 +314,9 @@ export default function FrozenDataTable() {
                 <tr>
                   {table.getVisibleFlatColumns().slice(2).map((column, i) => (
                     <th key={column.id} className="col-scrollable column-header">
-                      {column.columnDef.header ? 
-                        flexRender(column.columnDef.header, column.getContext()) : 
-                        `Column ${i + 3}`}
+                      {typeof column.columnDef.header === 'string' 
+                        ? column.columnDef.header 
+                        : `Column ${i + 3}`}
                     </th>
                   ))}
                 </tr>
