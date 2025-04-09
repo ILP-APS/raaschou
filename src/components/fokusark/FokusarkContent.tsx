@@ -42,15 +42,50 @@ const FokusarkContent: React.FC = () => {
             <TableHeader className="bg-muted/50">
               {/* First Header Row - Group Headers */}
               <TableRow>
-                {Array.from({ length: 5 }, (_, i) => (
-                  <TableHead 
-                    key={`group-header-${i}`} 
-                    className="font-medium whitespace-nowrap text-center border-r"
-                    colSpan={5}
-                  >
-                    Group {i+1}
-                  </TableHead>
-                ))}
+                {/* Group 1: Columns 1-3 */}
+                <TableHead 
+                  key="group-header-0" 
+                  className="font-medium whitespace-nowrap text-center border-r"
+                  colSpan={3}
+                >
+                  Group 1
+                </TableHead>
+                
+                {/* Group 2: Columns 4-8 */}
+                <TableHead 
+                  key="group-header-1" 
+                  className="font-medium whitespace-nowrap text-center border-r"
+                  colSpan={5}
+                >
+                  Group 2
+                </TableHead>
+                
+                {/* Group 3: Columns 9-14 */}
+                <TableHead 
+                  key="group-header-2" 
+                  className="font-medium whitespace-nowrap text-center border-r"
+                  colSpan={6}
+                >
+                  Group 3
+                </TableHead>
+                
+                {/* Group 4: Columns 15-19 */}
+                <TableHead 
+                  key="group-header-3" 
+                  className="font-medium whitespace-nowrap text-center border-r"
+                  colSpan={5}
+                >
+                  Group 4
+                </TableHead>
+                
+                {/* Group 5: Columns 20-25 */}
+                <TableHead 
+                  key="group-header-4" 
+                  className="font-medium whitespace-nowrap text-center border-r"
+                  colSpan={6}
+                >
+                  Group 5
+                </TableHead>
               </TableRow>
               
               {/* Second Header Row - Column Headers */}
