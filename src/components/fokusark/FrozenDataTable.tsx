@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import {
   flexRender,
@@ -40,7 +41,89 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 
-// Keep your interfaces and data generation the same
+// Define the data type for our rows
+interface DataItem {
+  id: number;
+  col1: string;
+  col2: string;
+  col3: string;
+  col4: string;
+  col5: string;
+  col6: string;
+  col7: string;
+  col8: string;
+  col9: string;
+  col10: string;
+  col11: string;
+  col12: string;
+  col13: string;
+  col14: string;
+  col15: string;
+  col16: string;
+  col17: string;
+  col18: string;
+  col19: string;
+  col20: string;
+  col21: string;
+  col22: string;
+}
+
+// Define custom metadata for our columns
+interface ColumnMeta {
+  frozen?: boolean;
+}
+
+// Generate sample data with 22 columns
+const generateSampleData = () => {
+  const data: DataItem[] = [];
+  for (let i = 1; i <= 50; i++) {
+    const row: any = { id: i };
+    for (let j = 1; j <= 22; j++) {
+      row[`col${j}`] = `R${i}C${j}`;
+    }
+    data.push(row as DataItem);
+  }
+  return data;
+};
+
+const data: DataItem[] = generateSampleData();
+
+// Create columns definition
+const createColumns = (): ColumnDef<DataItem, keyof DataItem>[] => {
+  const columns: ColumnDef<DataItem, keyof DataItem>[] = [];
+
+  // First two columns are frozen
+  columns.push({
+    accessorKey: 'col1',
+    header: ({ column }) => (
+      <div className="flex items-center">
+        Column 1
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    ),
+    meta: { frozen: true } as ColumnMeta,
+  });
+
+  columns.push({
+    accessorKey: 'col2',
+    header: 'Column 2',
+    meta: { frozen: true } as ColumnMeta,
+  });
+
+  // Generate other columns
+  for (let i = 3; i <= 22; i++) {
+    columns.push({
+      accessorKey: `col${i}` as keyof DataItem,
+      header: `Column ${i}`,
+    });
+  }
+
+  return columns;
+};
+
+const columns = createColumns();
 
 export default function FrozenDataTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -68,11 +151,46 @@ export default function FrozenDataTable() {
     },
   });
 
-  // Keep your filter inputs and column visibility menu the same
-
   return (
     <div className="w-full">
-      {/* Keep your existing filter and column selectors */}
+      <div className="flex items-center py-4 gap-2">
+        <Input
+          placeholder="Filter column 1..."
+          value={(table.getColumn('col1')?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn('col1')?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto">
+              <Settings2 className="h-4 w-4 mr-2" />
+              Columns
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-popover">
+            <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {table
+              .getAllColumns()
+              .filter(column => column.getCanHide())
+              .slice(0, 10) // Only show first 10 columns in dropdown to avoid menu being too long
+              .map(column => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       
       {/* Main table container with overflow */}
       <div className="relative border rounded-md" style={{ overflow: 'hidden' }}>
@@ -216,7 +334,57 @@ export default function FrozenDataTable() {
         </div>
       </div>
       
-      {/* Keep your pagination and row selection counter */}
+      <div className="flex items-center justify-between py-4">
+        <div className="flex-1 text-sm text-muted-foreground">
+          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
+        </div>
+        
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                href="#" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  table.previousPage();
+                }} 
+                aria-disabled={!table.getCanPreviousPage()}
+                className={!table.getCanPreviousPage() ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+            
+            {Array.from({ length: Math.min(5, table.getPageCount()) }).map((_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink 
+                  href="#" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    table.setPageIndex(i);
+                  }}
+                  isActive={table.getState().pagination.pageIndex === i}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            
+            {table.getPageCount() > 5 && <PaginationEllipsis />}
+            
+            <PaginationItem>
+              <PaginationNext 
+                href="#" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  table.nextPage();
+                }}
+                aria-disabled={!table.getCanNextPage()}
+                className={!table.getCanNextPage() ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
   );
 }
