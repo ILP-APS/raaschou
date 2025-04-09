@@ -1,77 +1,101 @@
 
-/* Sticky table container styles */
+/* Container styles with a fixed positioning approach */
 .sticky-table-container {
+  position: relative;
   max-height: 70vh;
   overflow: auto;
-  position: relative;
   border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border));
 }
 
 /* Core table styles */
 .sticky-table {
+  width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  width: max-content;
-  min-width: 100%;
+  table-layout: fixed;
 }
 
-/* Sticky header styles */
+/* Common cell styling */
+.sticky-table th,
+.sticky-table td {
+  padding: 0.75rem;
+  border-right: 1px solid hsl(var(--border));
+  border-bottom: 1px solid hsl(var(--border));
+  background-color: inherit;
+  box-sizing: border-box;
+}
+
+/* Header styling */
 .sticky-table thead th {
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 10;
   background-color: hsl(var(--muted));
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
 }
 
-/* Sticky column styles */
-.sticky-table [data-sticky="true"] {
-  position: sticky !important;
-  z-index: 1;
+/* Sticky columns */
+.sticky-table .sticky-cell {
+  position: sticky;
   background-color: hsl(var(--background));
+  z-index: 5;
 }
 
-/* Increase z-index for header cells that are also sticky columns */
-.sticky-table thead [data-sticky="true"] {
-  z-index: 3;
+/* Increase z-index for sticky header cells that are also sticky columns */
+.sticky-table thead .sticky-cell {
+  z-index: 15;
 }
 
-/* Add shadow to last sticky column */
-.sticky-table [data-last-sticky="true"]::after {
+/* Last sticky column shadow effect */
+.sticky-table .last-sticky-cell::after {
   content: '';
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
-  width: 8px;
+  width: 6px;
   pointer-events: none;
-  box-shadow: inset -8px 0 8px -8px rgba(0, 0, 0, 0.15);
+  box-shadow: inset -6px 0 8px -6px rgba(0, 0, 0, 0.15);
 }
 
 /* Dark mode shadow */
-.dark .sticky-table [data-last-sticky="true"]::after {
-  box-shadow: inset -8px 0 8px -8px rgba(0, 0, 0, 0.3);
-}
-
-/* Ensure cells have a background to prevent see-through */
-.sticky-table th, 
-.sticky-table td {
-  background-color: inherit;
-  white-space: nowrap;
-}
-
-/* Border styles for cells */
-.sticky-table th,
-.sticky-table td {
-  border-right: 1px solid hsl(var(--border));
-  border-bottom: 1px solid hsl(var(--border));
-}
-
-/* Row hover effect */
-.sticky-table tbody tr:hover {
-  background-color: hsl(var(--muted)/50);
+.dark .sticky-table .last-sticky-cell::after {
+  box-shadow: inset -6px 0 8px -6px rgba(0, 0, 0, 0.3);
 }
 
 /* Striped rows */
 .sticky-table tbody tr:nth-child(even) {
   background-color: hsl(var(--muted)/10);
+}
+
+/* Row hover effect */
+.sticky-table tbody tr:hover {
+  background-color: hsl(var(--muted)/30);
+}
+
+/* Ensure sticky columns maintain background on hover */
+.sticky-table tbody tr:hover .sticky-cell {
+  background-color: hsl(var(--muted)/30);
+}
+
+/* Ensure all cells have consistent sizing */
+.sticky-table th,
+.sticky-table td {
+  min-width: 120px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* First two columns are wider */
+.sticky-table th.col-id,
+.sticky-table td.col-id,
+.sticky-table th.col-name,
+.sticky-table td.col-name {
+  min-width: 180px;
+  max-width: 180px;
 }

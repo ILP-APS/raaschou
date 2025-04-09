@@ -12,12 +12,14 @@ import "@/components/fokusark/FokusarkTableStyles.css";
 export default function FokusarkPage() {
   return (
     <SidebarProvider>
-      <div className="flex w-full relative">
+      <div className="flex w-full relative h-screen overflow-hidden">
         <AppSidebar />
         <SidebarInset>
-          <div className="flex flex-col h-screen page-container">
+          <div className="flex flex-col h-full overflow-hidden">
             <FokusarkHeader />
-            <FokusarkContent />
+            <div className="flex-1 overflow-hidden">
+              <FokusarkContent />
+            </div>
           </div>
         </SidebarInset>
       </div>
