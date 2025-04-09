@@ -2,8 +2,6 @@
 import React from "react";
 import FokusarkDescription from "./FokusarkDescription";
 import { useFokusarkData } from "@/hooks/useFokusarkData";
-import StickyTable from "./StickyTable";
-import "./StickyTableStyles.css";
 
 const FokusarkContent: React.FC = () => {
   const { isLoading } = useFokusarkData();
@@ -15,16 +13,13 @@ const FokusarkContent: React.FC = () => {
         <FokusarkDescription />
       </div>
       
-      <div className="rounded-lg border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
-        {isLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          </div>
-        ) : (
-          <div className="p-0">
-            <StickyTable />
-          </div>
-        )}
+      <div className="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-6">
+        <div className="text-center">
+          <h3 className="text-lg font-medium mb-2">Table functionality removed</h3>
+          <p className="text-muted-foreground">
+            The table has been completely removed from the application.
+          </p>
+        </div>
       </div>
     </div>
   );
