@@ -153,6 +153,18 @@ export default function FrozenDataTable() {
     },
   });
 
+  // For tracking the width of frozen columns
+  const calculateLeftOffset = (columnIndex: number) => {
+    let offset = 0;
+    for (let i = 0; i < columnIndex; i++) {
+      if ((columns[i].meta as ColumnMeta)?.frozen) {
+        // Using fixed width for simplicity, adjust as needed
+        offset += 150;
+      }
+    }
+    return offset;
+  };
+
   return (
     <div className="w-full">
       <div className="flex items-center py-4 gap-2">
@@ -194,65 +206,86 @@ export default function FrozenDataTable() {
         </DropdownMenu>
       </div>
       
-      <div className="relative overflow-auto border rounded-md" style={{ maxHeight: '400px', maxWidth: '100%' }}>
-        {/* This div acts as the corner element where frozen rows and columns intersect */}
+      <div className="relative border rounded-md overflow-hidden">
         <div 
-          className="sticky top-0 left-0 z-40 bg-background" 
-          style={{ width: '300px', height: '82px', position: 'absolute' }}
-        />
-        
-        <Table>
-          {/* Frozen Header Rows (Top 2) */}
-          <TableHeader className="sticky top-0 z-20 bg-background">
-            {/* First frozen header row */}
-            <TableRow>
-              {table.getHeaderGroups()[0].headers.map((header) => (
-                <TableHead
-                  key={header.id}
-                  className={(header.column.columnDef.meta as ColumnMeta)?.frozen 
-                    ? 'sticky left-0 z-30 bg-background shadow-[1px_0_0_0_#e5e7eb]' 
-                    : ''}
-                  style={{ minWidth: '150px' }}
+          className="overflow-auto"
+          style={{ 
+            maxHeight: '400px',
+            maxWidth: '100%'
+          }}
+        >
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().slice(0, 2).map((headerGroup, groupIndex) => (
+                <TableRow 
+                  key={headerGroup.id}
+                  className="sticky bg-background" 
+                  style={{ 
+                    top: `${groupIndex * 41}px`, // 41px is approximate row height
+                    zIndex: 20
+                  }}
                 >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
+                  {headerGroup.headers.map((header, colIndex) => {
+                    const isFrozen = !!(header.column.columnDef.meta as ColumnMeta)?.frozen;
+                    const leftOffset = isFrozen ? calculateLeftOffset(colIndex) : undefined;
+                    
+                    return (
+                      <TableHead
+                        key={header.id}
+                        style={{
+                          minWidth: '150px',
+                          position: isFrozen ? 'sticky' : undefined,
+                          left: isFrozen ? `${leftOffset}px` : undefined,
+                          zIndex: isFrozen ? 30 : undefined,
+                          backgroundColor: isFrozen ? 'var(--background)' : undefined,
+                          boxShadow: isFrozen ? '1px 0 0 0 #e5e7eb' : undefined
+                        }}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              headerGroup.id === table.getHeaderGroups()[0].id
+                                ? header.column.columnDef.header
+                                : `Sub-header ${colIndex + 1}`,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
               ))}
-            </TableRow>
-            {/* Second frozen header row */}
-            <TableRow className="bg-muted/50">
-              {table.getHeaderGroups()[0].headers.map((header) => (
-                <TableHead
-                  key={`subheader-${header.id}`}
-                  className={(header.column.columnDef.meta as ColumnMeta)?.frozen 
-                    ? 'sticky left-0 z-30 bg-muted/50 shadow-[1px_0_0_0_#e5e7eb]' 
-                    : ''}
-                  style={{ minWidth: '150px' }}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.map((row) => (
+                <TableRow 
+                  key={row.id} 
+                  data-state={row.getIsSelected() && "selected"}
                 >
-                  Sub-header {header.index + 1}
-                </TableHead>
+                  {row.getVisibleCells().map((cell, cellIndex) => {
+                    const isFrozen = !!(cell.column.columnDef.meta as ColumnMeta)?.frozen;
+                    const leftOffset = isFrozen ? calculateLeftOffset(cellIndex) : undefined;
+                    
+                    return (
+                      <TableCell
+                        key={cell.id}
+                        style={{
+                          minWidth: '150px',
+                          position: isFrozen ? 'sticky' : undefined,
+                          left: isFrozen ? `${leftOffset}px` : undefined,
+                          zIndex: isFrozen ? 10 : undefined,
+                          backgroundColor: isFrozen ? 'var(--background)' : undefined,
+                          boxShadow: isFrozen ? '1px 0 0 0 #e5e7eb' : undefined
+                        }}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
               ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell
-                    key={cell.id}
-                    className={(cell.column.columnDef.meta as ColumnMeta)?.frozen 
-                      ? 'sticky left-0 z-10 bg-background shadow-[1px_0_0_0_#e5e7eb]' 
-                      : ''}
-                    style={{ minWidth: '150px' }}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableBody>
+          </Table>
+        </div>
       </div>
       
       <div className="flex items-center justify-between py-4">
