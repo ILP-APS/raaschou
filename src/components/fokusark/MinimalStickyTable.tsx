@@ -58,7 +58,7 @@ const headerGroups = [
   { id: 'Summary', title: 'Summary', colSpan: 2 }
 ];
 
-const data = Array.from({ length: 50 }).map((_, i) => {
+const data = Array.from({ length: 10 }).map((_, i) => {
   const rowData: Record<string, string> = {
     id: `${i + 1}`,
     name: `Project ${i + 1}`,
@@ -66,21 +66,21 @@ const data = Array.from({ length: 50 }).map((_, i) => {
   };
   
   for (let j = 1; j <= 5; j++) {
-    rowData[`budA${j}`] = `Bud-A${i + 1}-${j}`;
+    rowData[`budA${j}`] = `Bud-A${j}-${i + 1}`;
   }
   
   for (let j = 1; j <= 4; j++) {
-    rowData[`budB${j}`] = `Bud-B${i + 1}-${j}`;
+    rowData[`budB${j}`] = `Bud-B${j}-${i + 1}`;
   }
   
   for (let j = 1; j <= 4; j++) {
-    rowData[`budC${j}`] = `Bud-C${i + 1}-${j}`;
+    rowData[`budC${j}`] = `Bud-C${j}-${i + 1}`;
   }
   
   rowData.special = `Special ${i + 1}`;
   
   for (let j = 1; j <= 5; j++) {
-    rowData[`budD${j}`] = `Bud-D${i + 1}-${j}`;
+    rowData[`budD${j}`] = `Bud-D${j}-${i + 1}`;
   }
   
   rowData.sum1 = `Total ${i + 1}`;
@@ -126,7 +126,7 @@ export default function MinimalStickyTable() {
     <div style={{
       position: 'relative',
       width: '100%',
-      maxWidth: '800px',
+      maxWidth: '100%', 
       height: '400px',
       overflowX: 'auto',
       overflowY: 'auto',
@@ -136,7 +136,7 @@ export default function MinimalStickyTable() {
     }}>
       <Table style={{ 
         width: 'auto', 
-        minWidth: '2400px',
+        minWidth: '1500px',
         borderCollapse: 'separate'
       }}>
         <TableHeader>
