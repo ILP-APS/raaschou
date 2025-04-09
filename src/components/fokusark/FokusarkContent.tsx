@@ -1,6 +1,7 @@
 
 import React from "react";
 import FokusarkDescription from "./FokusarkDescription";
+import FrozenDataTable from "./FrozenDataTable";
 
 const FokusarkContent: React.FC = () => {
   return (
@@ -11,12 +12,8 @@ const FokusarkContent: React.FC = () => {
       </div>
       
       <div className="p-6 rounded-lg border border-border bg-card text-card-foreground shadow-sm">
-        <div className="flex flex-col items-center justify-center p-8 text-center">
-          <h3 className="text-lg font-medium mb-2">Table has been removed</h3>
-          <p className="text-muted-foreground max-w-md">
-            The Fokusark table has been removed as requested. This space is now available for new content.
-          </p>
-        </div>
+        <h3 className="text-lg font-medium mb-4">Frozen Data Table Example</h3>
+        <FrozenDataTable />
       </div>
     </div>
   );
