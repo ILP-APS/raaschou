@@ -37,12 +37,6 @@ const FokusarkTableScroll: React.FC<FokusarkTableScrollProps> = ({ children }) =
       } else {
         scrollContainer.classList.remove('is-scrolling');
       }
-
-      // Apply scroll position to fixed header cells
-      const fixedCols = scrollContainer.querySelectorAll('.fixed-column');
-      fixedCols.forEach((col) => {
-        (col as HTMLElement).style.left = `${scrollLeft}px`;
-      });
     };
     
     scrollContainer.addEventListener('wheel', handleWheel, { passive: false });

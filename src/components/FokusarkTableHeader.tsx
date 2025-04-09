@@ -42,17 +42,17 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
       case 15:
         return "Total";
       case 16:
-        return "Projektering"; // Changed from "Timer tilbage" to "Projektering"
+        return "Projektering"; 
       case 17:
-        return "Timer tilbage"; // Rearranged from position 21
+        return "Timer tilbage"; 
       case 18:
-        return "Færdig % ex montage nu"; // Rearranged from position 17
+        return "Færdig % ex montage nu"; 
       case 19:
-        return "Færdig % ex montage før"; // Rearranged from position 18
+        return "Færdig % ex montage før"; 
       case 20:
-        return "Est timer ift færdig %"; // Rearranged from position 19
+        return "Est timer ift færdig %"; 
       case 21:
-        return "+/- timer"; // Rearranged from position 20
+        return "+/- timer"; 
       case 22:
         return "Afsat fragt";
       default:
@@ -84,9 +84,9 @@ const FokusarkTableHeader: React.FC<FokusarkTableHeaderProps> = ({ columnCount }
 
   // Get the appropriate CSS class for the column
   const getColumnClass = (index: number): string => {
-    if (index === 0) return "fokusark-col-0";
-    if (index === 1) return "fokusark-col-1";
-    return "fokusark-col-n";
+    if (index === 0) return "fixed-col-0";
+    if (index === 1) return "fixed-col-1";
+    return "table-col";
   };
 
   // Generate column groups for the first header row

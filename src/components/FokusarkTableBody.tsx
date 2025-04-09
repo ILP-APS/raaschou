@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Input } from "@/components/ui/input";
 
@@ -72,9 +73,9 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
 
   // Function to get cell class based on column index
   const getCellClass = (index: number): string => {
-    if (index === 0) return "fokusark-col-0";
-    if (index === 1) return "fokusark-col-1";
-    return "fokusark-col-n";
+    if (index === 0) return "fixed-col-0";
+    if (index === 1) return "fixed-col-1";
+    return "table-col";
   };
 
   // Function to render a cell - special handling for editable cells

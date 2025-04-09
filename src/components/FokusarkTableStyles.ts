@@ -32,6 +32,7 @@ export const tableContainerStyles = `
     border-spacing: 0;
     width: max-content;
     min-width: 100%;
+    table-layout: fixed;
   }
   
   /* Headers styling */
@@ -45,49 +46,51 @@ export const tableContainerStyles = `
     position: sticky;
     top: 0;
     z-index: 20;
-    background-color: white;
+    background-color: hsl(var(--background));
   }
   
   .fokusark-table-container thead tr:nth-child(2) th {
     position: sticky;
     top: 41px; /* Height of the first row */
     z-index: 20;
-    background-color: white;
+    background-color: hsl(var(--background));
   }
 
   /* First column - fixed */
-  .fokusark-col-0 {
+  .fixed-col-0 {
     position: sticky !important;
     left: 0;
     z-index: 15;
-    background-color: white;
+    background-color: hsl(var(--background));
     width: 100px;
     min-width: 100px;
+    max-width: 100px;
   }
   
   /* Second column - fixed */
-  .fokusark-col-1 {
+  .fixed-col-1 {
     position: sticky !important;
     left: 100px; /* Width of first column */
     z-index: 15;
-    background-color: white;
+    background-color: hsl(var(--background));
     width: 200px;
     min-width: 200px;
+    max-width: 200px;
   }
   
   /* Fixed column styling for header intersection */
-  thead tr:first-child th.fokusark-col-0,
-  thead tr:first-child th.fokusark-col-1 {
+  thead tr:first-child th.fixed-col-0,
+  thead tr:first-child th.fixed-col-1 {
     z-index: 30;
   }
   
-  thead tr:nth-child(2) th.fokusark-col-0,
-  thead tr:nth-child(2) th.fokusark-col-1 {
+  thead tr:nth-child(2) th.fixed-col-0,
+  thead tr:nth-child(2) th.fixed-col-1 {
     z-index: 30;
   }
   
   /* Shadow effect for scrolling state */
-  .is-scrolling .fokusark-col-1::after {
+  .is-scrolling .fixed-col-1::after {
     content: '';
     position: absolute;
     top: 0;
@@ -99,7 +102,7 @@ export const tableContainerStyles = `
   }
   
   /* Other columns */
-  .fokusark-col-n {
+  .table-col {
     min-width: 120px;
   }
   
@@ -125,19 +128,19 @@ export const tableContainerStyles = `
     background-color: hsl(var(--muted)/20);
   }
   
-  .fokusark-table-container tbody tr[data-sub-appointment="true"] td.fokusark-col-0 {
+  .fokusark-table-container tbody tr[data-sub-appointment="true"] td.fixed-col-0 {
     padding-left: 20px;
   }
   
   /* Add visual borders to clearly delineate fixed regions */
-  .fokusark-col-1 {
+  .fixed-col-1 {
     border-right: 1px solid hsl(var(--border));
   }
   
   /* Dark mode support */
   .dark .fokusark-table-container thead tr th,
-  .dark .fokusark-table-container .fokusark-col-0,
-  .dark .fokusark-table-container .fokusark-col-1 {
+  .dark .fokusark-table-container .fixed-col-0,
+  .dark .fokusark-table-container .fixed-col-1 {
     background-color: hsl(var(--background));
   }
   
