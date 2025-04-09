@@ -51,7 +51,6 @@ type FokusarkRow = {
 const generateSampleData = (): FokusarkRow[] => {
   const data: FokusarkRow[] = [];
   for (let i = 1; i <= 60; i++) {
-    // Increased to 60 rows for more data
     const row: FokusarkRow = {
       id: i,
       nr: `A-${100 + i}`,
@@ -77,7 +76,6 @@ const generateSampleData = (): FokusarkRow[] => {
       estTimerIftFaerdigPct: (Math.random() * 300).toFixed(2).replace('.', ','),
       plusMinusTimer: (Math.random() * 50 - 25).toFixed(2).replace('.', ','),
       afsatFragt: (Math.random() * 5000).toFixed(2).replace('.', ','),
-      // Additional columns with dummy data
       col1: `Value ${(Math.random() * 1000).toFixed(0)}`,
       col2: `Value ${(Math.random() * 1000).toFixed(0)}`,
       col3: `Value ${(Math.random() * 1000).toFixed(0)}`,
@@ -108,7 +106,20 @@ export default function FrozenDataTable() {
     id: 'select',
     header: ({
       table
-    }) => <Checkbox checked={table.getIsAllPageRowsSelected() || table.getIsSomePageRowsSelected() && "indeterminate"} onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)} aria-label="Select all" className="ml-2" />,
+    }) => (
+      <Checkbox 
+        checked={
+          table.getIsAllPageRowsSelected() 
+            ? true 
+            : table.getIsSomePageRowsSelected() 
+              ? "indeterminate" 
+              : false
+        } 
+        onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)} 
+        aria-label="Select all" 
+        className="ml-2" 
+      />
+    ),
     cell: ({
       row
     }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={value => row.toggleSelected(!!value)} aria-label="Select row" className="ml-2" />,
@@ -157,9 +168,7 @@ export default function FrozenDataTable() {
             kr. {info.getValue()}
           </div>,
     size: 120
-  }),
-  // Adding 10 additional columns
-  columnHelper.accessor('col1', {
+  }), columnHelper.accessor('col1', {
     header: 'Column 1',
     cell: info => info.getValue(),
     size: 120
@@ -226,6 +235,7 @@ export default function FrozenDataTable() {
             </DropdownMenu>;
     }
   }], []);
+
   const table = useReactTable({
     data,
     columns,
@@ -243,10 +253,11 @@ export default function FrozenDataTable() {
     getFilteredRowModel: getFilteredRowModel(),
     initialState: {
       pagination: {
-        pageSize: 10 // Increased page size
+        pageSize: 10
       }
     }
   });
+
   return <div className="w-full space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
