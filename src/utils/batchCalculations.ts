@@ -28,3 +28,13 @@ export const applyProjekteringCalculations = (data: string[][]): string[][] => {
     return rowCopy;
   });
 };
+
+/**
+ * Recalculate all calculated fields for a dataset
+ */
+export const recalculateAllFields = (data: string[][]): string[][] => {
+  let result = [...data];
+  result = applyMaterialerCalculations(result);
+  result = applyProjekteringCalculations(result);
+  return result;
+};

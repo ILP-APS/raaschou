@@ -24,5 +24,6 @@ export {
 // Re-export batch calculations
 export {
   applyMaterialerCalculations,
-  applyProjekteringCalculations
+  applyProjekteringCalculations,
+  recalculateAllFields
 } from './batchCalculations';

@@ -10,7 +10,8 @@ import {
 import { 
   parseNumber, 
   formatDanishNumber, 
-  calculateProjektering 
+  calculateProjektering,
+  recalculateAllFields
 } from "@/utils/fokusarkCalculations";
 import { FokusarkAppointment } from "@/api/fokusarkAppointmentsApi";
 
@@ -55,7 +56,11 @@ export const useFokusarkTable = (initialData: string[][]) => {
           
           try {
             console.log('No existing data found. Saving initial data...');
-            appointmentsData = await saveApiDataToSupabase(initialData);
+            
+            // Apply calculations to initial data before saving
+            const calculatedData = recalculateAllFields(initialData);
+            
+            appointmentsData = await saveApiDataToSupabase(calculatedData);
             console.log(`Successfully saved ${appointmentsData.length} appointments`);
             
             toast({
@@ -75,6 +80,54 @@ export const useFokusarkTable = (initialData: string[][]) => {
             setIsLoading(false);
             setIsInitialized(true);
             return;
+          }
+        } else {
+          // Ensure all appointments have projektering calculated correctly
+          try {
+            console.log('Verifying all appointments have projektering calculated...');
+            
+            // Get display data format
+            let displayData = transformAppointmentsToDisplayData(appointmentsData);
+            
+            // Check if any projektering fields need recalculation
+            let needsRecalculation = false;
+            for (const row of displayData) {
+              const projekteringValue = parseNumber(row[9]);
+              if (projekteringValue === 0) {
+                const recalculatedValue = calculateProjektering(row);
+                if (parseNumber(recalculatedValue) > 0) {
+                  needsRecalculation = true;
+                  break;
+                }
+              }
+            }
+            
+            if (needsRecalculation) {
+              console.log('Some projektering values need recalculation, updating...');
+              
+              // Apply recalculation to all rows
+              displayData = recalculateAllFields(displayData);
+              
+              // Update database with recalculated values
+              for (const row of displayData) {
+                const appointmentNumber = row[0];
+                const projekteringValue = parseNumber(row[9]);
+                
+                if (projekteringValue > 0) {
+                  await updateAppointmentField(
+                    appointmentNumber,
+                    'projektering_1',
+                    projekteringValue
+                  );
+                  console.log(`Updated projektering_1 for ${appointmentNumber} to ${projekteringValue}`);
+                }
+              }
+              
+              // Reload updated data
+              appointmentsData = await loadFokusarkAppointments();
+            }
+          } catch (error) {
+            console.error('Error recalculating projektering values:', error);
           }
         }
         

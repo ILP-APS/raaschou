@@ -30,6 +30,7 @@ export const calculateProjektering = (row: string[]): string => {
     
     if (hasMontage2Value) {
       montage2 = parseNumber(montage2Str);
+      console.log(`Found valid Montage2 value for appointment ${row[0]}: ${montage2}`);
     }
     
     // Determine which montage value to use in the calculation
@@ -54,13 +55,15 @@ export const calculateProjektering = (row: string[]): string => {
     });
     
     // Check for NaN and return '0' if the calculation resulted in NaN
-    if (isNaN(projektering)) {
-      console.log(`Projektering result is NaN for appointment ${row[0]}, returning 0`);
+    if (isNaN(projektering) || projektering === 0) {
+      console.log(`Projektering result is NaN or 0 for appointment ${row[0]}, returning 0`);
       return '0';
     }
     
     // Format the result with the Danish number format
-    return formatDanishNumber(projektering);
+    const formattedValue = formatDanishNumber(projektering);
+    console.log(`Final formatted projektering for appointment ${row[0]}: ${formattedValue}`);
+    return formattedValue;
   } catch (error) {
     console.error(`Error calculating Projektering for appointment ${row[0]}:`, error);
     return '0';
