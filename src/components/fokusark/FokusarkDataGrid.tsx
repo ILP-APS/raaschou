@@ -18,9 +18,9 @@ import { useTheme } from "next-themes";
 import "./FokusarkDataGridStyles.css";
 
 // Define custom meta type for columns
-type FokusarkColumnMeta = {
+interface FokusarkColumnMeta {
   frozen?: boolean;
-};
+}
 
 // Define the row type for our grid
 interface FokusarkRow {
@@ -81,16 +81,16 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
   };
 
   // Define columns - similar to the example
-  const columns: ColumnDef<FokusarkRow, unknown, FokusarkColumnMeta>[] = [
+  const columns: ColumnDef<FokusarkRow, any>[] = [
     {
       accessorKey: 'nr',
       header: 'Nr.',
-      meta: { frozen: true },
+      meta: { frozen: true } as FokusarkColumnMeta,
     },
     {
       accessorKey: 'navn',
       header: 'Navn',
-      meta: { frozen: true },
+      meta: { frozen: true } as FokusarkColumnMeta,
     },
     {
       accessorKey: 'ansvarlig',
@@ -246,7 +246,8 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
   const getColumnOffset = (index: number): number => {
     let offset = 0;
     for (let i = 0; i < index; i++) {
-      const isFrozen = !!columns[i].meta?.frozen;
+      const columnMeta = columns[i].meta as FokusarkColumnMeta | undefined;
+      const isFrozen = columnMeta?.frozen === true;
       if (isFrozen) {
         offset += 150; // Fixed column width
       }
@@ -296,7 +297,8 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
               }}
             >
               {table.getHeaderGroups()[0].headers.map((header, index) => {
-                const isFrozen = !!header.column.columnDef.meta?.frozen;
+                const columnMeta = header.column.columnDef.meta as FokusarkColumnMeta | undefined;
+                const isFrozen = columnMeta?.frozen === true;
                 const leftOffset = isFrozen ? getColumnOffset(index) : undefined;
                 
                 return (
@@ -319,39 +321,6 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
                 );
               })}
             </TableRow>
-            
-            {/* Optional second header row (for grouping) - Enable if needed */}
-            {/* <TableRow
-              style={{
-                position: 'sticky',
-                top: '41px', 
-                zIndex: 50,
-                backgroundColor: 'hsl(var(--muted))',
-              }}
-            >
-              {table.getHeaderGroups()[0].headers.map((header, index) => {
-                const isFrozen = !!header.column.columnDef.meta?.frozen;
-                const leftOffset = isFrozen ? getColumnOffset(index) : undefined;
-                
-                return (
-                  <TableHead
-                    key={`subheader-${header.id}`}
-                    style={{
-                      width: '150px',
-                      minWidth: '150px',
-                      position: isFrozen ? 'sticky' : 'static',
-                      left: isFrozen ? `${leftOffset}px` : undefined,
-                      zIndex: isFrozen ? 60 : 50,
-                      backgroundColor: 'hsl(var(--muted))',
-                      boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : undefined,
-                      borderRight: isFrozen ? '1px solid hsl(var(--border))' : undefined,
-                    }}
-                  >
-                    Subheader {index + 1}
-                  </TableHead>
-                );
-              })}
-            </TableRow> */}
           </TableHeader>
           
           <TableBody>
@@ -363,7 +332,8 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
                   className={isSubAppointment ? "bg-muted/20" : ""}
                 >
                   {row.getVisibleCells().map((cell, cellIndex) => {
-                    const isFrozen = !!cell.column.columnDef.meta?.frozen;
+                    const columnMeta = cell.column.columnDef.meta as FokusarkColumnMeta | undefined;
+                    const isFrozen = columnMeta?.frozen === true;
                     const leftOffset = isFrozen ? getColumnOffset(cellIndex) : undefined;
                     
                     return (
