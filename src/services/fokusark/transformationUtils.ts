@@ -119,9 +119,21 @@ const addCoreAppointmentData = (appointment: FokusarkAppointment): string[] => {
  * Add estimated values (columns 8-11)
  */
 const addEstimatedValues = (appointment: FokusarkAppointment, row: string[]): void => {
+  // Debug log the appointment data for verification
+  console.log(`Adding estimated values for ${appointment.appointment_number}:`, {
+    materialer: appointment.materialer,
+    projektering_1: appointment.projektering_1,
+    produktion: appointment.produktion,
+    montage_3: appointment.montage_3,
+    produktion_realized: appointment.produktion_realized
+  });
+
   row[8] = formatDanishNumber(appointment.materialer || 0);
   row[9] = formatValueOrEmpty(appointment.projektering_1);
+  
+  // For column 10 (produktion - estimated calculated value)
   row[10] = formatValueOrEmpty(appointment.produktion);
+  
   row[11] = formatValueOrEmpty(appointment.montage_3);
 };
 
@@ -129,9 +141,16 @@ const addEstimatedValues = (appointment: FokusarkAppointment, row: string[]): vo
  * Add realized values (columns 12-15)
  */
 const addRealizedValues = (appointment: FokusarkAppointment, row: string[]): void => {
+  // Debug log the realized values
+  console.log(`Adding realized values for ${appointment.appointment_number}:`, {
+    projektering_2: appointment.projektering_2,
+    produktion_realized: appointment.produktion_realized,
+    montage_3: appointment.montage_3
+  });
+
   row[12] = formatValueOrEmpty(appointment.projektering_2);
   
-  // Explicitly use produktion_realized for the realized production column (column 13)
+  // For column 13 (realized produktion - from API)
   row[13] = formatValueOrEmpty(appointment.produktion_realized);
   
   row[14] = formatValueOrEmpty(appointment.montage_3);
@@ -151,12 +170,15 @@ const addRemainingColumns = (appointment: FokusarkAppointment, row: string[]): v
   const timerTilbage = (appointment.projektering_1 || 0) - (appointment.projektering_2 || 0);
   row[16] = formatDanishNumber(timerTilbage);
   
+  // Calculate produktion timer tilbage as produktion - produktion_realized
+  const produktionTimerTilbage = (appointment.produktion || 0) - (appointment.produktion_realized || 0);
+  row[17] = formatDanishNumber(produktionTimerTilbage);
+  
   // Add production columns in the new rearranged order
-  row[17] = formatValueOrEmpty(appointment.timer_tilbage_2); // Timer tilbage (moved from position 21)
-  row[18] = formatValueOrEmpty(appointment.faerdig_pct_ex_montage_nu); // Moved from position 17
-  row[19] = formatValueOrEmpty(appointment.faerdig_pct_ex_montage_foer); // Moved from position 18
-  row[20] = formatValueOrEmpty(appointment.est_timer_ift_faerdig_pct); // Moved from position 19
-  row[21] = formatValueOrEmpty(appointment.plus_minus_timer); // Moved from position 20
+  row[18] = formatValueOrEmpty(appointment.faerdig_pct_ex_montage_nu);
+  row[19] = formatValueOrEmpty(appointment.faerdig_pct_ex_montage_foer);
+  row[20] = formatValueOrEmpty(appointment.est_timer_ift_faerdig_pct);
+  row[21] = formatValueOrEmpty(appointment.plus_minus_timer);
   
   // Add afsat fragt (transport) column
   row[22] = formatValueOrEmpty(appointment.afsat_fragt);

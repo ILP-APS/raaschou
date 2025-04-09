@@ -40,8 +40,13 @@ const RefreshRealizedHoursButton: React.FC = () => {
               total: totalNum
             });
             
+            console.log(`Current appointment data in DB:`, {
+              projektering_1: appointment.projektering_1,
+              produktion: appointment.produktion,
+              produktion_realized: appointment.produktion_realized
+            });
+            
             // Update the realized hours in database - this should go to the correct columns
-            // We must store the API's produktion value in produktion_realized field!
             await updateRealizedHours(
               appointment.appointment_number,
               projekteringNum,

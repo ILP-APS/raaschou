@@ -55,7 +55,7 @@ export const useTableData = () => {
             
             // Get realized hours from API
             const realizedHours = await getRealizedHours(appointment.hnAppointmentID);
-            console.log(`Realized hours for ${appointment.appointmentNumber}:`, realizedHours);
+            console.log(`[Realized hours API] Got data for ${appointment.appointmentNumber}:`, realizedHours);
             
             try {
               // Parse realized hours from API (these are already formatted strings)
@@ -64,7 +64,7 @@ export const useTableData = () => {
               const montageNum = parseFloat(realizedHours.montage.replace(/\./g, '').replace(',', '.')) || 0;
               const totalNum = parseFloat(realizedHours.total.replace(/\./g, '').replace(',', '.')) || 0;
               
-              console.log(`Storing realized hours for ${appointment.appointmentNumber}:`, {
+              console.log(`[Realized hours API] Parsed values for ${appointment.appointmentNumber}:`, {
                 projektering: projekteringNum,
                 produktion: produktionNum, // API value for realized production
                 montage: montageNum,
@@ -72,7 +72,6 @@ export const useTableData = () => {
               });
               
               // Store realized hours in database - ensure we're using the correct columns
-              // Store API produktion value in produktion_realized field
               await updateRealizedHours(
                 appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
                 projekteringNum,
@@ -81,7 +80,7 @@ export const useTableData = () => {
                 totalNum
               );
               
-              console.log(`Updated realized hours in Supabase for appointment ${appointment.appointmentNumber}`);
+              console.log(`[Realized hours API] Updated realized hours in Supabase for appointment ${appointment.appointmentNumber}`);
             } catch (updateError) {
               console.error(`Error updating realized hours for ${appointment.appointmentNumber}:`, updateError);
             }

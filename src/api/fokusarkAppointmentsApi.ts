@@ -17,7 +17,7 @@ export interface FokusarkAppointment {
   montage_3?: number | null;
   total?: number | null;
   projektering_2?: number | null;
-  produktion_realized?: number | null;  // Distinct field for realized production
+  produktion_realized?: number | null;  // Distinct field for realized production (from API)
   timer_tilbage_1?: number | null;
   timer_tilbage_2?: number | null;
   faerdig_pct_ex_montage_nu?: number | null;
@@ -96,6 +96,9 @@ export async function updateFokusarkAppointmentField(
   const updateData = {
     [field]: value
   };
+  
+  // Debug log for field updates
+  console.log(`Updating field "${field}" for appointment ${appointmentNumber} to:`, value);
   
   // Use type assertion to bypass TypeScript's type checking
   const { data, error } = await (supabase

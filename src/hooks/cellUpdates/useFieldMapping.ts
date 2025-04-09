@@ -21,13 +21,13 @@ export const useFieldMapping = () => {
       case 9:
         return 'projektering_1';
       case 10:
-        return 'produktion'; // Estimated produktion (calculated)
+        return 'produktion'; // Estimated produktion (calculated via formula)
       case 11:
         return 'montage_3';
       case 12:
         return 'projektering_2'; // Realized projektering
       case 13:
-        return 'produktion_realized'; // This is the field for realized production
+        return 'produktion_realized'; // This is specifically the produktion_realized field from API
       case 14:
         return 'montage_3'; // Realized montage field
       case 15:
@@ -75,13 +75,13 @@ export const useFieldMapping = () => {
       case 9:
         return 'Projektering';
       case 10:
-        return 'Produktion';
+        return 'Produktion'; // Estimated produktion - calculated
       case 11:
         return 'Montage';
       case 12:
         return 'Real. Projektering';
       case 13:
-        return 'Real. Produktion';
+        return 'Real. Produktion'; // Realized produktion - from API
       case 14:
         return 'Real. Montage';
       case 15:
