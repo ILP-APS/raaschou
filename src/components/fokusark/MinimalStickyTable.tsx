@@ -214,11 +214,14 @@ export default function MinimalStickyTable() {
                   style={{
                     width: index === 0 ? '80px' : '150px',
                     minWidth: index === 0 ? '80px' : '150px',
-                    position: isSticky ? 'sticky' : undefined,
-                    left: isSticky ? getLeftPosition(stickyIndex) : undefined,
-                    zIndex: isSticky ? 30 : undefined,
+                    position: 'sticky', // Make all header cells sticky vertically
+                    top: 0, // Stick to the top
+                    left: isSticky ? getLeftPosition(stickyIndex) : undefined, // Keep horizontal stickiness
+                    zIndex: isSticky ? 50 : 40, // Higher z-index for headers, even higher for sticky columns
                     backgroundColor: getBgColor(),
-                    boxShadow: isSticky ? '2px 0 5px -2px rgba(0,0,0,0.15)' : undefined
+                    boxShadow: isSticky 
+                      ? '2px 2px 5px -2px rgba(0,0,0,0.15)' // Shadow for corner cells
+                      : '0 2px 5px -2px rgba(0,0,0,0.15)' // Bottom shadow for regular header cells
                   }}
                 >
                   {flexRender(
