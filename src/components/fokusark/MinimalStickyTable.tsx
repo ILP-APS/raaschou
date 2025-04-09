@@ -64,9 +64,21 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   // Define columns with proper grouping
   const columns = React.useMemo(() => [
     // Group 1: Info (3 cols)
-    { accessorKey: 'id', header: 'ID', meta: { sticky: true, index: 0, group: 'Info' } },
-    { accessorKey: 'name', header: 'Name', meta: { sticky: true, index: 1, group: 'Info' } },
-    { accessorKey: 'type', header: 'Type', meta: { group: 'Info' } },
+    { 
+      accessorKey: 'id', 
+      header: 'ID', 
+      meta: { sticky: true, index: 0, group: 'Info' } 
+    },
+    { 
+      accessorKey: 'name', 
+      header: 'Name', 
+      meta: { sticky: true, index: 1, group: 'Info' } 
+    },
+    { 
+      accessorKey: 'type', 
+      header: 'Type', 
+      meta: { group: 'Info' } 
+    },
     
     // Other columns
     ...Array.from({ length: 20 }).map((_, i) => ({
@@ -192,8 +204,9 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
           {/* Regular header row */}
           <TableRow>
             {table.getFlatHeaders().map((header, index) => {
-              const isSticky = !!(header.column.columnDef.meta as any)?.sticky;
-              const stickyIndex = (header.column.columnDef.meta as any)?.index || 0;
+              const columnMeta = header.column.columnDef.meta || {};
+              const isSticky = !!columnMeta.sticky;
+              const stickyIndex = columnMeta.index || 0;
               const isIdCol = index === 0;
               const isNameCol = index === 1;
               
@@ -229,8 +242,9 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
             return (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell, cellIndex) => {
-                  const isSticky = !!(cell.column.columnDef.meta as any)?.sticky;
-                  const stickyIndex = (cell.column.columnDef.meta as any)?.index || 0;
+                  const columnMeta = cell.column.columnDef.meta || {};
+                  const isSticky = !!columnMeta.sticky;
+                  const stickyIndex = columnMeta.index || 0;
                   const isIdCol = cellIndex === 0;
                   const isNameCol = cellIndex === 1;
                   
