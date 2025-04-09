@@ -1,5 +1,5 @@
 
-/* Styles for the sticky table */
+/* Styles for the sticky table - simplified to just handle scrollbars */
 .sticky-table-container {
   position: relative;
   overflow: auto;
@@ -26,60 +26,4 @@
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--muted-foreground)/0.3) hsl(var(--muted)/0.2);
   }
-}
-
-/* Add subtle box shadow to frozen columns to indicate they're fixed */
-.sticky-table-container [style*="position: sticky"][style*="left:"]::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 4px;
-  pointer-events: none;
-  box-shadow: inset -2px 0 4px -2px rgba(0, 0, 0, 0.15);
-}
-
-.dark .sticky-table-container [style*="position: sticky"][style*="left:"]::after {
-  box-shadow: inset -2px 0 4px -2px rgba(255, 255, 255, 0.1);
-}
-
-/* Force sticky positioning - ensure no other styles can override this */
-.sticky-table-container td[style*="position: sticky"][style*="left:"],
-.sticky-table-container th[style*="position: sticky"][style*="left:"] {
-  position: sticky !important;
-  z-index: 20 !important;
-}
-
-/* Improve corner cells (intersections of sticky headers and columns) */
-.sticky-table-container tr:first-child th[style*="position: sticky"][style*="left:"],
-.sticky-table-container tr:nth-child(2) th[style*="position: sticky"][style*="left:"] {
-  z-index: 50 !important; /* Ensure corner cells are on top */
-}
-
-/* Give the frozen columns a distinctive background matching their parent's */
-.sticky-table-container th[style*="position: sticky"][style*="left:"] {
-  background-color: inherit !important;
-}
-
-/* Ensure table cells take the proper background color */
-.sticky-table-container td[style*="position: sticky"][style*="left:"] {
-  background-color: inherit !important;
-}
-
-/* Adding a stronger rule for frozen columns visibility */
-.sticky-frozen-column {
-  position: sticky !important;
-  z-index: 20 !important;
-}
-
-/* Enhanced corner cell style */
-.sticky-frozen-header-cell {
-  position: sticky !important;
-  z-index: 50 !important;
-}
-
-/* Ensure row background extends behind sticky columns */
-.sticky-table-container tr {
-  background-color: inherit;
 }
