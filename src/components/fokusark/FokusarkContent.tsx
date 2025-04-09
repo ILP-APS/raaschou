@@ -20,8 +20,8 @@ const FokusarkContent: React.FC = () => {
   // Generate sample data for the table - increase column count to create overflow
   const generateTableData = () => {
     const rows = [];
-    // More columns to force horizontal overflow
-    const columnCount = 25;
+    // Even more columns to ensure horizontal scrolling
+    const columnCount = 35;
     
     for (let i = 0; i < 30; i++) {
       const row = [];
@@ -40,10 +40,11 @@ const FokusarkContent: React.FC = () => {
     { name: "Group 1", colSpan: 2 }, // For the sticky columns
     { name: "Group 2", colSpan: 4 },
     { name: "Group 3", colSpan: 5 },
-    { name: "Group 4", colSpan: 4 },
-    { name: "Group 5", colSpan: 4 },
-    { name: "Group 6", colSpan: 3 },
-    { name: "Group 7", colSpan: 3 },
+    { name: "Group 4", colSpan: 5 },
+    { name: "Group 5", colSpan: 5 },
+    { name: "Group 6", colSpan: 5 },
+    { name: "Group 7", colSpan: 5 },
+    { name: "Group 8", colSpan: 4 },
   ];
 
   // Effect to sync horizontal scroll between frozen and main content
@@ -51,7 +52,7 @@ const FokusarkContent: React.FC = () => {
     const container = tableContainerRef.current;
     if (!container) return;
 
-    // Force a reflow to ensure sticky positioning works correctly
+    // Force a reflow to ensure sticky positioning works correctly and enable scrolling
     setTimeout(() => {
       if (container) {
         container.scrollLeft = 0;
@@ -103,7 +104,7 @@ const FokusarkContent: React.FC = () => {
               
               {/* Column Headers Row */}
               <TableRow>
-                {Array.from({ length: 25 }, (_, i) => {
+                {Array.from({ length: 35 }, (_, i) => {
                   // Define styling for sticky columns
                   const isFirst = i === 0;
                   const isSecond = i === 1;

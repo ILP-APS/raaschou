@@ -15,7 +15,7 @@
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
-  min-width: 2500px; /* Force horizontal overflow with a minimum width */
+  min-width: 3500px; /* Increase minimum width to ensure more horizontal overflow */
 }
 
 /* Common cell styling */
@@ -89,7 +89,7 @@
 /* Ensure all cells have consistent sizing */
 .sticky-table th,
 .sticky-table td {
-  min-width: 150px; /* Increase minimum width for all columns */
+  min-width: 150px; /* Set minimum width for all cells */
   max-width: 150px;
 }
 
