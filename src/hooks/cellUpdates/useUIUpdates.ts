@@ -100,6 +100,8 @@ export const useUIUpdates = (
   
   // Update produktion timer tilbage cell in the UI (column 17)
   const updateProduktionTimerTilbageUI = (rowIndex: number, value: string) => {
+    console.log(`Updating UI for produktion timer tilbage at row ${rowIndex}, column 17 with value: ${value}`);
+    
     setTableData(prevData => {
       const newData = [...prevData];
       const rowCopy = [...newData[rowIndex]];
