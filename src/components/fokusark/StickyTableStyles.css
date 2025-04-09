@@ -1,0 +1,50 @@
+
+/* Styles for the sticky table */
+.sticky-table-container {
+  position: relative;
+}
+
+/* Custom scrollbar styles */
+.sticky-table-container::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.sticky-table-container::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground)/0.3);
+  border-radius: 4px;
+}
+
+.sticky-table-container::-webkit-scrollbar-track {
+  background-color: hsl(var(--muted)/0.2);
+}
+
+/* Firefox scrollbar */
+@-moz-document url-prefix() {
+  .sticky-table-container {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground)/0.3) hsl(var(--muted)/0.2);
+  }
+}
+
+/* Add subtle box shadow to frozen columns to indicate they're fixed */
+.sticky-table-container [style*="position: sticky"][style*="left:"]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 4px;
+  pointer-events: none;
+  box-shadow: inset -2px 0 4px -2px rgba(0, 0, 0, 0.15);
+}
+
+.dark .sticky-table-container [style*="position: sticky"][style*="left:"]::after {
+  box-shadow: inset -2px 0 4px -2px rgba(255, 255, 255, 0.1);
+}
+
+/* Improve corner cells (intersections of sticky headers and columns) */
+.sticky-table-container tr:first-child th[style*="position: sticky"][style*="left:"],
+.sticky-table-container tr:nth-child(2) th[style*="position: sticky"][style*="left:"] {
+  z-index: 50 !important; /* Ensure corner cells are on top */
+}

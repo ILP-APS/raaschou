@@ -2,6 +2,8 @@
 import React from "react";
 import FokusarkDescription from "./FokusarkDescription";
 import { useFokusarkData } from "@/hooks/useFokusarkData";
+import StickyTable from "./StickyTable";
+import "./StickyTableStyles.css";
 
 const FokusarkContent: React.FC = () => {
   const { isLoading } = useFokusarkData();
@@ -13,14 +15,14 @@ const FokusarkContent: React.FC = () => {
         <FokusarkDescription />
       </div>
       
-      <div className="p-6 rounded-lg border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
+      <div className="rounded-lg border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-64">
-            <p className="text-muted-foreground">Table will be implemented here.</p>
+          <div className="p-4">
+            <StickyTable />
           </div>
         )}
       </div>
