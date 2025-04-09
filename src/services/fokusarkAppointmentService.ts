@@ -27,10 +27,22 @@ export const transformApiDataToAppointments = (tableData: string[][]): FokusarkA
       montage: parseNumber(row[4]),
       underleverandor: parseNumber(row[5]),
       is_sub_appointment: isSubApp,
-      // Initialize with empty values
+      // Initialize with null values
       montage2: null,
       underleverandor2: null,
-      materialer: null
+      materialer: null,
+      projektering_1: null,
+      produktion: null,
+      montage_3: null,
+      total: null,
+      projektering_2: null,
+      timer_tilbage_1: null,
+      faerdig_pct_ex_montage_nu: null,
+      faerdig_pct_ex_montage_foer: null,
+      est_timer_ift_faerdig_pct: null,
+      plus_minus_timer: null,
+      timer_tilbage_2: null,
+      afsat_fragt: null
     };
     
     // Add Montage 2 and Underleverandor 2 if they contain actual values
@@ -44,6 +56,37 @@ export const transformApiDataToAppointments = (tableData: string[][]): FokusarkA
     
     if (underlev2Str && /\d/.test(underlev2Str) && !/R\d+C\d+/.test(underlev2Str)) {
       appointment.underleverandor2 = parseNumber(underlev2Str);
+    }
+    
+    // Parse the rest of the editable columns if they contain actual values
+    if (row.length > 8) {
+      // Materialer is at index 8 (handled by database trigger)
+      
+      // Est 2 (Projektering_1) at index 9
+      if (row[9] && /\d/.test(row[9]) && !/R\d+C\d+/.test(row[9])) {
+        appointment.projektering_1 = parseNumber(row[9]);
+      }
+      
+      // Est 3 (Produktion) at index 10
+      if (row[10] && /\d/.test(row[10]) && !/R\d+C\d+/.test(row[10])) {
+        appointment.produktion = parseNumber(row[10]);
+      }
+      
+      // Est 4 (Montage_3) at index 11
+      if (row[11] && /\d/.test(row[11]) && !/R\d+C\d+/.test(row[11])) {
+        appointment.montage_3 = parseNumber(row[11]);
+      }
+      
+      // Skip Real columns (12-15) as they're not editable in our current implementation
+      
+      // Timer tilbage (timer_tilbage_1) at index 16
+      if (row[16] && /\d/.test(row[16]) && !/R\d+C\d+/.test(row[16])) {
+        appointment.timer_tilbage_1 = parseNumber(row[16]);
+      }
+      
+      // Skip Prod columns (17-21) as they're not editable in our current implementation
+      
+      // Remaining fields would be handled similarly if needed
     }
     
     return appointment;
@@ -68,8 +111,18 @@ export const transformAppointmentsToDisplayData = (appointments: FokusarkAppoint
     row[7] = appointment.underleverandor2 !== null ? formatNumberToDanish(appointment.underleverandor2) : '';
     row[8] = formatNumberToDanish(appointment.materialer || 0);
     
-    // Add placeholder data for remaining columns
-    for (let i = 9; i < 24; i++) {
+    // Add the new columns
+    row[9] = appointment.projektering_1 !== null ? formatNumberToDanish(appointment.projektering_1) : '';
+    row[10] = appointment.produktion !== null ? formatNumberToDanish(appointment.produktion) : '';
+    row[11] = appointment.montage_3 !== null ? formatNumberToDanish(appointment.montage_3) : '';
+    row[12] = ''; // Real 1 (placeholder)
+    row[13] = ''; // Real 2 (placeholder)
+    row[14] = ''; // Real 3 (placeholder)
+    row[15] = ''; // Real 4 (placeholder)
+    row[16] = appointment.timer_tilbage_1 !== null ? formatNumberToDanish(appointment.timer_tilbage_1) : '';
+    
+    // Placeholder data for remaining columns
+    for (let i = 17; i < 24; i++) {
       row[i] = '';
     }
     

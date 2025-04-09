@@ -48,10 +48,16 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
     return normalizedRow;
   };
 
+  // Function to check if a cell is editable based on its column index
+  const isEditableColumn = (columnIndex: number): boolean => {
+    // Editable columns: Montage 2, Underleverandør 2, Projektering, Produktion, Montage 3, Timer tilbage
+    return [6, 7, 9, 10, 11, 16].includes(columnIndex);
+  };
+
   // Function to render a cell - special handling for editable cells
   const renderCell = (rowIndex: number, cellIndex: number, cellValue: string, isSubAppointment: boolean) => {
-    // If it's the "Montage 2" column (index 6) or "Underleverandør 2" column (index 7), make it editable
-    if (cellIndex === 6 || cellIndex === 7) {
+    // If it's an editable column, make it editable
+    if (isEditableColumn(cellIndex)) {
       return (
         <td key={cellIndex} className={getCellClass(cellIndex, isSubAppointment)}>
           <Input
@@ -75,7 +81,7 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
   };
 
   // Determine the expected number of columns (excluding the row type indicator)
-  const expectedColumns = 25; // Adjusted from 24 to 25 (added Mont 2 back)
+  const expectedColumns = 25;
 
   return (
     <tbody className="bg-background divide-y divide-border">

@@ -101,6 +101,26 @@ export const useFokusarkTable = (initialData: string[][]) => {
     initializeData();
   }, [initialData, isInitialized, toast]);
   
+  // Function to determine which field to update based on column index
+  const getFieldNameForColumn = (colIndex: number): string | null => {
+    switch (colIndex) {
+      case 6:
+        return 'montage2';
+      case 7:
+        return 'underleverandor2';
+      case 9:
+        return 'projektering_1';
+      case 10:
+        return 'produktion';
+      case 11:
+        return 'montage_3';
+      case 16:
+        return 'timer_tilbage_1';
+      default:
+        return null;
+    }
+  };
+  
   // Handle cell value changes
   const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {
     // Get the appointment number from the current row
@@ -116,21 +136,14 @@ export const useFokusarkTable = (initialData: string[][]) => {
     });
     
     // Determine which field to update based on column index
-    let fieldName = '';
-    let parsedValue: number | null = null;
-    
-    if (colIndex === 6) {
-      fieldName = 'montage2';
-      parsedValue = parseNumber(value);
-    } else if (colIndex === 7) {
-      fieldName = 'underleverandor2';
-      parsedValue = parseNumber(value);
-    }
-    
+    const fieldName = getFieldNameForColumn(colIndex);
     if (!fieldName) {
       console.error(`Unsupported column index for update: ${colIndex}`);
       return;
     }
+    
+    // Parse the value
+    const parsedValue = parseNumber(value);
     
     // Save to Supabase
     try {
@@ -150,25 +163,28 @@ export const useFokusarkTable = (initialData: string[][]) => {
         )
       );
       
-      // Update the materialer value in the table display
-      const materialerValue = updatedAppointment.materialer || 0;
-      
-      setTableData(prevData => {
-        const newData = [...prevData];
-        const rowCopy = [...newData[rowIndex]];
-        // Update the materialer column (index 8)
-        rowCopy[8] = materialerValue.toLocaleString('da-DK', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
+      // If materialer was updated by the trigger, update it in the UI
+      if (updatedAppointment.materialer !== null) {
+        setTableData(prevData => {
+          const newData = [...prevData];
+          const rowCopy = [...newData[rowIndex]];
+          // Update the materialer column (index 8)
+          rowCopy[8] = formatDanishNumber(updatedAppointment.materialer || 0);
+          newData[rowIndex] = rowCopy;
+          return newData;
         });
-        newData[rowIndex] = rowCopy;
-        return newData;
-      });
+      }
+      
+      // If total was updated by the trigger, update it in the UI
+      if (updatedAppointment.total !== null) {
+        // This column might not be visible in the current UI but would be available in the data
+        console.log(`Total updated to ${updatedAppointment.total}`);
+      }
       
       // Show a toast notification
       toast({
         title: "Updated successfully",
-        description: `Updated ${fieldName === 'montage2' ? 'Montage 2' : 'Underleverandør 2'} for ${appointmentNumber}`,
+        description: `Updated ${getColumnDisplayName(colIndex)} for ${appointmentNumber}`,
       });
     } catch (error) {
       console.error(`Error updating ${fieldName} for appointment ${appointmentNumber}:`, error);
@@ -187,6 +203,34 @@ export const useFokusarkTable = (initialData: string[][]) => {
         console.error('Error reloading data after failed update:', reloadError);
       }
     }
+  };
+  
+  // Helper function to get column display name for toast messages
+  const getColumnDisplayName = (colIndex: number): string => {
+    switch (colIndex) {
+      case 6:
+        return 'Montage 2';
+      case 7:
+        return 'Underleverandør 2';
+      case 9:
+        return 'Projektering';
+      case 10:
+        return 'Produktion';
+      case 11:
+        return 'Montage 3';
+      case 16:
+        return 'Timer tilbage';
+      default:
+        return `Column ${colIndex + 1}`;
+    }
+  };
+  
+  // Helper function for Danish number formatting
+  const formatDanishNumber = (value: number): string => {
+    return value.toLocaleString('da-DK', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   };
   
   return { tableData, isLoading, handleCellChange };

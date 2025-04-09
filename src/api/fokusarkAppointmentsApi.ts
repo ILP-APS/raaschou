@@ -12,6 +12,18 @@ export interface FokusarkAppointment {
   montage2?: number | null;
   underleverandor2?: number | null;
   materialer?: number | null;
+  projektering_1?: number | null;
+  produktion?: number | null;
+  montage_3?: number | null;
+  total?: number | null;
+  projektering_2?: number | null;
+  timer_tilbage_1?: number | null;
+  faerdig_pct_ex_montage_nu?: number | null;
+  faerdig_pct_ex_montage_foer?: number | null;
+  est_timer_ift_faerdig_pct?: number | null;
+  plus_minus_timer?: number | null;
+  timer_tilbage_2?: number | null;
+  afsat_fragt?: number | null;
   is_sub_appointment?: boolean | null;
   hn_appointment_id?: number | null;
   created_at?: string;
