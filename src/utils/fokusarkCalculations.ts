@@ -85,3 +85,15 @@ export const calculateProduktionTimerTilbage = (row: string[]): string => {
   
   return formatDanishNumber(produktionTimerTilbage);
 };
+
+// Format percentage input ensuring it doesn't exceed 100%
+export const formatPercentageInput = (value: string): string => {
+  // Parse the input as a number
+  const numValue = parseNumber(value);
+  
+  // Cap the value at 100
+  const cappedValue = Math.min(numValue, 100);
+  
+  // Return formatted value
+  return formatDanishNumber(cappedValue);
+};

@@ -1,7 +1,7 @@
 
 import { useToast } from "@/hooks/use-toast";
 import { updateAppointmentField, loadFokusarkAppointments, transformAppointmentsToDisplayData } from "@/services/fokusarkAppointmentService";
-import { parseNumber, calculateTotal, calculateTimerTilbage, calculateProduktionTimerTilbage } from "@/utils/fokusarkCalculations";
+import { parseNumber, calculateTotal, calculateTimerTilbage, calculateProduktionTimerTilbage, formatPercentageInput } from "@/utils/fokusarkCalculations";
 import { FokusarkAppointment } from "@/api/fokusarkAppointmentsApi";
 import { Dispatch, SetStateAction } from 'react';
 import { useFieldMapping } from "./useFieldMapping";
@@ -27,9 +27,19 @@ export const useCellChange = ({
   const { updateMaterialerUI, updateTotalUI, updateProjekteringUI, updateProduktionUI, updateMontageUI, updateCellUI, updateTimerTilbageUI, updateProjekteringRestUI, updateProduktionRestUI } = useUIUpdates(tableData, setTableData);
   const { recalculateProjektering, recalculateProduktion, recalculateMontage, recalculateTimerTilbage, recalculateProduktionTimerTilbage } = useCalculations();
   
+  // Helper function to determine if a column should be treated as percentage
+  const isPercentageColumn = (colIndex: number): boolean => {
+    return [19, 20].includes(colIndex); // Færdig % ex montage nu, Færdig % ex montage før
+  };
+
   const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {
     const appointmentNumber = tableData[rowIndex][0];
     console.log(`Updating value for appointment ${appointmentNumber}, column ${colIndex}, new value: ${value}`);
+    
+    // For percentage columns, ensure the value is formatted and capped at 100%
+    if (isPercentageColumn(colIndex)) {
+      value = formatPercentageInput(value);
+    }
     
     updateCellUI(rowIndex, colIndex, value);
     

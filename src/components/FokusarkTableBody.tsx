@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 
@@ -53,9 +52,41 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
     // Only these columns are editable: 
     // - Montage 2 (index 6)
     // - Underleverandør 2 (index 7)
-    // - Færdig % ex montage nu (index 18)
-    // - Færdig % ex montage før (index 19)
-    return [6, 7, 18, 19].includes(columnIndex);
+    // - Færdig % ex montage nu (index 19)
+    // - Færdig % ex montage før (index 20)
+    return [6, 7, 19, 20].includes(columnIndex);
+  };
+
+  // Function to check if a column should be treated as percentage
+  const isPercentageColumn = (columnIndex: number): boolean => {
+    // These columns are percentages:
+    // - Færdig % ex montage nu (index 19)
+    // - Færdig % ex montage før (index 20)
+    return [19, 20].includes(columnIndex);
+  };
+
+  // Handle percentage input changes
+  const handlePercentageChange = (rowIndex: number, colIndex: number, value: string) => {
+    // Parse the input as a number
+    let numValue = parseFloat(value.replace(',', '.'));
+    
+    // If the input is a valid number
+    if (!isNaN(numValue)) {
+      // Cap the value at 100
+      numValue = Math.min(numValue, 100);
+      
+      // Format with Danish number format
+      const formattedValue = numValue.toLocaleString('da-DK', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      
+      // Call the onCellChange handler with the formatted value
+      onCellChange?.(rowIndex, colIndex, formattedValue);
+    } else {
+      // If input is not a valid number, pass it through unchanged
+      onCellChange?.(rowIndex, colIndex, value);
+    }
   };
 
   // Function to render a cell - special handling for editable cells
@@ -66,7 +97,15 @@ const FokusarkTableBody: React.FC<FokusarkTableBodyProps> = ({ data, onCellChang
         <td key={cellIndex} className={getCellClass(cellIndex, isSubAppointment)}>
           <Input
             value={cellValue}
-            onChange={(e) => onCellChange?.(rowIndex, cellIndex, e.target.value)}
+            onChange={(e) => {
+              // If it's a percentage column, use special handling
+              if (isPercentageColumn(cellIndex)) {
+                handlePercentageChange(rowIndex, cellIndex, e.target.value);
+              } else {
+                // Otherwise, use the standard handler
+                onCellChange?.(rowIndex, cellIndex, e.target.value);
+              }
+            }}
             className="h-8 w-full border-0 bg-transparent focus:ring-1 focus:ring-primary"
           />
         </td>
