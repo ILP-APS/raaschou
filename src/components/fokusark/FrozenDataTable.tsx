@@ -20,16 +20,25 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, MoreHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // Define the data type for our table
 type FokusarkRow = {
@@ -100,6 +109,7 @@ export default function FrozenDataTable() {
   const [data] = useState<FokusarkRow[]>(() => generateSampleData());
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
+  const [rowSelection, setRowSelection] = useState({});
   
   // Create a column helper based on our data type
   const columnHelper = createColumnHelper<FokusarkRow>();
@@ -107,6 +117,31 @@ export default function FrozenDataTable() {
   // Define columns with column helper
   const columns = React.useMemo<ColumnDef<FokusarkRow>[]>(
     () => [
+      {
+        id: 'select',
+        header: ({ table }) => (
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label="Select all"
+            className="ml-2"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+            className="ml-2"
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+        size: 40,
+      },
       columnHelper.accessor('nr', {
         header: 'Nr.',
         cell: info => info.getValue(),
@@ -124,128 +159,41 @@ export default function FrozenDataTable() {
       }),
       columnHelper.accessor('tilbud', {
         header: 'Tilbud',
-        cell: info => info.getValue(),
-        size: 120,
-      }),
-      columnHelper.accessor('montage', {
-        header: 'Montage',
-        cell: info => info.getValue(),
-        size: 120,
-      }),
-      columnHelper.accessor('underleverandor', {
-        header: 'Underleverandør',
-        cell: info => info.getValue(),
-        size: 120,
-      }),
-      columnHelper.accessor('montage2', {
-        header: 'Montage 2',
         cell: info => (
-          <Input 
-            value={info.getValue()} 
-            onChange={e => console.log('Changing montage2:', e.target.value)}
-            className="h-8 w-full border-0 bg-transparent focus:ring-1 focus:ring-primary"
-          />
+          <div className="text-right font-mono">
+            kr. {info.getValue()}
+          </div>
         ),
         size: 120,
       }),
-      columnHelper.accessor('underleverandor2', {
-        header: 'Underleverandør 2',
-        cell: info => (
-          <Input 
-            value={info.getValue()} 
-            onChange={e => console.log('Changing underleverandor2:', e.target.value)}
-            className="h-8 w-full border-0 bg-transparent focus:ring-1 focus:ring-primary"
-          />
-        ),
-        size: 120,
-      }),
-      columnHelper.accessor('materialer', {
-        header: 'Materialer',
-        cell: info => info.getValue(),
-        size: 120,
-      }),
-      columnHelper.accessor('projektering', {
-        header: 'Projektering',
-        cell: info => info.getValue(),
-        size: 120,
-      }),
-      columnHelper.accessor('produktion', {
-        header: 'Produktion',
-        cell: info => info.getValue(),
-        size: 120,
-      }),
-      columnHelper.accessor('montage3', {
-        header: 'Montage',
-        cell: info => info.getValue(),
-        size: 120,
-      }),
-      columnHelper.accessor('projektering2', {
-        header: 'Projektering',
-        cell: info => info.getValue(),
-        size: 120,
-      }),
-      columnHelper.accessor('produktionRealized', {
-        header: 'Produktion',
-        cell: info => info.getValue(),
-        size: 120,
-      }),
-      columnHelper.accessor('montageRealized', {
-        header: 'Montage',
-        cell: info => info.getValue(),
-        size: 120,
-      }),
-      columnHelper.accessor('total', {
-        header: 'Total',
-        cell: info => info.getValue(),
-        size: 120,
-      }),
-      columnHelper.accessor('timerTilbage1', {
-        header: 'Timer tilbage',
-        cell: info => info.getValue(),
-        size: 120,
-      }),
-      columnHelper.accessor('timerTilbage2', {
-        header: 'Timer tilbage',
-        cell: info => info.getValue(),
-        size: 120,
-      }),
-      columnHelper.accessor('faerdigPctExMontageNu', {
-        header: 'Færdig % ex montage nu',
-        cell: info => (
-          <Input 
-            value={info.getValue()} 
-            onChange={e => console.log('Changing faerdigPctExMontageNu:', e.target.value)}
-            className="h-8 w-full border-0 bg-transparent focus:ring-1 focus:ring-primary"
-          />
-        ),
-        size: 160,
-      }),
-      columnHelper.accessor('faerdigPctExMontageFoer', {
-        header: 'Færdig % ex montage før',
-        cell: info => (
-          <Input 
-            value={info.getValue()} 
-            onChange={e => console.log('Changing faerdigPctExMontageFoer:', e.target.value)}
-            className="h-8 w-full border-0 bg-transparent focus:ring-1 focus:ring-primary"
-          />
-        ),
-        size: 160,
-      }),
-      columnHelper.accessor('estTimerIftFaerdigPct', {
-        header: 'Est timer ift færdig %',
-        cell: info => info.getValue(),
-        size: 150,
-      }),
-      columnHelper.accessor('plusMinusTimer', {
-        header: '+/- timer',
-        cell: info => info.getValue(),
-        size: 120,
-      }),
-      columnHelper.accessor('afsatFragt', {
-        header: 'Afsat fragt',
-        cell: info => info.getValue(),
-        size: 120,
-      })
+      {
+        id: 'actions',
+        cell: ({ row }) => {
+          const appointment = row.original;
+          
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => console.log(appointment)}>
+                  View details
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Edit</DropdownMenuItem>
+                <DropdownMenuItem className="text-red-600">
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
     ],
     []
   );
@@ -256,84 +204,63 @@ export default function FrozenDataTable() {
     state: {
       sorting,
       globalFilter,
+      rowSelection,
     },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
+    onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: 5,
       },
     },
   });
   
   return (
-    <div className="w-full">
+    <div className="w-full space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium">Style:</span>
+            <select className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm">
+              <option>New York</option>
+              <option>London</option>
+              <option>Paris</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
       <div className="flex items-center py-4 gap-2">
         <Input
-          placeholder="Search projects..."
+          placeholder="Filter emails..."
           value={globalFilter ?? ''}
           onChange={e => setGlobalFilter(String(e.target.value))}
           className="max-w-sm"
         />
+        
+        <div className="ml-auto">
+          <Button variant="outline" className="ml-2">
+            Columns
+            <ChevronDown className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
       </div>
       
-      <div className="border rounded-md overflow-auto" style={{ maxHeight: '500px' }}>
-        <style>{`
-          table {
-            border-collapse: separate;
-            border-spacing: 0;
-          }
-          
-          /* Resize handle styles */
-          .resizer {
-            position: absolute;
-            right: 0;
-            top: 0;
-            height: 100%;
-            width: 5px;
-            background: rgba(0, 0, 0, 0.1);
-            cursor: col-resize;
-            user-select: none;
-            touch-action: none;
-            opacity: 0;
-          }
-          
-          .resizer:hover {
-            opacity: 1;
-          }
-          
-          .resizer.isResizing {
-            background: rgba(0, 0, 0, 0.2);
-            opacity: 1;
-          }
-          
-          .dark .resizer {
-            background: rgba(255, 255, 255, 0.1);
-          }
-          
-          .dark .resizer.isResizing {
-            background: rgba(255, 255, 255, 0.2);
-          }
-          
-          /* Sub-appointment styling */
-          .bg-muted\\/20 td:first-child {
-            padding-left: 20px;
-          }
-        `}</style>
-        
+      <div className="rounded-md border">
         <Table>
-          <TableHeader className="sticky top-0 bg-muted z-10">
-            {table.getHeaderGroups().map(headerGroup => (
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <TableHead
+                {headerGroup.headers.map((header) => (
+                  <TableHead 
                     key={header.id}
                     onClick={header.column.getToggleSortingHandler()}
-                    className="relative"
+                    className="bg-muted/30"
                   >
                     <div className="flex items-center justify-between">
                       {flexRender(header.column.columnDef.header, header.getContext())}
@@ -356,11 +283,13 @@ export default function FrozenDataTable() {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
+                  data-state={row.getIsSelected() ? "selected" : undefined}
                   className={row.original.isSubAppointment ? 'bg-muted/20' : ''}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell 
                       key={cell.id}
+                      className="py-3"
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
@@ -380,8 +309,8 @@ export default function FrozenDataTable() {
       
       <div className="flex items-center justify-between py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          Showing page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
+          {table.getSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
         
         <Pagination>
