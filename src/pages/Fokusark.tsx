@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/sidebar";
 import FokusarkHeader from "@/components/fokusark/FokusarkHeader";
 import FokusarkContent from "@/components/fokusark/FokusarkContent";
+import "@/components/fokusark/FokusarkTableStyles.css";
 
 export default function FokusarkPage() {
   return (
