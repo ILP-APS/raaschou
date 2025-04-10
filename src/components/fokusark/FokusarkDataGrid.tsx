@@ -16,6 +16,7 @@ import {
 import { useTheme } from "next-themes";
 import "./FokusarkDataGridStyles.css";
 import { formatDanishCurrency } from "@/utils/formatUtils";
+import { parseNumber } from "@/utils/numberFormatUtils";
 
 interface FokusarkColumnMeta {
   frozen?: boolean;
@@ -134,8 +135,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
           return <div className="text-right font-mono"></div>;
         }
         
-        const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
-        const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
+        const numValue = parseNumber(value);
         
         return (
           <div className="flex justify-between">
@@ -168,8 +168,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
           return <div className="text-right font-mono"></div>;
         }
         
-        const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
-        const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
+        const numValue = parseNumber(value);
         
         return (
           <div className="flex justify-between">

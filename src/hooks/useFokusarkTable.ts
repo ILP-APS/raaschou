@@ -8,6 +8,7 @@ import {
   loadAppointmentsFromSupabase
 } from '@/services/appointmentService';
 import { supabase } from '@/integrations/supabase/client';
+import { parseNumber, formatDanishNumber } from '@/utils/numberFormatUtils';
 
 export const useFokusarkTable = (initialData: string[][]) => {
   const [tableData, setTableData] = useState<string[][]>([]);
@@ -126,7 +127,11 @@ export const useFokusarkTable = (initialData: string[][]) => {
   
   // Handle cell changes
   const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {
-    if (!tableData[rowIndex]) return false;
+    if (!tableData[rowIndex]) {
+      console.error("Invalid row index", rowIndex);
+      toast.error("Failed to save changes: invalid row");
+      return false;
+    }
     
     try {
       // Update the cell value in the local state
@@ -134,26 +139,36 @@ export const useFokusarkTable = (initialData: string[][]) => {
       newData[rowIndex][colIndex] = value;
       setTableData(newData);
       
-      // Map the array index to the Supabase column name
-      const columnName = `${colIndex + 1} col`;
+      // Format numeric values for display (this won't affect the saved value)
+      try {
+        const numValue = parseNumber(value);
+        if (!isNaN(numValue) && numValue !== 0) {
+          const formattedValue = formatDanishNumber(numValue);
+          newData[rowIndex][colIndex] = formattedValue;
+        }
+      } catch (e) {
+        console.log("Not a number, keeping original value", value);
+      }
       
-      // Get the appointment number or ID for the row
-      const rowId = rowIndex.toString();
-      const appointmentNumber = newData[rowIndex][0]; // First column usually contains appointment number
+      // Get the appointment number for the row
+      const appointmentNumber = newData[rowIndex][0]; // First column contains appointment number
       
-      console.log(`Updating cell: row=${rowId}, column=${columnName}, appointmentNumber=${appointmentNumber}, value=${value}`);
+      console.log(`Updating cell: row=${rowIndex}, column=${colIndex}, appointmentNumber=${appointmentNumber}, value=${value}`);
+      
+      // Prepare UUID-compatible ID
+      const rowId = `row-${rowIndex}-${Date.now()}`;
       
       // Create update data
       const updateData: Record<string, any> = {
-        [columnName]: value
+        [`${colIndex + 1} col`]: value
       };
       
-      // If there's an appointment number, use it as well for more reliable updates
-      if (appointmentNumber) {
-        updateData['1 col'] = appointmentNumber;
-      }
+      // Add the first 3 columns as identifiers to ensure we're updating the right row
+      updateData['1 col'] = newData[rowIndex][0] || ''; // Appointment number
+      updateData['2 col'] = newData[rowIndex][1] || ''; // Subject
+      updateData['3 col'] = newData[rowIndex][2] || ''; // Responsible
       
-      // Update in Supabase using the row ID
+      // Update in Supabase
       const { data, error } = await supabase
         .from('fokusark_table')
         .upsert({
@@ -163,11 +178,11 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       if (error) {
         console.error("Error updating Supabase:", error);
-        toast.error("Failed to save changes");
+        toast.error("Failed to save changes to database");
         return false;
       }
       
-      toast.success("Cell updated in database");
+      toast.success("Cell updated successfully");
       return true;
     } catch (error) {
       console.error("Error updating cell:", error);
@@ -180,6 +195,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
   const refreshData = async () => {
     setIsRefreshing(true);
     setError(null);
+    toast.info("Refreshing data from database...");
     
     try {
       // First, try to get data directly from Supabase without fallbacks
@@ -187,7 +203,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
       const { data, error } = await supabase
         .from('fokusark_table')
         .select('*')
-        .order('id');
+        .order('created_at');
       
       if (error) {
         console.error("Error fetching from Supabase during refresh:", error);
@@ -243,6 +259,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
     } catch (err) {
       console.error("Error during refresh:", err);
       handleError(err);
+      toast.error("Failed to refresh data");
       return false;
     } finally {
       setIsRefreshing(false);
