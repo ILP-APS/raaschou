@@ -7,16 +7,22 @@ import {
   saveAppointmentsToSupabase,
   loadAppointmentsFromSupabase
 } from '@/services/appointmentService';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useFokusarkTable = (initialData: string[][]) => {
   const [tableData, setTableData] = useState<string[][]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Initial data load
   useEffect(() => {
     const loadData = async () => {
+      if (isRefreshing) return; // Prevent duplicate fetches
+      
       setIsLoading(true);
+      console.log('Loading data in useFokusarkTable');
+      
       try {
         // Always try to get fresh data from API first
         const appointments = await fetchAppointments();
@@ -77,7 +83,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
     };
     
     loadData();
-  }, [initialData]);
+  }, [initialData, isRefreshing]);
   
   // Handle cell changes
   const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {
@@ -119,6 +125,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
   
   // Refresh data from API
   const refreshData = async () => {
+    setIsRefreshing(true);
     setIsLoading(true);
     toast.info("Refreshing data from API...");
     
@@ -148,6 +155,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
       toast.error("Failed to refresh data from API");
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
   

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 
 const FokusarkContent: React.FC = () => {
-  const { isLoading, tableData, isInitialized, handleCellChange, refreshData } = useFokusarkTable([]);
+  const { isLoading, tableData, handleCellChange, refreshData } = useFokusarkTable([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
   const handleRefresh = async () => {
@@ -16,7 +16,7 @@ const FokusarkContent: React.FC = () => {
     setIsRefreshing(false);
   };
   
-  if (isLoading && !isInitialized) {
+  if (isLoading) {
     return (
       <div className="flex flex-col gap-4 p-4 md:p-6">
         <div className="flex flex-col gap-4 pb-4">

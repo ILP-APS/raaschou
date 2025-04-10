@@ -36,30 +36,35 @@ export async function fetchAppointments(): Promise<AppointmentResponse[]> {
   const apiUrl = 'https://publicapi.e-regnskab.dk/Appointment/Standard?open=true';
   const apiKey = 'w9Jq5NiTeOIpXfovZ0Hf1jLnM:pGwZ';
   
-  const response = await fetch(apiUrl, {
-    method: 'GET',
-    headers: {
-      'accept': 'text/plain',
-      'ApiKey': apiKey
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'accept': 'text/plain',
+        'ApiKey': apiKey
+      }
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`API Error: ${response.status}`, errorText);
+      throw new Error(`API responded with status: ${response.status}`);
     }
-  });
-  
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error(`API Error: ${response.status}`, errorText);
-    throw new Error(`API responded with status: ${response.status}`);
+    
+    const data = await response.json();
+    console.log('API Response:', data);
+    
+    if (!Array.isArray(data)) {
+      console.error('API returned non-array data:', data);
+      throw new Error('Invalid data format from API');
+    }
+    
+    console.log(`Successfully fetched ${data.length} real appointments from API`);
+    return data;
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    throw error;
   }
-  
-  const data = await response.json();
-  console.log('API Response:', data);
-  
-  if (!Array.isArray(data)) {
-    console.error('API returned non-array data:', data);
-    throw new Error('Invalid data format from API');
-  }
-  
-  console.log(`Successfully fetched ${data.length} real appointments from API`);
-  return data;
 }
 
 /**
@@ -134,33 +139,38 @@ export async function saveAppointmentsToSupabase(appointments: AppointmentRespon
 export async function loadAppointmentsFromSupabase(): Promise<string[][]> {
   console.log("Loading appointments from Supabase");
   
-  const { data, error } = await supabase
-    .from('fokusark_table')
-    .select('*')
-    .order('created_at', { ascending: true });
-  
-  if (error) {
-    console.error("Error loading from Supabase:", error);
+  try {
+    const { data, error } = await supabase
+      .from('fokusark_table')
+      .select('*')
+      .order('created_at', { ascending: true });
+    
+    if (error) {
+      console.error("Error loading from Supabase:", error);
+      throw error;
+    }
+    
+    if (!data || data.length === 0) {
+      console.log("No data found in Supabase");
+      return [];
+    }
+    
+    console.log(`Loaded ${data.length} rows from Supabase`);
+    
+    // Convert to table format
+    const tableData = data.map(row => {
+      const rowData: string[] = [];
+      for (let i = 1; i <= 24; i++) {
+        rowData.push(row[`${i} col`] || '');
+      }
+      return rowData;
+    });
+    
+    return tableData;
+  } catch (error) {
+    console.error("Error in loadAppointmentsFromSupabase:", error);
     throw error;
   }
-  
-  if (!data || data.length === 0) {
-    console.log("No data found in Supabase");
-    return [];
-  }
-  
-  console.log(`Loaded ${data.length} rows from Supabase`);
-  
-  // Convert to table format
-  const tableData = data.map(row => {
-    const rowData: string[] = [];
-    for (let i = 1; i <= 24; i++) {
-      rowData.push(row[`${i} col`] || '');
-    }
-    return rowData;
-  });
-  
-  return tableData;
 }
 
 /**
