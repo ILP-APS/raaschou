@@ -41,6 +41,9 @@ export const useTableData = () => {
       try {
         setIsProcessing(true);
         
+        // Debug the appointment data
+        console.log("First appointment from useAppointments:", appointments[0]);
+        
         const userMap = createUserMap(users);
         
         const processedData: string[][] = [];
@@ -56,6 +59,7 @@ export const useTableData = () => {
         for (const batch of appointmentBatches) {
           const batchPromises = batch.map(async (appointment) => {
             try {
+              console.log("Processing appointment:", appointment);
               const details = await getAppointmentDetail(appointment.hnAppointmentID);
               
               if (details.done) {
@@ -76,9 +80,12 @@ export const useTableData = () => {
                 return null;
               }
               
+              // Use the appointmentNumber directly from the API
+              console.log("Using appointment number:", appointment.appointmentNumber);
+              
               // Build the row of data
               const row = [
-                appointment.appointmentNumber || `${appointment.hnAppointmentID}`,
+                appointment.appointmentNumber, // Use this directly from the API
                 details.subject || 'N/A',
                 responsibleUserName,
                 offerTotal,
@@ -128,13 +135,16 @@ export const useTableData = () => {
         }
         
         if (processedData.length === 0) {
-          setTableData(generateTableData());
+          const sampleData = generateTableData();
+          console.log("Using sample data, first row:", sampleData[0]);
+          setTableData(sampleData);
           toast({
             title: "No matching appointments found",
             description: "No appointments met the criteria (not done and offer > 40,000). Using sample data instead.",
             variant: "default",
           });
         } else {
+          console.log("Using API data, first row:", processedData[0]);
           setTableData(processedData);
           toast({
             title: "Data loaded",
@@ -144,7 +154,8 @@ export const useTableData = () => {
         }
       } catch (error) {
         console.error("Error building table data:", error);
-        setTableData(generateTableData());
+        const sampleData = generateTableData();
+        setTableData(sampleData);
         toast({
           title: "Error processing data",
           description: "Using sample data instead.",

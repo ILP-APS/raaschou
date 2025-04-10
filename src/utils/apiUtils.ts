@@ -1,4 +1,3 @@
-
 // API utility for e-regnskab data fetching
 export const fetchOpenAppointments = async () => {
   const res = await fetch(
@@ -13,7 +12,10 @@ export const fetchOpenAppointments = async () => {
   );
   
   if (!res.ok) throw new Error("Failed to fetch open appointments");
-  return res.json();
+  
+  const data = await res.json();
+  console.log("API response from fetchOpenAppointments:", data[0]);
+  return data;
 };
 
 // Fetch appointment details by ID
@@ -108,12 +110,15 @@ export const fetchAppointmentLineWork = async (appointmentId: number) => {
 
 // Helper function to sort appointments by ID and group sub-appointments
 export const sortAndGroupAppointments = (appointments: any[]) => {
+  console.log("Sorting appointments, first appointment:", appointments[0]);
+  
   // Create a mapping of parent appointment numbers to arrays of sub-appointments
   const appointmentGroups: Record<string, any[]> = {};
   
   // First, separate parent appointments and sub-appointments
   appointments.forEach(appointment => {
     const appNumber = appointment.appointmentNumber;
+    console.log("Processing appointment with number:", appNumber);
     
     // Check if this is a sub-appointment (contains a hyphen)
     if (appNumber && appNumber.includes('-')) {
@@ -177,5 +182,6 @@ export const sortAndGroupAppointments = (appointments: any[]) => {
     }
   });
   
+  console.log("First sorted appointment:", sortedAppointments[0]);
   return sortedAppointments;
 };

@@ -6,7 +6,8 @@ export const generateTableData = () => {
   for (let i = 1; i <= 10; i++) {
     const row = [];
     // First column (index 0) should be the actual appointment number (no A- prefix)
-    row.push(`${24000 + i}`); // Using realistic appointment numbers like 24001, 24002, etc.
+    // Use the format shown in the API (like "9598")
+    row.push(`${9590 + i}`); // Using realistic appointment numbers like 9591, 9592, etc.
     
     // For the second column (index 1), add some sample text
     row.push(`Sample Project ${i}`);
