@@ -17,14 +17,13 @@ export const formatDanishNumber = (value: number): string => {
  */
 export const formatDanishCurrency = (value: number): string => {
   // Check for NaN
-  if (isNaN(value)) return '0,00 DKK';
+  if (isNaN(value)) return '0 DKK';
 
-  // Format using Danish locale rules
+  // Format using Danish locale rules without decimal places
   const formattedValue = value.toLocaleString('da-DK', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   });
   
   return `${formattedValue} DKK`;
 };
-
