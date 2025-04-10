@@ -139,30 +139,130 @@ export default function MinimalStickyTable({
       accessorKey: `col3`,
       header: `Montage 2`,
       meta: { groupIndex: 2 } as ColumnMeta,
-      cell: ({ getValue }) => {
+      cell: ({ getValue, row, column }) => {
         const value = getValue() as string;
+        
+        if (editingCell?.rowIndex === parseInt(row.id) && editingCell?.colIndex === 6) {
+          return (
+            <input
+              type="text"
+              inputMode="decimal"
+              value={value}
+              onChange={(e) => {
+                const regex = /^[0-9.,]*$/;
+                if (regex.test(e.target.value) || e.target.value === '') {
+                  handleCellEdit(parseInt(row.id), 6, e.target.value);
+                }
+              }}
+              onBlur={(e) => {
+                setEditingCell(null);
+                if (e.target.value) {
+                  try {
+                    const numValue = parseFloat(e.target.value.replace(/\./g, '').replace(',', '.'));
+                    if (!isNaN(numValue)) {
+                      const formatted = numValue.toLocaleString('da-DK');
+                      handleCellEdit(parseInt(row.id), 6, formatted);
+                    }
+                  } catch (error) {
+                    console.error("Error formatting number:", error);
+                  }
+                }
+              }}
+              style={{
+                width: '100%',
+                height: '100%',
+                padding: '8px 12px',
+                border: 'none',
+                backgroundColor: 'transparent',
+                textAlign: 'right',
+                fontFamily: 'inherit',
+                fontSize: 'inherit',
+                color: 'inherit',
+              }}
+              className="focus:outline-none focus:ring-1 focus:ring-primary"
+              autoFocus
+            />
+          );
+        }
         
         if (!value || value.trim() === '') {
           return <div className="text-right font-mono"></div>;
         }
-      
+        
         const numValue = parseNumber(value);
-        return <div className="text-right font-mono">{formatDanishCurrency(numValue)}</div>;
+        return (
+          <div 
+            className="text-right font-mono cursor-pointer" 
+            onClick={() => setEditingCell({ rowIndex: parseInt(row.id), colIndex: 6 })}
+          >
+            {formatDanishCurrency(numValue)}
+          </div>
+        );
       }
     },
     {
       accessorKey: `col4`,
       header: `Underleverandør 2`,
       meta: { groupIndex: 2 } as ColumnMeta,
-      cell: ({ getValue }) => {
+      cell: ({ getValue, row, column }) => {
         const value = getValue() as string;
+        
+        if (editingCell?.rowIndex === parseInt(row.id) && editingCell?.colIndex === 7) {
+          return (
+            <input
+              type="text"
+              inputMode="decimal"
+              value={value}
+              onChange={(e) => {
+                const regex = /^[0-9.,]*$/;
+                if (regex.test(e.target.value) || e.target.value === '') {
+                  handleCellEdit(parseInt(row.id), 7, e.target.value);
+                }
+              }}
+              onBlur={(e) => {
+                setEditingCell(null);
+                if (e.target.value) {
+                  try {
+                    const numValue = parseFloat(e.target.value.replace(/\./g, '').replace(',', '.'));
+                    if (!isNaN(numValue)) {
+                      const formatted = numValue.toLocaleString('da-DK');
+                      handleCellEdit(parseInt(row.id), 7, formatted);
+                    }
+                  } catch (error) {
+                    console.error("Error formatting number:", error);
+                  }
+                }
+              }}
+              style={{
+                width: '100%',
+                height: '100%',
+                padding: '8px 12px',
+                border: 'none',
+                backgroundColor: 'transparent',
+                textAlign: 'right',
+                fontFamily: 'inherit',
+                fontSize: 'inherit',
+                color: 'inherit',
+              }}
+              className="focus:outline-none focus:ring-1 focus:ring-primary"
+              autoFocus
+            />
+          );
+        }
         
         if (!value || value.trim() === '') {
           return <div className="text-right font-mono"></div>;
         }
         
         const numValue = parseNumber(value);
-        return <div className="text-right font-mono">{formatDanishCurrency(numValue)}</div>;
+        return (
+          <div 
+            className="text-right font-mono cursor-pointer" 
+            onClick={() => setEditingCell({ rowIndex: parseInt(row.id), colIndex: 7 })}
+          >
+            {formatDanishCurrency(numValue)}
+          </div>
+        );
       }
     },
     
@@ -237,7 +337,7 @@ export default function MinimalStickyTable({
       header: `Summary ${i + 1}`,
       meta: { groupIndex: 7 } as ColumnMeta
     }))
-  ], []);
+  ], [handleCellEdit, editingCell]);
 
   const table = useReactTable({
     data,

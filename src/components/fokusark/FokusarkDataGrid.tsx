@@ -17,19 +17,16 @@ import { useTheme } from "next-themes";
 import "./FokusarkDataGridStyles.css";
 import { formatDanishCurrency } from "@/utils/formatUtils";
 
-// Define custom meta type for columns
 interface FokusarkColumnMeta {
   frozen?: boolean;
 }
 
-// Define the row type for our grid
 interface FokusarkRow {
   [key: string]: string | number | boolean;
   id: string;
   isSubAppointment?: boolean;
 }
 
-// Define props for our component
 interface FokusarkDataGridProps {
   data: string[][];
   onCellChange?: (rowIndex: number, colIndex: number, value: string) => void;
@@ -40,7 +37,6 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
   const isDarkMode = resolvedTheme === "dark";
   const [rows, setRows] = useState<FokusarkRow[]>([]);
 
-  // Transform raw data to grid rows on data change
   useEffect(() => {
     console.log("FokusarkDataGrid received data:", data?.length || 0, "rows");
     if (data && data.length > 0) {
@@ -53,16 +49,13 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
     }
   }, [data]);
 
-  // Function to transform string[][] data into row objects for the grid
   const transformDataToRows = (rawData: string[][]): FokusarkRow[] => {
     return (rawData || []).map((row, index) => {
       const rowObj: FokusarkRow = { id: index.toString() };
       
-      // The last element might indicate if it's a sub-appointment
       const rowType = row.length > 0 ? row[row.length - 1] : null;
       rowObj.isSubAppointment = rowType === 'sub-appointment';
       
-      // Map the columns to the rowObj
       const columnKeys = [
         "nr", "navn", "ansvarlig", "tilbud", "montage", "underleverandor", 
         "montage2", "underleverandor2", "materialer", "projektering", 
@@ -80,7 +73,6 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
     });
   };
 
-  // Define columns
   const columns: ColumnDef<FokusarkRow, any>[] = [
     {
       accessorKey: 'nr',
@@ -103,7 +95,6 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
         const value = getValue() as string;
         if (!value) return <div className="text-right font-mono"></div>;
         
-        // Parse and format with DKK
         const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
         const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
         return <div className="text-right font-mono">{formatted}</div>;
@@ -116,7 +107,6 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
         const value = getValue() as string;
         if (!value) return <div className="text-right font-mono"></div>;
         
-        // Parse and format with DKK
         const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
         const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
         return <div className="text-right font-mono">{formatted}</div>;
@@ -129,7 +119,6 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
         const value = getValue() as string;
         if (!value) return <div className="text-right font-mono"></div>;
         
-        // Parse and format with DKK
         const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
         const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
         return <div className="text-right font-mono">{formatted}</div>;
@@ -140,22 +129,32 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
       header: 'Montage 2',
       cell: ({ getValue, row, column, table }) => {
         const value = getValue() as string;
+        
+        if (!value || value.trim() === '') {
+          return <div className="text-right font-mono"></div>;
+        }
+        
+        const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+        const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
+        
         return (
-          <input
-            value={value}
-            onChange={e => {
-              const rowIndex = parseInt(row.id);
-              const colKey = column.id;
-              const colIndex = 6; // Index of montage2 column
-              onCellChange?.(rowIndex, colIndex, e.target.value);
-              
-              // Update the internal state
-              const newRows = [...rows];
-              newRows[rowIndex][colKey] = e.target.value;
-              setRows(newRows);
-            }}
-            className="w-full bg-transparent border-0 focus:ring-1 focus:ring-primary"
-          />
+          <div className="flex justify-between">
+            <input
+              value={value}
+              onChange={e => {
+                const rowIndex = parseInt(row.id);
+                const colKey = column.id;
+                const colIndex = 6; // Index of montage2 column
+                onCellChange?.(rowIndex, colIndex, e.target.value);
+                
+                const newRows = [...rows];
+                newRows[rowIndex][colKey] = e.target.value;
+                setRows(newRows);
+              }}
+              className="w-full bg-transparent border-0 focus:ring-1 focus:ring-primary text-right font-mono"
+            />
+            {numValue > 0 && <div className="text-right font-mono">{formatDanishCurrency(numValue)}</div>}
+          </div>
         );
       }
     },
@@ -164,22 +163,32 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
       header: 'Underleverandør 2',
       cell: ({ getValue, row, column }) => {
         const value = getValue() as string;
+        
+        if (!value || value.trim() === '') {
+          return <div className="text-right font-mono"></div>;
+        }
+        
+        const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+        const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
+        
         return (
-          <input
-            value={value}
-            onChange={e => {
-              const rowIndex = parseInt(row.id);
-              const colKey = column.id;
-              const colIndex = 7; // Index of underleverandor2 column
-              onCellChange?.(rowIndex, colIndex, e.target.value);
-              
-              // Update the internal state
-              const newRows = [...rows];
-              newRows[rowIndex][colKey] = e.target.value;
-              setRows(newRows);
-            }}
-            className="w-full bg-transparent border-0 focus:ring-1 focus:ring-primary"
-          />
+          <div className="flex justify-between">
+            <input
+              value={value}
+              onChange={e => {
+                const rowIndex = parseInt(row.id);
+                const colKey = column.id;
+                const colIndex = 7; // Index of underleverandor2 column
+                onCellChange?.(rowIndex, colIndex, e.target.value);
+                
+                const newRows = [...rows];
+                newRows[rowIndex][colKey] = e.target.value;
+                setRows(newRows);
+              }}
+              className="w-full bg-transparent border-0 focus:ring-1 focus:ring-primary text-right font-mono"
+            />
+            {numValue > 0 && <div className="text-right font-mono">{formatDanishCurrency(numValue)}</div>}
+          </div>
         );
       }
     },
@@ -190,7 +199,6 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
         const value = getValue() as string;
         if (!value) return <div className="text-right font-mono"></div>;
         
-        // Parse and format with DKK
         const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
         const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
         return <div className="text-right font-mono">{formatted}</div>;
@@ -203,7 +211,6 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
         const value = getValue() as string;
         if (!value) return <div className="text-right font-mono"></div>;
         
-        // Parse and format with DKK
         const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
         const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
         return <div className="text-right font-mono">{formatted}</div>;
@@ -216,7 +223,6 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
         const value = getValue() as string;
         if (!value) return <div className="text-right font-mono"></div>;
         
-        // Parse and format with DKK
         const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
         const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
         return <div className="text-right font-mono">{formatted}</div>;
@@ -236,7 +242,6 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
               const colIndex = 18; // Index of faerdigPctExMontageNu
               onCellChange?.(rowIndex, colIndex, e.target.value);
               
-              // Update the internal state
               const newRows = [...rows];
               newRows[rowIndex][colKey] = e.target.value;
               setRows(newRows);
@@ -260,7 +265,6 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
               const colIndex = 19; // Index of faerdigPctExMontageFoer
               onCellChange?.(rowIndex, colIndex, e.target.value);
               
-              // Update the internal state
               const newRows = [...rows];
               newRows[rowIndex][colKey] = e.target.value;
               setRows(newRows);
@@ -272,20 +276,18 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
     }
   ];
 
-  // Helper to calculate column offsets
   const getColumnOffset = (index: number): number => {
     let offset = 0;
     for (let i = 0; i < index; i++) {
       const columnMeta = columns[i].meta as FokusarkColumnMeta | undefined;
       const isFrozen = columnMeta?.frozen === true;
       if (isFrozen) {
-        offset += 150; // Fixed column width
+        offset += 150;
       }
     }
     return offset;
   };
 
-  // Create the table instance
   const table = useReactTable({
     data: rows,
     columns,
@@ -317,7 +319,6 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
       >
         <Table style={{ width: 'auto', minWidth: '100%' }}>
           <TableHeader>
-            {/* Sticky header row */}
             <TableRow
               style={{
                 position: 'sticky',
@@ -339,7 +340,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
                       minWidth: '150px',
                       position: isFrozen ? 'sticky' : 'static',
                       left: isFrozen ? `${leftOffset}px` : undefined,
-                      zIndex: isFrozen ? 100 : 50, // Increased z-index for frozen columns
+                      zIndex: isFrozen ? 100 : 50,
                       backgroundColor: 'hsl(var(--background))',
                       boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : undefined,
                       borderRight: isFrozen ? '1px solid hsl(var(--border))' : undefined,
@@ -356,7 +357,6 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
           <TableBody>
             {table.getRowModel().rows.map((row, rowIndex) => {
               const isSubAppointment = row.original.isSubAppointment;
-              // Make the first row sticky
               const isFirstDataRow = rowIndex === 0;
               
               return (
@@ -364,7 +364,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
                   key={row.id}
                   style={{
                     position: isFirstDataRow ? 'sticky' : 'static',
-                    top: '41px', // Height of the header row
+                    top: '41px',
                     zIndex: isFirstDataRow ? 40 : 30,
                     backgroundColor: isFirstDataRow 
                       ? 'hsl(var(--background))'
@@ -376,15 +376,14 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
                     const isFrozen = columnMeta?.frozen === true;
                     const leftOffset = isFrozen ? getColumnOffset(cellIndex) : undefined;
                     
-                    // Determine z-index based on both sticky position and frozen status
-                    let zIndex = 30; // Default z-index
+                    let zIndex = 30;
                     
                     if (isFrozen && isFirstDataRow) {
-                      zIndex = 90; // Highest z-index for frozen cells in the first row
+                      zIndex = 90;
                     } else if (isFrozen) {
-                      zIndex = 80; // High z-index for frozen cells in other rows
+                      zIndex = 80;
                     } else if (isFirstDataRow) {
-                      zIndex = 40; // Higher z-index for non-frozen cells in the first row
+                      zIndex = 40;
                     }
                     
                     return (
@@ -395,9 +394,9 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
                           minWidth: '150px',
                           position: isFrozen || isFirstDataRow ? 'sticky' : 'static',
                           left: isFrozen ? `${leftOffset}px` : undefined,
-                          top: isFrozen && isFirstDataRow ? '41px' : undefined, // For first row frozen cells
+                          top: isFrozen && isFirstDataRow ? '41px' : undefined,
                           zIndex,
-                          backgroundColor: 'hsl(var(--background))', // Use standard background color for all rows
+                          backgroundColor: 'hsl(var(--background))',
                           boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : undefined,
                           borderRight: isFrozen ? '1px solid hsl(var(--border))' : undefined,
                         }}
