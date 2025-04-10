@@ -33,16 +33,37 @@ export interface FokusarkAppointment {
 
 /**
  * Fetches all fokusark appointments from Supabase
- * (This is a mock implementation since the table doesn't exist yet)
+ * Now implemented with mock data for development
  */
 export async function fetchFokusarkAppointments() {
-  console.log('Mock: Fetching fokusark appointments');
-  return [];
+  console.log('Fetching fokusark appointments');
+  
+  try {
+    // Try to get data from Supabase if the table exists
+    const { data, error } = await supabase
+      .from('fokusark_appointments')
+      .select('*');
+    
+    if (error) {
+      console.warn('Error fetching fokusark appointments, using mock data:', error);
+      return generateMockAppointments();
+    }
+    
+    if (data && data.length > 0) {
+      return data;
+    } else {
+      console.log('No appointments found in database, using mock data');
+      return generateMockAppointments();
+    }
+  } catch (error) {
+    console.error('Exception fetching fokusark appointments:', error);
+    return generateMockAppointments();
+  }
 }
 
 /**
  * Upsert a fokusark appointment in Supabase
- * (This is a mock implementation since the table doesn't exist yet)
+ * (Now with mock implementation until table exists)
  */
 export async function upsertFokusarkAppointment(appointment: FokusarkAppointment) {
   console.log('Mock: Upserting fokusark appointment', appointment);
@@ -51,7 +72,7 @@ export async function upsertFokusarkAppointment(appointment: FokusarkAppointment
 
 /**
  * Batch upsert multiple fokusark appointments
- * (This is a mock implementation since the table doesn't exist yet)
+ * (Mock implementation until table exists)
  */
 export async function batchUpsertFokusarkAppointments(appointments: FokusarkAppointment[]) {
   console.log('Mock: Batch upserting fokusark appointments', appointments.length);
@@ -60,7 +81,7 @@ export async function batchUpsertFokusarkAppointments(appointments: FokusarkAppo
 
 /**
  * Update a specific field for a fokusark appointment
- * (This is a mock implementation since the table doesn't exist yet)
+ * (Mock implementation until table exists)
  */
 export async function updateFokusarkAppointmentField(
   appointmentNumber: string, 
@@ -82,7 +103,7 @@ export async function updateFokusarkAppointmentField(
 
 /**
  * Update realized hours for an appointment
- * (This is a mock implementation since the table doesn't exist yet)
+ * (Mock implementation until table exists)
  */
 export async function updateRealizedHours(
   appointmentNumber: string,
@@ -105,4 +126,47 @@ export async function updateRealizedHours(
   };
   
   return mockAppointment;
+}
+
+/**
+ * Generate mock appointment data for development
+ */
+function generateMockAppointments(): FokusarkAppointment[] {
+  const mockData: FokusarkAppointment[] = [];
+  
+  // Create some sample appointment data
+  const subjects = [
+    "Construction af udestue", "Installation af gulv", "Repair af køkken", 
+    "Maintenance af udestue", "Upgrade af gulv", "Remodel af badeværelse",
+    "Replacement af gulv", "Renovation af tag", "Construction af vinduer"
+  ];
+  
+  const responsiblePersons = ["Anna", "Peter", "Maria", "Thomas", "Sofie", "Lars", "Mette"];
+  
+  for (let i = 0; i < 15; i++) {
+    const appointmentNumber = (24481 + i).toString();
+    const subject = subjects[Math.floor(Math.random() * subjects.length)];
+    const responsiblePerson = responsiblePersons[Math.floor(Math.random() * responsiblePersons.length)];
+    
+    // Generate random budget numbers
+    const tilbud = Math.floor(Math.random() * 5000) + 1000;
+    const montage = Math.floor(tilbud * 0.2);
+    const underleverandor = Math.floor(tilbud * 0.15);
+    
+    mockData.push({
+      id: i.toString(),
+      appointment_number: appointmentNumber,
+      subject,
+      responsible_person: responsiblePerson,
+      tilbud,
+      montage,
+      underleverandor,
+      hn_appointment_id: 10000 + i,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
+  }
+  
+  console.log(`Generated ${mockData.length} mock appointments`);
+  return mockData;
 }

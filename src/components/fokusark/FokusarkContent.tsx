@@ -1,11 +1,21 @@
 
-import React from "react";
+import React, { useState } from "react";
 import FokusarkDescription from "./FokusarkDescription";
 import MinimalStickyTable from "./MinimalStickyTable";
 import { useFokusarkTable } from "@/hooks/useFokusarkTable";
+import { Button } from "@/components/ui/button";
+import { RefreshCw, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const FokusarkContent: React.FC = () => {
-  const { isLoading, tableData, isInitialized, handleCellChange, refreshData } = useFokusarkTable([]);
+  const { isLoading, tableData, isInitialized, handleCellChange, refreshData, error } = useFokusarkTable([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refreshData();
+    setIsRefreshing(false);
+  };
   
   if (isLoading && !isInitialized) {
     return (
@@ -26,13 +36,31 @@ const FokusarkContent: React.FC = () => {
       <div className="flex flex-col gap-4 pb-4">
         <h2 className="text-2xl font-semibold tracking-tight">Fokusark</h2>
         <FokusarkDescription />
+        
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>API Error</AlertTitle>
+            <AlertDescription>
+              Unable to fetch data from the API ({error.message}). Sample data is being displayed instead.
+              {!error.message.includes("401") ? "" : " Check your API key credentials."}
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <div className="flex justify-end gap-2">
-          <button 
-            onClick={refreshData}
-            className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
+          <Button 
+            onClick={handleRefresh}
+            className="gap-2"
+            disabled={isRefreshing}
           >
-            Refresh Data from API
-          </button>
+            {isRefreshing ? (
+              <RefreshCw className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            {isRefreshing ? 'Refreshing...' : 'Refresh Data from API'}
+          </Button>
         </div>
       </div>
       

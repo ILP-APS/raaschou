@@ -18,7 +18,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
   const [tableData, setTableData] = useState<string[][]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   
   useEffect(() => {
     const initData = async () => {
@@ -50,7 +50,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
         setIsInitialized(true);
       } catch (error) {
         console.error("Error initializing table data:", error);
-        setError("Failed to initialize table data");
+        setError(error instanceof Error ? error : new Error("Failed to initialize table data"));
         
         // Fallback to generated data
         try {
@@ -82,15 +82,17 @@ export const useFokusarkTable = (initialData: string[][]) => {
     });
   }, [initialData, tableData, isLoading, isInitialized, error]);
   
-  const handleCellChange = (rowIndex: number, colIndex: number, value: string) => {
+  const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {
     console.log("Cell change:", rowIndex, colIndex, value);
     
     const newData = [...tableData];
     if (newData[rowIndex]) {
       newData[rowIndex][colIndex] = value;
       setTableData(newData);
+      return true;
     } else {
       console.warn(`Row ${rowIndex} does not exist, cannot update cell`);
+      return false;
     }
   };
   
@@ -115,7 +117,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
       }
     } catch (error) {
       console.error("Error refreshing data:", error);
-      setError("Failed to refresh data");
+      setError(error instanceof Error ? error : new Error("Failed to refresh data"));
       toast.error("Failed to refresh data");
     } finally {
       setIsLoading(false);

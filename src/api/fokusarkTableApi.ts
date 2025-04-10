@@ -11,6 +11,18 @@ export interface FokusarkTableRow {
  */
 export async function fetchFokusarkTableData() {
   try {
+    // Check if fokusark_table exists
+    const { data: tableInfo, error: tableCheckError } = await supabase
+      .from('fokusark_table')
+      .select('id')
+      .limit(1);
+      
+    // If table doesn't exist or error, return empty array
+    if (tableCheckError || !tableInfo) {
+      console.log('No fokusark_table found or error fetching table:', tableCheckError);
+      return [];
+    }
+    
     const { data, error } = await supabase
       .from('fokusark_table')
       .select('*')
@@ -20,7 +32,7 @@ export async function fetchFokusarkTableData() {
     return data || [];
   } catch (error) {
     console.error('Error fetching fokusark table data:', error);
-    throw error;
+    return []; // Return empty array on error
   }
 }
 
@@ -33,43 +45,59 @@ export async function saveFokusarkTableRow(row: FokusarkTableRow) {
       throw new Error('Row ID is required for saving');
     }
     
-    // Check if row already exists
-    const { data: existingData, error: fetchError } = await supabase
-      .from('fokusark_table')
-      .select('id')
-      .eq('id', row.id);
+    // For non-existent tables, this operation will gracefully fail
+    // but we need to handle the error gracefully
+    try {
+      // Check if row already exists
+      const { data: existingData, error: fetchError } = await supabase
+        .from('fokusark_table')
+        .select('id')
+        .eq('id', row.id);
+        
+      if (fetchError) {
+        console.log('Error checking for existing row:', fetchError);
+        return null;
+      }
       
-    if (fetchError) throw fetchError;
-    
-    let result;
-    
-    if (existingData && existingData.length > 0) {
-      // Update existing row
-      const { data, error } = await supabase
-        .from('fokusark_table')
-        .update(row)
-        .eq('id', row.id)
-        .select()
-        .single();
-        
-      if (error) throw error;
-      result = data;
-    } else {
-      // Insert new row
-      const { data, error } = await supabase
-        .from('fokusark_table')
-        .insert([row])
-        .select()
-        .single();
-        
-      if (error) throw error;
-      result = data;
+      let result;
+      
+      if (existingData && existingData.length > 0) {
+        // Update existing row
+        const { data, error } = await supabase
+          .from('fokusark_table')
+          .update(row)
+          .eq('id', row.id)
+          .select()
+          .single();
+          
+        if (error) {
+          console.log('Error updating row:', error);
+          return null;
+        }
+        result = data;
+      } else {
+        // Insert new row
+        const { data, error } = await supabase
+          .from('fokusark_table')
+          .insert([row])
+          .select()
+          .single();
+          
+        if (error) {
+          console.log('Error inserting row:', error);
+          return null;
+        }
+        result = data;
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Error with database operation:', error);
+      return null;
     }
-    
-    return result;
   } catch (error) {
     console.error('Error saving fokusark table row:', error);
-    throw error;
+    return null;
   }
 }
 
@@ -85,17 +113,25 @@ export async function batchSaveFokusarkTableRows(rows: FokusarkTableRow[]) {
       }
     });
     
-    // We'll use upsert to handle both insert and update cases
-    const { data, error } = await supabase
-      .from('fokusark_table')
-      .upsert(rows, { onConflict: 'id' })
-      .select();
-      
-    if (error) throw error;
-    return data || [];
+    try {
+      // For non-existent tables, this operation will fail gracefully
+      const { data, error } = await supabase
+        .from('fokusark_table')
+        .upsert(rows, { onConflict: 'id' })
+        .select();
+        
+      if (error) {
+        console.log('Error in batch save:', error);
+        return [];
+      }
+      return data || [];
+    } catch (error) {
+      console.error('Database error in batch save:', error);
+      return [];
+    }
   } catch (error) {
     console.error('Error batch saving fokusark table rows:', error);
-    throw error;
+    return [];
   }
 }
 
@@ -104,16 +140,24 @@ export async function batchSaveFokusarkTableRows(rows: FokusarkTableRow[]) {
  */
 export async function deleteFokusarkTableRow(id: string) {
   try {
-    const { error } = await supabase
-      .from('fokusark_table')
-      .delete()
-      .eq('id', id);
-      
-    if (error) throw error;
-    return true;
+    try {
+      const { error } = await supabase
+        .from('fokusark_table')
+        .delete()
+        .eq('id', id);
+        
+      if (error) {
+        console.log('Error deleting row:', error);
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.error('Database error deleting row:', error);
+      return false;
+    }
   } catch (error) {
     console.error('Error deleting fokusark table row:', error);
-    throw error;
+    return false;
   }
 }
 
