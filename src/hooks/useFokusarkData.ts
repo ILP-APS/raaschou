@@ -16,7 +16,7 @@ export const useFokusarkData = () => {
         
         // Generate sample data for now
         // In a real scenario, this would be an API call
-        const data = generateTableData();
+        const data = generateTableData(24); // Generate 24 rows to ensure we have enough data
         console.log(`Generated ${data.length} rows of sample data`);
         
         // No row count limit, use whatever is returned
@@ -39,7 +39,7 @@ export const useFokusarkData = () => {
     setError(null);
     
     try {
-      const data = generateTableData();
+      const data = generateTableData(24); // Generate 24 rows for consistent testing
       console.log(`Refreshed data with ${data.length} rows`);
       setTableData(data);
       toast.success("Data refreshed successfully");

@@ -34,7 +34,8 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   console.log("MinimalStickyTable received data:", {
     rowCount: tableData?.length || 0,
     hasData: tableData && tableData.length > 0,
-    firstRow: tableData && tableData.length > 0 ? tableData[0].slice(0, 3) : []
+    firstRow: tableData && tableData.length > 0 ? tableData[0].slice(0, 3) : [],
+    lastRow: tableData && tableData.length > 0 ? tableData[tableData.length - 1].slice(0, 3) : []
   });
   
   // Transform tableData into usable data for the table
@@ -45,7 +46,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     }
     
     // Convert the 2D array data to objects
-    return tableData.map((row, i) => {
+    const transformed = tableData.map((row, i) => {
       // Get the appointment number and subject from the row data
       const appointmentNumber = row[0]; // This is the actual appointment number from API
       const subject = row[1]; // This is the appointment subject from API
@@ -63,6 +64,9 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
       
       return rowObj;
     });
+    
+    console.log(`Transformed ${transformed.length} rows from raw data`);
+    return transformed;
   }, [tableData]);
   
   // Define columns with proper typing for custom meta properties
@@ -163,6 +167,8 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
       </div>
     );
   }
+
+  console.log(`MinimalStickyTable rendering table with ${data.length} rows of data`);
 
   return (
     <div className="table-wrapper" style={{

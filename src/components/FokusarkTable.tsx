@@ -43,6 +43,13 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
     console.warn("Displaying fallback data due to an error:", error);
   }
 
+  // Add detailed debugging information about the data being passed
+  console.log("Data passed to MinimalStickyTable:", {
+    totalRows: data.length,
+    firstRowData: data.length > 0 ? data[0].slice(0, 5) : [],
+    lastRowData: data.length > 0 ? data[data.length - 1].slice(0, 5) : []
+  });
+
   return (
     <div className="rounded-md w-full relative">
       <MinimalStickyTable tableData={data} />
