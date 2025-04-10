@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   flexRender,
@@ -106,7 +107,7 @@ export default function MinimalStickyTable({
     },
     { 
       accessorKey: 'type', 
-      header: 'Type',
+      header: 'Ansvarlig', // Changed from 'Type' to 'Ansvarlig'
       meta: { groupIndex: 1 } as ColumnMeta
     },
     
