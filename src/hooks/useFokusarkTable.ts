@@ -117,17 +117,33 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       // Update the corresponding row in Supabase
       try {
-        const { data, error } = await loadAppointmentsFromSupabase();
+        // Fix: The error is here - loadAppointmentsFromSupabase returns string[][], not an object with data and error properties
+        const supabaseData = await loadAppointmentsFromSupabase();
         
-        if (error || !data || data.length <= rowIndex) {
-          console.error("Error getting Supabase row to update:", error);
+        if (!supabaseData || supabaseData.length <= rowIndex) {
+          console.error("Error getting Supabase row to update");
           return false;
         }
         
-        const rowToUpdate = data[rowIndex];
+        // Get the ID for the row in Supabase
+        // First check if we can find the appointment number in the current row
+        const appointmentNumber = newData[rowIndex][0];
         
-        if (!rowToUpdate || !rowToUpdate.id) {
-          console.error("Invalid row to update");
+        if (!appointmentNumber) {
+          console.error("Invalid appointment number for row update");
+          return false;
+        }
+        
+        // Find the corresponding row in Supabase by fetching the row with this appointment number
+        const { data: rowData, error: rowError } = await supabase
+          .from('fokusark_table')
+          .select('id')
+          .eq('1 col', appointmentNumber)
+          .single();
+        
+        if (rowError || !rowData) {
+          console.error("Error finding row in Supabase:", rowError);
+          toast.error("Failed to save cell change to database");
           return false;
         }
         
@@ -135,7 +151,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
         const { error: updateError } = await supabase
           .from('fokusark_table')
           .update({ [`${colIndex + 1} col`]: value })
-          .eq('id', rowToUpdate.id);
+          .eq('id', rowData.id);
         
         if (updateError) {
           console.error("Error updating cell in Supabase:", updateError);
