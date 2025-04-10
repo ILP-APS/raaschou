@@ -51,10 +51,11 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     
     // Convert the 2D array data to objects
     return tableData.map((row, i) => {
+      // Ensure we use appointment_number from the data (first column) as id
       const rowObj: Record<string, string> = {
-        id: row[0] || `${i + 1}`,
-        name: row[1] || `Project ${i + 1}`,
-        type: row[2] || `Type ${i % 4 + 1}`,
+        id: row[0] || `${i + 1}`, // Use appointment number for id
+        name: row[1] || `Project ${i + 1}`, // Subject
+        type: row[2] || `Type ${i % 4 + 1}`, // Responsible person
       };
       
       // Add remaining columns
@@ -202,7 +203,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
             
             {/* Column Header Row */}
             <TableRow>
-              {table.getFlatHeaders().map((header, index) => {
+              {table.getFlatHeaders().map((header) => {
                 const meta = header.column.columnDef.meta as ColumnMeta | undefined;
                 const isSticky = meta?.sticky;
                 const stickyIndex = meta?.index || 0;
