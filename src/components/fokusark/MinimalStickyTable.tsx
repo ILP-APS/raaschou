@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   flexRender,
@@ -68,12 +69,12 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   const columns = React.useMemo<ColumnDef<Record<string, string>, any>[]>(() => [
     { 
       accessorKey: 'id', 
-      header: 'ID', 
+      header: 'ID',
       meta: { sticky: true, index: 0 } as ColumnMeta
     },
     { 
       accessorKey: 'name', 
-      header: 'Name', 
+      header: 'Name',
       meta: { sticky: true, index: 1 } as ColumnMeta
     },
     { 
@@ -94,101 +95,99 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // Function to calculate left position for each sticky column
-  const getLeftPosition = (index: number): string | number | undefined => {
-    if (index === 0) return 0;
-    if (index === 1) return '80px'; // Width of first column
-    return undefined;
-  };
-
   // Get background color based on theme
   const getBgColor = (isEvenRow: boolean = false) => {
     if (isDarkMode) {
-      return isEvenRow ? 'hsl(var(--muted)/20)' : 'hsl(var(--background))';
+      return isEvenRow ? 'hsl(var(--muted))' : 'hsl(var(--background))';
     } else {
       return isEvenRow ? 'hsl(var(--muted)/10)' : 'hsl(var(--background))';
     }
   };
 
   return (
-    <div style={{
-      position: 'relative',
+    <div className="table-wrapper" style={{
       width: '100%',
-      overflowX: 'auto',
-      overflowY: 'auto',
-      maxHeight: '70vh',
+      height: '500px',
+      position: 'relative',
+      overflow: 'hidden',
       border: '1px solid hsl(var(--border))',
-      borderRadius: '0.5rem'
+      borderRadius: '8px'
     }}>
-      <Table style={{ 
-        width: 'auto', 
-        minWidth: '100%',
-        borderCollapse: 'separate'
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        overflow: 'auto',
+        WebkitOverflowScrolling: 'touch'
       }}>
-        <TableHeader>
-          <TableRow>
-            {table.getFlatHeaders().map((header, index) => {
-              const columnMeta = header.column.columnDef.meta as ColumnMeta | undefined;
-              const isSticky = !!columnMeta?.sticky;
-              const stickyIndex = columnMeta?.index || 0;
-              const isIdCol = index === 0;
+        <Table style={{ 
+          width: 'auto',
+          minWidth: '100%'
+        }}>
+          <TableHeader>
+            <TableRow>
+              {table.getFlatHeaders().map((header, index) => {
+                const meta = header.column.columnDef.meta as ColumnMeta | undefined;
+                const isSticky = meta?.sticky;
+                const stickyIndex = meta?.index || 0;
+                
+                return (
+                  <TableHead
+                    key={header.id}
+                    style={{
+                      position: isSticky ? 'sticky' : undefined,
+                      top: 0,
+                      left: isSticky ? (stickyIndex === 0 ? 0 : '80px') : undefined,
+                      zIndex: isSticky ? 40 : 30,
+                      minWidth: index === 0 ? '80px' : '200px',
+                      backgroundColor: getBgColor(),
+                      boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border)), 0 1px 0 0 hsl(var(--border))' : '0 1px 0 0 hsl(var(--border))'
+                    }}
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row, rowIndex) => {
+              const isEvenRow = rowIndex % 2 === 1;
               
               return (
-                <TableHead
-                  key={header.id}
-                  style={{
-                    minWidth: isIdCol ? '80px' : '200px',
-                    width: isIdCol ? '80px' : '200px',
-                    position: isSticky ? 'sticky' : undefined,
-                    left: isSticky ? getLeftPosition(stickyIndex) : undefined,
-                    zIndex: isSticky ? 30 : undefined,
-                    backgroundColor: getBgColor(),
-                    boxShadow: isSticky ? '2px 0 5px -2px rgba(0,0,0,0.15)' : undefined
-                  }}
-                >
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
-                </TableHead>
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell, cellIndex) => {
+                    const meta = cell.column.columnDef.meta as ColumnMeta | undefined;
+                    const isSticky = meta?.sticky;
+                    const stickyIndex = meta?.index || 0;
+                    
+                    return (
+                      <TableCell
+                        key={cell.id}
+                        style={{
+                          position: isSticky ? 'sticky' : undefined,
+                          left: isSticky ? (stickyIndex === 0 ? 0 : '80px') : undefined,
+                          zIndex: isSticky ? 20 : undefined,
+                          minWidth: cellIndex === 0 ? '80px' : '200px',
+                          backgroundColor: getBgColor(isEvenRow),
+                          boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border))' : undefined
+                        }}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
               );
             })}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.map((row, rowIndex) => {
-            const isEvenRow = rowIndex % 2 === 1;
-            
-            return (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell, cellIndex) => {
-                  const columnMeta = cell.column.columnDef.meta as ColumnMeta | undefined;
-                  const isSticky = !!columnMeta?.sticky;
-                  const stickyIndex = columnMeta?.index || 0;
-                  const isIdCol = cellIndex === 0;
-                  
-                  return (
-                    <TableCell
-                      key={cell.id}
-                      style={{
-                        width: isIdCol ? '80px' : '200px',
-                        minWidth: isIdCol ? '80px' : '200px',
-                        position: isSticky ? 'sticky' : undefined,
-                        left: isSticky ? getLeftPosition(stickyIndex) : undefined,
-                        zIndex: isSticky ? 20 : undefined,
-                        backgroundColor: getBgColor(isEvenRow),
-                        boxShadow: isSticky ? '2px 0 5px -2px rgba(0,0,0,0.15)' : undefined
-                      }}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

@@ -28,7 +28,6 @@ const FokusarkContent: React.FC = () => {
         <FokusarkDescription />
       </div>
       
-      {/* Pass the data to MinimalStickyTable */}
       <MinimalStickyTable tableData={tableData} />
     </div>
   );
