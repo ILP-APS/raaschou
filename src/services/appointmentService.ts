@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -23,15 +22,16 @@ export interface AppointmentResponse {
   done: boolean;
   doneDate: null;
   created: string;
-  hnOfferID: null;
+  hnOfferID: number | null;
   appointmentAssociatedUsers: number[];
 }
 
 /**
  * Fetches appointment data from the API with proper error handling
+ * Only returns appointments that have a value in hnOfferID
  */
 export async function fetchAppointments(): Promise<AppointmentResponse[]> {
-  console.log('Fetching real appointments from API');
+  console.log('Fetching appointments from API - with hnOfferID filter');
   
   const apiUrl = 'https://publicapi.e-regnskab.dk/Appointment/Standard?open=true';
   const apiKey = 'w9Jq5NiTeOIpXfovZ0Hf1jLnM:pGwZ';
@@ -43,7 +43,6 @@ export async function fetchAppointments(): Promise<AppointmentResponse[]> {
         'accept': 'text/plain',
         'ApiKey': apiKey
       },
-      // Add cache: 'no-store' to prevent caching issues
       cache: 'no-store'
     });
     
@@ -60,11 +59,15 @@ export async function fetchAppointments(): Promise<AppointmentResponse[]> {
       throw new Error('Invalid data format from API');
     }
     
-    console.log(`Successfully fetched ${data.length} real appointments from API`);
-    return data;
+    // Filter appointments to only include those with a non-null hnOfferID
+    const filteredAppointments = data.filter(appointment => appointment.hnOfferID !== null);
+    
+    console.log(`Successfully fetched ${data.length} appointments from API`);
+    console.log(`Filtered to ${filteredAppointments.length} appointments with hnOfferID`);
+    
+    return filteredAppointments;
   } catch (error) {
     console.error('Error fetching appointments:', error);
-    // Re-throw the error to be handled by the caller
     throw error;
   }
 }
