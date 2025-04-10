@@ -4,11 +4,10 @@ import FokusarkDescription from "./FokusarkDescription";
 import MinimalStickyTable from "./MinimalStickyTable";
 import { useFokusarkTable } from "@/hooks/useFokusarkTable";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { RefreshCw } from "lucide-react";
 
 const FokusarkContent: React.FC = () => {
-  const { isLoading, tableData, isInitialized, handleCellChange, refreshData, error } = useFokusarkTable([]);
+  const { isLoading, tableData, isInitialized, handleCellChange, refreshData } = useFokusarkTable([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
   const handleRefresh = async () => {
@@ -37,17 +36,6 @@ const FokusarkContent: React.FC = () => {
         <h2 className="text-2xl font-semibold tracking-tight">Fokusark</h2>
         <FokusarkDescription />
         
-        {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>API Error</AlertTitle>
-            <AlertDescription>
-              Unable to fetch data from the API ({error.message}). Sample data is being displayed instead.
-              {!error.message.includes("401") ? "" : " Check your API key credentials."}
-            </AlertDescription>
-          </Alert>
-        )}
-        
         <div className="flex justify-end gap-2">
           <Button 
             onClick={handleRefresh}
@@ -59,7 +47,7 @@ const FokusarkContent: React.FC = () => {
             ) : (
               <RefreshCw className="h-4 w-4" />
             )}
-            {isRefreshing ? 'Refreshing...' : 'Refresh Data from API'}
+            {isRefreshing ? 'Refreshing...' : 'Refresh Data'}
           </Button>
         </div>
       </div>

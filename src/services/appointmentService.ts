@@ -10,34 +10,12 @@ export interface AppointmentResponse {
 }
 
 /**
- * Fetches appointments from the e-regnskab API
+ * Provides mock appointment data since API fetching is disabled
  */
 export async function fetchAppointments(): Promise<AppointmentResponse[]> {
-  try {
-    console.log('Fetching appointments from external API...');
-    const response = await fetch('https://publicapi.e-regnskab.dk/Appointment/Standard?open=true', {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        // Fixed API key format
-        'ApiKey': 'w9Jq5NiTeOIpXfovZ0HfijLnM:p6wZ'
-      }
-    });
-
-    if (!response.ok) {
-      // If API call fails, mock some sample data for development
-      console.error(`API error: ${response.status} ${response.statusText}`);
-      return generateMockAppointments();
-    }
-
-    const data: AppointmentResponse[] = await response.json();
-    console.log(`Fetched ${data.length} appointments from API`);
-    return data;
-  } catch (error) {
-    console.error('Error fetching appointments:', error);
-    toast.error('Failed to fetch appointments from external API, using mock data');
-    return generateMockAppointments();
-  }
+  console.log('Generating mock appointments instead of API fetch');
+  const mockData = generateMockAppointments();
+  return mockData;
 }
 
 /**
@@ -73,7 +51,7 @@ function generateMockAppointments(): AppointmentResponse[] {
 }
 
 /**
- * Maps external API data to the format required by our application
+ * Maps mock data to the format required by our application
  */
 export function mapAppointmentsToTableData(appointments: AppointmentResponse[]): string[][] {
   console.log(`Mapping ${appointments.length} appointments to table data`);

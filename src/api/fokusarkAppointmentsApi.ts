@@ -1,6 +1,4 @@
 
-import { supabase } from "@/integrations/supabase/client";
-
 export interface FokusarkAppointment {
   id?: string;
   appointment_number: string;
@@ -32,62 +30,37 @@ export interface FokusarkAppointment {
 }
 
 /**
- * Fetches all fokusark appointments from Supabase
- * Now implemented with mock data for development
+ * Mock implementation for fetching fokusark appointments
  */
-export async function fetchFokusarkAppointments() {
-  console.log('Fetching fokusark appointments');
-  
-  try {
-    // Try to get data from Supabase if the table exists
-    const { data, error } = await supabase
-      .from('fokusark_appointments')
-      .select('*');
-    
-    if (error) {
-      console.warn('Error fetching fokusark appointments, using mock data:', error);
-      return generateMockAppointments();
-    }
-    
-    if (data && data.length > 0) {
-      return data;
-    } else {
-      console.log('No appointments found in database, using mock data');
-      return generateMockAppointments();
-    }
-  } catch (error) {
-    console.error('Exception fetching fokusark appointments:', error);
-    return generateMockAppointments();
-  }
+export async function fetchFokusarkAppointments(): Promise<FokusarkAppointment[]> {
+  console.log('Generating mock fokusark appointments');
+  return generateMockAppointments();
 }
 
 /**
- * Upsert a fokusark appointment in Supabase
- * (Now with mock implementation until table exists)
+ * Mock implementation for upserting a fokusark appointment
  */
-export async function upsertFokusarkAppointment(appointment: FokusarkAppointment) {
+export async function upsertFokusarkAppointment(appointment: FokusarkAppointment): Promise<FokusarkAppointment> {
   console.log('Mock: Upserting fokusark appointment', appointment);
   return appointment;
 }
 
 /**
- * Batch upsert multiple fokusark appointments
- * (Mock implementation until table exists)
+ * Mock implementation for batch upserting fokusark appointments
  */
-export async function batchUpsertFokusarkAppointments(appointments: FokusarkAppointment[]) {
+export async function batchUpsertFokusarkAppointments(appointments: FokusarkAppointment[]): Promise<FokusarkAppointment[]> {
   console.log('Mock: Batch upserting fokusark appointments', appointments.length);
   return appointments;
 }
 
 /**
- * Update a specific field for a fokusark appointment
- * (Mock implementation until table exists)
+ * Mock implementation for updating a field in a fokusark appointment
  */
 export async function updateFokusarkAppointmentField(
   appointmentNumber: string, 
   field: string, 
   value: any
-) {
+): Promise<FokusarkAppointment> {
   console.log(`Mock: Updating field "${field}" for appointment ${appointmentNumber} to:`, value);
   
   const mockAppointment: FokusarkAppointment = {
@@ -102,8 +75,7 @@ export async function updateFokusarkAppointmentField(
 }
 
 /**
- * Update realized hours for an appointment
- * (Mock implementation until table exists)
+ * Mock implementation for updating realized hours
  */
 export async function updateRealizedHours(
   appointmentNumber: string,
@@ -111,7 +83,7 @@ export async function updateRealizedHours(
   produktion: number,
   montage: number,
   total: number
-) {
+): Promise<FokusarkAppointment> {
   console.log(`Mock: Updating realized hours for ${appointmentNumber}`);
   
   const mockAppointment: FokusarkAppointment = {
@@ -129,7 +101,7 @@ export async function updateRealizedHours(
 }
 
 /**
- * Generate mock appointment data for development
+ * Generate mock appointment data
  */
 function generateMockAppointments(): FokusarkAppointment[] {
   const mockData: FokusarkAppointment[] = [];

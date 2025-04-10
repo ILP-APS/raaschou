@@ -1,19 +1,19 @@
 
 import { 
-  fetchFokusarkAppointments, 
-  batchUpsertFokusarkAppointments,
-  updateFokusarkAppointmentField,
+  fetchFokusarkAppointments as mockFetchAppointments, 
+  batchUpsertFokusarkAppointments as mockBatchUpsert,
+  updateFokusarkAppointmentField as mockUpdateField,
   FokusarkAppointment
 } from "@/api/fokusarkAppointmentsApi";
 
 /**
- * Load all appointments from Supabase
+ * Load all appointments using mock data
  */
 export const loadFokusarkAppointments = async (): Promise<FokusarkAppointment[]> => {
   try {
-    console.log('Loading fokusark appointments from Supabase...');
-    const appointments = await fetchFokusarkAppointments();
-    console.log(`Loaded ${appointments.length} appointments from Supabase`);
+    console.log('Loading mock fokusark appointments...');
+    const appointments = await mockFetchAppointments();
+    console.log(`Loaded ${appointments.length} mock appointments`);
     return appointments;
   } catch (error) {
     console.error('Error loading fokusark appointments:', error);
@@ -22,24 +22,24 @@ export const loadFokusarkAppointments = async (): Promise<FokusarkAppointment[]>
 };
 
 /**
- * Save batch of appointment data to Supabase
+ * Save batch of appointment data using mock implementation
  */
 export const saveAppointmentBatch = async (appointments: FokusarkAppointment[]): Promise<void> => {
   try {
-    console.log('Batch saving appointments to Supabase...');
+    console.log('Mock: Batch saving appointments...');
     console.log('Appointments to save:', appointments.length);
     
-    // Save all appointments in a batch operation
-    const result = await batchUpsertFokusarkAppointments(appointments);
-    console.log('Batch upsert completed');
+    // Use mock batch upsert
+    await mockBatchUpsert(appointments);
+    console.log('Mock batch upsert completed');
   } catch (error) {
-    console.error('Error batch saving appointment data to Supabase:', error);
+    console.error('Error batch saving appointment data:', error);
     throw error;
   }
 };
 
 /**
- * Update a specific field for an appointment
+ * Update a specific field for an appointment using mock implementation
  */
 export const updateAppointmentField = async (
   appointmentNumber: string,
@@ -47,20 +47,9 @@ export const updateAppointmentField = async (
   value: any
 ): Promise<FokusarkAppointment> => {
   try {
-    console.log(`Updating ${field} for appointment ${appointmentNumber} to ${value}`);
+    console.log(`Mock: Updating ${field} for appointment ${appointmentNumber} to ${value}`);
     
-    // If this is appointment 24371 and we're updating projektering_1, log extra debug info
-    if (appointmentNumber === '24371' && field === 'projektering_1') {
-      console.log(`Special debug: Updating projektering for 24371 to ${value}`);
-    }
-    
-    const result = await updateFokusarkAppointmentField(appointmentNumber, field, value);
-    
-    // Add debug log for the updated appointment
-    if (appointmentNumber === '24371') {
-      console.log('Updated appointment 24371:', result);
-    }
-    
+    const result = await mockUpdateField(appointmentNumber, field, value);
     return result;
   } catch (error) {
     console.error(`Error updating ${field} for appointment ${appointmentNumber}:`, error);

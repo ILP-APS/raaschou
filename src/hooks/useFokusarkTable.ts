@@ -12,7 +12,7 @@ export interface FokusarkTableData {
 
 /**
  * Main hook for handling the Fokusark table functionality
- * Enhanced to fetch data from the e-regnskab API
+ * Uses mock data since API fetching is disabled
  */
 export const useFokusarkTable = (initialData: string[][]) => {
   const [tableData, setTableData] = useState<string[][]>([]);
@@ -27,16 +27,16 @@ export const useFokusarkTable = (initialData: string[][]) => {
       setError(null);
       
       try {
-        // First attempt to fetch data from the API
+        // Generate mock data instead of API fetching
         const appointments = await fetchAppointments();
         
         if (appointments && appointments.length > 0) {
-          console.log(`Using data from API: ${appointments.length} appointments`);
+          console.log(`Using mock data: ${appointments.length} appointments`);
           const mappedData = mapAppointmentsToTableData(appointments);
           setTableData(mappedData);
-          toast.success(`Loaded ${appointments.length} appointments from API`);
+          toast.success(`Generated ${appointments.length} mock appointments`);
         } 
-        // If no API data, use provided data or generate sample data
+        // If no mock data, use provided data or generate sample data
         else if (initialData && initialData.length > 0) {
           console.log(`Using provided data: ${initialData.length} rows`);
           setTableData(initialData);
@@ -50,14 +50,13 @@ export const useFokusarkTable = (initialData: string[][]) => {
         setIsInitialized(true);
       } catch (error) {
         console.error("Error initializing table data:", error);
-        setError(error instanceof Error ? error : new Error("Failed to initialize table data"));
         
         // Fallback to generated data
         try {
           console.log("Attempting to use fallback generated data");
           const generatedData = generateTableData();
           setTableData(generatedData);
-          toast.warning("Using fallback data due to an error");
+          toast.warning("Using fallback data");
         } catch (fallbackError) {
           console.error("Failed to generate fallback data:", fallbackError);
           setTableData([]);
@@ -98,27 +97,20 @@ export const useFokusarkTable = (initialData: string[][]) => {
   
   const refreshData = async () => {
     setIsLoading(true);
-    setError(null);
     
     try {
-      // Try to fetch fresh data from the API first
+      // Generate new mock data
       const appointments = await fetchAppointments();
-      
-      if (appointments && appointments.length > 0) {
-        const mappedData = mapAppointmentsToTableData(appointments);
-        setTableData(mappedData);
-        toast.success(`Refreshed data with ${appointments.length} appointments from API`);
-      } else {
-        // Fallback to generated data if API returns nothing
-        const data = generateTableData();
-        console.log(`Refreshed with ${data.length} rows of generated data`);
-        setTableData(data);
-        toast.success("Data refreshed successfully");
-      }
+      const mappedData = mapAppointmentsToTableData(appointments);
+      setTableData(mappedData);
+      toast.success("Data refreshed successfully");
     } catch (error) {
       console.error("Error refreshing data:", error);
-      setError(error instanceof Error ? error : new Error("Failed to refresh data"));
       toast.error("Failed to refresh data");
+      
+      // Fallback to generated data
+      const data = generateTableData();
+      setTableData(data);
     } finally {
       setIsLoading(false);
     }

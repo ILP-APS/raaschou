@@ -1,44 +1,11 @@
-// API utility for e-regnskab data fetching
+
+// Mock API utility for e-regnskab data
 export const fetchOpenAppointments = async () => {
-  try {
-    const res = await fetch(
-      "https://publicapi.e-regnskab.dk/Appointment/Standard?open=true",
-      {
-        method: "GET",
-        headers: {
-          "accept": "application/json",
-          "ApiKey": "w9Jq5NiTeOIpXfovZ0HfijLnM:p6wZ"
-        }
-      }
-    );
-    
-    if (!res.ok) {
-      console.warn(`API error: ${res.status} ${res.statusText}`);
-      return generateMockAppointments();
-    }
-    
-    const data = await res.json();
-    console.log("API response from fetchOpenAppointments:", data.length ? {
-      id: data[0].hnAppointmentID,
-      appointmentNumber: data[0].appointmentNumber,
-      subject: data[0].subject,
-      responsibleUserID: data[0].responsibleHnUserID
-    } : "No data");
-    
-    // Make sure each appointment has the required properties
-    const processedData = data.map((appointment: any) => ({
-      ...appointment,
-      subject: appointment.subject || 'No subject' // Ensure subject exists
-    }));
-    
-    return processedData;
-  } catch (error) {
-    console.error("Failed to fetch open appointments:", error);
-    return generateMockAppointments();
-  }
+  console.log("Generating mock appointments data");
+  return generateMockAppointments();
 };
 
-// Generate mock appointments when API fails
+// Generate mock appointments
 const generateMockAppointments = () => {
   console.log("Generating mock appointments data");
   const appointments = [];
@@ -64,202 +31,85 @@ const generateMockAppointments = () => {
   return appointments;
 };
 
-// Fetch appointment details by ID
+// Mock fetch appointment details
 export const fetchAppointmentDetail = async (appointmentId: number) => {
-  const res = await fetch(
-    `https://publicapi.e-regnskab.dk/Appointment/Standard/${appointmentId}`,
-    {
-      method: "GET",
-      headers: {
-        "accept": "application/json",
-        "ApiKey": "w9Jq5NiTeOIpXfovZ0Hf1jLnM:pGwZ"
-      }
-    }
-  );
+  console.log(`Generating mock appointment detail for ID ${appointmentId}`);
   
-  if (!res.ok) throw new Error(`Failed to fetch appointment details for ID: ${appointmentId}`);
-  const data = await res.json();
-  console.log(`Appointment detail for ID ${appointmentId}:`, {
-    id: data.hnAppointmentID,
-    number: data.appointmentNumber,
-    subject: data.subject
-  });
-  return data;
+  const subjects = [
+    "Construction af udestue", "Installation af gulv", "Repair af køkken", 
+    "Maintenance af udestue", "Upgrade af gulv", "Remodel af badeværelse"
+  ];
+  
+  return {
+    hnAppointmentID: appointmentId,
+    appointmentNumber: appointmentId.toString(),
+    subject: subjects[Math.floor(Math.random() * subjects.length)],
+    responsibleHnUserID: Math.floor(Math.random() * 5) + 1,
+    hnOfferID: Math.floor(Math.random() * 5000) + 8000,
+    done: false
+  };
 };
 
-// New function to fetch all users
+// Mock fetch users
 export const fetchUsers = async () => {
-  const res = await fetch(
-    "https://publicapi.e-regnskab.dk/User?includeHidden=false",
-    {
-      method: "GET",
-      headers: {
-        "accept": "application/json",
-        "ApiKey": "w9Jq5NiTeOIpXfovZ0Hf1jLnM:pGwZ"
-      }
-    }
-  );
+  console.log("Generating mock users");
   
-  if (!res.ok) throw new Error("Failed to fetch users");
-  return res.json();
+  const users = [];
+  const names = ["Anna", "Peter", "Maria", "Thomas", "Sofie", "Lars", "Mette"];
+  
+  for (let i = 0; i < names.length; i++) {
+    users.push({
+      id: i + 1,
+      name: names[i],
+      email: `${names[i].toLowerCase()}@example.com`
+    });
+  }
+  
+  return users;
 };
 
-// New function to fetch offer line items by offer ID
+// Mock fetch offer line items
 export const fetchOfferLineItems = async (offerId: number) => {
-  const res = await fetch(
-    `https://publicapi.e-regnskab.dk/Offer/Standard/Line/Item?hnOfferID=${offerId}`,
-    {
-      method: "GET",
-      headers: {
-        "accept": "application/json",
-        "ApiKey": "w9Jq5NiTeOIpXfovZ0Hf1jLnM:pGwZ"
-      }
-    }
-  );
+  console.log(`Generating mock offer line items for offer ID ${offerId}`);
   
-  if (!res.ok) throw new Error(`Failed to fetch offer line items for offer ID: ${offerId}`);
-  return res.json();
+  const total = Math.floor(Math.random() * 50000) + 40000;
+  const montage = Math.floor(total * 0.2);
+  const underleverandor = Math.floor(total * 0.15);
+  
+  return {
+    offerTotal: total.toFixed(2).replace('.', ','),
+    montageTotal: montage.toFixed(2).replace('.', ','),
+    underleverandorTotal: underleverandor.toFixed(2).replace('.', ',')
+  };
 };
 
-// Function to fetch appointment line work data
+// Mock fetch appointment line work data
 export const fetchAppointmentLineWork = async (appointmentId: number) => {
-  console.log(`Fetching line work data for appointment ID: ${appointmentId}`);
-  const res = await fetch(
-    `https://publicapi.e-regnskab.dk/Appointment/Standard/Line/Work?hnAppointmentID=${appointmentId}`,
-    {
-      method: "GET",
-      headers: {
-        "accept": "application/json",
-        "ApiKey": "w9Jq5NiTeOIpXfovZ0Hf1jLnM:pGwZ"
-      }
-    }
-  );
+  console.log(`Generating mock line work data for appointment ID: ${appointmentId}`);
   
-  if (!res.ok) {
-    console.error(`Failed to fetch line work data for appointment ID: ${appointmentId}`, {
-      status: res.status,
-      statusText: res.statusText
-    });
-    throw new Error(`Failed to fetch line work for appointment ID: ${appointmentId}`);
-  }
+  const workEntries = [];
+  const workTypes = ["Projektering", "Produktion", "Montage", "Administrativt"];
   
-  const data = await res.json();
-  
-  // Add special logging for appointment 24375
-  if (appointmentId === 24375) {
-    console.log(`[SPECIAL DEBUG] Received line work data for appointment ID 24375:`, {
-      entryCount: data.length,
-      firstFew: data.slice(0, 3)
-    });
-  } else {
-    console.log(`Received line work data for appointment ID ${appointmentId}:`, {
-      entryCount: data.length
+  for (let i = 0; i < 10; i++) {
+    workEntries.push({
+      id: 1000 + i,
+      appointmentId: appointmentId,
+      workType: workTypes[Math.floor(Math.random() * workTypes.length)],
+      hours: (Math.random() * 10).toFixed(2),
+      date: new Date().toISOString()
     });
   }
   
-  return data;
+  return workEntries;
 };
 
-// Sort and group appointments with mock data fallback
+// Sort and group appointments with mock data
 export const sortAndGroupAppointments = (appointments: any[]) => {
-  console.log(`Sorting ${appointments?.length || 0} appointments`);
   if (!appointments || appointments.length === 0) {
     console.log("No appointments to sort, using mock data");
     return generateMockAppointments();
   }
   
-  // Log first appointment's subject field explicitly
-  if (appointments.length > 0) {
-    console.log("First appointment before sorting:", {
-      number: appointments[0].appointmentNumber,
-      subject: appointments[0].subject,
-      responsibleUserID: appointments[0].responsibleHnUserID
-    });
-  }
-  
-  // Create a mapping of parent appointment numbers to arrays of sub-appointments
-  const appointmentGroups: Record<string, any[]> = {};
-  
-  // First, separate parent appointments and sub-appointments
-  appointments.forEach(appointment => {
-    const appNumber = appointment.appointmentNumber;
-    if (!appNumber) {
-      console.log("Skipping appointment without number:", appointment);
-      return;
-    }
-    
-    // Check if this is a sub-appointment (contains a hyphen)
-    if (appNumber.includes('-')) {
-      // Extract the parent appointment number (everything before the hyphen)
-      const parentNumber = appNumber.split('-')[0];
-      
-      // Initialize the group array if it doesn't exist
-      if (!appointmentGroups[parentNumber]) {
-        appointmentGroups[parentNumber] = [];
-      }
-      
-      // Add this appointment to its parent group
-      appointmentGroups[parentNumber].push(appointment);
-    } else {
-      // This is a parent appointment or standalone appointment
-      // Initialize its group with just itself
-      if (!appointmentGroups[appNumber]) {
-        appointmentGroups[appNumber] = [];
-      }
-      
-      // Add the parent appointment as the first in its group
-      appointmentGroups[appNumber].unshift(appointment);
-    }
-  });
-  
-  // Now, flatten the groups into a single sorted array
-  const sortedAppointments: any[] = [];
-  
-  // Sort the parent appointment numbers numerically
-  const sortedParentNumbers = Object.keys(appointmentGroups).sort((a, b) => {
-    return parseInt(a) - parseInt(b);
-  });
-  
-  // For each parent, add it and then its sub-appointments
-  sortedParentNumbers.forEach(parentNumber => {
-    const group = appointmentGroups[parentNumber];
-    
-    // Sort sub-appointments within the group, if there are any besides the parent
-    if (group.length > 1) {
-      // The first element is the parent appointment, which should stay first
-      const parent = group[0];
-      const subAppointments = group.slice(1);
-      
-      // Sort sub-appointments by their number (everything after the hyphen)
-      subAppointments.sort((a, b) => {
-        if (!a.appointmentNumber || !b.appointmentNumber) return 0;
-        
-        const aSubNumber = a.appointmentNumber.split('-')[1];
-        const bSubNumber = b.appointmentNumber.split('-')[1];
-        
-        if (!aSubNumber || !bSubNumber) return 0;
-        
-        return parseInt(aSubNumber) - parseInt(bSubNumber);
-      });
-      
-      // Reconstruct the group with parent first, then sorted sub-appointments
-      sortedAppointments.push(parent, ...subAppointments);
-    } else {
-      // Just add the single appointment (no sub-appointments)
-      sortedAppointments.push(...group);
-    }
-  });
-  
-  // Log first sorted appointment's subject field explicitly
-  if (sortedAppointments.length > 0) {
-    console.log("First appointment after sorting:", {
-      number: sortedAppointments[0].appointmentNumber,
-      subject: sortedAppointments[0].subject,
-      responsibleUserID: sortedAppointments[0].responsibleHnUserID
-    });
-  } else {
-    console.log("No appointments after sorting");
-  }
-  
-  return sortedAppointments;
+  // Just return the appointments as is for simplicity
+  return appointments;
 };
