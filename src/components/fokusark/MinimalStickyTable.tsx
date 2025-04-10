@@ -104,6 +104,8 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     }
   };
 
+  const headerHeight = '41px';
+
   return (
     <div className="table-wrapper" style={{
       width: '100%',
@@ -127,6 +129,141 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
           minWidth: '100%'
         }}>
           <TableHeader>
+            {/* Group Header Row */}
+            <TableRow>
+              {/* Group 1: 2 cols - sticky */}
+              <TableHead
+                colSpan={2}
+                style={{
+                  position: 'sticky',
+                  top: 0,
+                  left: 0,
+                  zIndex: 60,
+                  backgroundColor: getBgColor(),
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  borderBottom: '1px solid hsl(var(--border))',
+                  minWidth: '350px', // Combined width of first two columns
+                  boxShadow: '1px 0 0 0 hsl(var(--border)), 0 1px 0 0 hsl(var(--border))'
+                }}
+              >
+                Info
+              </TableHead>
+              
+              {/* Group 2: 1 col */}
+              <TableHead
+                colSpan={1}
+                style={{
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 50,
+                  backgroundColor: getBgColor(),
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  borderBottom: '1px solid hsl(var(--border))'
+                }}
+              >
+                Type
+              </TableHead>
+              
+              {/* Group 3: 5 cols */}
+              <TableHead
+                colSpan={5}
+                style={{
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 50,
+                  backgroundColor: getBgColor(),
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  borderBottom: '1px solid hsl(var(--border))'
+                }}
+              >
+                Budget Group A
+              </TableHead>
+              
+              {/* Group 4: 4 cols */}
+              <TableHead
+                colSpan={4}
+                style={{
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 50,
+                  backgroundColor: getBgColor(),
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  borderBottom: '1px solid hsl(var(--border))'
+                }}
+              >
+                Budget Group B
+              </TableHead>
+              
+              {/* Group 5: 4 cols */}
+              <TableHead
+                colSpan={4}
+                style={{
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 50,
+                  backgroundColor: getBgColor(),
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  borderBottom: '1px solid hsl(var(--border))'
+                }}
+              >
+                Budget Group C
+              </TableHead>
+              
+              {/* Group 6: 1 col */}
+              <TableHead
+                colSpan={1}
+                style={{
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 50,
+                  backgroundColor: getBgColor(),
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  borderBottom: '1px solid hsl(var(--border))'
+                }}
+              >
+                Special
+              </TableHead>
+              
+              {/* Group 7: 5 cols */}
+              <TableHead
+                colSpan={5}
+                style={{
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 50,
+                  backgroundColor: getBgColor(),
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  borderBottom: '1px solid hsl(var(--border))'
+                }}
+              >
+                Budget Group D
+              </TableHead>
+              
+              {/* Group 8: 2 cols */}
+              <TableHead
+                colSpan={2}
+                style={{
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 50,
+                  backgroundColor: getBgColor(),
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  borderBottom: '1px solid hsl(var(--border))'
+                }}
+              >
+                Summary
+              </TableHead>
+            </TableRow>
+            
+            {/* Column Header Row */}
             <TableRow>
               {table.getFlatHeaders().map((header, index) => {
                 const meta = header.column.columnDef.meta as ColumnMeta | undefined;
@@ -137,13 +274,15 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
                   <TableHead
                     key={header.id}
                     style={{
-                      position: isSticky ? 'sticky' : undefined,
-                      top: 0,
-                      left: isSticky ? (stickyIndex === 0 ? 0 : '80px') : undefined,
-                      zIndex: isSticky ? 40 : 30,
-                      minWidth: index === 0 ? '80px' : '200px',
+                      position: 'sticky',
+                      top: headerHeight, // Height of the group header row
+                      left: isSticky ? (stickyIndex === 0 ? 0 : '150px') : undefined,
+                      zIndex: isSticky ? 55 : 45,
+                      minWidth: stickyIndex === 0 ? '150px' : (stickyIndex === 1 ? '200px' : '150px'),
                       backgroundColor: getBgColor(),
-                      boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border)), 0 1px 0 0 hsl(var(--border))' : '0 1px 0 0 hsl(var(--border))'
+                      boxShadow: isSticky ? 
+                        '1px 0 0 0 hsl(var(--border)), 0 1px 0 0 hsl(var(--border))' : 
+                        '0 1px 0 0 hsl(var(--border))'
                     }}
                   >
                     {flexRender(
@@ -171,9 +310,9 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
                         key={cell.id}
                         style={{
                           position: isSticky ? 'sticky' : undefined,
-                          left: isSticky ? (stickyIndex === 0 ? 0 : '80px') : undefined,
+                          left: isSticky ? (stickyIndex === 0 ? 0 : '150px') : undefined,
                           zIndex: isSticky ? 20 : undefined,
-                          minWidth: cellIndex === 0 ? '80px' : '200px',
+                          minWidth: stickyIndex === 0 ? '150px' : (stickyIndex === 1 ? '200px' : '150px'),
                           backgroundColor: getBgColor(isEvenRow),
                           boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border))' : undefined
                         }}
