@@ -31,9 +31,10 @@ interface FokusarkRow {
 interface FokusarkDataGridProps {
   data: string[][];
   onCellChange?: (rowIndex: number, colIndex: number, value: string) => void;
+  onCellBlur?: (rowIndex: number, colIndex: number, value: string) => void;
 }
 
-const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange }) => {
+const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange, onCellBlur }) => {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   const [rows, setRows] = useState<FokusarkRow[]>([]);
@@ -128,7 +129,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
     {
       accessorKey: 'montage2',
       header: 'Montage 2',
-      cell: ({ getValue, row, column, table }) => {
+      cell: ({ getValue, row, column }) => {
         const value = getValue() as string;
         
         if (!value || value.trim() === '') {
@@ -150,6 +151,20 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
                 const newRows = [...rows];
                 newRows[rowIndex][colKey] = e.target.value;
                 setRows(newRows);
+              }}
+              onBlur={e => {
+                if (onCellBlur) {
+                  const rowIndex = parseInt(row.id);
+                  const colIndex = 6; // Index of montage2 column
+                  onCellBlur(rowIndex, colIndex, e.target.value);
+                }
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && onCellBlur) {
+                  const rowIndex = parseInt(row.id);
+                  const colIndex = 6; // Index of montage2 column
+                  onCellBlur(rowIndex, colIndex, e.currentTarget.value);
+                }
               }}
               className="w-full bg-transparent border-0 focus:ring-1 focus:ring-primary text-right font-mono"
             />
@@ -183,6 +198,20 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
                 const newRows = [...rows];
                 newRows[rowIndex][colKey] = e.target.value;
                 setRows(newRows);
+              }}
+              onBlur={e => {
+                if (onCellBlur) {
+                  const rowIndex = parseInt(row.id);
+                  const colIndex = 7; // Index of underleverandor2 column
+                  onCellBlur(rowIndex, colIndex, e.target.value);
+                }
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && onCellBlur) {
+                  const rowIndex = parseInt(row.id);
+                  const colIndex = 7; // Index of underleverandor2 column
+                  onCellBlur(rowIndex, colIndex, e.currentTarget.value);
+                }
               }}
               className="w-full bg-transparent border-0 focus:ring-1 focus:ring-primary text-right font-mono"
             />
@@ -245,6 +274,20 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
               newRows[rowIndex][colKey] = e.target.value;
               setRows(newRows);
             }}
+            onBlur={e => {
+              if (onCellBlur) {
+                const rowIndex = parseInt(row.id);
+                const colIndex = 18; // Index of faerdigPctExMontageNu
+                onCellBlur(rowIndex, colIndex, e.target.value);
+              }
+            }}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && onCellBlur) {
+                const rowIndex = parseInt(row.id);
+                const colIndex = 18; // Index of faerdigPctExMontageNu
+                onCellBlur(rowIndex, colIndex, e.currentTarget.value);
+              }
+            }}
             className="w-full bg-transparent border-0 focus:ring-1 focus:ring-primary"
           />
         );
@@ -267,6 +310,20 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
               const newRows = [...rows];
               newRows[rowIndex][colKey] = e.target.value;
               setRows(newRows);
+            }}
+            onBlur={e => {
+              if (onCellBlur) {
+                const rowIndex = parseInt(row.id);
+                const colIndex = 19; // Index of faerdigPctExMontageFoer
+                onCellBlur(rowIndex, colIndex, e.target.value);
+              }
+            }}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && onCellBlur) {
+                const rowIndex = parseInt(row.id);
+                const colIndex = 19; // Index of faerdigPctExMontageFoer
+                onCellBlur(rowIndex, colIndex, e.currentTarget.value);
+              }
             }}
             className="w-full bg-transparent border-0 focus:ring-1 focus:ring-primary"
           />
