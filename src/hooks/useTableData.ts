@@ -66,6 +66,9 @@ export const useTableData = () => {
                 return null;
               }
               
+              // Log the subject from the API
+              console.log(`Appointment ${appointment.appointmentNumber} subject:`, details.subject);
+              
               const responsibleUserName = userMap.get(details.responsibleHnUserID) || 'Unknown';
               
               const { offerTotal, montageTotal, underleverandorTotal } = 
@@ -80,13 +83,13 @@ export const useTableData = () => {
                 return null;
               }
               
-              // Use the appointmentNumber directly from the API
+              // Use the appointmentNumber and subject directly from the API
               console.log("Using appointment number:", appointment.appointmentNumber);
               
               // Build the row of data
               const row = [
                 appointment.appointmentNumber, // Use this directly from the API
-                details.subject || 'N/A',
+                details.subject || 'N/A',     // Use the subject from the API
                 responsibleUserName,
                 offerTotal,
                 montageTotal,

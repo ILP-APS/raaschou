@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   flexRender,
@@ -53,13 +54,15 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     
     // Convert the 2D array data to objects
     return tableData.map((row, i) => {
-      // Get the actual appointment number from the row (directly from API)
-      const appointmentNumber = row[0]; // This is the actual appointment number
-      console.log(`Row ${i}: appointment number = ${appointmentNumber}`);
+      // Get the appointment number and subject from the row data
+      const appointmentNumber = row[0]; // This is the actual appointment number from API
+      const subject = row[1]; // This is the appointment subject from API
+      
+      console.log(`Row ${i}: appointment number = ${appointmentNumber}, subject = ${subject}`);
       
       const rowObj: Record<string, string> = {
         id: appointmentNumber, // Use the actual appointment number as id
-        name: row[1] || `Project ${i + 1}`, // Subject
+        name: subject || `Project ${i + 1}`, // Use the actual subject from API data
         type: row[2] || `Type ${i % 4 + 1}`, // Responsible person
       };
       

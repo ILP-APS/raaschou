@@ -9,8 +9,8 @@ export const generateTableData = () => {
     // Use the format shown in the API (like "9598")
     row.push(`${9590 + i}`); // Using realistic appointment numbers like 9591, 9592, etc.
     
-    // For the second column (index 1), add some sample text
-    row.push(`Sample Project ${i}`);
+    // For the second column (index 1), add descriptive project names/subjects
+    row.push(`${i % 3 === 0 ? 'Renovation' : i % 2 === 0 ? 'Construction' : 'Installation'} Project ${9590 + i}`);
     
     // For "ansvarlig" column (index 2)
     row.push(`User ${i}`);
