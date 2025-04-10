@@ -42,12 +42,13 @@ export const useTableData = () => {
         setIsProcessing(true);
         
         // Debug the appointment data
-        console.log("First appointment from useAppointments:", appointments[0]);
+        console.log(`Processing ${appointments.length} appointments from useAppointments`);
+        console.log("First appointment sample:", appointments[0]);
         
         const userMap = createUserMap(users);
         
         const processedData: string[][] = [];
-        const batchSize = 10;
+        const batchSize = 20; // Increased batch size for larger data set
         const appointmentBatches = [];
         
         // Create batches of appointments
@@ -55,36 +56,33 @@ export const useTableData = () => {
           appointmentBatches.push(appointments.slice(i, i + batchSize));
         }
         
+        console.log(`Created ${appointmentBatches.length} batches of appointments`);
+        
         // Process each batch
+        let counter = 0;
         for (const batch of appointmentBatches) {
+          console.log(`Processing batch ${counter + 1}/${appointmentBatches.length}`);
+          counter++;
+          
           const batchPromises = batch.map(async (appointment) => {
             try {
-              console.log("Processing appointment:", appointment);
               const details = await getAppointmentDetail(appointment.hnAppointmentID);
               
+              // Skip appointments that are marked as done
               if (details.done) {
                 return null;
               }
               
-              // Log the subject from the API
-              console.log(`Appointment ${appointment.appointmentNumber} subject:`, details.subject);
-              
               const responsibleUserName = userMap.get(details.responsibleHnUserID) || 'Unknown';
               
+              // Get offer data (don't filter by value anymore)
               const { offerTotal, montageTotal, underleverandorTotal } = 
                 await getOfferLineItems(details.hnOfferID);
               
               // Get realized hours from API
               const realizedHours = await getRealizedHours(appointment.hnAppointmentID);
               
-              const offerTotalNumber = parseFloat(offerTotal.replace(/[^0-9,]/g, '').replace(',', '.'));
-              
-              if (offerTotalNumber <= 40000) {
-                return null;
-              }
-              
-              // Use the appointmentNumber and subject directly from the API
-              console.log("Using appointment number:", appointment.appointmentNumber);
+              console.log(`Processing appointment ${appointment.appointmentNumber}: "${details.subject}"`);
               
               // Build the row of data
               const row = [
@@ -139,15 +137,16 @@ export const useTableData = () => {
         
         if (processedData.length === 0) {
           const sampleData = generateTableData();
-          console.log("Using sample data, first row:", sampleData[0]);
+          console.log("No appointments found that meet criteria. Using sample data, first row:", sampleData[0]);
           setTableData(sampleData);
           toast({
-            title: "No matching appointments found",
-            description: "No appointments met the criteria (not done and offer > 40,000). Using sample data instead.",
+            title: "No valid appointments found",
+            description: "Using sample data instead. Try changing the API endpoint or check for API errors.",
             variant: "default",
           });
         } else {
-          console.log("Using API data, first row:", processedData[0]);
+          console.log(`Successfully processed ${processedData.length} appointments from API data`);
+          console.log("First processed row sample:", processedData[0]);
           setTableData(processedData);
           toast({
             title: "Data loaded",
@@ -161,7 +160,7 @@ export const useTableData = () => {
         setTableData(sampleData);
         toast({
           title: "Error processing data",
-          description: "Using sample data instead.",
+          description: "Using sample data instead. Check console for error details.",
           variant: "destructive",
         });
       } finally {

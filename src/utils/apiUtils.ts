@@ -1,7 +1,7 @@
 // API utility for e-regnskab data fetching
 export const fetchOpenAppointments = async () => {
   const res = await fetch(
-    "https://publicapi.e-regnskab.dk/Appointment/Standard/Address?open=true",
+    "https://publicapi.e-regnskab.dk/Appointment/Standard?open=true",
     {
       method: "GET",
       headers: {
@@ -14,7 +14,8 @@ export const fetchOpenAppointments = async () => {
   if (!res.ok) throw new Error("Failed to fetch open appointments");
   
   const data = await res.json();
-  console.log("API response from fetchOpenAppointments:", data[0]);
+  console.log(`API response from fetchOpenAppointments: found ${data.length} appointments`);
+  console.log("First appointment sample:", data[0]);
   return data;
 };
 
@@ -110,7 +111,7 @@ export const fetchAppointmentLineWork = async (appointmentId: number) => {
 
 // Helper function to sort appointments by ID and group sub-appointments
 export const sortAndGroupAppointments = (appointments: any[]) => {
-  console.log("Sorting appointments, first appointment:", appointments[0]);
+  console.log(`Sorting and grouping ${appointments.length} appointments`);
   
   // Create a mapping of parent appointment numbers to arrays of sub-appointments
   const appointmentGroups: Record<string, any[]> = {};
@@ -182,6 +183,6 @@ export const sortAndGroupAppointments = (appointments: any[]) => {
     }
   });
   
-  console.log("First sorted appointment:", sortedAppointments[0]);
+  console.log(`Sorted appointments: ${sortedAppointments.length} total`);
   return sortedAppointments;
 };
