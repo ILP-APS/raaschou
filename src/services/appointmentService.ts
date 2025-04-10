@@ -1,8 +1,8 @@
-
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserName, preloadUsers } from "@/utils/userUtils";
 import { fetchOfferLineItems } from "@/utils/apiUtils";
+import { formatDanishCurrency } from "@/utils/formatUtils";
 
 export interface AppointmentResponse {
   hnAppointmentID: number;
@@ -342,12 +342,15 @@ export function mapAppointmentsToTableData(appointments: AppointmentResponse[]):
             console.log(`Fetching offer data for appointment ${appointment.appointmentNumber}`);
             const offerData = await fetchOfferLineItems(appointment.hnOfferID);
             
-            // Add offer total to column 4
-            row[3] = offerData.offerTotal;
-            // Add montage total to column 4
-            row[4] = offerData.montageTotal;
-            // Add underleverandor total to column 5
-            row[5] = offerData.underleverandorTotal;
+            // Format with DKK currency 
+            const offerTotal = parseFloat(offerData.offerTotal.replace(/\./g, '').replace(',', '.'));
+            row[3] = !isNaN(offerTotal) ? offerData.offerTotal : '';
+            
+            const montageTotal = parseFloat(offerData.montageTotal.replace(/\./g, '').replace(',', '.'));
+            row[4] = !isNaN(montageTotal) ? offerData.montageTotal : '';
+            
+            const underleverandorTotal = parseFloat(offerData.underleverandorTotal.replace(/\./g, '').replace(',', '.'));
+            row[5] = !isNaN(underleverandorTotal) ? offerData.underleverandorTotal : '';
           } catch (error) {
             console.error(`Error fetching offer data for appointment ${appointment.appointmentNumber}:`, error);
             // Set empty values if we can't fetch the data

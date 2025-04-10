@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   flexRender,
@@ -16,6 +15,7 @@ import {
 } from '@/components/ui/table';
 import { useTheme } from "next-themes";
 import "./FokusarkDataGridStyles.css";
+import { formatDanishCurrency } from '@/utils/formatUtils';
 
 // Define custom meta type for columns
 type FokusarkColumnMeta = {
@@ -88,9 +88,11 @@ const ShadcnFokusarkTable: React.FC<ShadcnFokusarkTableProps> = ({ data, onCellC
     if (!value) return '';
     
     if (format === 'currency') {
+      // Use our Danish currency formatter for monetary values
+      const numericValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
       return (
         <div className="text-right font-mono">
-          kr. {value}
+          {!isNaN(numericValue) ? formatDanishCurrency(numericValue) : value}
         </div>
       );
     }

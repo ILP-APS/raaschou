@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   flexRender,
@@ -16,8 +15,8 @@ import {
 } from '@/components/ui/table';
 import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
+import { formatDanishCurrency } from '@/utils/formatUtils';
 
-// Define the column meta type to include our custom properties
 interface ColumnMeta {
   sticky?: boolean;
   index?: number;
@@ -47,31 +46,27 @@ export default function MinimalStickyTable({
     } : {}
   });
   
-  // Transform tableData into usable data for the table
   const data = React.useMemo(() => {
     if (!tableData || tableData.length === 0) {
       console.log("No table data provided, returning empty array");
       return [];
     }
     
-    // Convert the 2D array data to objects
     const transformed = tableData.map((row, i) => {
-      // Get the real appointment number and subject from the row data
-      const appointmentNumber = row[0] || ''; // This is the actual appointment number from API
-      const subject = row[1] || ''; // This is the appointment subject from API
-      const isSubAppointment = row[23] === 'sub-appointment'; // Check if it's a sub-appointment
+      const appointmentNumber = row[0] || '';
+      const subject = row[1] || '';
+      const isSubAppointment = row[23] === 'sub-appointment';
       
       console.log(`Row ${i}: appointmentNumber=${appointmentNumber}, subject=${subject}, isSubAppointment=${isSubAppointment}`);
       
       const rowObj: Record<string, string | boolean> = {
-        id: i.toString(), // Use index as id
-        appointmentNumber: appointmentNumber, // Store the actual appointment number
-        subject: subject, // Store the actual subject
-        type: row[2] || '', // Responsible person
-        isSubAppointment: isSubAppointment, // Store sub-appointment status
+        id: i.toString(),
+        appointmentNumber: appointmentNumber,
+        subject: subject,
+        type: row[2] || '',
+        isSubAppointment: isSubAppointment,
       };
       
-      // Add remaining columns
       for (let j = 3; j < Math.min(row.length, 23); j++) {
         rowObj[`col${j-3}`] = row[j] || '';
       }
@@ -83,7 +78,6 @@ export default function MinimalStickyTable({
     return transformed;
   }, [tableData]);
   
-  // Function to handle cell edits
   const handleCellEdit = React.useCallback((rowIndex: number, colIndex: number, value: string) => {
     if (onCellChange) {
       onCellChange(rowIndex, colIndex, value);
@@ -91,95 +85,115 @@ export default function MinimalStickyTable({
     }
   }, [onCellChange]);
   
-  // Define columns with proper typing for custom meta properties
+  const formatCellValue = (value: string, isMonetary: boolean = false) => {
+    if (!value || value.trim() === '') return '';
+    
+    if (isMonetary) {
+      const numericValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+      return !isNaN(numericValue) ? formatDanishCurrency(numericValue) : value;
+    }
+    
+    return value;
+  };
+  
   const columns = React.useMemo<ColumnDef<Record<string, string | boolean>, any>[]>(() => [
     { 
       accessorKey: 'appointmentNumber', 
       header: 'Nr.', 
       meta: { sticky: true, index: 0, groupIndex: 0 } as ColumnMeta,
-      cell: info => info.getValue() // Display the real appointment number
+      cell: info => info.getValue()
     },
     { 
       accessorKey: 'subject', 
       header: 'Navn', 
       meta: { sticky: true, index: 1, groupIndex: 0 } as ColumnMeta,
-      cell: info => info.getValue() // Display the real subject
+      cell: info => info.getValue()
     },
     { 
       accessorKey: 'type', 
-      header: 'Ansvarlig', // Changed from 'Type' to 'Ansvarlig'
+      header: 'Ansvarlig',
       meta: { groupIndex: 1 } as ColumnMeta
     },
     
-    // Updated column names for the Tilbud columns (formerly Budget Group A)
     {
       accessorKey: `col0`,
       header: `Tilbud`, 
-      meta: { groupIndex: 2 } as ColumnMeta
+      meta: { groupIndex: 2 } as ColumnMeta,
+      cell: info => formatCellValue(info.getValue() as string, true)
     },
     {
       accessorKey: `col1`,
       header: `Montage`,
-      meta: { groupIndex: 2 } as ColumnMeta
+      meta: { groupIndex: 2 } as ColumnMeta,
+      cell: info => formatCellValue(info.getValue() as string, true)
     },
     {
       accessorKey: `col2`,
       header: `Underleverandør`,
-      meta: { groupIndex: 2 } as ColumnMeta
+      meta: { groupIndex: 2 } as ColumnMeta,
+      cell: info => formatCellValue(info.getValue() as string, true)
     },
     {
       accessorKey: `col3`,
       header: `Montage 2`,
-      meta: { groupIndex: 2 } as ColumnMeta
+      meta: { groupIndex: 2 } as ColumnMeta,
+      cell: info => formatCellValue(info.getValue() as string, true)
     },
     {
       accessorKey: `col4`,
       header: `Underleverandør 2`,
-      meta: { groupIndex: 2 } as ColumnMeta
+      meta: { groupIndex: 2 } as ColumnMeta,
+      cell: info => formatCellValue(info.getValue() as string, true)
     },
     
-    // Keep Group B columns the same but with better names
     {
       accessorKey: `col5`,
       header: `Materialer`, 
-      meta: { groupIndex: 3 } as ColumnMeta
+      meta: { groupIndex: 3 } as ColumnMeta,
+      cell: info => formatCellValue(info.getValue() as string, true)
     },
     {
       accessorKey: `col6`,
       header: `Projektering`,
-      meta: { groupIndex: 3 } as ColumnMeta
+      meta: { groupIndex: 3 } as ColumnMeta,
+      cell: info => formatCellValue(info.getValue() as string, true)
     },
     {
       accessorKey: `col7`,
       header: `Produktion`,
-      meta: { groupIndex: 3 } as ColumnMeta
+      meta: { groupIndex: 3 } as ColumnMeta,
+      cell: info => formatCellValue(info.getValue() as string, true)
     },
     {
       accessorKey: `col8`,
       header: `Montage 3`,
-      meta: { groupIndex: 3 } as ColumnMeta
+      meta: { groupIndex: 3 } as ColumnMeta,
+      cell: info => formatCellValue(info.getValue() as string, true)
     },
     
-    // Group C columns with better names
     {
       accessorKey: `col9`,
       header: `Proj. Realiseret`,
-      meta: { groupIndex: 4 } as ColumnMeta
+      meta: { groupIndex: 4 } as ColumnMeta,
+      cell: info => formatCellValue(info.getValue() as string, true)
     },
     {
       accessorKey: `col10`,
       header: `Prod. Realiseret`,
-      meta: { groupIndex: 4 } as ColumnMeta
+      meta: { groupIndex: 4 } as ColumnMeta,
+      cell: info => formatCellValue(info.getValue() as string, true)
     },
     {
       accessorKey: `col11`,
       header: `Mont. Realiseret`,
-      meta: { groupIndex: 4 } as ColumnMeta
+      meta: { groupIndex: 4 } as ColumnMeta,
+      cell: info => formatCellValue(info.getValue() as string, true)
     },
     {
       accessorKey: `col12`,
       header: `Total Realiseret`,
-      meta: { groupIndex: 4 } as ColumnMeta
+      meta: { groupIndex: 4 } as ColumnMeta,
+      cell: info => formatCellValue(info.getValue() as string, true)
     },
     
     {
@@ -188,7 +202,6 @@ export default function MinimalStickyTable({
       meta: { groupIndex: 5 } as ColumnMeta
     },
     
-    // Group D columns with better names
     ...Array.from({ length: 5 }).map((_, i) => ({
       accessorKey: `col${i + 14}`,
       header: `${i === 0 ? 'Færdig % Nu' : 
@@ -199,7 +212,6 @@ export default function MinimalStickyTable({
       meta: { groupIndex: 6 } as ColumnMeta
     })),
     
-    // Summary columns
     ...Array.from({ length: 2 }).map((_, i) => ({
       accessorKey: `col${i + 19}`,
       header: `Summary ${i + 1}`,
@@ -213,11 +225,10 @@ export default function MinimalStickyTable({
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // Define group structure with column spans - update Budget Group A to Tilbud
   const columnGroups = [
     { name: 'Aftale', span: 2, index: 0 },
     { name: '', span: 1, index: 1 },
-    { name: 'Tilbud', span: 5, index: 2 }, // Changed from 'Budget Group A' to 'Tilbud'
+    { name: 'Tilbud', span: 5, index: 2 },
     { name: 'Budget Group B', span: 4, index: 3 },
     { name: 'Budget Group C', span: 4, index: 4 },
     { name: 'Special', span: 1, index: 5 },
@@ -225,7 +236,6 @@ export default function MinimalStickyTable({
     { name: 'Summary', span: 2, index: 7 }
   ];
   
-  // Get background color based on group index and theme
   const getGroupBgColor = (groupIndex: number) => {
     if (isDarkMode) {
       return groupIndex % 2 === 0 ? 'hsl(var(--background))' : 'hsl(var(--muted))';
@@ -236,7 +246,6 @@ export default function MinimalStickyTable({
 
   const headerHeight = '41px';
   
-  // If no data, show appropriate message
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 w-full">
@@ -275,7 +284,6 @@ export default function MinimalStickyTable({
           minWidth: '100%'
         }}>
           <TableHeader>
-            {/* Group Header Row */}
             <TableRow>
               {columnGroups.map((group, index) => (
                 <TableHead
@@ -301,7 +309,6 @@ export default function MinimalStickyTable({
               ))}
             </TableRow>
             
-            {/* Column Header Row */}
             <TableRow>
               {table.getFlatHeaders().map((header) => {
                 const meta = header.column.columnDef.meta as ColumnMeta | undefined;
@@ -335,7 +342,6 @@ export default function MinimalStickyTable({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.map((row, rowIdx) => {
-              // Check if this is a sub-appointment
               const isSubAppointment = row.original.isSubAppointment === true;
               
               return (
@@ -348,10 +354,8 @@ export default function MinimalStickyTable({
                     const stickyIndex = meta?.index || 0;
                     const groupIndex = meta?.groupIndex || 0;
                     
-                    // Make the first 2 columns read-only
                     const isReadOnly = cellIdx <= 1;
                     
-                    // Add indentation for sub-appointments in the first column
                     const paddingStyle = (cellIdx === 0 && isSubAppointment) ? 
                       { paddingLeft: '1.5rem' } : {};
                     
@@ -359,9 +363,8 @@ export default function MinimalStickyTable({
                       <TableCell
                         key={cell.id}
                         onClick={() => {
-                          // Handle cell click for editable cells
                           if (onCellChange && !isReadOnly) {
-                            const colIndex = cellIdx + 2; // Adjusted for the first two columns
+                            const colIndex = cellIdx + 2;
                             const value = prompt('Enter new value:', cell.getValue() as string) || '';
                             if (value !== (cell.getValue() as string)) {
                               handleCellEdit(rowIdx, colIndex, value);
@@ -373,14 +376,13 @@ export default function MinimalStickyTable({
                           left: isSticky ? (stickyIndex === 0 ? 0 : '150px') : undefined,
                           zIndex: isSticky ? 20 : undefined,
                           minWidth: stickyIndex === 0 ? '150px' : (stickyIndex === 1 ? '200px' : '150px'),
-                          backgroundColor: getGroupBgColor(groupIndex), // Use group background color for all rows
+                          backgroundColor: getGroupBgColor(groupIndex),
                           boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border))' : undefined,
                           cursor: isReadOnly ? 'default' : 'pointer',
                           fontWeight: isReadOnly ? '500' : 'normal',
                           ...paddingStyle
                         }}
                       >
-                        {/* Special rendering for appointment numbers */}
                         {cellIdx === 0 && isSubAppointment ? (
                           <div className="flex items-center">
                             <span className="text-muted-foreground mr-2">└</span>

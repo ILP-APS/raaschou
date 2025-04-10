@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/table';
 import { useTheme } from "next-themes";
 import "./FokusarkDataGridStyles.css";
+import { formatDanishCurrency } from "@/utils/formatUtils";
 
 // Define custom meta type for columns
 interface FokusarkColumnMeta {
@@ -100,7 +101,12 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
       header: 'Tilbud',
       cell: ({ getValue }) => {
         const value = getValue() as string;
-        return <div className="text-right font-mono">kr. {value}</div>;
+        if (!value) return <div className="text-right font-mono"></div>;
+        
+        // Parse and format with DKK
+        const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+        const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
+        return <div className="text-right font-mono">{formatted}</div>;
       }
     },
     {
@@ -108,7 +114,12 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
       header: 'Montage',
       cell: ({ getValue }) => {
         const value = getValue() as string;
-        return <div className="text-right font-mono">kr. {value}</div>;
+        if (!value) return <div className="text-right font-mono"></div>;
+        
+        // Parse and format with DKK
+        const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+        const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
+        return <div className="text-right font-mono">{formatted}</div>;
       }
     },
     {
@@ -116,7 +127,12 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
       header: 'Underleverandør',
       cell: ({ getValue }) => {
         const value = getValue() as string;
-        return <div className="text-right font-mono">kr. {value}</div>;
+        if (!value) return <div className="text-right font-mono"></div>;
+        
+        // Parse and format with DKK
+        const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+        const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
+        return <div className="text-right font-mono">{formatted}</div>;
       }
     },
     {
@@ -172,7 +188,12 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
       header: 'Materialer',
       cell: ({ getValue }) => {
         const value = getValue() as string;
-        return <div className="text-right font-mono">kr. {value}</div>;
+        if (!value) return <div className="text-right font-mono"></div>;
+        
+        // Parse and format with DKK
+        const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+        const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
+        return <div className="text-right font-mono">{formatted}</div>;
       }
     },
     {
@@ -180,7 +201,12 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
       header: 'Projektering',
       cell: ({ getValue }) => {
         const value = getValue() as string;
-        return <div className="text-right font-mono">kr. {value}</div>;
+        if (!value) return <div className="text-right font-mono"></div>;
+        
+        // Parse and format with DKK
+        const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+        const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
+        return <div className="text-right font-mono">{formatted}</div>;
       }
     },
     {
@@ -188,7 +214,12 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
       header: 'Produktion',
       cell: ({ getValue }) => {
         const value = getValue() as string;
-        return <div className="text-right font-mono">kr. {value}</div>;
+        if (!value) return <div className="text-right font-mono"></div>;
+        
+        // Parse and format with DKK
+        const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+        const formatted = !isNaN(numValue) ? formatDanishCurrency(numValue) : value;
+        return <div className="text-right font-mono">{formatted}</div>;
       }
     },
     {
