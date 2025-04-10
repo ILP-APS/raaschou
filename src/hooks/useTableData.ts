@@ -54,7 +54,11 @@ export const useTableData = () => {
         console.log(`Starting to process ${appointments.length} appointments`);
         
         if (appointments.length > 0) {
-          console.log("First appointment from useAppointments:", appointments[0]);
+          console.log("First appointment from useAppointments:", {
+            number: appointments[0].appointmentNumber,
+            subject: appointments[0].subject, // Log subject explicitly
+            id: appointments[0].hnAppointmentID
+          });
         }
         
         const userMap = createUserMap(users);
@@ -176,7 +180,11 @@ export const useTableData = () => {
             variant: "default",
           });
         } else {
-          console.log("Using real API data, first row:", processedData[0]);
+          console.log("Using real API data, first row:", {
+            appointmentNumber: processedData[0][0],
+            subject: processedData[0][1], // Log the subject explicitly
+            responsibleUser: processedData[0][2]
+          });
           setTableData(processedData);
           toast({
             title: "Data loaded",

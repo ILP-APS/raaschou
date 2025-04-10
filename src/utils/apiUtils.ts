@@ -14,7 +14,12 @@ export const fetchOpenAppointments = async () => {
   if (!res.ok) throw new Error("Failed to fetch open appointments");
   
   const data = await res.json();
-  console.log("API response from fetchOpenAppointments:", data.length ? data[0] : "No data");
+  console.log("API response from fetchOpenAppointments:", data.length ? {
+    id: data[0].hnAppointmentID,
+    appointmentNumber: data[0].appointmentNumber,
+    subject: data[0].subject,
+    responsibleUserID: data[0].responsibleHnUserID
+  } : "No data");
   return data;
 };
 
@@ -32,7 +37,13 @@ export const fetchAppointmentDetail = async (appointmentId: number) => {
   );
   
   if (!res.ok) throw new Error(`Failed to fetch appointment details for ID: ${appointmentId}`);
-  return res.json();
+  const data = await res.json();
+  console.log(`Appointment detail for ID ${appointmentId}:`, {
+    id: data.hnAppointmentID,
+    number: data.appointmentNumber,
+    subject: data.subject
+  });
+  return data;
 };
 
 // New function to fetch all users
@@ -116,7 +127,14 @@ export const sortAndGroupAppointments = (appointments: any[]) => {
     return [];
   }
   
-  console.log("First appointment before sorting:", appointments[0]);
+  // Log first appointment's subject field explicitly
+  if (appointments.length > 0) {
+    console.log("First appointment before sorting:", {
+      number: appointments[0].appointmentNumber,
+      subject: appointments[0].subject,
+      responsibleUserID: appointments[0].responsibleHnUserID
+    });
+  }
   
   // Create a mapping of parent appointment numbers to arrays of sub-appointments
   const appointmentGroups: Record<string, any[]> = {};
@@ -191,8 +209,16 @@ export const sortAndGroupAppointments = (appointments: any[]) => {
     }
   });
   
-  console.log(`Sorted ${sortedAppointments.length} appointments`);
-  console.log("First appointment after sorting:", sortedAppointments.length > 0 ? sortedAppointments[0] : "No appointments");
+  // Log first sorted appointment's subject field explicitly
+  if (sortedAppointments.length > 0) {
+    console.log("First appointment after sorting:", {
+      number: sortedAppointments[0].appointmentNumber,
+      subject: sortedAppointments[0].subject,
+      responsibleUserID: sortedAppointments[0].responsibleHnUserID
+    });
+  } else {
+    console.log("No appointments after sorting");
+  }
   
   return sortedAppointments;
 };

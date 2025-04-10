@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   flexRender,
@@ -34,8 +33,16 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   console.log("MinimalStickyTable received data:", {
     rowCount: tableData?.length || 0,
     hasData: tableData && tableData.length > 0,
-    firstRow: tableData && tableData.length > 0 ? tableData[0].slice(0, 3) : [],
-    lastRow: tableData && tableData.length > 0 ? tableData[tableData.length - 1].slice(0, 3) : []
+    firstRow: tableData && tableData.length > 0 ? {
+      appointmentNumber: tableData[0][0],
+      subject: tableData[0][1], // Log subject explicitly
+      responsibleUser: tableData[0][2]
+    } : {},
+    lastRow: tableData && tableData.length > 0 ? {
+      appointmentNumber: tableData[tableData.length - 1][0],
+      subject: tableData[tableData.length - 1][1], // Log subject explicitly
+      responsibleUser: tableData[tableData.length - 1][2]
+    } : {}
   });
   
   // Transform tableData into usable data for the table
@@ -48,12 +55,14 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     // Convert the 2D array data to objects
     const transformed = tableData.map((row, i) => {
       // Get the appointment number and subject from the row data
-      const appointmentNumber = row[0]; // This is the actual appointment number from API
-      const subject = row[1]; // This is the appointment subject from API
+      const appointmentNumber = row[0] || `row-${i}`; // This is the actual appointment number from API
+      const subject = row[1] || `Project ${i + 1}`; // This is the appointment subject from API
+      
+      console.log(`Row ${i}: appointmentNumber=${appointmentNumber}, subject=${subject}`);
       
       const rowObj: Record<string, string> = {
-        id: appointmentNumber || `row-${i}`, // Use the actual appointment number as id
-        name: subject || `Project ${i + 1}`, // Use the actual subject from API data
+        id: appointmentNumber, // Use the actual appointment number as id
+        name: subject, // Use the actual subject from API data
         type: row[2] || `Type ${i % 4 + 1}`, // Responsible person
       };
       
@@ -66,6 +75,13 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     });
     
     console.log(`Transformed ${transformed.length} rows from raw data`);
+    if (transformed.length > 0) {
+      console.log("First transformed row:", {
+        id: transformed[0].id,
+        name: transformed[0].name,
+        type: transformed[0].type
+      });
+    }
     return transformed;
   }, [tableData]);
   

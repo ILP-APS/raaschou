@@ -18,6 +18,11 @@ export const useAppointments = () => {
         const fetchedAppointments = await fetchOpenAppointments();
         console.log(`Fetched ${fetchedAppointments.length} appointments from API`);
         
+        // Log a sample of the first appointment's subject to verify it exists
+        if (fetchedAppointments.length > 0) {
+          console.log("Sample appointment subject:", fetchedAppointments[0].subject);
+        }
+        
         const sortedAppointments = sortAndGroupAppointments(fetchedAppointments);
         console.log(`After sorting and grouping: ${sortedAppointments.length} appointments`);
         
