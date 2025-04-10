@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   flexRender,
@@ -177,8 +176,8 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
       overflow: 'hidden',
       border: '1px solid hsl(var(--border))',
       borderRadius: '8px',
-      // Set a more substantial minimum height to make better use of space
-      minHeight: data.length < 10 ? '400px' : '200px',
+      height: '600px',
+      minHeight: '600px',
       maxHeight: '80vh'
     }}>
       <div style={{
