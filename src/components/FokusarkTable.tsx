@@ -15,12 +15,17 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   
   console.log(`FokusarkTable rendering with ${tableData?.length || 0} rows of data`);
   
-  // Show loading state while fetching data
   if (isLoading) {
-    return <FokusarkTableLoading />;
+    return (
+      <div className="rounded-md w-full relative shadow-md border border-border p-8" style={{ minHeight: '600px' }}>
+        <div className="flex flex-col items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+          <p className="text-muted-foreground">Loading appointment data from API...</p>
+        </div>
+      </div>
+    );
   }
   
-  // Check if we have data to display
   if (!tableData || tableData.length === 0) {
     return (
       <div className="rounded-md w-full relative shadow-md border border-border p-8" style={{ minHeight: '600px' }}>
@@ -41,19 +46,34 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
     );
   }
 
-  // Add detailed debugging information about the data being passed
-  console.log("Data passed to MinimalStickyTable:", {
-    totalRows: tableData.length,
-    firstRowData: tableData.length > 0 ? tableData[0].slice(0, 5) : [],
-    lastRowData: tableData.length > 0 ? tableData[tableData.length - 1].slice(0, 5) : []
-  });
+  if (error) {
+    return (
+      <div className="rounded-md w-full relative shadow-md border border-border p-8" style={{ minHeight: '600px' }}>
+        <div className="text-center">
+          <h3 className="text-lg font-medium mb-2 text-destructive">Error Loading Data</h3>
+          <p className="text-muted-foreground mb-4">
+            {error.message || "An error occurred while fetching data from the API."}
+          </p>
+          <Button 
+            onClick={refreshData}
+            className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-md w-full relative" style={{ minHeight: '600px' }}>
       <div className="mb-4 flex justify-between items-center">
         <div>
           <p className="text-sm text-muted-foreground">
-            Showing {tableData.length} appointments from API
+            {tableData.length === 1 ? 
+              `Showing 1 appointment from API` : 
+              `Showing ${tableData.length} appointments from API`}
           </p>
         </div>
         <Button 
