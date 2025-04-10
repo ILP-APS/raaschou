@@ -16,6 +16,7 @@ import {
 import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import { formatDanishCurrency } from '@/utils/formatUtils';
+import { parseNumber } from '@/utils/numberFormatUtils';
 
 interface ColumnMeta {
   sticky?: boolean;
@@ -138,13 +139,31 @@ export default function MinimalStickyTable({
       accessorKey: `col3`,
       header: `Montage 2`,
       meta: { groupIndex: 2 } as ColumnMeta,
-      cell: info => formatCellValue(info.getValue() as string, true)
+      cell: ({ getValue, row, column, table }) => {
+        const value = getValue() as string;
+        
+        if (!value || value.trim() === '') {
+          return <div className="text-right font-mono"></div>;
+        }
+      
+        const numValue = parseNumber(value);
+        return <div className="text-right font-mono">{formatDanishCurrency(numValue)}</div>;
+      }
     },
     {
       accessorKey: `col4`,
       header: `Underleverandør 2`,
       meta: { groupIndex: 2 } as ColumnMeta,
-      cell: info => formatCellValue(info.getValue() as string, true)
+      cell: ({ getValue, row, column, table }) => {
+        const value = getValue() as string;
+        
+        if (!value || value.trim() === '') {
+          return <div className="text-right font-mono"></div>;
+        }
+        
+        const numValue = parseNumber(value);
+        return <div className="text-right font-mono">{formatDanishCurrency(numValue)}</div>;
+      }
     },
     
     {
