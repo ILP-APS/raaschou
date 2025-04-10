@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -34,23 +33,26 @@ export const useFokusarkTable = (initialData: string[][]) => {
       console.log('Initial loading of data in useFokusarkTable');
       
       try {
-        // First try loading from Supabase (faster and prevents unnecessary API calls)
-        console.log("First trying to load from Supabase cache");
+        // First try loading from Supabase (faster)
+        console.log("Loading from Supabase");
         const supabaseData = await loadAppointmentsFromSupabase();
         
         if (supabaseData && supabaseData.length > 0) {
-          console.log(`Loaded ${supabaseData.length} rows from Supabase cache`);
+          console.log(`Loaded ${supabaseData.length} rows from Supabase`);
           setTableData(supabaseData);
           setIsLoading(false);
-          
-          // After showing cached data, refresh in the background for fresh data
-          refreshDataInBackground();
+          isInitialLoadRef.current = false;
           return;
         }
         
-        // If no data in Supabase, try the API
-        console.log("No data in Supabase cache, trying API directly");
-        await fetchAndProcessData();
+        // If no data in Supabase, try the API and save to Supabase
+        console.log("No data in Supabase, trying API");
+        const success = await fetchAndProcessData();
+        
+        if (!success && initialData && initialData.length > 0) {
+          console.log("API failed, using initialData as fallback");
+          setTableData(initialData);
+        }
       } catch (err) {
         handleError(err);
       } finally {
@@ -60,7 +62,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
     };
     
     loadData();
-  }, []);
+  }, [initialData]);
   
   // Separate function for fetching from API and processing data
   const fetchAndProcessData = async () => {
@@ -71,42 +73,25 @@ export const useFokusarkTable = (initialData: string[][]) => {
       if (appointments && appointments.length > 0) {
         console.log(`Got ${appointments.length} appointments from API`);
         
-        // Map the data for display - Make sure to await the promise
+        // Map the data for display
         const mappedData = await mapAppointmentsToTableData(appointments);
         setTableData(mappedData);
         
-        // Save to Supabase in the background
-        saveAppointmentsToSupabase(appointments)
-          .then(success => {
-            if (success) {
-              console.log("Saved to Supabase successfully");
-            } else {
-              console.error("Failed to save to Supabase");
-            }
-          })
-          .catch(err => {
-            console.error("Error saving to Supabase:", err);
-          });
+        // Save to Supabase
+        const saveSuccess = await saveAppointmentsToSupabase(appointments);
+        if (saveSuccess) {
+          console.log("Saved to Supabase successfully");
+        } else {
+          console.error("Failed to save to Supabase");
+        }
         
         return true;
       } else {
         console.warn("API returned no appointments");
-        setTableData(initialData || []);
         return false;
       }
     } catch (err) {
       throw err;
-    }
-  };
-  
-  // Function to refresh data in the background (without setting loading state)
-  const refreshDataInBackground = async () => {
-    console.log("Refreshing data in background...");
-    try {
-      await fetchAndProcessData();
-    } catch (err) {
-      console.error("Background refresh error:", err);
-      // Don't show error to user for background refreshes
     }
   };
   
@@ -127,6 +112,8 @@ export const useFokusarkTable = (initialData: string[][]) => {
             console.log("Recovered with Supabase fallback data");
             setTableData(data);
             toast.warning("Using cached data. Failed to connect to API.");
+          } else {
+            setTableData([]);
           }
         })
         .catch(() => {
@@ -146,54 +133,35 @@ export const useFokusarkTable = (initialData: string[][]) => {
       newData[rowIndex][colIndex] = value;
       setTableData(newData);
       
-      // Get the appointment number (this is in column 0)
-      const appointmentNumber = newData[rowIndex][0];
-      
-      if (!appointmentNumber) {
-        console.error("Invalid appointment number");
-        toast.error("Failed to save: Missing appointment number");
-        return false;
-      }
-      
-      // Map the array index to the Supabase column name (e.g., 0 -> "1 col", 1 -> "2 col", etc.)
+      // Map the array index to the Supabase column name
       const columnName = `${colIndex + 1} col`;
       
-      console.log(`Updating cell in Supabase: appointment=${appointmentNumber}, column=${columnName}, value=${value}`);
+      // Get the appointment number or ID for the row
+      const rowId = rowIndex.toString();
+      const appointmentNumber = newData[rowIndex][0]; // First column usually contains appointment number
       
-      // First, check if a row with this appointment number exists
-      const { data: existingRows, error: fetchError } = await supabase
+      console.log(`Updating cell: row=${rowId}, column=${columnName}, appointmentNumber=${appointmentNumber}, value=${value}`);
+      
+      // Create update data
+      const updateData: Record<string, any> = {
+        [columnName]: value
+      };
+      
+      // If there's an appointment number, use it as well for more reliable updates
+      if (appointmentNumber) {
+        updateData['1 col'] = appointmentNumber;
+      }
+      
+      // Update in Supabase using the row ID
+      const { data, error } = await supabase
         .from('fokusark_table')
-        .select('id')
-        .eq('1 col', appointmentNumber);
-        
-      if (fetchError) {
-        console.error("Error checking for existing row:", fetchError);
-        toast.error("Failed to save changes");
-        return false;
-      }
+        .upsert({
+          id: rowId,
+          ...updateData
+        });
       
-      let result;
-      
-      if (existingRows && existingRows.length > 0) {
-        // Update existing row
-        result = await supabase
-          .from('fokusark_table')
-          .update({ [columnName]: value })
-          .eq('1 col', appointmentNumber);
-      } else {
-        // Insert new row with appointment number and the updated value
-        const newRow: Record<string, any> = {
-          '1 col': appointmentNumber
-        };
-        newRow[columnName] = value;
-        
-        result = await supabase
-          .from('fokusark_table')
-          .insert([newRow]);
-      }
-      
-      if (result.error) {
-        console.error("Error updating cell:", result.error);
+      if (error) {
+        console.error("Error updating Supabase:", error);
         toast.error("Failed to save changes");
         return false;
       }
@@ -213,8 +181,13 @@ export const useFokusarkTable = (initialData: string[][]) => {
     setError(null);
     
     try {
-      await fetchAndProcessData();
-      return true;
+      const success = await fetchAndProcessData();
+      if (!success) {
+        toast.error("Failed to refresh data from API");
+      } else {
+        toast.success("Data refreshed successfully");
+      }
+      return success;
     } catch (err) {
       handleError(err);
       return false;
