@@ -156,6 +156,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
                 if (onCellBlur) {
                   const rowIndex = parseInt(row.id);
                   const colIndex = 6; // Index of montage2 column
+                  console.log(`Montage2 cell blur at row ${rowIndex}, column ${colIndex}, value: ${e.target.value}`);
                   onCellBlur(rowIndex, colIndex, e.target.value);
                 }
               }}
@@ -163,6 +164,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
                 if (e.key === 'Enter' && onCellBlur) {
                   const rowIndex = parseInt(row.id);
                   const colIndex = 6; // Index of montage2 column
+                  console.log(`Montage2 cell Enter key at row ${rowIndex}, column ${colIndex}, value: ${e.currentTarget.value}`);
                   onCellBlur(rowIndex, colIndex, e.currentTarget.value);
                 }
               }}
@@ -203,6 +205,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
                 if (onCellBlur) {
                   const rowIndex = parseInt(row.id);
                   const colIndex = 7; // Index of underleverandor2 column
+                  console.log(`Underleverandor2 cell blur at row ${rowIndex}, column ${colIndex}, value: ${e.target.value}`);
                   onCellBlur(rowIndex, colIndex, e.target.value);
                 }
               }}
@@ -210,6 +213,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
                 if (e.key === 'Enter' && onCellBlur) {
                   const rowIndex = parseInt(row.id);
                   const colIndex = 7; // Index of underleverandor2 column
+                  console.log(`Underleverandor2 cell Enter key at row ${rowIndex}, column ${colIndex}, value: ${e.currentTarget.value}`);
                   onCellBlur(rowIndex, colIndex, e.currentTarget.value);
                 }
               }}

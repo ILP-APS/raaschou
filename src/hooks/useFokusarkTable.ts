@@ -157,6 +157,8 @@ export const useFokusarkTable = (initialData: string[][]) => {
     }
     
     try {
+      console.log(`Saving cell value: row=${rowIndex}, column=${colIndex}, value=${value}`);
+      
       // Format numeric values for display (this won't affect the saved value)
       try {
         const numValue = parseNumber(value);
@@ -186,15 +188,22 @@ export const useFokusarkTable = (initialData: string[][]) => {
       updateData['3 col'] = tableData[rowIndex][2] || ''; // Responsible
       
       // First check if this appointment already exists in the database
-      const { data: existingRows } = await supabase
+      const { data: existingRows, error: fetchError } = await supabase
         .from('fokusark_table')
         .select('id')
         .eq('1 col', appointmentNumber);
+      
+      if (fetchError) {
+        console.error("Error checking existing rows:", fetchError);
+        toast.error("Failed to save changes to database");
+        return false;
+      }
       
       let result;
       
       if (existingRows && existingRows.length > 0) {
         // Update existing row
+        console.log(`Updating existing row for appointment ${appointmentNumber}, column ${colIndex + 1}`, updateData);
         const { data, error } = await supabase
           .from('fokusark_table')
           .update(updateData)
@@ -206,6 +215,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
         // Insert new row with a proper UUID
         updateData.id = crypto.randomUUID();
         
+        console.log(`Inserting new row for appointment ${appointmentNumber}, column ${colIndex + 1}`, updateData);
         const { data, error } = await supabase
           .from('fokusark_table')
           .insert([updateData])

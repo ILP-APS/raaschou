@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { fetchOpenAppointments } from '@/utils/apiUtils';
 import { FokusarkAppointment } from '@/api/fokusarkAppointmentsApi';
@@ -192,8 +191,8 @@ export const loadAppointmentsFromSupabase = async (): Promise<string[][] | null>
       row['4 col'] || '',
       row['5 col'] || '',
       row['6 col'] || '',
-      row['7 col'] || '',
-      row['8 col'] || '',
+      row['7 col'] || '',  // Montage2
+      row['8 col'] || '',  // Underleverandor2
       row['9 col'] || '',
       row['10 col'] || '',
       row['11 col'] || '',
