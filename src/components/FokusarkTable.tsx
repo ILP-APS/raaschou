@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useFokusarkData } from "@/hooks/useFokusarkData";
 import FokusarkTableLoading from "./fokusark/FokusarkTableLoading";
 import MinimalStickyTable from "./fokusark/MinimalStickyTable";
@@ -12,13 +12,22 @@ interface FokusarkTableProps {
 }
 
 const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
-  const { isLoading, refreshData } = useFokusarkData();
+  const { isLoading, refreshData, tableData: hookData } = useFokusarkData();
   
-  console.log("FokusarkTable rendering with data:", {
-    isLoading,
-    dataLength: data?.length || 0,
-    firstRow: data && data.length > 0 ? data[0] : 'No data'
-  });
+  // Use both sources of data - either passed in props or from the hook
+  const displayData = data && data.length > 0 ? data : hookData;
+  
+  // Add more detailed logging for debugging
+  useEffect(() => {
+    console.log("FokusarkTable component state:", {
+      isLoading,
+      propsDataLength: data?.length || 0,
+      hookDataLength: hookData?.length || 0,
+      displayDataLength: displayData?.length || 0,
+      firstRowFromProps: data && data.length > 0 ? data[0].slice(0, 3) : 'No data from props',
+      firstRowFromHook: hookData && hookData.length > 0 ? hookData[0].slice(0, 3) : 'No data from hook',
+    });
+  }, [data, hookData, isLoading, displayData]);
   
   // Show loading state while fetching data
   if (isLoading) {
@@ -26,7 +35,7 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   }
   
   // Check if we have data to display
-  if (!data || data.length === 0) {
+  if (!displayData || displayData.length === 0) {
     return (
       <div className="rounded-md w-full relative shadow-md border border-border p-8">
         <Alert variant="destructive" className="mb-4">
@@ -51,7 +60,7 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
 
   return (
     <div className="rounded-md w-full relative">
-      <MinimalStickyTable tableData={data} />
+      <MinimalStickyTable tableData={displayData} />
     </div>
   );
 };

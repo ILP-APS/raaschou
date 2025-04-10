@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import {
   flexRender,
@@ -15,6 +14,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useTheme } from 'next-themes';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // Define the column meta type to include our custom properties
 interface ColumnMeta {
@@ -35,7 +36,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   useEffect(() => {
     console.log("MinimalStickyTable received data:", {
       rowCount: tableData?.length || 0,
-      hasData: tableData && tableData.length > 0,
+      hasData: Boolean(tableData && tableData.length > 0),
       firstRow: tableData && tableData.length > 0 ? tableData[0]?.slice(0, 3) : 'No data'
     });
   }, [tableData]);
@@ -43,19 +44,13 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   // Transform tableData into usable data for the table
   const data = React.useMemo(() => {
     if (!tableData || tableData.length === 0) {
-      console.log("No table data provided, using default data");
-      // Provide default data if none is passed
-      return [
-        { id: '1', name: 'Project 1', type: 'Type 1', col1: 'Value 1-1', col2: 'Value 1-2', col3: 'Value 1-3' },
-        { id: '2', name: 'Project 2', type: 'Type 2', col1: 'Value 2-1', col2: 'Value 2-2', col3: 'Value 2-3' },
-        { id: '3', name: 'Project 3', type: 'Type 3', col1: 'Value 3-1', col2: 'Value 3-2', col3: 'Value 3-3' },
-        { id: '4', name: 'Project 4', type: 'Type 4', col1: 'Value 4-1', col2: 'Value 4-2', col3: 'Value 4-3' },
-        { id: '5', name: 'Project 5', type: 'Type 1', col1: 'Value 5-1', col2: 'Value 5-2', col3: 'Value 5-3' },
-      ];
+      console.log("No table data provided to MinimalStickyTable");
+      return [];
     }
     
     // Log first few rows to see actual data structure
-    console.log("Transforming table data structure (first 2 rows):", tableData.slice(0, 2));
+    console.log("Transforming table data structure (first 2 rows):", 
+      tableData.slice(0, 2));
     
     // Convert the 2D array data to objects
     return tableData.map((row, i) => {
@@ -142,6 +137,21 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     getCoreRowModel: getCoreRowModel(),
   });
 
+  if (data.length === 0) {
+    console.log("No data to display in MinimalStickyTable");
+    return (
+      <div className="table-wrapper bg-background border border-border rounded-md p-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>No data available</AlertTitle>
+          <AlertDescription>
+            The table doesn't have any data to display. This could be due to an error in data loading or transformation.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   // Define group structure with column spans
   const columnGroups = [
     { name: 'Aftale', span: 2, index: 0 },
@@ -155,7 +165,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   ];
   
   // Get background color based on group index and theme
-  const getGroupBgColor = (groupIndex: number) => {
+  const getGroupBgColor = (groupIndex: number, isDarkMode: boolean) => {
     if (isDarkMode) {
       return groupIndex % 2 === 0 ? 'hsl(var(--background))' : 'hsl(var(--muted))';
     } else {
@@ -164,15 +174,6 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   };
 
   const headerHeight = '41px';
-
-  if (data.length === 0) {
-    console.log("No data to display in table");
-    return (
-      <div className="table-wrapper bg-background border border-border rounded-md p-6 text-center">
-        <p className="text-muted-foreground">No data available for display.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="table-wrapper" style={{
@@ -207,7 +208,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
                     top: 0,
                     left: index === 0 ? 0 : undefined,
                     zIndex: index === 0 ? 60 : 50,
-                    backgroundColor: getGroupBgColor(index),
+                    backgroundColor: getGroupBgColor(index, isDarkMode),
                     textAlign: 'center',
                     fontWeight: 'bold',
                     borderBottom: '1px solid hsl(var(--border))',
@@ -239,7 +240,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
                       left: isSticky ? (stickyIndex === 0 ? 0 : '150px') : undefined,
                       zIndex: isSticky ? 55 : 45,
                       minWidth: stickyIndex === 0 ? '150px' : (stickyIndex === 1 ? '200px' : '150px'),
-                      backgroundColor: getGroupBgColor(groupIndex),
+                      backgroundColor: getGroupBgColor(groupIndex, isDarkMode),
                       boxShadow: isSticky ? 
                         '1px 0 0 0 hsl(var(--border)), 0 1px 0 0 hsl(var(--border))' : 
                         '0 1px 0 0 hsl(var(--border))'
@@ -272,7 +273,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
                           left: isSticky ? (stickyIndex === 0 ? 0 : '150px') : undefined,
                           zIndex: isSticky ? 20 : undefined,
                           minWidth: stickyIndex === 0 ? '150px' : (stickyIndex === 1 ? '200px' : '150px'),
-                          backgroundColor: getGroupBgColor(groupIndex),
+                          backgroundColor: getGroupBgColor(groupIndex, isDarkMode),
                           boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border))' : undefined
                         }}
                       >
@@ -288,4 +289,13 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
       </div>
     </div>
   );
+}
+
+// Helper function for getting background color based on group index and theme
+function getGroupBgColor(groupIndex: number, isDarkMode: boolean) {
+  if (isDarkMode) {
+    return groupIndex % 2 === 0 ? 'hsl(var(--background))' : 'hsl(var(--muted))';
+  } else {
+    return groupIndex % 2 === 0 ? 'hsl(var(--background))' : 'hsl(var(--muted)/10)';
+  }
 }
