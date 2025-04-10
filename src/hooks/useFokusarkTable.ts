@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -139,13 +140,13 @@ export const useFokusarkTable = (initialData: string[][]) => {
   const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {
     if (!tableData[rowIndex]) return false;
     
-    // Update the cell value
-    const newData = [...tableData];
-    newData[rowIndex][colIndex] = value;
-    setTableData(newData);
-    
-    // Try to update in Supabase
     try {
+      // Update the cell value in the local state
+      const newData = [...tableData];
+      newData[rowIndex][colIndex] = value;
+      setTableData(newData);
+      
+      // Get the appointment number (this is in column 0)
       const appointmentNumber = newData[rowIndex][0];
       
       if (!appointmentNumber) {
@@ -154,9 +155,15 @@ export const useFokusarkTable = (initialData: string[][]) => {
         return false;
       }
       
+      // Map the array index to the Supabase column name (e.g., 0 -> "1 col", 1 -> "2 col", etc.)
+      const columnName = `${colIndex + 1} col`;
+      
+      console.log(`Updating cell in Supabase: appointment=${appointmentNumber}, column=${columnName}, value=${value}`);
+      
+      // Update in Supabase using the correct column name
       const { error } = await supabase
         .from('fokusark_table')
-        .update({ [`${colIndex + 1} col`]: value })
+        .update({ [columnName]: value })
         .eq('1 col', appointmentNumber);
       
       if (error) {

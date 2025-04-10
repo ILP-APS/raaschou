@@ -1,3 +1,4 @@
+
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserName, preloadUsers } from "@/utils/userUtils";
@@ -219,7 +220,8 @@ export async function saveAppointmentsToSupabase(appointments: AppointmentRespon
         await getUserName(appointment.responsibleHnUserID) : 
         'Unknown';
       
-      return {
+      // Initialize default row data
+      const row: Record<string, string> = {
         '1 col': appointment.appointmentNumber || '',
         '2 col': appointment.subject || '',
         '3 col': responsibleUserName,
@@ -243,8 +245,36 @@ export async function saveAppointmentsToSupabase(appointments: AppointmentRespon
         '21 col': '',
         '22 col': '',
         '23 col': '',
-        '24 col': ''
+        '24 col': appointment.isSubAppointment ? 'sub-appointment' : 'parent-appointment'
       };
+      
+      // Fetch offer data for column 4, 5, 6 if we have an offer ID
+      if (appointment.hnOfferID) {
+        try {
+          console.log(`Fetching offer data for appointment ${appointment.appointmentNumber}`);
+          const offerData = await fetchOfferLineItems(appointment.hnOfferID);
+          
+          // Format and store the offer data
+          const offerTotal = parseFloat(offerData.offerTotal.replace(/\./g, '').replace(',', '.'));
+          row['4 col'] = !isNaN(offerTotal) ? offerData.offerTotal : '';
+          
+          const montageTotal = parseFloat(offerData.montageTotal.replace(/\./g, '').replace(',', '.'));
+          row['5 col'] = !isNaN(montageTotal) ? offerData.montageTotal : '';
+          
+          const underleverandorTotal = parseFloat(offerData.underleverandorTotal.replace(/\./g, '').replace(',', '.'));
+          row['6 col'] = !isNaN(underleverandorTotal) ? offerData.underleverandorTotal : '';
+          
+          console.log(`Saved offer data for appointment ${appointment.appointmentNumber}:`, {
+            offerTotal: row['4 col'],
+            montageTotal: row['5 col'],
+            underleverandorTotal: row['6 col']
+          });
+        } catch (error) {
+          console.error(`Error fetching offer data for appointment ${appointment.appointmentNumber}:`, error);
+        }
+      }
+      
+      return row;
     });
     
     const rows = await Promise.all(rowPromises);
@@ -351,6 +381,8 @@ export function mapAppointmentsToTableData(appointments: AppointmentResponse[]):
             
             const underleverandorTotal = parseFloat(offerData.underleverandorTotal.replace(/\./g, '').replace(',', '.'));
             row[5] = !isNaN(underleverandorTotal) ? offerData.underleverandorTotal : '';
+            
+            console.log(`Mapped offer data for display: appointment=${appointment.appointmentNumber}, offerTotal=${row[3]}, montageTotal=${row[4]}, underleverandorTotal=${row[5]}`);
           } catch (error) {
             console.error(`Error fetching offer data for appointment ${appointment.appointmentNumber}:`, error);
             // Set empty values if we can't fetch the data
