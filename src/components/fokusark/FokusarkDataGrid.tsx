@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   flexRender,
@@ -80,7 +79,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
     });
   };
 
-  // Define columns - similar to the example
+  // Define columns
   const columns: ColumnDef<FokusarkRow, any>[] = [
     {
       accessorKey: 'nr',
@@ -309,7 +308,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
                       minWidth: '150px',
                       position: isFrozen ? 'sticky' : 'static',
                       left: isFrozen ? `${leftOffset}px` : undefined,
-                      zIndex: isFrozen ? 100 : 50, // Increased z-index to make them above all other elements
+                      zIndex: isFrozen ? 100 : 50, // Increased z-index for frozen columns
                       backgroundColor: 'hsl(var(--background))',
                       boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : undefined,
                       borderRight: isFrozen ? '1px solid hsl(var(--border))' : undefined,

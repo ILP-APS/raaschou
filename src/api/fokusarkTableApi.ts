@@ -7,155 +7,147 @@ export interface FokusarkTableRow {
 }
 
 /**
- * Fetches all rows from the fokusark_table
+ * Fetches all data from the fokusark_table
  */
 export async function fetchFokusarkTableData() {
-  console.log('Fetching data from fokusark_table...');
-  const { data, error } = await supabase
-    .from('fokusark_table')
-    .select('*');
-    
-  if (error) {
+  try {
+    const { data, error } = await supabase
+      .from('fokusark_table')
+      .select('*')
+      .order('id');
+      
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
     console.error('Error fetching fokusark table data:', error);
     throw error;
   }
-  
-  return data || [];
 }
 
 /**
  * Saves a row to the fokusark_table
  */
-export async function saveFokusarkTableRow(rowData: FokusarkTableRow) {
-  console.log('Saving row to fokusark_table:', rowData);
-  
-  if (rowData.id) {
-    // Update existing row
-    const { data, error } = await supabase
-      .from('fokusark_table')
-      .update(rowData)
-      .eq('id', rowData.id)
-      .select()
-      .single();
-      
-    if (error) {
-      console.error('Error updating fokusark table row:', error);
-      throw error;
+export async function saveFokusarkTableRow(row: FokusarkTableRow) {
+  try {
+    if (!row.id) {
+      throw new Error('Row ID is required for saving');
     }
     
-    return data;
-  } else {
-    // Insert new row
-    const { data, error } = await supabase
+    // Check if row already exists
+    const { data: existingData, error: fetchError } = await supabase
       .from('fokusark_table')
-      .insert([rowData])
-      .select()
-      .single();
+      .select('id')
+      .eq('id', row.id);
       
-    if (error) {
-      console.error('Error inserting fokusark table row:', error);
-      throw error;
+    if (fetchError) throw fetchError;
+    
+    let result;
+    
+    if (existingData && existingData.length > 0) {
+      // Update existing row
+      const { data, error } = await supabase
+        .from('fokusark_table')
+        .update(row)
+        .eq('id', row.id)
+        .select()
+        .single();
+        
+      if (error) throw error;
+      result = data;
+    } else {
+      // Insert new row
+      const { data, error } = await supabase
+        .from('fokusark_table')
+        .insert([row])
+        .select()
+        .single();
+        
+      if (error) throw error;
+      result = data;
     }
     
-    return data;
+    return result;
+  } catch (error) {
+    console.error('Error saving fokusark table row:', error);
+    throw error;
   }
 }
 
 /**
- * Saves multiple rows to the fokusark_table in a batch
+ * Batch saves multiple rows to the fokusark_table
  */
 export async function batchSaveFokusarkTableRows(rows: FokusarkTableRow[]) {
-  console.log(`Batch saving ${rows.length} rows to fokusark_table`);
-  
-  // Separate rows into inserts (no id) and updates (with id)
-  const insertRows = rows.filter(row => !row.id);
-  const updateRows = rows.filter(row => row.id);
-  
-  const results = [];
-  
-  // Process inserts
-  if (insertRows.length > 0) {
-    const { data: insertedData, error: insertError } = await supabase
+  try {
+    // Ensure all rows have IDs
+    rows.forEach((row, index) => {
+      if (!row.id) {
+        row.id = index.toString();
+      }
+    });
+    
+    // We'll use upsert to handle both insert and update cases
+    const { data, error } = await supabase
       .from('fokusark_table')
-      .insert(insertRows)
+      .upsert(rows, { onConflict: 'id' })
       .select();
       
-    if (insertError) {
-      console.error('Error batch inserting fokusark table rows:', insertError);
-      throw insertError;
-    }
-    
-    results.push(...(insertedData || []));
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error batch saving fokusark table rows:', error);
+    throw error;
   }
-  
-  // Process updates - one by one since we can't batch update different records
-  for (const row of updateRows) {
-    const { data: updatedData, error: updateError } = await supabase
-      .from('fokusark_table')
-      .update(row)
-      .eq('id', row.id)
-      .select()
-      .single();
-      
-    if (updateError) {
-      console.error(`Error updating fokusark table row ${row.id}:`, updateError);
-      throw updateError;
-    }
-    
-    if (updatedData) {
-      results.push(updatedData);
-    }
-  }
-  
-  return results;
 }
 
 /**
  * Deletes a row from the fokusark_table
  */
 export async function deleteFokusarkTableRow(id: string) {
-  console.log('Deleting fokusark table row:', id);
-  const { error } = await supabase
-    .from('fokusark_table')
-    .delete()
-    .eq('id', id);
-    
-  if (error) {
+  try {
+    const { error } = await supabase
+      .from('fokusark_table')
+      .delete()
+      .eq('id', id);
+      
+    if (error) throw error;
+    return true;
+  } catch (error) {
     console.error('Error deleting fokusark table row:', error);
     throw error;
   }
-  
-  return true;
 }
 
 /**
- * Converts string[][] table data to fokusark_table row format
+ * Utility function to convert table data to row format
  */
 export function convertTableDataToRowFormat(tableData: string[][]): FokusarkTableRow[] {
   return tableData.map((row, rowIndex) => {
-    const rowObj: FokusarkTableRow = {};
+    const rowObj: FokusarkTableRow = { id: rowIndex.toString() };
     
-    // Map each column to the corresponding "N col" field
-    for (let colIndex = 0; colIndex < Math.min(row.length, 24); colIndex++) {
-      rowObj[`${colIndex + 1} col`] = row[colIndex] || '';
-    }
+    row.forEach((cellValue, colIndex) => {
+      rowObj[`${colIndex + 1} col`] = cellValue;
+    });
     
     return rowObj;
   });
 }
 
 /**
- * Converts fokusark_table rows back to string[][] format
+ * Utility function to convert rows to table data format
  */
 export function convertRowsToTableData(rows: FokusarkTableRow[]): string[][] {
+  const maxCols = 24; // Match the number of columns in the table
+  
   return rows.map(row => {
-    const tableRow: string[] = [];
+    const rowData: string[] = Array(maxCols).fill('');
     
-    // Extract values from "1 col" to "24 col"
-    for (let i = 1; i <= 24; i++) {
-      tableRow.push(row[`${i} col`] || '');
+    for (let i = 0; i < maxCols; i++) {
+      const colKey = `${i + 1} col`;
+      if (row[colKey] !== undefined) {
+        rowData[i] = row[colKey];
+      }
     }
     
-    return tableRow;
+    return rowData;
   });
 }

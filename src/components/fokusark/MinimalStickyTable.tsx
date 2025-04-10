@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   flexRender,
@@ -101,12 +100,12 @@ export default function MinimalStickyTable({
   const columns = React.useMemo<ColumnDef<Record<string, string>, any>[]>(() => [
     { 
       accessorKey: 'id', 
-      header: 'Nr.', // Changed from 'ID' to 'Nr.'
+      header: 'Nr.', 
       meta: { sticky: true, index: 0, groupIndex: 0 } as ColumnMeta
     },
     { 
       accessorKey: 'name', 
-      header: 'Navn', // Changed from 'Name' to 'Navn'
+      header: 'Navn', 
       meta: { sticky: true, index: 1, groupIndex: 0 } as ColumnMeta
     },
     { 
@@ -168,7 +167,7 @@ export default function MinimalStickyTable({
     { name: 'Budget Group B', span: 4, index: 3 },
     { name: 'Budget Group C', span: 4, index: 4 },
     { name: 'Special', span: 1, index: 5 },
-    { name: 'Budget Group D', span: 5, index: 6 }, // Updated span from 2 to 5
+    { name: 'Budget Group D', span: 5, index: 6 },
     { name: 'Summary', span: 2, index: 7 }
   ];
   
