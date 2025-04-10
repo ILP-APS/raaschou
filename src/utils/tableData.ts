@@ -3,14 +3,29 @@
 export const generateTableData = () => {
   console.log("Generating sample table data");
   const rows = [];
+  
+  // Sample subjects for more realistic data
+  const sampleSubjects = [
+    "Vandskade i køkken",
+    "Renovering af badeværelse",
+    "Installation af gulvvarme",
+    "Udskiftning af vinduer",
+    "Nye døre i lejlighed",
+    "Reparation af tag",
+    "Opsætning af gipsvægge",
+    "Isolering af loft",
+    "El-installation i køkken",
+    "Maling af vægge"
+  ];
+  
   for (let i = 1; i <= 10; i++) {
     const row = [];
     // First column (index 0) should be the actual appointment number (no A- prefix)
-    // Use the format shown in the API (like "9598")
-    row.push(`${9590 + i}`); // Using realistic appointment numbers like 9591, 9592, etc.
+    // Use the format shown in the API (like "24482")
+    row.push(`${24480 + i}`); // Using realistic appointment numbers like 24481, 24482, etc.
     
-    // For the second column (index 1), add descriptive project names/subjects
-    row.push(`${i % 3 === 0 ? 'Renovation' : i % 2 === 0 ? 'Construction' : 'Installation'} Project ${9590 + i}`);
+    // For the second column (index 1), add descriptive project names/subjects from the sample list
+    row.push(sampleSubjects[i - 1]);
     
     // For "ansvarlig" column (index 2)
     row.push(`User ${i}`);

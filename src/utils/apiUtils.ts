@@ -36,6 +36,32 @@ export const fetchAppointmentDetail = async (appointmentId: number) => {
   return res.json();
 };
 
+// New function to fetch appointment by appointment number
+export const fetchAppointmentByNumber = async (appointmentNumber: string) => {
+  console.log(`Fetching appointment by number: ${appointmentNumber}`);
+  const res = await fetch(
+    `https://publicapi.e-regnskab.dk/Appointment/Standard/Address?appointmentNumber=${appointmentNumber}`,
+    {
+      method: "GET",
+      headers: {
+        "accept": "application/json",
+        "ApiKey": "w9Jq5NiTeOIpXfovZ0Hf1jLnM:pGwZ"
+      }
+    }
+  );
+  
+  if (!res.ok) throw new Error(`Failed to fetch appointment by number: ${appointmentNumber}`);
+  
+  const data = await res.json();
+  console.log(`Appointment by number ${appointmentNumber} response:`, data);
+  
+  if (Array.isArray(data) && data.length > 0) {
+    return data[0];
+  }
+  
+  return data;
+};
+
 // New function to fetch all users
 export const fetchUsers = async () => {
   const res = await fetch(

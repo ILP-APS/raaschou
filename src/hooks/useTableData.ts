@@ -12,6 +12,7 @@ import {
 import { generateTableData } from "@/utils/tableData";
 import { useToast } from "@/hooks/use-toast";
 import { updateRealizedHours } from "@/api/fokusarkAppointmentsApi";
+import { fetchAppointmentByNumber, fetchAppointmentDetail } from "@/utils/apiUtils";
 
 export const useTableData = () => {
   const [tableData, setTableData] = useState<string[][]>([]);
@@ -48,7 +49,7 @@ export const useTableData = () => {
         const userMap = createUserMap(users);
         
         const processedData: string[][] = [];
-        const batchSize = 20; // Increased batch size for larger data set
+        const batchSize = 20; // Process appointments in batches
         const appointmentBatches = [];
         
         // Create batches of appointments
@@ -66,7 +67,22 @@ export const useTableData = () => {
           
           const batchPromises = batch.map(async (appointment) => {
             try {
-              const details = await getAppointmentDetail(appointment.hnAppointmentID);
+              // 1. Get appointment number from the appointment
+              const appointmentNumber = appointment.appointmentNumber;
+              
+              // 2. First get appointment details by appointment number to retrieve hnAppointmentID
+              const appointmentByNumber = await fetchAppointmentByNumber(appointmentNumber);
+              const hnAppointmentID = appointmentByNumber.hnAppointmentID;
+              
+              if (!hnAppointmentID) {
+                console.error(`No hnAppointmentID found for appointment number ${appointmentNumber}`);
+                return null;
+              }
+              
+              console.log(`Appointment ${appointmentNumber} has hnAppointmentID: ${hnAppointmentID}`);
+              
+              // 3. Then get full appointment details using hnAppointmentID
+              const details = await fetchAppointmentDetail(hnAppointmentID);
               
               // Skip appointments that are marked as done
               if (details.done) {
@@ -75,7 +91,7 @@ export const useTableData = () => {
               
               const responsibleUserName = userMap.get(details.responsibleHnUserID) || 'Unknown';
               
-              // Get offer data (don't filter by value anymore)
+              // Get offer data
               const { offerTotal, montageTotal, underleverandorTotal } = 
                 await getOfferLineItems(details.hnOfferID);
               
@@ -86,8 +102,8 @@ export const useTableData = () => {
               
               // Build the row of data
               const row = [
-                appointment.appointmentNumber, // Use this directly from the API
-                details.subject || 'N/A',     // Use the subject from the API
+                appointmentNumber, // Use appointment number from the API
+                details.subject || 'N/A',     // Use the subject from the detailed API response
                 responsibleUserName,
                 offerTotal,
                 montageTotal,
@@ -115,12 +131,12 @@ export const useTableData = () => {
                 row.push(`R${processedData.length + 1}C${i + 1}`);
               }
               
-              const isSubApp = isSubAppointment(appointment.appointmentNumber);
+              const isSubApp = isSubAppointment(appointmentNumber);
               row.push(isSubApp ? 'sub-appointment' : 'parent-appointment');
               
               return row;
             } catch (error) {
-              console.error(`Error processing appointment ${appointment.hnAppointmentID}:`, error);
+              console.error(`Error processing appointment ${appointment.appointmentNumber}:`, error);
               return null;
             }
           });
