@@ -20,6 +20,7 @@ import { useTheme } from 'next-themes';
 interface ColumnMeta {
   sticky?: boolean;
   index?: number;
+  groupIndex?: number;
 }
 
 interface MinimalStickyTableProps {
@@ -36,7 +37,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
       // Provide default data if none is passed
       return [
         { id: '1', name: 'Project 1', type: 'Type 1', col1: 'Value 1-1', col2: 'Value 1-2', col3: 'Value 1-3' },
-        { id: '2', name: 'Project 2', type: 'Type 2', col1: 'Value 2-1', col2: 'Value 2-2', col3: 'Value 2-3' },
+        { id: '2', name: 'Project 2', type: 'Type 2', col1: 'Value 2-1', col2: 'Value 2-2', col2: 'Value 2-3' },
         { id: '3', name: 'Project 3', type: 'Type 3', col1: 'Value 3-1', col2: 'Value 3-2', col3: 'Value 3-3' },
         { id: '4', name: 'Project 4', type: 'Type 4', col1: 'Value 4-1', col2: 'Value 4-2', col3: 'Value 4-3' },
         { id: '5', name: 'Project 5', type: 'Type 1', col1: 'Value 5-1', col2: 'Value 5-2', col3: 'Value 5-3' },
@@ -70,22 +71,54 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     { 
       accessorKey: 'id', 
       header: 'ID',
-      meta: { sticky: true, index: 0 } as ColumnMeta
+      meta: { sticky: true, index: 0, groupIndex: 0 } as ColumnMeta
     },
     { 
       accessorKey: 'name', 
       header: 'Name',
-      meta: { sticky: true, index: 1 } as ColumnMeta
+      meta: { sticky: true, index: 1, groupIndex: 0 } as ColumnMeta
     },
     { 
       accessorKey: 'type', 
-      header: 'Type'
+      header: 'Type',
+      meta: { groupIndex: 1 } as ColumnMeta
     },
     
-    // Generate additional columns
-    ...Array.from({ length: 17 }).map((_, i) => ({
+    // Generate additional columns with group indices
+    ...Array.from({ length: 5 }).map((_, i) => ({
       accessorKey: `col${i}`,
-      header: `Column ${i + 1}`
+      header: `Group A ${i + 1}`,
+      meta: { groupIndex: 2 } as ColumnMeta
+    })),
+    
+    ...Array.from({ length: 4 }).map((_, i) => ({
+      accessorKey: `col${i + 5}`,
+      header: `Group B ${i + 1}`,
+      meta: { groupIndex: 3 } as ColumnMeta
+    })),
+    
+    ...Array.from({ length: 4 }).map((_, i) => ({
+      accessorKey: `col${i + 9}`,
+      header: `Group C ${i + 1}`,
+      meta: { groupIndex: 4 } as ColumnMeta
+    })),
+    
+    {
+      accessorKey: `col13`,
+      header: `Special`,
+      meta: { groupIndex: 5 } as ColumnMeta
+    },
+    
+    ...Array.from({ length: 2 }).map((_, i) => ({
+      accessorKey: `col${i + 14}`,
+      header: `Group D ${i + 1}`,
+      meta: { groupIndex: 6 } as ColumnMeta
+    })),
+    
+    ...Array.from({ length: 2 }).map((_, i) => ({
+      accessorKey: `col${i + 16}`,
+      header: `Summary ${i + 1}`,
+      meta: { groupIndex: 7 } as ColumnMeta
     }))
   ], []);
 
@@ -95,12 +128,34 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // Get background color based on theme
-  const getBgColor = (isEvenRow: boolean = false) => {
+  // Define group structure with column spans
+  const columnGroups = [
+    { name: 'Info', span: 2, index: 0 },
+    { name: 'Type', span: 1, index: 1 },
+    { name: 'Budget Group A', span: 5, index: 2 },
+    { name: 'Budget Group B', span: 4, index: 3 },
+    { name: 'Budget Group C', span: 4, index: 4 },
+    { name: 'Special', span: 1, index: 5 },
+    { name: 'Budget Group D', span: 2, index: 6 },
+    { name: 'Summary', span: 2, index: 7 }
+  ];
+  
+  // Get background color based on group index and theme
+  const getGroupBgColor = (groupIndex: number) => {
     if (isDarkMode) {
-      return isEvenRow ? 'hsl(var(--muted))' : 'hsl(var(--background))';
+      return groupIndex % 2 === 0 ? 'hsl(var(--background))' : 'hsl(var(--muted))';
     } else {
-      return isEvenRow ? 'hsl(var(--muted)/10)' : 'hsl(var(--background))';
+      return groupIndex % 2 === 0 ? 'hsl(var(--background))' : 'hsl(var(--muted)/10)';
+    }
+  };
+  
+  // Get background color based on theme and row parity
+  const getBgColor = (isEvenRow: boolean = false, groupIndex: number) => {
+    const baseColor = getGroupBgColor(groupIndex);
+    if (isDarkMode) {
+      return isEvenRow ? 'hsl(var(--muted))' : baseColor;
+    } else {
+      return isEvenRow ? 'hsl(var(--muted)/10)' : baseColor;
     }
   };
 
@@ -131,136 +186,28 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
           <TableHeader>
             {/* Group Header Row */}
             <TableRow>
-              {/* Group 1: 2 cols - sticky */}
-              <TableHead
-                colSpan={2}
-                style={{
-                  position: 'sticky',
-                  top: 0,
-                  left: 0,
-                  zIndex: 60,
-                  backgroundColor: getBgColor(),
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  borderBottom: '1px solid hsl(var(--border))',
-                  minWidth: '350px', // Combined width of first two columns
-                  boxShadow: '1px 0 0 0 hsl(var(--border)), 0 1px 0 0 hsl(var(--border))'
-                }}
-              >
-                Info
-              </TableHead>
-              
-              {/* Group 2: 1 col */}
-              <TableHead
-                colSpan={1}
-                style={{
-                  position: 'sticky',
-                  top: 0,
-                  zIndex: 50,
-                  backgroundColor: getBgColor(),
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  borderBottom: '1px solid hsl(var(--border))'
-                }}
-              >
-                Type
-              </TableHead>
-              
-              {/* Group 3: 5 cols */}
-              <TableHead
-                colSpan={5}
-                style={{
-                  position: 'sticky',
-                  top: 0,
-                  zIndex: 50,
-                  backgroundColor: getBgColor(),
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  borderBottom: '1px solid hsl(var(--border))'
-                }}
-              >
-                Budget Group A
-              </TableHead>
-              
-              {/* Group 4: 4 cols */}
-              <TableHead
-                colSpan={4}
-                style={{
-                  position: 'sticky',
-                  top: 0,
-                  zIndex: 50,
-                  backgroundColor: getBgColor(),
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  borderBottom: '1px solid hsl(var(--border))'
-                }}
-              >
-                Budget Group B
-              </TableHead>
-              
-              {/* Group 5: 4 cols */}
-              <TableHead
-                colSpan={4}
-                style={{
-                  position: 'sticky',
-                  top: 0,
-                  zIndex: 50,
-                  backgroundColor: getBgColor(),
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  borderBottom: '1px solid hsl(var(--border))'
-                }}
-              >
-                Budget Group C
-              </TableHead>
-              
-              {/* Group 6: 1 col */}
-              <TableHead
-                colSpan={1}
-                style={{
-                  position: 'sticky',
-                  top: 0,
-                  zIndex: 50,
-                  backgroundColor: getBgColor(),
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  borderBottom: '1px solid hsl(var(--border))'
-                }}
-              >
-                Special
-              </TableHead>
-              
-              {/* Group 7: 5 cols */}
-              <TableHead
-                colSpan={5}
-                style={{
-                  position: 'sticky',
-                  top: 0,
-                  zIndex: 50,
-                  backgroundColor: getBgColor(),
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  borderBottom: '1px solid hsl(var(--border))'
-                }}
-              >
-                Budget Group D
-              </TableHead>
-              
-              {/* Group 8: 2 cols */}
-              <TableHead
-                colSpan={2}
-                style={{
-                  position: 'sticky',
-                  top: 0,
-                  zIndex: 50,
-                  backgroundColor: getBgColor(),
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  borderBottom: '1px solid hsl(var(--border))'
-                }}
-              >
-                Summary
-              </TableHead>
+              {columnGroups.map((group, index) => (
+                <TableHead
+                  key={`group-${index}`}
+                  colSpan={group.span}
+                  style={{
+                    position: 'sticky',
+                    top: 0,
+                    left: index === 0 ? 0 : undefined,
+                    zIndex: index === 0 ? 60 : 50,
+                    backgroundColor: getGroupBgColor(index),
+                    textAlign: 'center',
+                    fontWeight: 'bold',
+                    borderBottom: '1px solid hsl(var(--border))',
+                    minWidth: index === 0 ? '350px' : undefined,
+                    boxShadow: index === 0 
+                      ? '1px 0 0 0 hsl(var(--border)), 0 1px 0 0 hsl(var(--border))' 
+                      : '0 1px 0 0 hsl(var(--border))'
+                  }}
+                >
+                  {group.name}
+                </TableHead>
+              ))}
             </TableRow>
             
             {/* Column Header Row */}
@@ -269,17 +216,18 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
                 const meta = header.column.columnDef.meta as ColumnMeta | undefined;
                 const isSticky = meta?.sticky;
                 const stickyIndex = meta?.index || 0;
+                const groupIndex = meta?.groupIndex || 0;
                 
                 return (
                   <TableHead
                     key={header.id}
                     style={{
                       position: 'sticky',
-                      top: headerHeight, // Height of the group header row
+                      top: headerHeight,
                       left: isSticky ? (stickyIndex === 0 ? 0 : '150px') : undefined,
                       zIndex: isSticky ? 55 : 45,
                       minWidth: stickyIndex === 0 ? '150px' : (stickyIndex === 1 ? '200px' : '150px'),
-                      backgroundColor: getBgColor(),
+                      backgroundColor: getGroupBgColor(groupIndex),
                       boxShadow: isSticky ? 
                         '1px 0 0 0 hsl(var(--border)), 0 1px 0 0 hsl(var(--border))' : 
                         '0 1px 0 0 hsl(var(--border))'
@@ -304,6 +252,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
                     const meta = cell.column.columnDef.meta as ColumnMeta | undefined;
                     const isSticky = meta?.sticky;
                     const stickyIndex = meta?.index || 0;
+                    const groupIndex = meta?.groupIndex || 0;
                     
                     return (
                       <TableCell
@@ -313,7 +262,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
                           left: isSticky ? (stickyIndex === 0 ? 0 : '150px') : undefined,
                           zIndex: isSticky ? 20 : undefined,
                           minWidth: stickyIndex === 0 ? '150px' : (stickyIndex === 1 ? '200px' : '150px'),
-                          backgroundColor: getBgColor(isEvenRow),
+                          backgroundColor: getBgColor(isEvenRow, groupIndex),
                           boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border))' : undefined
                         }}
                       >
