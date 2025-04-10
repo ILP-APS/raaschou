@@ -26,7 +26,7 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
         <div className="text-center">
           <h3 className="text-lg font-medium mb-2">No data available</h3>
           <p className="text-muted-foreground mb-4">
-            Try refreshing the page or checking the data source.
+            No appointment data is currently available.
           </p>
           <button 
             onClick={refetchData}
@@ -38,13 +38,6 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
       </div>
     );
   }
-
-  // Add detailed debugging information about the data being passed
-  console.log("Data passed to MinimalStickyTable:", {
-    totalRows: tableData.length,
-    firstRowData: tableData.length > 0 ? tableData[0].slice(0, 5) : [],
-    lastRowData: tableData.length > 0 ? tableData[tableData.length - 1].slice(0, 5) : []
-  });
 
   return (
     <div className="rounded-md w-full relative" style={{ minHeight: '600px' }}>

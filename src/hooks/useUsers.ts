@@ -13,23 +13,14 @@ export const useUsers = () => {
     const loadUsers = async () => {
       try {
         setIsLoading(true);
-        
-        // Create mock users instead of API fetching
-        const mockUsers: User[] = [
-          { hnUserID: 42, name: "John Doe", username: "john.doe" },
-          { hnUserID: 43, name: "Jane Smith", username: "jane.smith" },
-          { hnUserID: 44, name: "Peter Jensen", username: "peter.jensen" },
-          { hnUserID: 45, name: "Marie Hansen", username: "marie.hansen" },
-          { hnUserID: 46, name: "Thomas Nielsen", username: "thomas.nielsen" }
-        ];
-        
-        setUsers(mockUsers);
+        // Empty users array - no mock data
+        setUsers([]);
       } catch (err) {
-        console.error("Error setting up mock users:", err);
+        console.error("Error loading users:", err);
         setError(err instanceof Error ? err : new Error(String(err)));
         toast({
           title: "Error loading users",
-          description: "Failed to set up mock users data.",
+          description: "Failed to load user data.",
           variant: "destructive",
         });
       } finally {
