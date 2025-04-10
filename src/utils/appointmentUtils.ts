@@ -1,8 +1,11 @@
-
 import { 
   AppointmentDetail, 
+  OfferLineItem, 
   User 
 } from "@/types/appointment";
+import { fetchAppointmentDetail, fetchOfferLineItems, fetchAppointmentLineWork } from "@/utils/apiUtils";
+import { calculateRealizedHours } from "@/utils/workTypeMapping";
+import { formatDanishNumber } from "@/utils/formatUtils";
 
 // Create a map of user IDs to names for quick lookup
 export const createUserMap = (users: User[]): Map<number, string> => {
@@ -21,51 +24,35 @@ export const getResponsibleUserName = (userMap: Map<number, string>, userId: num
 // Fetch the appointment details
 export const getAppointmentDetail = async (appointmentId: number): Promise<AppointmentDetail> => {
   try {
-    // Return a properly typed mock appointment detail
-    return {
-      hnAppointmentID: appointmentId,
-      hnShippingAddressID: null,
-      appointmentNumber: appointmentId.toString(),
-      customerAccountNumber: "MOCK-ACCOUNT",
-      responsibleHnUserID: 42,
-      subject: `Appointment ${appointmentId}`,
-      project: null,
-      description: "Description goes here",
-      startDate: new Date().toISOString(),
-      endDate: new Date(Date.now() + 86400000).toISOString(),
-      hnAppointmentCategoryID: 1,
-      hnBudgetID: null,
-      hnMainAppointmentID: null,
-      blocked: false,
-      tags: [],
-      customerRef: "",
-      notes: "",
-      done: false,
-      doneDate: null,
-      created: new Date().toISOString(),
-      hnOfferID: null,
-      appointmentAssociatedUsers: []
-    };
+    return await fetchAppointmentDetail(appointmentId);
   } catch (error) {
     console.error(`Error fetching appointment detail for ID ${appointmentId}:`, error);
     throw error;
   }
 };
 
-// Calculate line item totals - now returns the correct type
-export const calculateOfferTotals = (lineItems: any[]): {
+// Calculate line item totals
+export const calculateOfferTotals = (lineItems: OfferLineItem[]): {
   offerTotal: string;
   montageTotal: string;
   underleverandorTotal: string;
 } => {
+  const total = lineItems.reduce((sum, item) => sum + item.totalPriceStandardCurrency, 0);
+  
+  const montageItems = lineItems.filter(item => item.itemNumber === "Montage");
+  const montageSum = montageItems.reduce((sum, item) => sum + item.totalPriceStandardCurrency, 0);
+  
+  const underleverandorItems = lineItems.filter(item => item.itemNumber === "Underleverandør");
+  const underleverandorSum = underleverandorItems.reduce((sum, item) => sum + item.totalPriceStandardCurrency, 0);
+  
   return {
-    offerTotal: '0',
-    montageTotal: '0',
-    underleverandorTotal: '0',
+    offerTotal: total.toLocaleString('da-DK'),
+    montageTotal: montageSum > 0 ? montageSum.toLocaleString('da-DK') : '0',
+    underleverandorTotal: underleverandorSum > 0 ? underleverandorSum.toLocaleString('da-DK') : '0',
   };
 };
 
-// Fetch offer line items - fixed to handle the type properly
+// Fetch offer line items
 export const getOfferLineItems = async (offerId: number | null): Promise<{
   offerTotal: string;
   montageTotal: string;
@@ -80,12 +67,8 @@ export const getOfferLineItems = async (offerId: number | null): Promise<{
   }
   
   try {
-    // Return mock data with the correct type
-    return {
-      offerTotal: '0',
-      montageTotal: '0',
-      underleverandorTotal: '0',
-    };
+    const lineItems = await fetchOfferLineItems(offerId);
+    return calculateOfferTotals(lineItems);
   } catch (error) {
     console.error(`Error fetching offer line items for offer ID ${offerId}:`, error);
     return {
@@ -108,12 +91,25 @@ export const getRealizedHours = async (appointmentId: number): Promise<{
   try {
     console.log(`Fetching realized hours for appointment ID ${appointmentId}`);
     
-    // Return zeroes for all values
+    // Fetch the line work data for the appointment
+    const lineWorkData = await fetchAppointmentLineWork(appointmentId);
+    console.log(`Line work data for appointment ${appointmentId}:`, lineWorkData);
+    
+    // Calculate the realized hours by category using the updated mapping
+    const { projektering, produktion, montage, total } = calculateRealizedHours(lineWorkData);
+    console.log(`Calculated hours for appointment ${appointmentId}:`, { 
+      projektering, 
+      produktion, 
+      montage, 
+      total 
+    });
+    
+    // Format the values with Danish number format
     return {
-      projektering: '0,00',
-      produktion: '0,00',
-      montage: '0,00',
-      total: '0,00'
+      projektering: formatDanishNumber(projektering),
+      produktion: formatDanishNumber(produktion),
+      montage: formatDanishNumber(montage),
+      total: formatDanishNumber(total)
     };
   } catch (error) {
     console.error(`Error fetching realized hours for appointment ID ${appointmentId}:`, error);
