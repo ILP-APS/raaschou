@@ -101,12 +101,12 @@ export default function MinimalStickyTable({
   const columns = React.useMemo<ColumnDef<Record<string, string>, any>[]>(() => [
     { 
       accessorKey: 'id', 
-      header: 'ID',
+      header: 'Nr.', // Changed from 'ID' to 'Nr.'
       meta: { sticky: true, index: 0, groupIndex: 0 } as ColumnMeta
     },
     { 
       accessorKey: 'name', 
-      header: 'Name',
+      header: 'Navn', // Changed from 'Name' to 'Navn'
       meta: { sticky: true, index: 1, groupIndex: 0 } as ColumnMeta
     },
     { 

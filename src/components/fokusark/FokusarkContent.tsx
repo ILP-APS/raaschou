@@ -2,12 +2,12 @@
 import React from "react";
 import FokusarkDescription from "./FokusarkDescription";
 import MinimalStickyTable from "./MinimalStickyTable";
-import { useFokusarkDb } from "@/hooks/useFokusarkDb";
+import { useFokusarkTable } from "@/hooks/useFokusarkTable";
 
 const FokusarkContent: React.FC = () => {
-  const { isLoading, tableData, saveCellChange, refreshData } = useFokusarkDb();
+  const { isLoading, tableData, isInitialized, handleCellChange, refreshData } = useFokusarkTable([]);
   
-  if (isLoading) {
+  if (isLoading && !isInitialized) {
     return (
       <div className="flex flex-col gap-4 p-4 md:p-6">
         <div className="flex flex-col gap-4 pb-4">
@@ -26,19 +26,19 @@ const FokusarkContent: React.FC = () => {
       <div className="flex flex-col gap-4 pb-4">
         <h2 className="text-2xl font-semibold tracking-tight">Fokusark</h2>
         <FokusarkDescription />
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
           <button 
             onClick={refreshData}
             className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            Refresh Data
+            Refresh Data from API
           </button>
         </div>
       </div>
       
       <MinimalStickyTable 
         tableData={tableData} 
-        onCellChange={saveCellChange}
+        onCellChange={handleCellChange}
       />
     </div>
   );

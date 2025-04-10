@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { generateTableData } from '@/utils/tableData';
 import { toast } from 'sonner';
+import { fetchAppointments, mapAppointmentsToTableData } from '@/services/appointmentService';
 
 export interface FokusarkTableData {
   data: string[][];
@@ -11,7 +12,7 @@ export interface FokusarkTableData {
 
 /**
  * Main hook for handling the Fokusark table functionality
- * Enhanced to handle API responses of any size
+ * Enhanced to fetch data from the e-regnskab API
  */
 export const useFokusarkTable = (initialData: string[][]) => {
   const [tableData, setTableData] = useState<string[][]>([]);
@@ -21,13 +22,22 @@ export const useFokusarkTable = (initialData: string[][]) => {
   
   useEffect(() => {
     const initData = async () => {
-      console.log(`Initializing table data with: ${initialData?.length || 0} rows`);
+      console.log(`Initializing table data`);
       setIsLoading(true);
       setError(null);
       
       try {
-        // Use provided data or generate sample data if none
-        if (initialData && initialData.length > 0) {
+        // First attempt to fetch data from the API
+        const appointments = await fetchAppointments();
+        
+        if (appointments && appointments.length > 0) {
+          console.log(`Using data from API: ${appointments.length} appointments`);
+          const mappedData = mapAppointmentsToTableData(appointments);
+          setTableData(mappedData);
+          toast.success(`Loaded ${appointments.length} appointments from API`);
+        } 
+        // If no API data, use provided data or generate sample data
+        else if (initialData && initialData.length > 0) {
           console.log(`Using provided data: ${initialData.length} rows`);
           setTableData(initialData);
         } else {
@@ -36,6 +46,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
           console.log(`Generated ${generatedData.length} rows of sample data`);
           setTableData(generatedData);
         }
+        
         setIsInitialized(true);
       } catch (error) {
         console.error("Error initializing table data:", error);
@@ -83,15 +94,25 @@ export const useFokusarkTable = (initialData: string[][]) => {
     }
   };
   
-  const refreshData = () => {
+  const refreshData = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
-      const data = generateTableData();
-      console.log(`Refreshed with ${data.length} rows of data`);
-      setTableData(data);
-      toast.success("Data refreshed successfully");
+      // Try to fetch fresh data from the API first
+      const appointments = await fetchAppointments();
+      
+      if (appointments && appointments.length > 0) {
+        const mappedData = mapAppointmentsToTableData(appointments);
+        setTableData(mappedData);
+        toast.success(`Refreshed data with ${appointments.length} appointments from API`);
+      } else {
+        // Fallback to generated data if API returns nothing
+        const data = generateTableData();
+        console.log(`Refreshed with ${data.length} rows of generated data`);
+        setTableData(data);
+        toast.success("Data refreshed successfully");
+      }
     } catch (error) {
       console.error("Error refreshing data:", error);
       setError("Failed to refresh data");
