@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -70,8 +71,8 @@ export const useFokusarkTable = (initialData: string[][]) => {
       if (appointments && appointments.length > 0) {
         console.log(`Got ${appointments.length} appointments from API`);
         
-        // Map the data for display
-        const mappedData = mapAppointmentsToTableData(appointments);
+        // Map the data for display - FIX: await the promise before setting state
+        const mappedData = await mapAppointmentsToTableData(appointments);
         setTableData(mappedData);
         
         // Save to Supabase in the background
