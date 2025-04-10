@@ -49,11 +49,16 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
       ];
     }
     
+    // Log first few rows to see actual data structure
+    console.log("Sample table data structure (first 2 rows):", tableData.slice(0, 2));
+    
     // Convert the 2D array data to objects
     return tableData.map((row, i) => {
-      // Ensure we use appointment_number from the data (first column) as id
+      // Get the actual appointment number from the row
+      const appointmentNumber = row[0]; // This is the actual appointment number
+      
       const rowObj: Record<string, string> = {
-        id: row[0] || `${i + 1}`, // Use appointment number for id
+        id: appointmentNumber || `row-${i + 1}`, // Use the actual appointment number as id
         name: row[1] || `Project ${i + 1}`, // Subject
         type: row[2] || `Type ${i % 4 + 1}`, // Responsible person
       };
