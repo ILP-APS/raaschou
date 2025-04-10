@@ -1,11 +1,13 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { api } from '@/utils/apiUtils';
+import { fetchOpenAppointments } from '@/utils/apiUtils';
 import { FokusarkAppointment } from '@/api/fokusarkAppointmentsApi';
 
 export const fetchAppointments = async (): Promise<any[]> => {
   try {
-    const response = await api.get('/fokusark/appointments');
-    return response.data;
+    // Since there's no 'api' export in apiUtils, let's use the fetchOpenAppointments function directly
+    const appointments = await fetchOpenAppointments();
+    return appointments;
   } catch (error) {
     console.error('Error fetching appointments:', error);
     throw error;

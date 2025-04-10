@@ -1,4 +1,3 @@
-
 // Mock API utility for e-regnskab data
 export const fetchOpenAppointments = async () => {
   console.log("Generating mock appointments data");
@@ -164,4 +163,15 @@ export const sortAndGroupAppointments = (appointments: any[]) => {
   
   // Just return the appointments as is for simplicity
   return appointments;
+};
+
+// Export the API functions
+export const api = {
+  get: async (url: string) => {
+    // For now, just mock the appointments data
+    if (url === '/fokusark/appointments') {
+      return { data: await fetchOpenAppointments() };
+    }
+    throw new Error(`Unhandled URL: ${url}`);
+  }
 };
