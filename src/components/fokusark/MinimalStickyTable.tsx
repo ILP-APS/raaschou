@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   flexRender,
@@ -163,7 +162,6 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   return (
     <div className="table-wrapper" style={{
       width: '100%',
-      height: '500px',
       position: 'relative',
       overflow: 'hidden',
       border: '1px solid hsl(var(--border))',

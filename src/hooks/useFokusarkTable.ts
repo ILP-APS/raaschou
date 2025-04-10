@@ -25,6 +25,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
         // Use provided data or generate sample data if none
         if (initialData && initialData.length > 0) {
           console.log("Using provided data");
+          // Use all rows without limitation
           setTableData(initialData);
         } else {
           console.log("No initial data, using generated data");
