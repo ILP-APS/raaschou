@@ -14,8 +14,13 @@ export const useFokusarkData = () => {
         setIsLoading(true);
         setError(null);
         
-        // No data fetching - just set empty array
-        setTableData([]);
+        // Generate sample data for now
+        // In a real scenario, this would be an API call
+        const data = generateTableData(24); // Generate 24 rows to ensure we have enough data
+        console.log(`Generated ${data.length} rows of sample data`);
+        
+        // No row count limit, use whatever is returned
+        setTableData(data);
       } catch (error) {
         console.error("Error loading data:", error);
         setError("Failed to load data. Please try again.");
@@ -34,8 +39,9 @@ export const useFokusarkData = () => {
     setError(null);
     
     try {
-      // No data fetching - just set empty array
-      setTableData([]);
+      const data = generateTableData(24); // Generate 24 rows for consistent testing
+      console.log(`Refreshed data with ${data.length} rows`);
+      setTableData(data);
       toast.success("Data refreshed successfully");
     } catch (error) {
       console.error("Error refreshing data:", error);

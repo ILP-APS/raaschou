@@ -1,12 +1,57 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { fetchOpenAppointments, sortAndGroupAppointments } from "@/utils/apiUtils";
 import { Appointment } from "@/types/appointment";
+import { useToast } from "@/hooks/use-toast";
 
 export const useAppointments = () => {
-  const [appointments] = useState<Appointment[]>([]);
-  const [isLoading] = useState(false);
-  const [error] = useState<Error | null>(null);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const { toast } = useToast();
 
-  // No API fetching implementation - just return empty data
+  useEffect(() => {
+    const loadAppointments = async () => {
+      try {
+        setIsLoading(true);
+        console.log("Fetching open appointments from API...");
+        const fetchedAppointments = await fetchOpenAppointments();
+        console.log(`Fetched ${fetchedAppointments.length} appointments from API`);
+        
+        // Log a sample of the first appointment's subject to verify it exists
+        if (fetchedAppointments.length > 0) {
+          console.log("Sample appointment subject:", fetchedAppointments[0].subject);
+          console.log("First appointment details:", {
+            id: fetchedAppointments[0].hnAppointmentID,
+            number: fetchedAppointments[0].appointmentNumber,
+            subject: fetchedAppointments[0].subject,
+            responsibleUserId: fetchedAppointments[0].responsibleHnUserID
+          });
+        }
+        
+        const sortedAppointments = sortAndGroupAppointments(fetchedAppointments);
+        console.log(`After sorting and grouping: ${sortedAppointments.length} appointments`);
+        
+        if (sortedAppointments.length > 0) {
+          console.log("First sorted appointment subject:", sortedAppointments[0].subject);
+        }
+        
+        setAppointments(sortedAppointments);
+      } catch (err) {
+        console.error("Error fetching appointments:", err);
+        setError(err instanceof Error ? err : new Error(String(err)));
+        toast({
+          title: "Error loading appointments",
+          description: "Failed to fetch appointments data.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAppointments();
+  }, [toast]);
+
   return { appointments, isLoading, error };
 };
