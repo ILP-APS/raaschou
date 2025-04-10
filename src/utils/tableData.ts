@@ -1,67 +1,35 @@
 
-/**
- * Generate sample table data for development and testing
- */
-export function generateTableData(rows = 10): string[][] {
-  console.log(`Generating sample table data with ${rows} rows`);
-  
-  const data: string[][] = [];
-  
-  // Generate rows
-  for (let i = 0; i < rows; i++) {
-    const appointmentNumber = (24481 + i).toString();
+// Generate table data for the Fokusark table
+export const generateTableData = () => {
+  console.log("Generating sample table data");
+  const rows = [];
+  for (let i = 1; i <= 10; i++) {
+    const row = [];
+    // First column (index 0) should be the actual appointment number (no A- prefix)
+    // Use the format shown in the API (like "9598")
+    row.push(`${9590 + i}`); // Using realistic appointment numbers like 9591, 9592, etc.
     
-    // Sample project names
-    const projectNames = [
-      "Vandskade i køkken",
-      "Renovering af badeværelse",
-      "Installation af gulvvarme",
-      "Udskiftning af vinduer",
-      "Nye døre i lejlighed",
-      "Reparation af tag",
-      "Opsætning af gipsvægge",
-      "Isolering af loft",
-      "El-installation i køkken",
-      "Maling af vægge",
-      "Montering af køkkenelementer",
-      "Kloakrenovering",
-      "Etablering af udestue",
-      "Ombygning af erhvervslokale",
-      "Nyt badeværelse"
-    ];
+    // For the second column (index 1), add descriptive project names/subjects
+    row.push(`${i % 3 === 0 ? 'Renovation' : i % 2 === 0 ? 'Construction' : 'Installation'} Project ${9590 + i}`);
     
-    const projectName = projectNames[i % projectNames.length];
-    const userName = `User ${(i % 5) + 1}`;
+    // For "ansvarlig" column (index 2)
+    row.push(`User ${i}`);
     
-    // Generate a row with random values for demo purposes
-    const row: string[] = [
-      appointmentNumber,
-      projectName,
-      userName,
-    ];
-    
-    // Add monetary values (columns 3-5)
-    for (let j = 0; j < 3; j++) {
-      row.push((Math.random() * 1000).toFixed(2));
+    // For numeric columns, add some sample values
+    for (let j = 3; j <= 15; j++) {
+      row.push(`${(Math.random() * 1000).toFixed(2)}`);
     }
     
-    // Add more columns with numeric values (columns 6-15)
-    for (let j = 0; j < 10; j++) {
-      row.push((Math.random() * 1000).toFixed(2));
+    // Add remaining columns
+    for (let j = 16; j <= 22; j++) {
+      row.push(`R${i}C${j}`);
     }
     
-    // Add placeholder values for remaining columns
-    for (let j = 16; j < 23; j++) {
-      row.push(`R${i+1}C${j+1}`);
-    }
+    // Add row type flag (every third row is a sub-appointment)
+    row.push(i % 3 === 0 ? 'sub-appointment' : 'parent-appointment');
     
-    // Add row type (parent or sub appointment)
-    const isSubAppointment = i % 4 === 0 && i > 0; // Every 4th row (except first) is a sub-appointment
-    row.push(isSubAppointment ? 'sub-appointment' : 'parent-appointment');
-    
-    data.push(row);
+    rows.push(row);
   }
-  
-  console.log(`Generated ${data.length} sample rows`);
-  return data;
-}
+  console.log("Generated", rows.length, "sample rows");
+  return rows;
+};

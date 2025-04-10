@@ -12,7 +12,6 @@ import {
 import { generateTableData } from "@/utils/tableData";
 import { useToast } from "@/hooks/use-toast";
 import { updateRealizedHours } from "@/api/fokusarkAppointmentsApi";
-import { fetchAppointmentByNumber, fetchAppointmentDetail } from "@/utils/apiUtils";
 
 export const useTableData = () => {
   const [tableData, setTableData] = useState<string[][]>([]);
@@ -43,13 +42,12 @@ export const useTableData = () => {
         setIsProcessing(true);
         
         // Debug the appointment data
-        console.log(`Processing ${appointments.length} appointments from useAppointments`);
-        console.log("First appointment sample:", appointments[0]);
+        console.log("First appointment from useAppointments:", appointments[0]);
         
         const userMap = createUserMap(users);
         
         const processedData: string[][] = [];
-        const batchSize = 20; // Process appointments in batches
+        const batchSize = 10;
         const appointmentBatches = [];
         
         // Create batches of appointments
@@ -57,53 +55,41 @@ export const useTableData = () => {
           appointmentBatches.push(appointments.slice(i, i + batchSize));
         }
         
-        console.log(`Created ${appointmentBatches.length} batches of appointments`);
-        
         // Process each batch
-        let counter = 0;
         for (const batch of appointmentBatches) {
-          console.log(`Processing batch ${counter + 1}/${appointmentBatches.length}`);
-          counter++;
-          
           const batchPromises = batch.map(async (appointment) => {
             try {
-              // 1. Get appointment number from the appointment
-              const appointmentNumber = appointment.appointmentNumber;
+              console.log("Processing appointment:", appointment);
+              const details = await getAppointmentDetail(appointment.hnAppointmentID);
               
-              // 2. First get appointment details by appointment number to retrieve hnAppointmentID
-              const appointmentByNumber = await fetchAppointmentByNumber(appointmentNumber);
-              const hnAppointmentID = appointmentByNumber.hnAppointmentID;
-              
-              if (!hnAppointmentID) {
-                console.error(`No hnAppointmentID found for appointment number ${appointmentNumber}`);
-                return null;
-              }
-              
-              console.log(`Appointment ${appointmentNumber} has hnAppointmentID: ${hnAppointmentID}`);
-              
-              // 3. Then get full appointment details using hnAppointmentID
-              const details = await fetchAppointmentDetail(hnAppointmentID);
-              
-              // Skip appointments that are marked as done
               if (details.done) {
                 return null;
               }
               
+              // Log the subject from the API
+              console.log(`Appointment ${appointment.appointmentNumber} subject:`, details.subject);
+              
               const responsibleUserName = userMap.get(details.responsibleHnUserID) || 'Unknown';
               
-              // Get offer data
               const { offerTotal, montageTotal, underleverandorTotal } = 
                 await getOfferLineItems(details.hnOfferID);
               
               // Get realized hours from API
               const realizedHours = await getRealizedHours(appointment.hnAppointmentID);
               
-              console.log(`Processing appointment ${appointment.appointmentNumber}: "${details.subject}"`);
+              const offerTotalNumber = parseFloat(offerTotal.replace(/[^0-9,]/g, '').replace(',', '.'));
+              
+              if (offerTotalNumber <= 40000) {
+                return null;
+              }
+              
+              // Use the appointmentNumber and subject directly from the API
+              console.log("Using appointment number:", appointment.appointmentNumber);
               
               // Build the row of data
               const row = [
-                appointmentNumber, // Use appointment number from the API
-                details.subject || 'N/A',     // Use the subject from the detailed API response
+                appointment.appointmentNumber, // Use this directly from the API
+                details.subject || 'N/A',     // Use the subject from the API
                 responsibleUserName,
                 offerTotal,
                 montageTotal,
@@ -131,12 +117,12 @@ export const useTableData = () => {
                 row.push(`R${processedData.length + 1}C${i + 1}`);
               }
               
-              const isSubApp = isSubAppointment(appointmentNumber);
+              const isSubApp = isSubAppointment(appointment.appointmentNumber);
               row.push(isSubApp ? 'sub-appointment' : 'parent-appointment');
               
               return row;
             } catch (error) {
-              console.error(`Error processing appointment ${appointment.appointmentNumber}:`, error);
+              console.error(`Error processing appointment ${appointment.hnAppointmentID}:`, error);
               return null;
             }
           });
@@ -153,16 +139,15 @@ export const useTableData = () => {
         
         if (processedData.length === 0) {
           const sampleData = generateTableData();
-          console.log("No appointments found that meet criteria. Using sample data, first row:", sampleData[0]);
+          console.log("Using sample data, first row:", sampleData[0]);
           setTableData(sampleData);
           toast({
-            title: "No valid appointments found",
-            description: "Using sample data instead. Try changing the API endpoint or check for API errors.",
+            title: "No matching appointments found",
+            description: "No appointments met the criteria (not done and offer > 40,000). Using sample data instead.",
             variant: "default",
           });
         } else {
-          console.log(`Successfully processed ${processedData.length} appointments from API data`);
-          console.log("First processed row sample:", processedData[0]);
+          console.log("Using API data, first row:", processedData[0]);
           setTableData(processedData);
           toast({
             title: "Data loaded",
@@ -176,7 +161,7 @@ export const useTableData = () => {
         setTableData(sampleData);
         toast({
           title: "Error processing data",
-          description: "Using sample data instead. Check console for error details.",
+          description: "Using sample data instead.",
           variant: "destructive",
         });
       } finally {

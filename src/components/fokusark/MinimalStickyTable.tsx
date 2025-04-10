@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+
+import React from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -14,8 +15,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useTheme } from 'next-themes';
-import { AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // Define the column meta type to include our custom properties
 interface ColumnMeta {
@@ -32,37 +31,38 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   
-  // Debug logs to track data
-  useEffect(() => {
-    console.log("MinimalStickyTable received data:", {
-      rowCount: tableData?.length || 0,
-      hasData: Boolean(tableData && tableData.length > 0),
-      firstRow: tableData && tableData.length > 0 ? tableData[0]?.slice(0, 3) : 'No data'
-    });
-  }, [tableData]);
-  
   // Transform tableData into usable data for the table
   const data = React.useMemo(() => {
     if (!tableData || tableData.length === 0) {
-      console.log("No table data provided to MinimalStickyTable");
-      return [];
+      // Provide default data if none is passed
+      return [
+        { id: '1', name: 'Project 1', type: 'Type 1', col1: 'Value 1-1', col2: 'Value 1-2', col3: 'Value 1-3' },
+        { id: '2', name: 'Project 2', type: 'Type 2', col1: 'Value 2-1', col2: 'Value 2-2', col3: 'Value 2-3' },
+        { id: '3', name: 'Project 3', type: 'Type 3', col1: 'Value 3-1', col2: 'Value 3-2', col3: 'Value 3-3' },
+        { id: '4', name: 'Project 4', type: 'Type 4', col1: 'Value 4-1', col2: 'Value 4-2', col3: 'Value 4-3' },
+        { id: '5', name: 'Project 5', type: 'Type 1', col1: 'Value 5-1', col2: 'Value 5-2', col3: 'Value 5-3' },
+        { id: '6', name: 'Project 6', type: 'Type 2', col1: 'Value 6-1', col2: 'Value 6-2', col3: 'Value 6-3' },
+        { id: '7', name: 'Project 7', type: 'Type 3', col1: 'Value 7-1', col2: 'Value 7-2', col3: 'Value 7-3' },
+        { id: '8', name: 'Project 8', type: 'Type 4', col1: 'Value 8-1', col2: 'Value 8-2', col3: 'Value 8-3' },
+        { id: '9', name: 'Project 9', type: 'Type 1', col1: 'Value 9-1', col2: 'Value 9-2', col3: 'Value 9-3' },
+        { id: '10', name: 'Project 10', type: 'Type 2', col1: 'Value 10-1', col2: 'Value 10-2', col3: 'Value 10-3' },
+      ];
     }
     
     // Log first few rows to see actual data structure
-    console.log("Transforming table data structure (first 2 rows):", 
-      tableData.slice(0, 2));
+    console.log("Sample table data structure (first 2 rows):", tableData.slice(0, 2));
     
     // Convert the 2D array data to objects
     return tableData.map((row, i) => {
       // Get the appointment number and subject from the row data
-      const appointmentNumber = row[0] || `${i + 1}`; // This is the actual appointment number from API
-      const subject = row[1] || `Project ${i + 1}`; // This is the appointment subject from API
+      const appointmentNumber = row[0]; // This is the actual appointment number from API
+      const subject = row[1]; // This is the appointment subject from API
       
       console.log(`Row ${i}: appointment number = ${appointmentNumber}, subject = ${subject}`);
       
       const rowObj: Record<string, string> = {
         id: appointmentNumber, // Use the actual appointment number as id
-        name: subject, // Use the actual subject from API data
+        name: subject || `Project ${i + 1}`, // Use the actual subject from API data
         type: row[2] || `Type ${i % 4 + 1}`, // Responsible person
       };
       
@@ -137,21 +137,6 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     getCoreRowModel: getCoreRowModel(),
   });
 
-  if (data.length === 0) {
-    console.log("No data to display in MinimalStickyTable");
-    return (
-      <div className="table-wrapper bg-background border border-border rounded-md p-6">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>No data available</AlertTitle>
-          <AlertDescription>
-            The table doesn't have any data to display. This could be due to an error in data loading or transformation.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
   // Define group structure with column spans
   const columnGroups = [
     { name: 'Aftale', span: 2, index: 0 },
@@ -165,7 +150,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   ];
   
   // Get background color based on group index and theme
-  const getGroupBgColor = (groupIndex: number, isDarkMode: boolean) => {
+  const getGroupBgColor = (groupIndex: number) => {
     if (isDarkMode) {
       return groupIndex % 2 === 0 ? 'hsl(var(--background))' : 'hsl(var(--muted))';
     } else {
@@ -178,6 +163,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   return (
     <div className="table-wrapper" style={{
       width: '100%',
+      height: '500px',
       position: 'relative',
       overflow: 'hidden',
       border: '1px solid hsl(var(--border))',
@@ -208,7 +194,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
                     top: 0,
                     left: index === 0 ? 0 : undefined,
                     zIndex: index === 0 ? 60 : 50,
-                    backgroundColor: getGroupBgColor(index, isDarkMode),
+                    backgroundColor: getGroupBgColor(index),
                     textAlign: 'center',
                     fontWeight: 'bold',
                     borderBottom: '1px solid hsl(var(--border))',
@@ -240,7 +226,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
                       left: isSticky ? (stickyIndex === 0 ? 0 : '150px') : undefined,
                       zIndex: isSticky ? 55 : 45,
                       minWidth: stickyIndex === 0 ? '150px' : (stickyIndex === 1 ? '200px' : '150px'),
-                      backgroundColor: getGroupBgColor(groupIndex, isDarkMode),
+                      backgroundColor: getGroupBgColor(groupIndex),
                       boxShadow: isSticky ? 
                         '1px 0 0 0 hsl(var(--border)), 0 1px 0 0 hsl(var(--border))' : 
                         '0 1px 0 0 hsl(var(--border))'
@@ -273,7 +259,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
                           left: isSticky ? (stickyIndex === 0 ? 0 : '150px') : undefined,
                           zIndex: isSticky ? 20 : undefined,
                           minWidth: stickyIndex === 0 ? '150px' : (stickyIndex === 1 ? '200px' : '150px'),
-                          backgroundColor: getGroupBgColor(groupIndex, isDarkMode),
+                          backgroundColor: getGroupBgColor(groupIndex),
                           boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border))' : undefined
                         }}
                       >
@@ -289,13 +275,4 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
       </div>
     </div>
   );
-}
-
-// Helper function for getting background color based on group index and theme
-function getGroupBgColor(groupIndex: number, isDarkMode: boolean) {
-  if (isDarkMode) {
-    return groupIndex % 2 === 0 ? 'hsl(var(--background))' : 'hsl(var(--muted))';
-  } else {
-    return groupIndex % 2 === 0 ? 'hsl(var(--background))' : 'hsl(var(--muted)/10)';
-  }
 }

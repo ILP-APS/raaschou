@@ -1,7 +1,7 @@
 // API utility for e-regnskab data fetching
 export const fetchOpenAppointments = async () => {
   const res = await fetch(
-    "https://publicapi.e-regnskab.dk/Appointment/Standard?open=true",
+    "https://publicapi.e-regnskab.dk/Appointment/Standard/Address?open=true",
     {
       method: "GET",
       headers: {
@@ -14,8 +14,7 @@ export const fetchOpenAppointments = async () => {
   if (!res.ok) throw new Error("Failed to fetch open appointments");
   
   const data = await res.json();
-  console.log(`API response from fetchOpenAppointments: found ${data.length} appointments`);
-  console.log("First appointment sample:", data[0]);
+  console.log("API response from fetchOpenAppointments:", data[0]);
   return data;
 };
 
@@ -34,32 +33,6 @@ export const fetchAppointmentDetail = async (appointmentId: number) => {
   
   if (!res.ok) throw new Error(`Failed to fetch appointment details for ID: ${appointmentId}`);
   return res.json();
-};
-
-// New function to fetch appointment by appointment number
-export const fetchAppointmentByNumber = async (appointmentNumber: string) => {
-  console.log(`Fetching appointment by number: ${appointmentNumber}`);
-  const res = await fetch(
-    `https://publicapi.e-regnskab.dk/Appointment/Standard/Address?appointmentNumber=${appointmentNumber}`,
-    {
-      method: "GET",
-      headers: {
-        "accept": "application/json",
-        "ApiKey": "w9Jq5NiTeOIpXfovZ0Hf1jLnM:pGwZ"
-      }
-    }
-  );
-  
-  if (!res.ok) throw new Error(`Failed to fetch appointment by number: ${appointmentNumber}`);
-  
-  const data = await res.json();
-  console.log(`Appointment by number ${appointmentNumber} response:`, data);
-  
-  if (Array.isArray(data) && data.length > 0) {
-    return data[0];
-  }
-  
-  return data;
 };
 
 // New function to fetch all users
@@ -137,7 +110,7 @@ export const fetchAppointmentLineWork = async (appointmentId: number) => {
 
 // Helper function to sort appointments by ID and group sub-appointments
 export const sortAndGroupAppointments = (appointments: any[]) => {
-  console.log(`Sorting and grouping ${appointments.length} appointments`);
+  console.log("Sorting appointments, first appointment:", appointments[0]);
   
   // Create a mapping of parent appointment numbers to arrays of sub-appointments
   const appointmentGroups: Record<string, any[]> = {};
@@ -209,6 +182,6 @@ export const sortAndGroupAppointments = (appointments: any[]) => {
     }
   });
   
-  console.log(`Sorted appointments: ${sortedAppointments.length} total`);
+  console.log("First sorted appointment:", sortedAppointments[0]);
   return sortedAppointments;
 };
