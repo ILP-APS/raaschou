@@ -59,18 +59,20 @@ export default function MinimalStickyTable({
       // Get the real appointment number and subject from the row data
       const appointmentNumber = row[0] || ''; // This is the actual appointment number from API
       const subject = row[1] || ''; // This is the appointment subject from API
+      const isSubAppointment = row[23] === 'sub-appointment'; // Check if it's a sub-appointment
       
-      console.log(`Row ${i}: appointmentNumber=${appointmentNumber}, subject=${subject}`);
+      console.log(`Row ${i}: appointmentNumber=${appointmentNumber}, subject=${subject}, isSubAppointment=${isSubAppointment}`);
       
-      const rowObj: Record<string, string> = {
+      const rowObj: Record<string, string | boolean> = {
         id: i.toString(), // Use index as id
         appointmentNumber: appointmentNumber, // Store the actual appointment number
         subject: subject, // Store the actual subject
         type: row[2] || '', // Responsible person
+        isSubAppointment: isSubAppointment, // Store sub-appointment status
       };
       
       // Add remaining columns
-      for (let j = 3; j < Math.min(row.length, 20); j++) {
+      for (let j = 3; j < Math.min(row.length, 23); j++) {
         rowObj[`col${j-3}`] = row[j] || '';
       }
       
@@ -90,7 +92,7 @@ export default function MinimalStickyTable({
   }, [onCellChange]);
   
   // Define columns with proper typing for custom meta properties
-  const columns = React.useMemo<ColumnDef<Record<string, string>, any>[]>(() => [
+  const columns = React.useMemo<ColumnDef<Record<string, string | boolean>, any>[]>(() => [
     { 
       accessorKey: 'appointmentNumber', 
       header: 'Nr.', 
@@ -276,8 +278,14 @@ export default function MinimalStickyTable({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.map((row, rowIdx) => {
+              // Check if this is a sub-appointment
+              const isSubAppointment = row.original.isSubAppointment === true;
+              
               return (
-                <TableRow key={row.id}>
+                <TableRow 
+                  key={row.id}
+                  className={isSubAppointment ? "bg-muted/30" : ""}
+                >
                   {row.getVisibleCells().map((cell, cellIdx) => {
                     const meta = cell.column.columnDef.meta as ColumnMeta | undefined;
                     const isSticky = meta?.sticky;
@@ -286,6 +294,10 @@ export default function MinimalStickyTable({
                     
                     // Make the first 2 columns read-only
                     const isReadOnly = cellIdx <= 1;
+                    
+                    // Add indentation for sub-appointments in the first column
+                    const paddingStyle = (cellIdx === 0 && isSubAppointment) ? 
+                      { paddingLeft: '1.5rem' } : {};
                     
                     return (
                       <TableCell
@@ -305,13 +317,24 @@ export default function MinimalStickyTable({
                           left: isSticky ? (stickyIndex === 0 ? 0 : '150px') : undefined,
                           zIndex: isSticky ? 20 : undefined,
                           minWidth: stickyIndex === 0 ? '150px' : (stickyIndex === 1 ? '200px' : '150px'),
-                          backgroundColor: getGroupBgColor(groupIndex),
+                          backgroundColor: isSubAppointment ? 
+                            (isDarkMode ? 'hsl(var(--muted)/60)' : 'hsl(var(--muted)/30)') : 
+                            getGroupBgColor(groupIndex),
                           boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border))' : undefined,
                           cursor: isReadOnly ? 'default' : 'pointer',
-                          fontWeight: isReadOnly ? '500' : 'normal'
+                          fontWeight: isReadOnly ? '500' : 'normal',
+                          ...paddingStyle
                         }}
                       >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        {/* Special rendering for appointment numbers */}
+                        {cellIdx === 0 && isSubAppointment ? (
+                          <div className="flex items-center">
+                            <span className="text-muted-foreground mr-2">└</span>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </div>
+                        ) : (
+                          flexRender(cell.column.columnDef.cell, cell.getContext())
+                        )}
                       </TableCell>
                     );
                   })}

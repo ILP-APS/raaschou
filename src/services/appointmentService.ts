@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -26,6 +25,7 @@ export interface AppointmentResponse {
   hnOfferID: number | null;
   appointmentAssociatedUsers: number[];
   isSubAppointment?: boolean; // Added to track sub-appointments
+  parentAppointmentNumber?: string; // Added to track parent appointment number
 }
 
 /**
@@ -34,6 +34,17 @@ export interface AppointmentResponse {
  */
 export function isSubAppointment(appointmentNumber: string): boolean {
   return /^\d+-\d+$/.test(appointmentNumber);
+}
+
+/**
+ * Extract the parent appointment number from a sub-appointment
+ * For example, from "24258-3" returns "24258"
+ */
+export function getParentAppointmentNumber(appointmentNumber: string): string | null {
+  if (!isSubAppointment(appointmentNumber)) return null;
+  
+  const parts = appointmentNumber.split('-');
+  return parts[0];
 }
 
 /**
@@ -71,11 +82,17 @@ export async function fetchAppointments(): Promise<AppointmentResponse[]> {
       throw new Error('Invalid data format from API');
     }
     
-    // Mark sub-appointments
-    const processedData = data.map(appointment => ({
-      ...appointment,
-      isSubAppointment: isSubAppointment(appointment.appointmentNumber)
-    }));
+    // Process appointments to identify sub-appointments and their parents
+    const processedData = data.map(appointment => {
+      const isSubApp = isSubAppointment(appointment.appointmentNumber);
+      const parentNumber = isSubApp ? getParentAppointmentNumber(appointment.appointmentNumber) : null;
+      
+      return {
+        ...appointment,
+        isSubAppointment: isSubApp,
+        parentAppointmentNumber: parentNumber
+      };
+    });
     
     // Filter appointments to include:
     // 1. Those with a non-null hnOfferID
@@ -84,14 +101,81 @@ export async function fetchAppointments(): Promise<AppointmentResponse[]> {
       appointment => appointment.hnOfferID !== null || appointment.isSubAppointment
     );
     
+    // Sort appointments:
+    // 1. First by numeric part of appointment number
+    // 2. Then group sub-appointments after their parent
+    const sortedAppointments = sortAppointments(filteredAppointments);
+    
     console.log(`Successfully fetched ${data.length} appointments from API`);
     console.log(`Filtered to ${filteredAppointments.length} appointments with hnOfferID or sub-appointments`);
+    console.log(`Sorted appointments to group sub-appointments with parents`);
     
-    return filteredAppointments;
+    return sortedAppointments;
   } catch (error) {
     console.error('Error fetching appointments:', error);
     throw error;
   }
+}
+
+/**
+ * Sort appointments by number and group sub-appointments with their parent
+ */
+function sortAppointments(appointments: AppointmentResponse[]): AppointmentResponse[] {
+  // First, create a map to quickly find parent appointments
+  const appointmentMap = new Map<string, AppointmentResponse>();
+  appointments.forEach(app => {
+    appointmentMap.set(app.appointmentNumber, app);
+  });
+  
+  // Separate parents and sub-appointments
+  const parents: AppointmentResponse[] = [];
+  const subAppointments: AppointmentResponse[] = [];
+  
+  appointments.forEach(app => {
+    if (app.isSubAppointment) {
+      subAppointments.push(app);
+    } else {
+      parents.push(app);
+    }
+  });
+  
+  // Sort parents numerically by appointment number
+  parents.sort((a, b) => {
+    const numA = parseInt(a.appointmentNumber.replace(/\D/g, ''), 10) || 0;
+    const numB = parseInt(b.appointmentNumber.replace(/\D/g, ''), 10) || 0;
+    return numA - numB;
+  });
+  
+  // Group sub-appointments with their parents
+  const result: AppointmentResponse[] = [];
+  
+  for (const parent of parents) {
+    // Add parent
+    result.push(parent);
+    
+    // Find and add all children, sorted by their suffix
+    const children = subAppointments
+      .filter(sub => sub.parentAppointmentNumber === parent.appointmentNumber)
+      .sort((a, b) => {
+        const suffixA = a.appointmentNumber.split('-')[1];
+        const suffixB = b.appointmentNumber.split('-')[1];
+        return parseInt(suffixA, 10) - parseInt(suffixB, 10);
+      });
+    
+    result.push(...children);
+  }
+  
+  // Add any orphaned sub-appointments at the end
+  const orphanedSubs = subAppointments.filter(
+    sub => !parents.some(p => p.appointmentNumber === sub.parentAppointmentNumber)
+  );
+  
+  if (orphanedSubs.length > 0) {
+    console.log(`Found ${orphanedSubs.length} sub-appointments without a parent in the filtered data`);
+    result.push(...orphanedSubs);
+  }
+  
+  return result;
 }
 
 /**
