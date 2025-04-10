@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { generateTableData } from '@/utils/tableData';
 import { toast } from 'sonner';
 import { fetchAppointments, mapAppointmentsToTableData } from '@/services/appointmentService';
@@ -19,12 +19,17 @@ export const useFokusarkTable = (initialData: string[][]) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const isDataFetchedRef = useRef(false);
   
   useEffect(() => {
     const initData = async () => {
+      // Skip if already initialized or data is already fetched
+      if (isInitialized || isDataFetchedRef.current) return;
+      
       console.log(`Initializing table data`);
       setIsLoading(true);
       setError(null);
+      isDataFetchedRef.current = true;
       
       try {
         // Generate mock data instead of API fetching
@@ -72,13 +77,15 @@ export const useFokusarkTable = (initialData: string[][]) => {
   
   // Debug logs
   useEffect(() => {
-    console.log("useFokusarkTable state:", {
-      initialDataLength: initialData?.length || 0,
-      tableDataLength: tableData?.length || 0,
-      isLoading,
-      isInitialized,
-      hasError: error !== null
-    });
+    if (isInitialized) {
+      console.log("useFokusarkTable state:", {
+        initialDataLength: initialData?.length || 0,
+        tableDataLength: tableData?.length || 0,
+        isLoading,
+        isInitialized,
+        hasError: error !== null
+      });
+    }
   }, [initialData, tableData, isLoading, isInitialized, error]);
   
   const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {

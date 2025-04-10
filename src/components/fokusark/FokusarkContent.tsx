@@ -52,10 +52,16 @@ const FokusarkContent: React.FC = () => {
         </div>
       </div>
       
-      <MinimalStickyTable 
-        tableData={tableData} 
-        onCellChange={handleCellChange}
-      />
+      {tableData && tableData.length > 0 ? (
+        <MinimalStickyTable 
+          tableData={tableData} 
+          onCellChange={handleCellChange}
+        />
+      ) : (
+        <div className="h-64 flex items-center justify-center">
+          <p className="text-muted-foreground">No data available. Try refreshing.</p>
+        </div>
+      )}
     </div>
   );
 };

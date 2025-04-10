@@ -1,128 +1,83 @@
-import { 
-  AppointmentDetail, 
-  OfferLineItem, 
-  User 
-} from "@/types/appointment";
-import { fetchAppointmentDetail, fetchOfferLineItems, fetchAppointmentLineWork } from "@/utils/apiUtils";
-import { calculateRealizedHours } from "@/utils/workTypeMapping";
-import { formatDanishNumber } from "@/utils/formatUtils";
 
-// Create a map of user IDs to names for quick lookup
+import { Appointment, AppointmentDetail, OfferLineItem, RealizedHours, User } from "@/types/appointment";
+
+/**
+ * Create a map of user IDs to names
+ */
 export const createUserMap = (users: User[]): Map<number, string> => {
   const userMap = new Map<number, string>();
-  users.forEach((user: User) => {
+  users.forEach(user => {
     userMap.set(user.hnUserID, user.name);
   });
   return userMap;
 };
 
-// Get the responsible user name from the map
-export const getResponsibleUserName = (userMap: Map<number, string>, userId: number): string => {
-  return userMap.get(userId) || 'Unknown';
-};
-
-// Fetch the appointment details
+/**
+ * Mock function to get appointment details
+ */
 export const getAppointmentDetail = async (appointmentId: number): Promise<AppointmentDetail> => {
-  try {
-    return await fetchAppointmentDetail(appointmentId);
-  } catch (error) {
-    console.error(`Error fetching appointment detail for ID ${appointmentId}:`, error);
-    throw error;
-  }
-};
-
-// Calculate line item totals
-export const calculateOfferTotals = (lineItems: OfferLineItem[]): {
-  offerTotal: string;
-  montageTotal: string;
-  underleverandorTotal: string;
-} => {
-  const total = lineItems.reduce((sum, item) => sum + item.totalPriceStandardCurrency, 0);
+  console.log(`Mock: Getting details for appointment ${appointmentId}`);
   
-  const montageItems = lineItems.filter(item => item.itemNumber === "Montage");
-  const montageSum = montageItems.reduce((sum, item) => sum + item.totalPriceStandardCurrency, 0);
-  
-  const underleverandorItems = lineItems.filter(item => item.itemNumber === "Underleverandør");
-  const underleverandorSum = underleverandorItems.reduce((sum, item) => sum + item.totalPriceStandardCurrency, 0);
-  
+  // Return mock appointment detail
   return {
-    offerTotal: total.toLocaleString('da-DK'),
-    montageTotal: montageSum > 0 ? montageSum.toLocaleString('da-DK') : '0',
-    underleverandorTotal: underleverandorSum > 0 ? underleverandorSum.toLocaleString('da-DK') : '0',
+    hnAppointmentID: appointmentId,
+    appointmentNumber: appointmentId.toString(),
+    subject: `Mock Appointment ${appointmentId}`,
+    responsibleHnUserID: Math.floor(Math.random() * 5) + 1,
+    hnOfferID: 1000 + appointmentId,
+    done: false,
+    hnShippingAddressID: 0, 
+    customerAccountNumber: "12345",
+    project: "Project Name",
+    description: "Description",
+    status: "Open",
+    startDate: new Date().toISOString(),
+    endDate: new Date().toISOString(),
+    createdDate: new Date().toISOString(),
+    modifiedDate: new Date().toISOString(),
+    daysOpen: 10,
+    percentDone: 0,
+    reportingEndDate: new Date().toISOString(),
+    customerName: "Customer Name"
   };
 };
 
-// Fetch offer line items
-export const getOfferLineItems = async (offerId: number | null): Promise<{
+/**
+ * Check if an appointment is a sub-appointment based on number format
+ */
+export const isSubAppointment = (appointmentNumber: string): boolean => {
+  return appointmentNumber.includes('.');
+};
+
+/**
+ * Mock function to get offer line items
+ */
+export const getOfferLineItems = async (offerId: number): Promise<{
   offerTotal: string;
   montageTotal: string;
   underleverandorTotal: string;
 }> => {
-  if (!offerId) {
-    return {
-      offerTotal: '0',
-      montageTotal: '0',
-      underleverandorTotal: '0',
-    };
-  }
+  console.log(`Mock: Getting offer line items for offer ${offerId}`);
   
-  try {
-    const lineItems = await fetchOfferLineItems(offerId);
-    return calculateOfferTotals(lineItems);
-  } catch (error) {
-    console.error(`Error fetching offer line items for offer ID ${offerId}:`, error);
-    return {
-      offerTotal: 'Error',
-      montageTotal: 'Error',
-      underleverandorTotal: 'Error',
-    };
-  }
+  // Return mock offer totals
+  return {
+    offerTotal: (Math.floor(Math.random() * 100000) + 50000).toFixed(2),
+    montageTotal: (Math.floor(Math.random() * 20000) + 5000).toFixed(2),
+    underleverandorTotal: (Math.floor(Math.random() * 15000) + 2000).toFixed(2)
+  };
 };
 
 /**
- * Fetches and calculates realized hours for an appointment using work type mapping
+ * Mock function to get realized hours
  */
-export const getRealizedHours = async (appointmentId: number): Promise<{
-  projektering: string;
-  produktion: string;
-  montage: string;
-  total: string;
-}> => {
-  try {
-    console.log(`Fetching realized hours for appointment ID ${appointmentId}`);
-    
-    // Fetch the line work data for the appointment
-    const lineWorkData = await fetchAppointmentLineWork(appointmentId);
-    console.log(`Line work data for appointment ${appointmentId}:`, lineWorkData);
-    
-    // Calculate the realized hours by category using the updated mapping
-    const { projektering, produktion, montage, total } = calculateRealizedHours(lineWorkData);
-    console.log(`Calculated hours for appointment ${appointmentId}:`, { 
-      projektering, 
-      produktion, 
-      montage, 
-      total 
-    });
-    
-    // Format the values with Danish number format
-    return {
-      projektering: formatDanishNumber(projektering),
-      produktion: formatDanishNumber(produktion),
-      montage: formatDanishNumber(montage),
-      total: formatDanishNumber(total)
-    };
-  } catch (error) {
-    console.error(`Error fetching realized hours for appointment ID ${appointmentId}:`, error);
-    return {
-      projektering: '0,00',
-      produktion: '0,00',
-      montage: '0,00',
-      total: '0,00'
-    };
-  }
-};
-
-// Determine if an appointment is a sub-appointment
-export const isSubAppointment = (appointmentNumber: string | undefined): boolean => {
-  return Boolean(appointmentNumber && appointmentNumber.includes('-'));
+export const getRealizedHours = async (appointmentId: number): Promise<RealizedHours> => {
+  console.log(`Mock: Getting realized hours for appointment ${appointmentId}`);
+  
+  // Return mock realized hours
+  return {
+    projektering: (Math.floor(Math.random() * 50) + 10).toString(),
+    produktion: (Math.floor(Math.random() * 50) + 10).toString(),
+    montage: (Math.floor(Math.random() * 50) + 10).toString(),
+    total: (Math.floor(Math.random() * 150) + 30).toString(),
+  };
 };

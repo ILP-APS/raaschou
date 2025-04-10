@@ -1,4 +1,7 @@
 
+// Cached mock appointments to prevent regeneration
+let cachedMockAppointments: FokusarkAppointment[] | null = null;
+
 export interface FokusarkAppointment {
   id?: string;
   appointment_number: string;
@@ -33,8 +36,15 @@ export interface FokusarkAppointment {
  * Mock implementation for fetching fokusark appointments
  */
 export async function fetchFokusarkAppointments(): Promise<FokusarkAppointment[]> {
+  // Return cached data if available
+  if (cachedMockAppointments) {
+    console.log('Using cached mock fokusark appointments');
+    return cachedMockAppointments;
+  }
+  
   console.log('Generating mock fokusark appointments');
-  return generateMockAppointments();
+  cachedMockAppointments = generateMockAppointments();
+  return cachedMockAppointments;
 }
 
 /**
@@ -42,6 +52,20 @@ export async function fetchFokusarkAppointments(): Promise<FokusarkAppointment[]
  */
 export async function upsertFokusarkAppointment(appointment: FokusarkAppointment): Promise<FokusarkAppointment> {
   console.log('Mock: Upserting fokusark appointment', appointment);
+  
+  // Update cache if it exists
+  if (cachedMockAppointments) {
+    const existingIndex = cachedMockAppointments.findIndex(
+      app => app.appointment_number === appointment.appointment_number
+    );
+    
+    if (existingIndex >= 0) {
+      cachedMockAppointments[existingIndex] = appointment;
+    } else {
+      cachedMockAppointments.push(appointment);
+    }
+  }
+  
   return appointment;
 }
 
@@ -50,6 +74,10 @@ export async function upsertFokusarkAppointment(appointment: FokusarkAppointment
  */
 export async function batchUpsertFokusarkAppointments(appointments: FokusarkAppointment[]): Promise<FokusarkAppointment[]> {
   console.log('Mock: Batch upserting fokusark appointments', appointments.length);
+  
+  // Update the cache
+  cachedMockAppointments = appointments;
+  
   return appointments;
 }
 
@@ -63,6 +91,7 @@ export async function updateFokusarkAppointmentField(
 ): Promise<FokusarkAppointment> {
   console.log(`Mock: Updating field "${field}" for appointment ${appointmentNumber} to:`, value);
   
+  // Create a new mock appointment with the updated field
   const mockAppointment: FokusarkAppointment = {
     appointment_number: appointmentNumber,
     tilbud: 0,
@@ -70,6 +99,20 @@ export async function updateFokusarkAppointmentField(
     underleverandor: 0,
     [field]: value
   };
+  
+  // Update the cache if it exists
+  if (cachedMockAppointments) {
+    const existingIndex = cachedMockAppointments.findIndex(
+      app => app.appointment_number === appointmentNumber
+    );
+    
+    if (existingIndex >= 0) {
+      cachedMockAppointments[existingIndex] = {
+        ...cachedMockAppointments[existingIndex],
+        [field]: value
+      };
+    }
+  }
   
   return mockAppointment;
 }
@@ -96,6 +139,23 @@ export async function updateRealizedHours(
     montage_3: montage,
     total: total
   };
+  
+  // Update the cache if it exists
+  if (cachedMockAppointments) {
+    const existingIndex = cachedMockAppointments.findIndex(
+      app => app.appointment_number === appointmentNumber
+    );
+    
+    if (existingIndex >= 0) {
+      cachedMockAppointments[existingIndex] = {
+        ...cachedMockAppointments[existingIndex],
+        projektering_2: projektering,
+        produktion_realized: produktion,
+        montage_3: montage,
+        total: total
+      };
+    }
+  }
   
   return mockAppointment;
 }

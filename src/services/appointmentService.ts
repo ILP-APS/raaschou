@@ -9,13 +9,21 @@ export interface AppointmentResponse {
   // Add other fields as needed
 }
 
+// Store the mock data to prevent regenerating it on every call
+let cachedMockAppointments: AppointmentResponse[] | null = null;
+
 /**
  * Provides mock appointment data since API fetching is disabled
  */
 export async function fetchAppointments(): Promise<AppointmentResponse[]> {
+  if (cachedMockAppointments) {
+    console.log('Using cached mock appointments');
+    return cachedMockAppointments;
+  }
+  
   console.log('Generating mock appointments instead of API fetch');
-  const mockData = generateMockAppointments();
-  return mockData;
+  cachedMockAppointments = generateMockAppointments();
+  return cachedMockAppointments;
 }
 
 /**
