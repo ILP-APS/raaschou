@@ -1,6 +1,8 @@
+
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserName, preloadUsers } from "@/utils/userUtils";
+import { fetchOfferLineItems } from "@/utils/apiUtils";
 
 export interface AppointmentResponse {
   hnAppointmentID: number;
