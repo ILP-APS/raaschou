@@ -14,8 +14,13 @@ export const useAppointments = () => {
     const loadAppointments = async () => {
       try {
         setIsLoading(true);
+        console.log("Fetching open appointments from API...");
         const fetchedAppointments = await fetchOpenAppointments();
+        console.log(`Fetched ${fetchedAppointments.length} appointments from API`);
+        
         const sortedAppointments = sortAndGroupAppointments(fetchedAppointments);
+        console.log(`After sorting and grouping: ${sortedAppointments.length} appointments`);
+        
         setAppointments(sortedAppointments);
       } catch (err) {
         console.error("Error fetching appointments:", err);

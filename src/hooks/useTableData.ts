@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useAppointments } from "./useAppointments";
 import { useUsers } from "./useUsers";
@@ -30,18 +31,34 @@ export const useTableData = () => {
     const buildTableData = async () => {
       if (
         (isLoadingAppointments || isLoadingUsers) || 
-        (appointmentsError || usersError) || 
-        !(appointments.length > 0)
+        (appointmentsError || usersError)
       ) {
+        console.log("Still loading or has errors, not building table data yet");
+        return;
+      }
+      
+      if (!appointments || appointments.length === 0) {
+        console.log("No appointments available");
+        const sampleData = generateTableData();
+        setTableData(sampleData);
+        toast({
+          title: "No appointments found",
+          description: "No appointments were returned from the API. Using sample data instead.",
+          variant: "default",
+        });
         return;
       }
       
       try {
         setIsProcessing(true);
+        console.log(`Starting to process ${appointments.length} appointments`);
         
-        console.log("First appointment from useAppointments:", appointments[0]);
+        if (appointments.length > 0) {
+          console.log("First appointment from useAppointments:", appointments[0]);
+        }
         
         const userMap = createUserMap(users);
+        console.log(`Created user map with ${userMap.size} users`);
         
         const processedData: string[][] = [];
         const batchSize = 10;
@@ -51,19 +68,38 @@ export const useTableData = () => {
           appointmentBatches.push(appointments.slice(i, i + batchSize));
         }
         
+        console.log(`Created ${appointmentBatches.length} batches of appointments to process`);
+        
         for (const batch of appointmentBatches) {
+          console.log(`Processing batch of ${batch.length} appointments`);
+          
           const batchPromises = batch.map(async (appointment) => {
             try {
-              console.log("Processing appointment:", appointment);
+              console.log(`Processing appointment ${appointment.appointmentNumber} (ID: ${appointment.hnAppointmentID})`);
+              
+              if (!appointment.hnAppointmentID) {
+                console.log(`Skipping appointment ${appointment.appointmentNumber} - no hnAppointmentID`);
+                return null;
+              }
+              
               const details = await getAppointmentDetail(appointment.hnAppointmentID);
               
               if (details.done) {
+                console.log(`Skipping appointment ${appointment.appointmentNumber} - marked as done`);
                 return null; // Skip completed appointments
               }
               
               console.log(`Appointment ${appointment.appointmentNumber} subject:`, details.subject);
               
+              // Get responsible user name
               const responsibleUserName = userMap.get(details.responsibleHnUserID) || 'Unknown';
+              console.log(`Responsible user for appointment ${appointment.appointmentNumber}: ${responsibleUserName}`);
+              
+              // Get offer line items
+              if (!details.hnOfferID) {
+                console.log(`Skipping appointment ${appointment.appointmentNumber} - no offer ID`);
+                return null;
+              }
               
               const { offerTotal, montageTotal, underleverandorTotal } = 
                 await getOfferLineItems(details.hnOfferID);
@@ -72,17 +108,20 @@ export const useTableData = () => {
               
               console.log(`Appointment ${appointment.appointmentNumber} offer total: ${offerTotalNumber}`);
               
+              // Only include appointments with offer total >= 40,000
               if (offerTotalNumber < 40000) {
                 console.log(`Skipping appointment ${appointment.appointmentNumber} - offer total below 40,000`);
                 return null;
               }
               
+              // Get realized hours
               const realizedHours = await getRealizedHours(appointment.hnAppointmentID);
               
+              // Build the row of data
               const row = [
-                appointment.appointmentNumber,
-                details.subject || 'N/A',
-                responsibleUserName,
+                appointment.appointmentNumber, // Use the real appointment number
+                details.subject || 'N/A',      // Use the real subject from API
+                responsibleUserName,           // Use the real responsible user
                 offerTotal,
                 montageTotal,
                 underleverandorTotal,
@@ -108,7 +147,7 @@ export const useTableData = () => {
               const isSubApp = isSubAppointment(appointment.appointmentNumber);
               row.push(isSubApp ? 'sub-appointment' : 'parent-appointment');
               
-              console.log(`Added appointment ${appointment.appointmentNumber} to table data`);
+              console.log(`Successfully processed appointment ${appointment.appointmentNumber}`);
               return row;
             } catch (error) {
               console.error(`Error processing appointment ${appointment.hnAppointmentID}:`, error);
@@ -129,7 +168,7 @@ export const useTableData = () => {
         
         if (processedData.length === 0) {
           const sampleData = generateTableData();
-          console.log("Using sample data, first row:", sampleData[0]);
+          console.log("No matching appointments found, using sample data");
           setTableData(sampleData);
           toast({
             title: "No matching appointments found",
@@ -137,7 +176,7 @@ export const useTableData = () => {
             variant: "default",
           });
         } else {
-          console.log("Using API data, first row:", processedData[0]);
+          console.log("Using real API data, first row:", processedData[0]);
           setTableData(processedData);
           toast({
             title: "Data loaded",

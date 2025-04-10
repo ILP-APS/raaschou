@@ -1,7 +1,7 @@
 // API utility for e-regnskab data fetching
 export const fetchOpenAppointments = async () => {
   const res = await fetch(
-    "https://publicapi.e-regnskab.dk/Appointment/Standard/Address?open=true",
+    "https://publicapi.e-regnskab.dk/Appointment/Standard?open=true",
     {
       method: "GET",
       headers: {
@@ -14,7 +14,7 @@ export const fetchOpenAppointments = async () => {
   if (!res.ok) throw new Error("Failed to fetch open appointments");
   
   const data = await res.json();
-  console.log("API response from fetchOpenAppointments:", data[0]);
+  console.log("API response from fetchOpenAppointments:", data.length ? data[0] : "No data");
   return data;
 };
 
@@ -110,7 +110,13 @@ export const fetchAppointmentLineWork = async (appointmentId: number) => {
 
 // Helper function to sort appointments by ID and group sub-appointments
 export const sortAndGroupAppointments = (appointments: any[]) => {
-  console.log("Sorting appointments, first appointment:", appointments[0]);
+  console.log(`Sorting ${appointments.length} appointments`);
+  if (!appointments || appointments.length === 0) {
+    console.log("No appointments to sort");
+    return [];
+  }
+  
+  console.log("First appointment before sorting:", appointments[0]);
   
   // Create a mapping of parent appointment numbers to arrays of sub-appointments
   const appointmentGroups: Record<string, any[]> = {};
@@ -118,10 +124,13 @@ export const sortAndGroupAppointments = (appointments: any[]) => {
   // First, separate parent appointments and sub-appointments
   appointments.forEach(appointment => {
     const appNumber = appointment.appointmentNumber;
-    console.log("Processing appointment with number:", appNumber);
+    if (!appNumber) {
+      console.log("Skipping appointment without number:", appointment);
+      return;
+    }
     
     // Check if this is a sub-appointment (contains a hyphen)
-    if (appNumber && appNumber.includes('-')) {
+    if (appNumber.includes('-')) {
       // Extract the parent appointment number (everything before the hyphen)
       const parentNumber = appNumber.split('-')[0];
       
@@ -182,6 +191,8 @@ export const sortAndGroupAppointments = (appointments: any[]) => {
     }
   });
   
-  console.log("First sorted appointment:", sortedAppointments[0]);
+  console.log(`Sorted ${sortedAppointments.length} appointments`);
+  console.log("First appointment after sorting:", sortedAppointments.length > 0 ? sortedAppointments[0] : "No appointments");
+  
   return sortedAppointments;
 };
