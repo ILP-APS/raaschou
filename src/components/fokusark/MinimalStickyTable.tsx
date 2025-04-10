@@ -100,9 +100,10 @@ export default function MinimalStickyTable({
     
     if (value) {
       try {
-        const numValue = parseNumber(value);
+        const cleanValue = value.replace(/ DKK$/, '');
+        const numValue = parseNumber(cleanValue);
         if (!isNaN(numValue)) {
-          const formatted = numValue.toLocaleString('da-DK');
+          const formatted = numValue.toLocaleString('da-DK').replace(/\./g, ',');
           handleCellEdit(rowIndex, colIndex, formatted);
         }
       } catch (error) {
@@ -172,8 +173,13 @@ export default function MinimalStickyTable({
             <input
               type="text"
               inputMode="decimal"
-              value={value}
-              onChange={(e) => handleCurrencyEdit(rowId, 6, e.target.value)}
+              value={value.replace(/ DKK$/, '')}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                if (newValue === '' || /^[0-9]*[,.]?[0-9]*$/.test(newValue)) {
+                  handleCurrencyEdit(rowId, 6, newValue);
+                }
+              }}
               onBlur={() => finishCurrencyEdit(rowId, 6, value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -223,8 +229,13 @@ export default function MinimalStickyTable({
             <input
               type="text"
               inputMode="decimal"
-              value={value}
-              onChange={(e) => handleCurrencyEdit(rowId, 7, e.target.value)}
+              value={value.replace(/ DKK$/, '')}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                if (newValue === '' || /^[0-9]*[,.]?[0-9]*$/.test(newValue)) {
+                  handleCurrencyEdit(rowId, 7, newValue);
+                }
+              }}
               onBlur={() => finishCurrencyEdit(rowId, 7, value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -470,9 +481,8 @@ export default function MinimalStickyTable({
                     const stickyIndex = meta?.index || 0;
                     const groupIndex = meta?.groupIndex || 0;
                     
-                    const isEditable = cellIdx === 6 || cellIdx === 7;
-                    
-                    const isReadOnly = cellIdx <= 1 || !isEditable;
+                    const isEditable = cellIdx >= 6 && cellIdx <= 7;
+                    const isReadOnly = cellIdx <= 2 || !isEditable;
                     
                     const paddingStyle = (cellIdx === 0 && isSubAppointment) ? 
                       { paddingLeft: '1.5rem' } : {};

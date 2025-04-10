@@ -36,10 +36,10 @@ const EditableCell: React.FC<EditableCellProps> = ({
         if (!isNaN(numValue)) {
           setEditValue(String(numValue).replace('.', ','));
         } else {
-          setEditValue(value);
+          setEditValue(value.replace(/ DKK$/, ''));
         }
       } catch (e) {
-        setEditValue(value);
+        setEditValue(value.replace(/ DKK$/, ''));
       }
     } else {
       setEditValue(value);
@@ -70,6 +70,19 @@ const EditableCell: React.FC<EditableCellProps> = ({
     }
   };
   
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    // For currency, only allow numbers, commas, and periods
+    if (isCurrency) {
+      // Allow empty string, or digits with optional comma/period
+      if (newValue === '' || /^[0-9]*[,.]?[0-9]*$/.test(newValue)) {
+        setEditValue(newValue);
+      }
+    } else {
+      setEditValue(newValue);
+    }
+  };
+  
   // Format display value if it's a currency
   const displayValue = isCurrency && value ? 
     `${formatDanishCurrency(parseNumber(value))} DKK` : 
@@ -83,7 +96,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           autoFocus
           className="w-full p-1 border border-primary rounded focus:outline-none"
           value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
+          onChange={handleChange}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           // Prevent unwanted form submissions

@@ -55,11 +55,14 @@ export const useCellValueUpdates = ({
       return null;
     }
     
+    // Clean the value - remove DKK suffix if present
+    const cleanValue = value.replace(/ DKK$/, '');
+    
     // Update last update reference
     lastUpdateRef.current = {
       appointmentNumber,
       colIndex,
-      value
+      value: cleanValue
     };
     
     // Clear any existing timeout
@@ -81,13 +84,13 @@ export const useCellValueUpdates = ({
           
           // For percentage columns, ensure the value is formatted and capped at 100%
           if (isPercentageColumn(colIndex)) {
-            value = formatPercentageInput(value);
+            value = formatPercentageInput(cleanValue);
           }
           
           // Parse numeric value for database update
           let parsedValue;
           try {
-            parsedValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+            parsedValue = parseFloat(cleanValue.replace(/\./g, '').replace(',', '.'));
             if (isNaN(parsedValue)) {
               parsedValue = 0;
             }
