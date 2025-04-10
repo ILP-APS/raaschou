@@ -139,7 +139,7 @@ export default function MinimalStickyTable({
       accessorKey: `col3`,
       header: `Montage 2`,
       meta: { groupIndex: 2 } as ColumnMeta,
-      cell: ({ getValue, row, column, table }) => {
+      cell: ({ getValue }) => {
         const value = getValue() as string;
         
         if (!value || value.trim() === '') {
@@ -154,7 +154,7 @@ export default function MinimalStickyTable({
       accessorKey: `col4`,
       header: `Underleverandør 2`,
       meta: { groupIndex: 2 } as ColumnMeta,
-      cell: ({ getValue, row, column, table }) => {
+      cell: ({ getValue }) => {
         const value = getValue() as string;
         
         if (!value || value.trim() === '') {
