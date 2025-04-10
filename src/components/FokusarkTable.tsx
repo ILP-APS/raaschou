@@ -3,6 +3,8 @@ import React from "react";
 import { useFokusarkTable } from "@/hooks/useFokusarkTable";
 import FokusarkTableLoading from "./fokusark/FokusarkTableLoading";
 import MinimalStickyTable from "./fokusark/MinimalStickyTable";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 interface FokusarkTableProps {
   data: string[][];
@@ -27,12 +29,13 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
           <p className="text-muted-foreground mb-4">
             Try refreshing the page or using the "Refresh Data" button.
           </p>
-          <button 
+          <Button 
             onClick={refreshData}
             className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
           >
+            <RefreshCw className="mr-2 h-4 w-4" />
             Refresh Data
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -54,12 +57,13 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
     <div className="rounded-md w-full relative" style={{ minHeight: '600px' }}>
       <MinimalStickyTable tableData={tableData} onCellChange={handleCellChange} />
       <div className="mt-4 flex justify-end">
-        <button 
+        <Button 
           onClick={refreshData}
           className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
         >
+          <RefreshCw className="mr-2 h-4 w-4" />
           Refresh Data
-        </button>
+        </Button>
       </div>
     </div>
   );

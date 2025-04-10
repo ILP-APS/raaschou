@@ -117,7 +117,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       // Update the corresponding row in Supabase
       try {
-        // Fix: The error is here - loadAppointmentsFromSupabase returns string[][], not an object with data and error properties
+        // Fix: loadAppointmentsFromSupabase returns string[][], not an object with data and error properties
         const supabaseData = await loadAppointmentsFromSupabase();
         
         if (!supabaseData || supabaseData.length <= rowIndex) {
@@ -177,14 +177,14 @@ export const useFokusarkTable = (initialData: string[][]) => {
     setIsLoading(true);
     
     try {
-      // Get fresh data from the API mock
+      // Force fetch fresh data from the API mock
       const appointments = await fetchAppointments();
       
       if (appointments && appointments.length > 0) {
         // Map to table data format
         const mappedData = mapAppointmentsToTableData(appointments);
         
-        // Save to Supabase
+        // Force save to Supabase (this will clear existing data and insert new data)
         const saveSuccess = await saveAppointmentsToSupabase(appointments);
         
         if (saveSuccess) {
