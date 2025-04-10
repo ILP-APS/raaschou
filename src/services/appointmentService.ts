@@ -1,3 +1,4 @@
+
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -24,14 +25,25 @@ export interface AppointmentResponse {
   created: string;
   hnOfferID: number | null;
   appointmentAssociatedUsers: number[];
+  isSubAppointment?: boolean; // Added to track sub-appointments
+}
+
+/**
+ * Checks if an appointment is a sub-appointment based on its number format
+ * Sub-appointments have a format like "24258-3"
+ */
+export function isSubAppointment(appointmentNumber: string): boolean {
+  return /^\d+-\d+$/.test(appointmentNumber);
 }
 
 /**
  * Fetches appointment data from the API with proper error handling
- * Only returns appointments that have a value in hnOfferID
+ * Returns:
+ * 1. All appointments that have a value in hnOfferID
+ * 2. All sub-appointments regardless of hnOfferID value
  */
 export async function fetchAppointments(): Promise<AppointmentResponse[]> {
-  console.log('Fetching appointments from API - with hnOfferID filter');
+  console.log('Fetching appointments from API - with hnOfferID filter and all sub-appointments');
   
   const apiUrl = 'https://publicapi.e-regnskab.dk/Appointment/Standard?open=true';
   const apiKey = 'w9Jq5NiTeOIpXfovZ0Hf1jLnM:pGwZ';
@@ -59,11 +71,21 @@ export async function fetchAppointments(): Promise<AppointmentResponse[]> {
       throw new Error('Invalid data format from API');
     }
     
-    // Filter appointments to only include those with a non-null hnOfferID
-    const filteredAppointments = data.filter(appointment => appointment.hnOfferID !== null);
+    // Mark sub-appointments
+    const processedData = data.map(appointment => ({
+      ...appointment,
+      isSubAppointment: isSubAppointment(appointment.appointmentNumber)
+    }));
+    
+    // Filter appointments to include:
+    // 1. Those with a non-null hnOfferID
+    // 2. All sub-appointments
+    const filteredAppointments = processedData.filter(
+      appointment => appointment.hnOfferID !== null || appointment.isSubAppointment
+    );
     
     console.log(`Successfully fetched ${data.length} appointments from API`);
-    console.log(`Filtered to ${filteredAppointments.length} appointments with hnOfferID`);
+    console.log(`Filtered to ${filteredAppointments.length} appointments with hnOfferID or sub-appointments`);
     
     return filteredAppointments;
   } catch (error) {
@@ -198,6 +220,14 @@ export function mapAppointmentsToTableData(appointments: AppointmentResponse[]):
     row[0] = appointment.appointmentNumber || '';
     row[1] = appointment.subject || '';
     row[2] = `User ${appointment.responsibleHnUserID}`;
+    
+    // Add a marker for sub-appointments in the last column (used internally)
+    if (appointment.isSubAppointment) {
+      row[23] = 'sub-appointment';
+    } else {
+      row[23] = 'parent-appointment';
+    }
+    
     return row;
   });
 }
