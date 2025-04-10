@@ -48,7 +48,7 @@ export async function saveFokusarkTableRow(rowData: FokusarkTableRow) {
     // Insert new row
     const { data, error } = await supabase
       .from('fokusark_table')
-      .insert(rowData)
+      .insert([rowData])
       .select()
       .single();
       

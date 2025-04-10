@@ -25,9 +25,13 @@ interface ColumnMeta {
 
 interface MinimalStickyTableProps {
   tableData?: string[][];
+  onCellChange?: (rowIndex: number, colIndex: number, value: string) => void;
 }
 
-export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTableProps) {
+export default function MinimalStickyTable({ 
+  tableData = [], 
+  onCellChange 
+}: MinimalStickyTableProps) {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   
@@ -85,6 +89,13 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     }
     return transformed;
   }, [tableData]);
+  
+  // Function to handle cell edits
+  const handleCellEdit = React.useCallback((rowIndex: number, colIndex: number, value: string) => {
+    if (onCellChange) {
+      onCellChange(rowIndex, colIndex, value);
+    }
+  }, [onCellChange]);
   
   // Define columns with proper typing for custom meta properties
   const columns = React.useMemo<ColumnDef<Record<string, string>, any>[]>(() => [
@@ -272,10 +283,10 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
             </TableRow>
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.map((row) => {
+            {table.getRowModel().rows.map((row, rowIdx) => {
               return (
                 <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => {
+                  {row.getVisibleCells().map((cell, cellIdx) => {
                     const meta = cell.column.columnDef.meta as ColumnMeta | undefined;
                     const isSticky = meta?.sticky;
                     const stickyIndex = meta?.index || 0;
@@ -284,13 +295,22 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
                     return (
                       <TableCell
                         key={cell.id}
+                        onClick={() => {
+                          // Handle cell click - this is where we would trigger edit mode
+                          if (onCellChange && cellIdx > 1) { // Skip ID and Name columns
+                            const colIndex = cellIdx;
+                            const value = prompt('Enter new value:', cell.getValue() as string) || '';
+                            handleCellEdit(rowIdx, colIndex, value);
+                          }
+                        }}
                         style={{
                           position: isSticky ? 'sticky' : undefined,
                           left: isSticky ? (stickyIndex === 0 ? 0 : '150px') : undefined,
                           zIndex: isSticky ? 20 : undefined,
                           minWidth: stickyIndex === 0 ? '150px' : (stickyIndex === 1 ? '200px' : '150px'),
                           backgroundColor: getGroupBgColor(groupIndex),
-                          boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border))' : undefined
+                          boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border))' : undefined,
+                          cursor: cellIdx > 1 ? 'pointer' : 'default'
                         }}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
