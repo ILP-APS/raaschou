@@ -1,68 +1,25 @@
+import { FokusarkCellData } from '@/api/fokusarkApi';
 
-import { supabase } from "@/integrations/supabase/client";
-import { FokusarkCellData } from "@/api/fokusarkApi";
-import { useToast } from "@/hooks/use-toast";
+// This file is now empty of real implementation since we removed Supabase tables
+// It's kept as a placeholder for future implementation
 
-/**
- * Loads saved cell data from Supabase
- */
-export const loadSavedCells = async () => {
-  try {
-    // Using any type here to work around the type issues
-    const { data: savedCells, error } = await supabase
-      .from('fokusark_cells')
-      .select('*') as any;
-    
-    if (error) {
-      throw error;
-    }
-    
-    return savedCells as FokusarkCellData[];
-  } catch (error) {
-    console.error('Error loading saved cell data:', error);
-    throw error;
-  }
-};
+export async function fetchAllSavedCells(): Promise<FokusarkCellData[]> {
+  console.log("fetchAllSavedCells called but no implementation exists");
+  return [];
+}
 
-/**
- * Updates a cell value in Supabase
- */
-export const updateCellValue = async (
-  rowIndex: number, 
-  colIndex: number, 
+export async function updateCellValue(
+  rowIndex: number,
+  colIndex: number,
   value: string
-): Promise<{success: boolean; error?: Error}> => {
-  try {
-    // Check if a record already exists for this cell
-    const { data: existingData, error: fetchError } = await supabase
-      .from('fokusark_cells')
-      .select('*')
-      .eq('row_index', rowIndex)
-      .eq('col_index', colIndex) as any;
-    
-    if (fetchError) throw fetchError;
-    
-    let result;
-    
-    if (existingData && existingData.length > 0) {
-      // Update existing record
-      result = await supabase
-        .from('fokusark_cells')
-        .update({ value })
-        .eq('row_index', rowIndex)
-        .eq('col_index', colIndex) as any;
-    } else {
-      // Insert new record
-      result = await supabase
-        .from('fokusark_cells')
-        .insert([{ row_index: rowIndex, col_index: colIndex, value }]) as any;
-    }
-    
-    if (result.error) throw result.error;
-    
-    return { success: true };
-  } catch (error) {
-    console.error('Error saving cell data:', error);
-    return { success: false, error: error as Error };
-  }
-};
+): Promise<FokusarkCellData | null> {
+  console.log(`updateCellValue called for cell (${rowIndex}, ${colIndex}) with value ${value} but no implementation exists`);
+  return null;
+}
+
+export async function importBatchCellValues(
+  cells: { row_index: number; col_index: number; value: string }[]
+): Promise<FokusarkCellData[] | null> {
+  console.log(`importBatchCellValues called with ${cells.length} cells but no implementation exists`);
+  return null;
+}

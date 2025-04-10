@@ -1,5 +1,6 @@
 
-import { supabase } from "@/integrations/supabase/client";
+// This file is kept empty intentionally
+// No Supabase table interaction since tables were dropped
 
 export interface FokusarkAppointment {
   id?: string;
@@ -17,7 +18,7 @@ export interface FokusarkAppointment {
   montage_3?: number | null;
   total?: number | null;
   projektering_2?: number | null;
-  produktion_realized?: number | null;  // Distinct field for realized production (from API)
+  produktion_realized?: number | null;
   timer_tilbage_1?: number | null;
   timer_tilbage_2?: number | null;
   faerdig_pct_ex_montage_nu?: number | null;
@@ -31,133 +32,38 @@ export interface FokusarkAppointment {
   updated_at?: string;
 }
 
-/**
- * Fetches all fokusark appointments from Supabase
- */
-export async function fetchFokusarkAppointments() {
-  // Use type assertion to bypass TypeScript's type checking
-  const { data, error } = await (supabase
-    .from('fokusark_appointments') as any)
-    .select('*')
-    .order('appointment_number');
-    
-  if (error) throw error;
-  return data as FokusarkAppointment[];
+// Stub functions that would normally interact with the database
+export async function fetchFokusarkAppointments(): Promise<FokusarkAppointment[]> {
+  console.log("fetchFokusarkAppointments called but no implementation exists");
+  return [];
 }
 
-/**
- * Upsert a fokusark appointment in Supabase
- * This will either update an existing appointment or create a new one
- */
 export async function upsertFokusarkAppointment(appointment: FokusarkAppointment) {
-  // Use type assertion to bypass TypeScript's type checking
-  const { data, error } = await (supabase
-    .from('fokusark_appointments') as any)
-    .upsert([appointment], { 
-      onConflict: 'appointment_number',
-      ignoreDuplicates: false 
-    })
-    .select()
-    .single();
-    
-  if (error) throw error;
-  return data as FokusarkAppointment;
+  console.log(`upsertFokusarkAppointment called for appointment ${appointment.appointment_number} but no implementation exists`);
+  return appointment;
 }
 
-/**
- * Batch upsert multiple fokusark appointments
- */
 export async function batchUpsertFokusarkAppointments(appointments: FokusarkAppointment[]) {
-  // Use type assertion to bypass TypeScript's type checking
-  const { data, error } = await (supabase
-    .from('fokusark_appointments') as any)
-    .upsert(appointments, { 
-      onConflict: 'appointment_number',
-      ignoreDuplicates: false 
-    });
-    
-  if (error) throw error;
-  return data;
+  console.log(`batchUpsertFokusarkAppointments called with ${appointments.length} appointments but no implementation exists`);
+  return null;
 }
 
-/**
- * Update a specific field for a fokusark appointment
- */
 export async function updateFokusarkAppointmentField(
   appointmentNumber: string, 
   field: string, 
   value: any
 ) {
-  // Add extra debug for specific appointment
-  if (appointmentNumber === '24371' && field === 'projektering_1') {
-    console.log(`API call: Updating projektering_1 for 24371 to ${value}`);
-  }
-  
-  const updateData = {
-    [field]: value
-  };
-  
-  // Debug log for field updates
-  console.log(`Updating field "${field}" for appointment ${appointmentNumber} to:`, value);
-  
-  // Use type assertion to bypass TypeScript's type checking
-  const { data, error } = await (supabase
-    .from('fokusark_appointments') as any)
-    .update(updateData)
-    .eq('appointment_number', appointmentNumber)
-    .select()
-    .single();
-  
-  if (error) {
-    console.error(`API error when updating ${field} for ${appointmentNumber}:`, error);
-    throw error;
-  }
-  
-  // Extra debug for appointment 24371
-  if (appointmentNumber === '24371') {
-    console.log(`API response for 24371 update:`, data);
-  }
-  
-  return data as FokusarkAppointment;
+  console.log(`updateFokusarkAppointmentField called for appointment ${appointmentNumber}, field ${field} but no implementation exists`);
+  return null;
 }
 
-/**
- * Update realized hours for an appointment
- */
 export async function updateRealizedHours(
   appointmentNumber: string,
   projektering: number,
-  produktion: number, // This comes from API
+  produktion: number,
   montage: number,
   total: number
 ) {
-  console.log(`Updating realized hours for ${appointmentNumber}:`, {
-    projektering_2: projektering,
-    produktion_realized: produktion, // Explicitly store in produktion_realized field
-    montage_3: montage,
-    total: total
-  });
-  
-  const updateData = {
-    projektering_2: projektering,
-    produktion_realized: produktion, // Store API value in produktion_realized field
-    montage_3: montage,
-    total: total
-  };
-  
-  // Use maybeSingle instead of single to avoid errors when no rows are found
-  const { data, error } = await (supabase
-    .from('fokusark_appointments') as any)
-    .update(updateData)
-    .eq('appointment_number', appointmentNumber)
-    .select();
-  
-  if (error) {
-    console.error(`API error when updating realized hours for ${appointmentNumber}:`, error);
-    throw error;
-  }
-  
-  console.log(`Successfully updated realized hours for ${appointmentNumber}`);
-  
-  return data && data.length > 0 ? data[0] as FokusarkAppointment : null;
+  console.log(`updateRealizedHours called for appointment ${appointmentNumber} but no implementation exists`);
+  return null;
 }

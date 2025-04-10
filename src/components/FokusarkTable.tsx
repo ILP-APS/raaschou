@@ -1,9 +1,8 @@
 
 import React from "react";
-import { useFokusarkData } from "@/hooks/useFokusarkData";
+import { useTableData } from "@/hooks/useTableData";
 import FokusarkTableLoading from "./fokusark/FokusarkTableLoading";
 import MinimalStickyTable from "./fokusark/MinimalStickyTable";
-import { useTableData } from "@/hooks/useTableData";
 
 interface FokusarkTableProps {
   data?: string[][];
@@ -26,7 +25,7 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
         <div className="text-center">
           <h3 className="text-lg font-medium mb-2">No data available</h3>
           <p className="text-muted-foreground mb-4">
-            Try refreshing the page or checking the data source.
+            No data source is currently configured.
           </p>
           <button 
             onClick={refetchData}
