@@ -7,17 +7,20 @@ interface EditableCellProps {
   value?: string;
   onChange?: (value: string) => void;
   isCurrency?: boolean;
+  onlyUpdateOnBlurOrEnter?: boolean;
 }
 
 const EditableCell: React.FC<EditableCellProps> = ({ 
   value = "", 
   onChange,
-  isCurrency = false 
+  isCurrency = false,
+  onlyUpdateOnBlurOrEnter = true
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
   const prevValueRef = useRef(value);
+  const hasUpdatedRef = useRef(false);
   
   // Update internal state when prop value changes (but not during editing)
   useEffect(() => {
@@ -29,6 +32,8 @@ const EditableCell: React.FC<EditableCellProps> = ({
   
   const handleDoubleClick = () => {
     setIsEditing(true);
+    hasUpdatedRef.current = false;
+    
     // For currency values, remove formatting when starting to edit
     if (isCurrency && value) {
       try {
@@ -54,7 +59,9 @@ const EditableCell: React.FC<EditableCellProps> = ({
   
   const finishEditing = () => {
     setIsEditing(false);
-    if (onChange && editValue !== prevValueRef.current) {
+    // Only trigger onChange if the value has actually changed
+    if (onChange && editValue !== prevValueRef.current && !hasUpdatedRef.current) {
+      hasUpdatedRef.current = true;
       onChange(editValue);
       prevValueRef.current = editValue;
     }
@@ -67,6 +74,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
     } else if (e.key === 'Escape') {
       setIsEditing(false);
       setEditValue(prevValueRef.current);
+      hasUpdatedRef.current = true; // Prevent update on blur after escape
     }
   };
   
@@ -81,11 +89,17 @@ const EditableCell: React.FC<EditableCellProps> = ({
     } else {
       setEditValue(newValue);
     }
+    
+    // Only update immediately if onlyUpdateOnBlurOrEnter is false
+    if (!onlyUpdateOnBlurOrEnter && onChange) {
+      onChange(newValue);
+      prevValueRef.current = newValue;
+    }
   };
   
   // Format display value if it's a currency
   const displayValue = isCurrency && value ? 
-    `${formatDanishCurrency(parseNumber(value))} DKK` : 
+    `${formatDanishCurrency(parseNumber(value))}` : 
     value;
   
   return (

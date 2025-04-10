@@ -14,11 +14,11 @@ export const useCellUpdates = (
   setAppointments: React.Dispatch<React.SetStateAction<FokusarkAppointment[]>>
 ) => {
   // Use the cell change hook to handle all update logic
-  const { handleCellChange } = useCellChange({
+  const { handleCellChange, handleCellBlur } = useCellChange({
     tableData,
     setTableData,
     setAppointments
   });
   
-  return { handleCellChange };
+  return { handleCellChange, handleCellBlur };
 };

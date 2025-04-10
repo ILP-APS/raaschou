@@ -38,7 +38,7 @@ export const useCellChange = ({
     const appointmentNumber = tableData[rowIndex][0];
     const updateKey = `${appointmentNumber}-${colIndex}`;
     
-    console.log(`Updating value for appointment ${appointmentNumber}, column ${colIndex}, new value: ${value}`);
+    console.log(`Handling cell change for appointment ${appointmentNumber}, column ${colIndex}, new value: ${value}`);
     
     // Mark this cell as being edited
     editingCellsRef.current.add(updateKey);
@@ -60,34 +60,44 @@ export const useCellChange = ({
       pendingUpdatesRef.current.delete(updateKey);
     }
     
-    // Set a new timeout for this update
-    pendingUpdatesRef.current.set(updateKey, setTimeout(async () => {
-      try {
-        // Remove currency suffix if present before saving
-        const cleanValue = value.replace(/ DKK$/, '');
+    // Update UI immediately without triggering the database update
+    updateCellUI(rowIndex, colIndex, value);
+  };
+
+  const handleCellBlur = async (rowIndex: number, colIndex: number, value: string) => {
+    if (rowIndex < 0 || rowIndex >= tableData.length) {
+      console.error(`Invalid row index: ${rowIndex}`);
+      return;
+    }
+    
+    const appointmentNumber = tableData[rowIndex][0];
+    const updateKey = `${appointmentNumber}-${colIndex}`;
+    
+    console.log(`Finalizing cell update for appointment ${appointmentNumber}, column ${colIndex}, value: ${value}`);
+    
+    try {
+      // Remove currency suffix if present before saving
+      const cleanValue = value.replace(/ DKK$/, '');
+      
+      // Update cell value in database
+      const updatedAppointment = await updateCellValueInDb(appointmentNumber, colIndex, cleanValue);
+      
+      if (updatedAppointment) {
+        // Create an updated row for recalculations
+        const updatedRow = [...tableData[rowIndex]];
+        updatedRow[colIndex] = cleanValue;
         
-        // Update cell value in database
-        const updatedAppointment = await updateCellValueInDb(appointmentNumber, colIndex, cleanValue);
-        
-        if (updatedAppointment) {
-          // Create an updated row for recalculations
-          const updatedRow = [...tableData[rowIndex]];
-          updatedRow[colIndex] = cleanValue;
-          
-          // Handle all needed recalculations
-          await handleRecalculations(appointmentNumber, rowIndex, colIndex, updatedRow);
-        }
-        
-        pendingUpdatesRef.current.delete(updateKey);
-        // Mark this cell as no longer being edited
-        editingCellsRef.current.delete(updateKey);
-      } catch (error) {
-        console.error(`Error handling cell change for appointment ${appointmentNumber}:`, error);
-        pendingUpdatesRef.current.delete(updateKey);
-        editingCellsRef.current.delete(updateKey);
+        // Handle all needed recalculations
+        await handleRecalculations(appointmentNumber, rowIndex, colIndex, updatedRow);
       }
-    }, 800)); // Increased debounce to 800ms to give more time for typing
+      
+      // Mark this cell as no longer being edited
+      editingCellsRef.current.delete(updateKey);
+    } catch (error) {
+      console.error(`Error handling cell change for appointment ${appointmentNumber}:`, error);
+      editingCellsRef.current.delete(updateKey);
+    }
   };
   
-  return { handleCellChange };
+  return { handleCellChange, handleCellBlur };
 };

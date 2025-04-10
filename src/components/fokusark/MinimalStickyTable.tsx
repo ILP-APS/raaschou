@@ -17,25 +17,28 @@ import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import { formatDanishCurrency } from '@/utils/formatUtils';
 import { parseNumber } from '@/utils/numberFormatUtils';
+import EditableCell from './components/EditableCell';
 
 interface ColumnMeta {
   sticky?: boolean;
   index?: number;
   groupIndex?: number;
+  isEditable?: boolean;
 }
 
 interface MinimalStickyTableProps {
   tableData?: string[][];
   onCellChange?: (rowIndex: number, colIndex: number, value: string) => void;
+  onCellBlur?: (rowIndex: number, colIndex: number, value: string) => void;
 }
 
 export default function MinimalStickyTable({ 
   tableData = [], 
-  onCellChange 
+  onCellChange,
+  onCellBlur
 }: MinimalStickyTableProps) {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
-  const [editingCell, setEditingCell] = useState<{ rowIndex: number; colIndex: number } | null>(null);
   
   console.log("MinimalStickyTable received data:", {
     rowCount: tableData?.length || 0,
@@ -57,8 +60,6 @@ export default function MinimalStickyTable({
       const appointmentNumber = row[0] || '';
       const subject = row[1] || '';
       const isSubAppointment = row[23] === 'sub-appointment';
-      
-      console.log(`Row ${i}: appointmentNumber=${appointmentNumber}, subject=${subject}, isSubAppointment=${isSubAppointment}`);
       
       const rowObj: Record<string, string | boolean> = {
         id: i.toString(),
@@ -86,31 +87,20 @@ export default function MinimalStickyTable({
     }
   }, [onCellChange]);
   
-  const handleCurrencyEdit = React.useCallback((rowIndex: number, colIndex: number, value: string) => {
-    const regex = /^[0-9.,]*$/;
-    if (!regex.test(value) && value !== '') {
-      return;
+  const handleCellFinalize = React.useCallback((rowIndex: number, colIndex: number, value: string) => {
+    if (onCellBlur) {
+      console.log(`Finalizing cell at row ${rowIndex}, column ${colIndex}, new value: ${value}`);
+      onCellBlur(rowIndex, colIndex, value);
     }
-    
-    handleCellEdit(rowIndex, colIndex, value);
-  }, [handleCellEdit]);
+  }, [onCellBlur]);
   
-  const finishCurrencyEdit = React.useCallback((rowIndex: number, colIndex: number, value: string) => {
-    setEditingCell(null);
-    
-    if (value) {
-      try {
-        const cleanValue = value.replace(/ DKK$/, '');
-        const numValue = parseNumber(cleanValue);
-        if (!isNaN(numValue)) {
-          const formatted = numValue.toLocaleString('da-DK').replace(/\./g, ',');
-          handleCellEdit(rowIndex, colIndex, formatted);
-        }
-      } catch (error) {
-        console.error("Error formatting number:", error);
-      }
-    }
-  }, [handleCellEdit]);
+  const isEditableColumn = (colIndex: number): boolean => {
+    return colIndex >= 3 && colIndex <= 19;
+  };
+  
+  const isCurrencyColumn = (colIndex: number): boolean => {
+    return [3, 4, 5, 6, 7, 8, 9, 10, 11].includes(colIndex);
+  };
   
   const formatCellValue = (value: string, isMonetary: boolean = false) => {
     if (!value || value.trim() === '') return '';
@@ -145,130 +135,59 @@ export default function MinimalStickyTable({
     {
       accessorKey: `col0`,
       header: `Tilbud`, 
-      meta: { groupIndex: 2 } as ColumnMeta,
+      meta: { groupIndex: 2, isEditable: true } as ColumnMeta,
       cell: info => formatCellValue(info.getValue() as string, true)
     },
     {
       accessorKey: `col1`,
       header: `Montage`,
-      meta: { groupIndex: 2 } as ColumnMeta,
+      meta: { groupIndex: 2, isEditable: true } as ColumnMeta,
       cell: info => formatCellValue(info.getValue() as string, true)
     },
     {
       accessorKey: `col2`,
       header: `Underleverandør`,
-      meta: { groupIndex: 2 } as ColumnMeta,
+      meta: { groupIndex: 2, isEditable: true } as ColumnMeta,
       cell: info => formatCellValue(info.getValue() as string, true)
     },
     {
       accessorKey: `col3`,
       header: `Montage 2`,
-      meta: { groupIndex: 2 } as ColumnMeta,
+      meta: { groupIndex: 2, isEditable: true } as ColumnMeta,
       cell: ({ getValue, row, column }) => {
         const value = getValue() as string;
         const rowId = parseInt(row.id);
-        
-        if (editingCell?.rowIndex === rowId && editingCell?.colIndex === 6) {
-          return (
-            <input
-              type="text"
-              inputMode="decimal"
-              value={value.replace(/ DKK$/, '')}
-              onChange={(e) => {
-                const newValue = e.target.value;
-                if (newValue === '' || /^[0-9]*[,.]?[0-9]*$/.test(newValue)) {
-                  handleCurrencyEdit(rowId, 6, newValue);
-                }
-              }}
-              onBlur={() => finishCurrencyEdit(rowId, 6, value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  finishCurrencyEdit(rowId, 6, value);
-                } else if (e.key === 'Escape') {
-                  setEditingCell(null);
-                }
-              }}
-              style={{
-                width: '100%',
-                height: '100%',
-                padding: '8px 12px',
-                border: 'none',
-                backgroundColor: 'transparent',
-                textAlign: 'right',
-                fontFamily: 'inherit',
-                fontSize: 'inherit',
-                color: 'inherit',
-              }}
-              className="focus:outline-none focus:ring-1 focus:ring-primary"
-              autoFocus
-            />
-          );
-        }
+        const colIndex = 6;
         
         return (
-          <div 
-            className="text-right font-mono cursor-pointer" 
-            onClick={() => setEditingCell({ rowIndex: rowId, colIndex: 6 })}
-          >
-            {!value || value.trim() === '' ? '' : `${formatDanishCurrency(parseNumber(value))} DKK`}
-          </div>
+          <EditableCell 
+            value={value}
+            isCurrency={true}
+            onChange={(newValue) => handleCellEdit(rowId, colIndex, newValue)}
+            onlyUpdateOnBlurOrEnter={true}
+          />
         );
       }
     },
     {
       accessorKey: `col4`,
       header: `Underleverandør 2`,
-      meta: { groupIndex: 2 } as ColumnMeta,
+      meta: { groupIndex: 2, isEditable: true } as ColumnMeta,
       cell: ({ getValue, row, column }) => {
         const value = getValue() as string;
         const rowId = parseInt(row.id);
-        
-        if (editingCell?.rowIndex === rowId && editingCell?.colIndex === 7) {
-          return (
-            <input
-              type="text"
-              inputMode="decimal"
-              value={value.replace(/ DKK$/, '')}
-              onChange={(e) => {
-                const newValue = e.target.value;
-                if (newValue === '' || /^[0-9]*[,.]?[0-9]*$/.test(newValue)) {
-                  handleCurrencyEdit(rowId, 7, newValue);
-                }
-              }}
-              onBlur={() => finishCurrencyEdit(rowId, 7, value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  finishCurrencyEdit(rowId, 7, value);
-                } else if (e.key === 'Escape') {
-                  setEditingCell(null);
-                }
-              }}
-              style={{
-                width: '100%',
-                height: '100%',
-                padding: '8px 12px',
-                border: 'none',
-                backgroundColor: 'transparent',
-                textAlign: 'right',
-                fontFamily: 'inherit',
-                fontSize: 'inherit',
-                color: 'inherit',
-              }}
-              className="focus:outline-none focus:ring-1 focus:ring-primary"
-              autoFocus
-            />
-          );
-        }
+        const colIndex = 7;
         
         return (
-          <div 
-            className="text-right font-mono cursor-pointer" 
-            onClick={() => setEditingCell({ rowIndex: rowId, colIndex: 7 })}
-          >
-            {!value || value.trim() === '' ? '' : `${formatDanishCurrency(parseNumber(value))} DKK`}
-          </div>
+          <EditableCell 
+            value={value}
+            isCurrency={true}
+            onChange={(newValue) => {
+              handleCellEdit(rowId, colIndex, newValue);
+              handleCellFinalize(rowId, colIndex, newValue);
+            }}
+            onlyUpdateOnBlurOrEnter={true}
+          />
         );
       }
     },
@@ -344,7 +263,7 @@ export default function MinimalStickyTable({
       header: `Summary ${i + 1}`,
       meta: { groupIndex: 7 } as ColumnMeta
     }))
-  ], [handleCellEdit, handleCurrencyEdit, finishCurrencyEdit, editingCell]);
+  ], [handleCellEdit, handleCellFinalize]);
 
   const table = useReactTable({
     data,
@@ -468,33 +387,25 @@ export default function MinimalStickyTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.map((row, rowIdx) => {
+            {table.getRowModel().rows.map((row) => {
               const isSubAppointment = row.original.isSubAppointment === true;
               
               return (
                 <TableRow 
                   key={row.id}
                 >
-                  {row.getVisibleCells().map((cell, cellIdx) => {
+                  {row.getVisibleCells().map((cell) => {
                     const meta = cell.column.columnDef.meta as ColumnMeta | undefined;
                     const isSticky = meta?.sticky;
                     const stickyIndex = meta?.index || 0;
                     const groupIndex = meta?.groupIndex || 0;
                     
-                    const isEditable = cellIdx >= 6 && cellIdx <= 7;
-                    const isReadOnly = cellIdx <= 2 || !isEditable;
-                    
-                    const paddingStyle = (cellIdx === 0 && isSubAppointment) ? 
+                    const paddingStyle = (cell.column.id === 'appointmentNumber' && isSubAppointment) ? 
                       { paddingLeft: '1.5rem' } : {};
                     
                     return (
                       <TableCell
                         key={cell.id}
-                        onClick={() => {
-                          if (onCellChange && !isReadOnly) {
-                            setEditingCell({ rowIndex: rowIdx, colIndex: cellIdx });
-                          }
-                        }}
                         style={{
                           position: isSticky ? 'sticky' : undefined,
                           left: isSticky ? (stickyIndex === 0 ? 0 : '150px') : undefined,
@@ -502,50 +413,11 @@ export default function MinimalStickyTable({
                           minWidth: stickyIndex === 0 ? '150px' : (stickyIndex === 1 ? '200px' : '150px'),
                           backgroundColor: getGroupBgColor(groupIndex),
                           boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border))' : undefined,
-                          cursor: isReadOnly ? 'default' : 'pointer',
-                          fontWeight: isReadOnly ? '500' : 'normal',
-                          padding: isEditable ? '0' : undefined,
+                          padding: meta?.isEditable ? '0' : undefined,
                           ...paddingStyle
                         }}
                       >
-                        {isEditable ? (
-                          <input
-                            type="text"
-                            inputMode="decimal"
-                            value={cell.getValue() as string || ''}
-                            onChange={(e) => {
-                              const regex = /^[0-9.,]*$/;
-                              if (regex.test(e.target.value) || e.target.value === '') {
-                                handleCellEdit(rowIdx, cellIdx, e.target.value);
-                              }
-                            }}
-                            onBlur={(e) => {
-                              if (e.target.value) {
-                                try {
-                                  const numValue = parseFloat(e.target.value.replace(/\./g, '').replace(',', '.'));
-                                  if (!isNaN(numValue)) {
-                                    const formatted = numValue.toLocaleString('da-DK');
-                                    handleCellEdit(rowIdx, cellIdx, formatted);
-                                  }
-                                } catch (error) {
-                                  console.error("Error formatting number:", error);
-                                }
-                              }
-                            }}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              padding: '8px 12px',
-                              border: 'none',
-                              backgroundColor: 'transparent',
-                              textAlign: 'right',
-                              fontFamily: 'inherit',
-                              fontSize: 'inherit',
-                              color: 'inherit',
-                            }}
-                            className="focus:outline-none focus:ring-1 focus:ring-primary"
-                          />
-                        ) : cellIdx === 0 && isSubAppointment ? (
+                        {cell.column.id === 'appointmentNumber' && isSubAppointment ? (
                           <div className="flex items-center">
                             <span className="text-muted-foreground mr-2">└</span>
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}

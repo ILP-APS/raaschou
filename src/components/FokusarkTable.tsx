@@ -11,7 +11,7 @@ interface FokusarkTableProps {
 }
 
 const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
-  const { tableData, isLoading, error, refreshData, handleCellChange, isRefreshing } = useFokusarkTable(data);
+  const { tableData, isLoading, error, refreshData, handleCellChange, handleCellBlur, isRefreshing } = useFokusarkTable(data);
   
   console.log(`FokusarkTable rendering with ${tableData?.length || 0} rows of data`);
   
@@ -115,7 +115,11 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
         </Button>
       </div>
       
-      <MinimalStickyTable tableData={tableData} onCellChange={handleCellChange} />
+      <MinimalStickyTable 
+        tableData={tableData} 
+        onCellChange={handleCellChange} 
+        onCellBlur={handleCellBlur}
+      />
     </div>
   );
 };

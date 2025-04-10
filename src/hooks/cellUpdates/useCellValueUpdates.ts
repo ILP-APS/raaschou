@@ -45,18 +45,19 @@ export const useCellValueUpdates = ({
     colIndex: number,
     value: string
   ) => {
+    // Clean the value - remove DKK suffix if present
+    const cleanValue = value.replace(/ DKK$/, '');
+    
     // Don't update if nothing changed
     if (
       lastUpdateRef.current && 
       lastUpdateRef.current.appointmentNumber === appointmentNumber &&
       lastUpdateRef.current.colIndex === colIndex &&
-      lastUpdateRef.current.value === value
+      lastUpdateRef.current.value === cleanValue
     ) {
+      console.log("No change detected, skipping update");
       return null;
     }
-    
-    // Clean the value - remove DKK suffix if present
-    const cleanValue = value.replace(/ DKK$/, '');
     
     // Update last update reference
     lastUpdateRef.current = {
@@ -70,75 +71,81 @@ export const useCellValueUpdates = ({
       clearTimeout(updateTimeoutRef.current);
     }
     
+    console.log(`Processing database update for appointment ${appointmentNumber}, column ${colIndex}, value: ${cleanValue}`);
+    
     // Create a promise that will be resolved after the update
     return new Promise<FokusarkAppointment | null>((resolve) => {
-      // Set a timeout to debounce rapid updates
-      updateTimeoutRef.current = setTimeout(async () => {
+      try {
+        const fieldName = getFieldNameForColumn(colIndex);
+        if (!fieldName) {
+          console.error(`Unsupported column index for update: ${colIndex}`);
+          resolve(null);
+          return;
+        }
+        
+        // For percentage columns, ensure the value is formatted and capped at 100%
+        if (isPercentageColumn(colIndex)) {
+          value = formatPercentageInput(cleanValue);
+        }
+        
+        // Parse numeric value for database update
+        let parsedValue;
         try {
-          const fieldName = getFieldNameForColumn(colIndex);
-          if (!fieldName) {
-            console.error(`Unsupported column index for update: ${colIndex}`);
-            resolve(null);
-            return;
-          }
-          
-          // For percentage columns, ensure the value is formatted and capped at 100%
-          if (isPercentageColumn(colIndex)) {
-            value = formatPercentageInput(cleanValue);
-          }
-          
-          // Parse numeric value for database update
-          let parsedValue;
-          try {
-            parsedValue = parseFloat(cleanValue.replace(/\./g, '').replace(',', '.'));
-            if (isNaN(parsedValue)) {
-              parsedValue = 0;
-            }
-          } catch (e) {
+          parsedValue = parseFloat(cleanValue.replace(/\./g, '').replace(',', '.'));
+          if (isNaN(parsedValue)) {
             parsedValue = 0;
           }
-          
-          console.log(`Updating ${fieldName} for appointment ${appointmentNumber} to ${parsedValue}`);
-          
-          const updatedAppointment = await updateAppointmentField(
-            appointmentNumber, 
-            fieldName, 
-            parsedValue
-          );
-          
-          // Update appointments state with updated appointment
-          setAppointments(prev => 
-            prev.map(app => 
-              app.appointment_number === appointmentNumber ? updatedAppointment : app
-            )
-          );
-          
-          toast({
-            title: "Updated successfully",
-            description: `Updated ${getColumnDisplayName(colIndex)} for ${appointmentNumber}`,
-          });
-          
-          resolve(updatedAppointment);
-        } catch (error) {
-          console.error(`Error updating ${appointmentNumber}:`, error);
-          toast({
-            title: "Error saving data",
-            description: "Could not save your changes to the database. Please try again.",
-            variant: "destructive",
-          });
-          
-          try {
-            // Only reload if we have a serious error
-            const reloadedAppointments = await loadFokusarkAppointments();
-            setAppointments(reloadedAppointments);
-            setTableData(transformAppointmentsToDisplayData(reloadedAppointments));
-          } catch (reloadError) {
-            console.error('Error reloading data after failed update:', reloadError);
-          }
-          
-          resolve(null);
+        } catch (e) {
+          parsedValue = 0;
         }
-      }, 500); // 500ms debounce
+        
+        console.log(`Updating ${fieldName} for appointment ${appointmentNumber} to ${parsedValue}`);
+        
+        // Process the update
+        updateAppointmentField(appointmentNumber, fieldName, parsedValue)
+          .then(updatedAppointment => {
+            // Update appointments state with updated appointment
+            setAppointments(prev => 
+              prev.map(app => 
+                app.appointment_number === appointmentNumber ? updatedAppointment : app
+              )
+            );
+            
+            toast({
+              title: "Updated successfully",
+              description: `Updated ${getColumnDisplayName(colIndex)} for ${appointmentNumber}`,
+            });
+            
+            resolve(updatedAppointment);
+          })
+          .catch(error => {
+            console.error(`Error updating ${appointmentNumber}:`, error);
+            toast({
+              title: "Error saving data",
+              description: "Could not save your changes to the database. Please try again.",
+              variant: "destructive",
+            });
+            
+            try {
+              // Only reload if we have a serious error
+              loadFokusarkAppointments()
+                .then(reloadedAppointments => {
+                  setAppointments(reloadedAppointments);
+                  setTableData(transformAppointmentsToDisplayData(reloadedAppointments));
+                })
+                .catch(reloadError => {
+                  console.error('Error reloading data after failed update:', reloadError);
+                });
+            } catch (reloadError) {
+              console.error('Error reloading data after failed update:', reloadError);
+            }
+            
+            resolve(null);
+          });
+      } catch (error) {
+        console.error(`Error processing update for ${appointmentNumber}:`, error);
+        resolve(null);
+      }
     });
   };
   
