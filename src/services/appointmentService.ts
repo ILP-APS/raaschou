@@ -33,7 +33,7 @@ export async function fetchAppointments(): Promise<AppointmentResponse[]> {
 function generateMockAppointments(): AppointmentResponse[] {
   const mockData: AppointmentResponse[] = [];
   
-  // Sample subjects from the API
+  // Real subjects from the API
   const subjects = [
     "Skoleophold m.v.", "Tilbygning", "Kontorudvidelse", 
     "Køkkenrenovering", "Vinduesudskiftning", "Tagudskiftning",

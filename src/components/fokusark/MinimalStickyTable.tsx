@@ -56,34 +56,28 @@ export default function MinimalStickyTable({
     
     // Convert the 2D array data to objects
     const transformed = tableData.map((row, i) => {
-      // Get the appointment number and subject from the row data
-      const appointmentNumber = row[0] || `row-${i}`; // This is the actual appointment number from API
-      const subject = row[1] || `Project ${i + 1}`; // This is the appointment subject from API
+      // Get the real appointment number and subject from the row data
+      const appointmentNumber = row[0] || ''; // This is the actual appointment number from API
+      const subject = row[1] || ''; // This is the appointment subject from API
       
       console.log(`Row ${i}: appointmentNumber=${appointmentNumber}, subject=${subject}`);
       
       const rowObj: Record<string, string> = {
-        id: appointmentNumber, // Use the actual appointment number as id
-        name: subject, // Use the actual subject from API data
-        type: row[2] || `Type ${i % 4 + 1}`, // Responsible person
+        id: i.toString(), // Use index as id
+        appointmentNumber: appointmentNumber, // Store the actual appointment number
+        subject: subject, // Store the actual subject
+        type: row[2] || '', // Responsible person
       };
       
       // Add remaining columns
       for (let j = 3; j < Math.min(row.length, 20); j++) {
-        rowObj[`col${j-3}`] = row[j] || `Value ${i}-${j}`;
+        rowObj[`col${j-3}`] = row[j] || '';
       }
       
       return rowObj;
     });
     
     console.log(`Transformed ${transformed.length} rows from raw data`);
-    if (transformed.length > 0) {
-      console.log("First transformed row:", {
-        id: transformed[0].id,
-        name: transformed[0].name,
-        type: transformed[0].type
-      });
-    }
     return transformed;
   }, [tableData]);
   
@@ -98,14 +92,16 @@ export default function MinimalStickyTable({
   // Define columns with proper typing for custom meta properties
   const columns = React.useMemo<ColumnDef<Record<string, string>, any>[]>(() => [
     { 
-      accessorKey: 'id', 
+      accessorKey: 'appointmentNumber', 
       header: 'Nr.', 
-      meta: { sticky: true, index: 0, groupIndex: 0 } as ColumnMeta
+      meta: { sticky: true, index: 0, groupIndex: 0 } as ColumnMeta,
+      cell: info => info.getValue() // Display the real appointment number
     },
     { 
-      accessorKey: 'name', 
+      accessorKey: 'subject', 
       header: 'Navn', 
-      meta: { sticky: true, index: 1, groupIndex: 0 } as ColumnMeta
+      meta: { sticky: true, index: 1, groupIndex: 0 } as ColumnMeta,
+      cell: info => info.getValue() // Display the real subject
     },
     { 
       accessorKey: 'type', 
@@ -194,8 +190,6 @@ export default function MinimalStickyTable({
       </div>
     );
   }
-
-  console.log(`MinimalStickyTable rendering table with ${data.length} rows of data`);
 
   return (
     <div className="table-wrapper" style={{
@@ -289,20 +283,19 @@ export default function MinimalStickyTable({
                     const isSticky = meta?.sticky;
                     const stickyIndex = meta?.index || 0;
                     const groupIndex = meta?.groupIndex || 0;
-                    const isEditing = editingCell?.rowIndex === rowIdx && editingCell?.colIndex === cellIdx;
                     
-                    // Make first 2 columns read-only
+                    // Make the first 2 columns read-only
                     const isReadOnly = cellIdx <= 1;
                     
                     return (
                       <TableCell
                         key={cell.id}
                         onClick={() => {
-                          // Handle cell click - this is where we would trigger edit mode
+                          // Handle cell click for editable cells
                           if (onCellChange && !isReadOnly) {
-                            const colIndex = cellIdx;
+                            const colIndex = cellIdx + 2; // Adjusted for the first two columns
                             const value = prompt('Enter new value:', cell.getValue() as string) || '';
-                            if (value) {
+                            if (value !== (cell.getValue() as string)) {
                               handleCellEdit(rowIdx, colIndex, value);
                             }
                           }

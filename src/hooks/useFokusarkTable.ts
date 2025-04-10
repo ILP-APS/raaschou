@@ -12,7 +12,7 @@ export interface FokusarkTableData {
 
 /**
  * Main hook for handling the Fokusark table functionality
- * Uses mock data since API fetching is disabled
+ * Uses real data from the API mocks
  */
 export const useFokusarkTable = (initialData: string[][]) => {
   const [tableData, setTableData] = useState<string[][]>([]);
@@ -26,47 +26,34 @@ export const useFokusarkTable = (initialData: string[][]) => {
       // Skip if already initialized or data is already fetched
       if (isInitialized || isDataFetchedRef.current) return;
       
-      console.log(`Initializing table data`);
+      console.log(`Initializing table data from API`);
       setIsLoading(true);
       setError(null);
       isDataFetchedRef.current = true;
       
       try {
-        // Generate mock data instead of API fetching
+        // Get real data from the API mock
         const appointments = await fetchAppointments();
         
         if (appointments && appointments.length > 0) {
-          console.log(`Using mock data: ${appointments.length} appointments`);
+          console.log(`Loaded real data: ${appointments.length} appointments`);
           const mappedData = mapAppointmentsToTableData(appointments);
           setTableData(mappedData);
-          toast.success(`Generated ${appointments.length} mock appointments`);
         } 
-        // If no mock data, use provided data or generate sample data
+        // If no API data, use provided data as fallback
         else if (initialData && initialData.length > 0) {
           console.log(`Using provided data: ${initialData.length} rows`);
           setTableData(initialData);
         } else {
-          console.log("No initial data, generating sample data");
-          const generatedData = generateTableData();
-          console.log(`Generated ${generatedData.length} rows of sample data`);
-          setTableData(generatedData);
+          console.log("No data available");
+          setTableData([]);
         }
         
         setIsInitialized(true);
       } catch (error) {
         console.error("Error initializing table data:", error);
-        
-        // Fallback to generated data
-        try {
-          console.log("Attempting to use fallback generated data");
-          const generatedData = generateTableData();
-          setTableData(generatedData);
-          toast.warning("Using fallback data");
-        } catch (fallbackError) {
-          console.error("Failed to generate fallback data:", fallbackError);
-          setTableData([]);
-          toast.error("Failed to load any data");
-        }
+        setError(error instanceof Error ? error : new Error('Unknown error'));
+        setTableData([]);
       } finally {
         setIsLoading(false);
       }
@@ -106,18 +93,20 @@ export const useFokusarkTable = (initialData: string[][]) => {
     setIsLoading(true);
     
     try {
-      // Generate new mock data
+      // Get fresh data from the API mock
       const appointments = await fetchAppointments();
-      const mappedData = mapAppointmentsToTableData(appointments);
-      setTableData(mappedData);
-      toast.success("Data refreshed successfully");
+      if (appointments && appointments.length > 0) {
+        const mappedData = mapAppointmentsToTableData(appointments);
+        setTableData(mappedData);
+        toast.success("Data refreshed successfully");
+      } else {
+        toast.error("No data available from API");
+        setTableData([]);
+      }
     } catch (error) {
       console.error("Error refreshing data:", error);
       toast.error("Failed to refresh data");
-      
-      // Fallback to generated data
-      const data = generateTableData();
-      setTableData(data);
+      setTableData([]);
     } finally {
       setIsLoading(false);
     }
