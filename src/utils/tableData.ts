@@ -1,8 +1,9 @@
 
 // Generate table data for the Fokusark table
 export const generateTableData = (rowCount?: number) => {
-  // Allow specifying the number of rows, default to a random number between 5 and 20
-  const numRows = rowCount || Math.floor(Math.random() * 16) + 5;
+  // Allow specifying the number of rows, default to a random number between 10 and 25
+  // Increased the min rows to ensure we have a reasonable number of rows by default
+  const numRows = rowCount || Math.floor(Math.random() * 16) + 10;
   console.log(`Generating sample table data with ${numRows} rows`);
   
   const rows = [];

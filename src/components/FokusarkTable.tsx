@@ -21,7 +21,7 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   // Check if we have data to display
   if (!data || data.length === 0) {
     return (
-      <div className="rounded-md w-full relative shadow-md border border-border p-8">
+      <div className="rounded-md w-full relative shadow-md border border-border p-8" style={{ minHeight: '400px' }}>
         <div className="text-center">
           <h3 className="text-lg font-medium mb-2">No data available</h3>
           <p className="text-muted-foreground mb-4">

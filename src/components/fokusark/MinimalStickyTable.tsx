@@ -171,8 +171,8 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
       overflow: 'hidden',
       border: '1px solid hsl(var(--border))',
       borderRadius: '8px',
-      // Dynamic height based on content, with reasonable constraints
-      minHeight: '200px',
+      // Set a more substantial minimum height to make better use of space
+      minHeight: data.length < 10 ? '400px' : '200px',
       maxHeight: '80vh'
     }}>
       <div style={{
