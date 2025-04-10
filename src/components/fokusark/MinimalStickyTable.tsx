@@ -37,7 +37,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
       // Provide default data if none is passed
       return [
         { id: '1', name: 'Project 1', type: 'Type 1', col1: 'Value 1-1', col2: 'Value 1-2', col3: 'Value 1-3' },
-        { id: '2', name: 'Project 2', type: 'Type 2', col1: 'Value 2-1', col2: 'Value 2-2', col2: 'Value 2-3' },
+        { id: '2', name: 'Project 2', type: 'Type 2', col1: 'Value 2-1', col2: 'Value 2-2', col3: 'Value 2-3' },
         { id: '3', name: 'Project 3', type: 'Type 3', col1: 'Value 3-1', col2: 'Value 3-2', col3: 'Value 3-3' },
         { id: '4', name: 'Project 4', type: 'Type 4', col1: 'Value 4-1', col2: 'Value 4-2', col3: 'Value 4-3' },
         { id: '5', name: 'Project 5', type: 'Type 1', col1: 'Value 5-1', col2: 'Value 5-2', col3: 'Value 5-3' },
@@ -148,16 +148,6 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
       return groupIndex % 2 === 0 ? 'hsl(var(--background))' : 'hsl(var(--muted)/10)';
     }
   };
-  
-  // Get background color based on theme and row parity
-  const getBgColor = (isEvenRow: boolean = false, groupIndex: number) => {
-    const baseColor = getGroupBgColor(groupIndex);
-    if (isDarkMode) {
-      return isEvenRow ? 'hsl(var(--muted))' : baseColor;
-    } else {
-      return isEvenRow ? 'hsl(var(--muted)/10)' : baseColor;
-    }
-  };
 
   const headerHeight = '41px';
 
@@ -243,12 +233,10 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
             </TableRow>
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.map((row, rowIndex) => {
-              const isEvenRow = rowIndex % 2 === 1;
-              
+            {table.getRowModel().rows.map((row) => {
               return (
                 <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell, cellIndex) => {
+                  {row.getVisibleCells().map((cell) => {
                     const meta = cell.column.columnDef.meta as ColumnMeta | undefined;
                     const isSticky = meta?.sticky;
                     const stickyIndex = meta?.index || 0;
@@ -262,7 +250,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
                           left: isSticky ? (stickyIndex === 0 ? 0 : '150px') : undefined,
                           zIndex: isSticky ? 20 : undefined,
                           minWidth: stickyIndex === 0 ? '150px' : (stickyIndex === 1 ? '200px' : '150px'),
-                          backgroundColor: getBgColor(isEvenRow, groupIndex),
+                          backgroundColor: getGroupBgColor(groupIndex),
                           boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border))' : undefined
                         }}
                       >
