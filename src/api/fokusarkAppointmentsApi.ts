@@ -161,22 +161,24 @@ export async function updateRealizedHours(
 }
 
 /**
- * Generate mock appointment data
+ * Generate mock appointment data that matches the API format
  */
 function generateMockAppointments(): FokusarkAppointment[] {
   const mockData: FokusarkAppointment[] = [];
   
-  // Create some sample appointment data
+  // Sample subjects from the API
   const subjects = [
-    "Construction af udestue", "Installation af gulv", "Repair af køkken", 
-    "Maintenance af udestue", "Upgrade af gulv", "Remodel af badeværelse",
-    "Replacement af gulv", "Renovation af tag", "Construction af vinduer"
+    "Skoleophold m.v.", "Tilbygning", "Kontorudvidelse", 
+    "Køkkenrenovering", "Vinduesudskiftning", "Tagudskiftning",
+    "Facaderenovering", "Energirenovering", "Kloakrenovering"
   ];
   
-  const responsiblePersons = ["Anna", "Peter", "Maria", "Thomas", "Sofie", "Lars", "Mette"];
+  // Sample responsible persons
+  const responsiblePersons = ["User 1832", "User 1833", "User 1834", "User 1835", "User 1836"];
   
+  // Generate appointment numbers like in the API (4-digit format)
   for (let i = 0; i < 15; i++) {
-    const appointmentNumber = (24481 + i).toString();
+    const appointmentNumber = `${9990 + i}`; // Starting from 9990 like in the API example
     const subject = subjects[Math.floor(Math.random() * subjects.length)];
     const responsiblePerson = responsiblePersons[Math.floor(Math.random() * responsiblePersons.length)];
     
@@ -193,7 +195,7 @@ function generateMockAppointments(): FokusarkAppointment[] {
       tilbud,
       montage,
       underleverandor,
-      hn_appointment_id: 10000 + i,
+      hn_appointment_id: 529633 + i, // Based on API example
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     });

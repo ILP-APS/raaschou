@@ -28,33 +28,32 @@ export async function fetchAppointments(): Promise<AppointmentResponse[]> {
 
 /**
  * Generates mock appointment data for development and testing
+ * that matches the structure seen in the API response
  */
 function generateMockAppointments(): AppointmentResponse[] {
   const mockData: AppointmentResponse[] = [];
   
-  // Create sample appointment data
+  // Sample subjects from the API
   const subjects = [
-    "Construction af udestue", "Installation af gulv", "Repair af køkken", 
-    "Maintenance af udestue", "Upgrade af gulv", "Remodel af badeværelse",
-    "Replacement af gulv", "Renovation af tag", "Construction af vinduer"
+    "Skoleophold m.v.", "Tilbygning", "Kontorudvidelse", 
+    "Køkkenrenovering", "Vinduesudskiftning", "Tagudskiftning",
+    "Facaderenovering", "Energirenovering", "Kloakrenovering"
   ];
   
-  const responsibleUsers = [1, 2, 3, 4, 5]; // Mock user IDs
-  
+  // Generate appointment numbers like in the API (4-digit format)
   for (let i = 0; i < 15; i++) {
-    const appointmentNumber = (24481 + i).toString();
+    const appointmentNumber = `${9990 + i}`; // Starting from 9990 like in the API
     const subject = subjects[Math.floor(Math.random() * subjects.length)];
-    const responsibleHnUserID = responsibleUsers[Math.floor(Math.random() * responsibleUsers.length)];
     
     mockData.push({
-      hnAppointmentID: 10000 + i,
+      hnAppointmentID: 529633 + i, // Based on API example
       appointmentNumber,
       subject,
-      responsibleHnUserID
+      responsibleHnUserID: 1832 + (i % 5) // Varied user IDs
     });
   }
   
-  console.log(`Generated ${mockData.length} mock appointments`);
+  console.log(`Generated ${mockData.length} mock appointments that match API format`);
   return mockData;
 }
 

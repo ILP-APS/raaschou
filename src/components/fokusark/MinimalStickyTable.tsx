@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -14,6 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useTheme } from 'next-themes';
+import { toast } from 'sonner';
 
 // Define the column meta type to include our custom properties
 interface ColumnMeta {
@@ -33,19 +35,15 @@ export default function MinimalStickyTable({
 }: MinimalStickyTableProps) {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
+  const [editingCell, setEditingCell] = useState<{ rowIndex: number; colIndex: number } | null>(null);
   
   console.log("MinimalStickyTable received data:", {
     rowCount: tableData?.length || 0,
     hasData: tableData && tableData.length > 0,
     firstRow: tableData && tableData.length > 0 ? {
       appointmentNumber: tableData[0][0],
-      subject: tableData[0][1], // Log subject explicitly
+      subject: tableData[0][1],
       responsibleUser: tableData[0][2]
-    } : {},
-    lastRow: tableData && tableData.length > 0 ? {
-      appointmentNumber: tableData[tableData.length - 1][0],
-      subject: tableData[tableData.length - 1][1], // Log subject explicitly
-      responsibleUser: tableData[tableData.length - 1][2]
     } : {}
   });
   
@@ -93,6 +91,7 @@ export default function MinimalStickyTable({
   const handleCellEdit = React.useCallback((rowIndex: number, colIndex: number, value: string) => {
     if (onCellChange) {
       onCellChange(rowIndex, colIndex, value);
+      toast.success("Cell updated successfully");
     }
   }, [onCellChange]);
   
@@ -290,16 +289,22 @@ export default function MinimalStickyTable({
                     const isSticky = meta?.sticky;
                     const stickyIndex = meta?.index || 0;
                     const groupIndex = meta?.groupIndex || 0;
+                    const isEditing = editingCell?.rowIndex === rowIdx && editingCell?.colIndex === cellIdx;
+                    
+                    // Make first 2 columns read-only
+                    const isReadOnly = cellIdx <= 1;
                     
                     return (
                       <TableCell
                         key={cell.id}
                         onClick={() => {
                           // Handle cell click - this is where we would trigger edit mode
-                          if (onCellChange && cellIdx > 1) { // Skip ID and Name columns
+                          if (onCellChange && !isReadOnly) {
                             const colIndex = cellIdx;
                             const value = prompt('Enter new value:', cell.getValue() as string) || '';
-                            handleCellEdit(rowIdx, colIndex, value);
+                            if (value) {
+                              handleCellEdit(rowIdx, colIndex, value);
+                            }
                           }
                         }}
                         style={{
@@ -309,7 +314,8 @@ export default function MinimalStickyTable({
                           minWidth: stickyIndex === 0 ? '150px' : (stickyIndex === 1 ? '200px' : '150px'),
                           backgroundColor: getGroupBgColor(groupIndex),
                           boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border))' : undefined,
-                          cursor: cellIdx > 1 ? 'pointer' : 'default'
+                          cursor: isReadOnly ? 'default' : 'pointer',
+                          fontWeight: isReadOnly ? '500' : 'normal'
                         }}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
