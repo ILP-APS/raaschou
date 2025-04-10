@@ -117,16 +117,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       // Update the corresponding row in Supabase
       try {
-        // Fix: loadAppointmentsFromSupabase returns string[][], not an object with data and error properties
-        const supabaseData = await loadAppointmentsFromSupabase();
-        
-        if (!supabaseData || supabaseData.length <= rowIndex) {
-          console.error("Error getting Supabase row to update");
-          return false;
-        }
-        
-        // Get the ID for the row in Supabase
-        // First check if we can find the appointment number in the current row
+        // Get the appointment number from the current row
         const appointmentNumber = newData[rowIndex][0];
         
         if (!appointmentNumber) {
@@ -134,24 +125,11 @@ export const useFokusarkTable = (initialData: string[][]) => {
           return false;
         }
         
-        // Find the corresponding row in Supabase by fetching the row with this appointment number
-        const { data: rowData, error: rowError } = await supabase
-          .from('fokusark_table')
-          .select('id')
-          .eq('1 col', appointmentNumber)
-          .single();
-        
-        if (rowError || !rowData) {
-          console.error("Error finding row in Supabase:", rowError);
-          toast.error("Failed to save cell change to database");
-          return false;
-        }
-        
         // Update the specific cell in Supabase
         const { error: updateError } = await supabase
           .from('fokusark_table')
           .update({ [`${colIndex + 1} col`]: value })
-          .eq('id', rowData.id);
+          .eq('1 col', appointmentNumber);
         
         if (updateError) {
           console.error("Error updating cell in Supabase:", updateError);
@@ -189,17 +167,19 @@ export const useFokusarkTable = (initialData: string[][]) => {
         
         if (saveSuccess) {
           toast.success("Successfully refreshed and saved data to Supabase");
+          
+          // Load the fresh data from Supabase to ensure consistent view
+          const supabaseData = await loadAppointmentsFromSupabase();
+          
+          if (supabaseData && supabaseData.length > 0) {
+            setTableData(supabaseData);
+          } else {
+            // Fallback to mapped data if Supabase load fails
+            setTableData(mappedData);
+          }
         } else {
           toast.error("Failed to save refreshed data to Supabase");
-        }
-        
-        // Load the fresh data from Supabase to ensure consistent view
-        const supabaseData = await loadAppointmentsFromSupabase();
-        
-        if (supabaseData && supabaseData.length > 0) {
-          setTableData(supabaseData);
-        } else {
-          // Fallback to mapped data if Supabase load fails
+          // Still update the UI with the new data even if save failed
           setTableData(mappedData);
         }
       } else {

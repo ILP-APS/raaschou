@@ -69,7 +69,7 @@ export async function saveAppointmentsToSupabase(appointments: AppointmentRespon
     const { error: deleteError } = await supabase
       .from('fokusark_table')
       .delete()
-      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
+      .not('id', 'is', null); // Delete all rows (safer than hardcoding a UUID)
     
     if (deleteError) {
       console.error("Error clearing existing fokusark_table data:", deleteError);
@@ -79,7 +79,8 @@ export async function saveAppointmentsToSupabase(appointments: AppointmentRespon
     // Format appointment data for Supabase insertion
     const rows = appointments.map((appointment, index) => {
       return {
-        id: crypto.randomUUID(), // Generate a UUID for each row
+        // Don't use crypto.randomUUID() as it might not be available in all browsers
+        // Let Supabase generate the UUID with its default
         '1 col': appointment.appointmentNumber,
         '2 col': appointment.subject,
         '3 col': `User ${appointment.responsibleHnUserID}`, // Map user ID to a user name format
@@ -178,6 +179,7 @@ export function mapAppointmentsToTableData(appointments: AppointmentResponse[]):
     const row: string[] = Array(24).fill('');
     row[0] = appointment.appointmentNumber;
     row[1] = appointment.subject || '';
+    row[2] = `User ${appointment.responsibleHnUserID}`;
     
     // Add some mock budget values for the demo
     row[3] = (Math.floor(Math.random() * 5000) + 500).toFixed(2);
