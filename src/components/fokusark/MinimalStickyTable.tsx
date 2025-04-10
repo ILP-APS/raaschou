@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   flexRender,
@@ -80,7 +81,12 @@ export default function MinimalStickyTable({
   
   const handleCellEdit = React.useCallback((rowIndex: number, colIndex: number, value: string) => {
     if (onCellChange) {
-      onCellChange(rowIndex, colIndex, value);
+      // Map the columnIndex to the actual index in the tableData array
+      // col0 is at index 3 in the original data, col1 is at index 4, etc.
+      const actualColIndex = colIndex + 3;
+      
+      console.log(`Editing cell at row ${rowIndex}, column ${actualColIndex}, new value: ${value}`);
+      onCellChange(rowIndex, actualColIndex, value);
       toast.success("Cell updated successfully");
     }
   }, [onCellChange]);
@@ -354,7 +360,12 @@ export default function MinimalStickyTable({
                     const stickyIndex = meta?.index || 0;
                     const groupIndex = meta?.groupIndex || 0;
                     
-                    const isReadOnly = cellIdx <= 1;
+                    // Check if this is column 7 or 8 (col4 or col5 in our data structure)
+                    // These are editable columns for Montage 2 and Underleverandør 2
+                    const isEditable = cellIdx >= 6 && cellIdx <= 7;
+                    
+                    // Always make the first two columns read-only (appointment number and subject)
+                    const isReadOnly = cellIdx <= 1 || !isEditable;
                     
                     const paddingStyle = (cellIdx === 0 && isSubAppointment) ? 
                       { paddingLeft: '1.5rem' } : {};
@@ -364,10 +375,9 @@ export default function MinimalStickyTable({
                         key={cell.id}
                         onClick={() => {
                           if (onCellChange && !isReadOnly) {
-                            const colIndex = cellIdx + 2;
                             const value = prompt('Enter new value:', cell.getValue() as string) || '';
                             if (value !== (cell.getValue() as string)) {
-                              handleCellEdit(rowIdx, colIndex, value);
+                              handleCellEdit(rowIdx, cellIdx, value);
                             }
                           }
                         }}
@@ -380,10 +390,52 @@ export default function MinimalStickyTable({
                           boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border))' : undefined,
                           cursor: isReadOnly ? 'default' : 'pointer',
                           fontWeight: isReadOnly ? '500' : 'normal',
+                          padding: isEditable ? '0' : undefined,
                           ...paddingStyle
                         }}
                       >
-                        {cellIdx === 0 && isSubAppointment ? (
+                        {isEditable ? (
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            value={cell.getValue() as string || ''}
+                            onChange={(e) => {
+                              // Only allow numeric input with commas and dots
+                              const regex = /^[0-9.,]*$/;
+                              if (regex.test(e.target.value) || e.target.value === '') {
+                                handleCellEdit(rowIdx, cellIdx, e.target.value);
+                              }
+                            }}
+                            onBlur={(e) => {
+                              // Format as Danish currency on blur
+                              if (e.target.value) {
+                                try {
+                                  // Parse the input value - replace dots with empty string and commas with dots
+                                  const numValue = parseFloat(e.target.value.replace(/\./g, '').replace(',', '.'));
+                                  if (!isNaN(numValue)) {
+                                    // Format using Danish locale
+                                    const formatted = numValue.toLocaleString('da-DK');
+                                    handleCellEdit(rowIdx, cellIdx, formatted);
+                                  }
+                                } catch (error) {
+                                  console.error("Error formatting number:", error);
+                                }
+                              }
+                            }}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              padding: '8px 12px',
+                              border: 'none',
+                              backgroundColor: 'transparent',
+                              textAlign: 'right',
+                              fontFamily: 'inherit',
+                              fontSize: 'inherit',
+                              color: 'inherit',
+                            }}
+                            className="focus:outline-none focus:ring-1 focus:ring-primary"
+                          />
+                        ) : cellIdx === 0 && isSubAppointment ? (
                           <div className="flex items-center">
                             <span className="text-muted-foreground mr-2">└</span>
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
