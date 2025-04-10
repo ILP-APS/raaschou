@@ -42,7 +42,8 @@ export async function fetchFokusarkTableData() {
 export async function saveFokusarkTableRow(row: FokusarkTableRow) {
   try {
     if (!row.id) {
-      throw new Error('Row ID is required for saving');
+      // Ensure we have a valid UUID
+      row.id = crypto.randomUUID();
     }
     
     // For non-existent tables, this operation will gracefully fail
@@ -106,10 +107,10 @@ export async function saveFokusarkTableRow(row: FokusarkTableRow) {
  */
 export async function batchSaveFokusarkTableRows(rows: FokusarkTableRow[]) {
   try {
-    // Ensure all rows have IDs
+    // Ensure all rows have valid UUIDs
     rows.forEach((row, index) => {
       if (!row.id) {
-        row.id = index.toString();
+        row.id = crypto.randomUUID();
       }
     });
     
@@ -166,7 +167,7 @@ export async function deleteFokusarkTableRow(id: string) {
  */
 export function convertTableDataToRowFormat(tableData: string[][]): FokusarkTableRow[] {
   return tableData.map((row, rowIndex) => {
-    const rowObj: FokusarkTableRow = { id: rowIndex.toString() };
+    const rowObj: FokusarkTableRow = { id: crypto.randomUUID() };
     
     row.forEach((cellValue, colIndex) => {
       rowObj[`${colIndex + 1} col`] = cellValue;

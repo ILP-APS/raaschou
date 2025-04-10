@@ -26,6 +26,11 @@ export const useCellValueUpdates = ({
     return [18, 19].includes(colIndex); 
   };
   
+  // Helper function to determine if a column should be treated as currency
+  const isCurrencyColumn = (colIndex: number): boolean => {
+    return [3, 4, 5, 6, 7, 8, 9, 10, 11].includes(colIndex);
+  };
+  
   // Updates cell value in the database
   const updateCellValueInDb = async (
     appointmentNumber: string,
@@ -88,5 +93,9 @@ export const useCellValueUpdates = ({
     }
   };
   
-  return { updateCellValueInDb, isPercentageColumn };
+  return { 
+    updateCellValueInDb, 
+    isPercentageColumn,
+    isCurrencyColumn
+  };
 };
