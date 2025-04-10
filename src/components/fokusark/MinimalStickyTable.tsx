@@ -130,8 +130,8 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
 
   // Define group structure with column spans
   const columnGroups = [
-    { name: 'Info', span: 2, index: 0 },
-    { name: 'Type', span: 1, index: 1 },
+    { name: 'Aftale', span: 2, index: 0 },
+    { name: '', span: 1, index: 1 },
     { name: 'Budget Group A', span: 5, index: 2 },
     { name: 'Budget Group B', span: 4, index: 3 },
     { name: 'Budget Group C', span: 4, index: 4 },
