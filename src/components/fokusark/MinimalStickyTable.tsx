@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   flexRender,
@@ -110,10 +111,10 @@ export default function MinimalStickyTable({
       meta: { groupIndex: 1 } as ColumnMeta
     },
     
-    // Updated column names for the Budget Group A columns
+    // Updated column names for the Tilbud columns (formerly Budget Group A)
     {
       accessorKey: `col0`,
-      header: `Tilbud`, // Changed from 'Group A 1' to 'Tilbud'
+      header: `Tilbud`, 
       meta: { groupIndex: 2 } as ColumnMeta
     },
     {
@@ -212,11 +213,11 @@ export default function MinimalStickyTable({
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // Define group structure with column spans
+  // Define group structure with column spans - update Budget Group A to Tilbud
   const columnGroups = [
     { name: 'Aftale', span: 2, index: 0 },
     { name: '', span: 1, index: 1 },
-    { name: 'Budget Group A', span: 5, index: 2 },
+    { name: 'Tilbud', span: 5, index: 2 }, // Changed from 'Budget Group A' to 'Tilbud'
     { name: 'Budget Group B', span: 4, index: 3 },
     { name: 'Budget Group C', span: 4, index: 4 },
     { name: 'Special', span: 1, index: 5 },
