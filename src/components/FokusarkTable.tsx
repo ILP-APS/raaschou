@@ -11,7 +11,7 @@ interface FokusarkTableProps {
 }
 
 const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
-  const { tableData, isLoading, error, refreshData, handleCellChange } = useFokusarkTable(data);
+  const { tableData, isLoading, error, refreshData, handleCellChange, isRefreshing } = useFokusarkTable(data);
   
   console.log(`FokusarkTable rendering with ${tableData?.length || 0} rows of data`);
   
@@ -37,9 +37,19 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
           <Button 
             onClick={refreshData}
             className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
+            disabled={isRefreshing}
           >
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh Data from API
+            {isRefreshing ? (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                Refreshing...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Refresh Data from API
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -57,9 +67,19 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
           <Button 
             onClick={refreshData}
             className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
+            disabled={isRefreshing}
           >
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Try Again
+            {isRefreshing ? (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                Refreshing...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Try Again
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -72,16 +92,26 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
         <div>
           <p className="text-sm text-muted-foreground">
             {tableData.length === 1 ? 
-              `Showing 1 appointment from API` : 
-              `Showing ${tableData.length} appointments from API`}
+              `Showing 1 appointment from database` : 
+              `Showing ${tableData.length} appointments from database`}
           </p>
         </div>
         <Button 
           onClick={refreshData}
           className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
+          disabled={isRefreshing}
         >
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh Data from API
+          {isRefreshing ? (
+            <>
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+              Refreshing...
+            </>
+          ) : (
+            <>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Refresh Data
+            </>
+          )}
         </Button>
       </div>
       

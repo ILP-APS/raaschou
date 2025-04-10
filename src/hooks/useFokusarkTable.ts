@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -175,20 +176,72 @@ export const useFokusarkTable = (initialData: string[][]) => {
     }
   };
   
-  // Refresh data from API
+  // Refresh data from API and Supabase
   const refreshData = async () => {
     setIsRefreshing(true);
     setError(null);
     
     try {
+      // First, try to get data directly from Supabase without fallbacks
+      console.log("Refresh: Loading all data from Supabase...");
+      const { data, error } = await supabase
+        .from('fokusark_table')
+        .select('*')
+        .order('id');
+      
+      if (error) {
+        console.error("Error fetching from Supabase during refresh:", error);
+        throw error;
+      }
+      
+      if (data && data.length > 0) {
+        console.log(`Refresh: Loaded ${data.length} rows directly from Supabase`);
+        
+        // Transform the data to the expected format
+        const tableData: string[][] = data.map(row => [
+          row['1 col'] || '',
+          row['2 col'] || '',
+          row['3 col'] || '',
+          row['4 col'] || '',
+          row['5 col'] || '',
+          row['6 col'] || '',
+          row['7 col'] || '',
+          row['8 col'] || '',
+          row['9 col'] || '',
+          row['10 col'] || '',
+          row['11 col'] || '',
+          row['12 col'] || '',
+          row['13 col'] || '',
+          row['14 col'] || '',
+          row['15 col'] || '',
+          row['16 col'] || '',
+          row['17 col'] || '',
+          row['18 col'] || '',
+          row['19 col'] || '',
+          row['20 col'] || '',
+          row['21 col'] || '',
+          row['22 col'] || '',
+          row['23 col'] || '',
+          'regular-appointment'
+        ]);
+        
+        setTableData(tableData);
+        toast.success("Data refreshed from database");
+        setIsRefreshing(false);
+        return true;
+      }
+      
+      // If no data in Supabase or the data is empty, fall back to API
+      console.log("Refresh: No data in Supabase, trying API");
       const success = await fetchAndProcessData();
       if (!success) {
         toast.error("Failed to refresh data from API");
       } else {
-        toast.success("Data refreshed successfully");
+        toast.success("Data refreshed successfully from API");
       }
       return success;
     } catch (err) {
+      console.error("Error during refresh:", err);
       handleError(err);
       return false;
     } finally {
@@ -201,6 +254,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
     isLoading, 
     error,
     handleCellChange,
-    refreshData
+    refreshData,
+    isRefreshing
   };
 };

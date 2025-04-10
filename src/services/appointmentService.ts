@@ -9,7 +9,8 @@ export const fetchAppointments = async (): Promise<any[]> => {
     // First try to fetch from Supabase
     const { data: supabaseData, error } = await supabase
       .from('fokusark_table')
-      .select('*');
+      .select('*')
+      .order('id');
     
     if (error) {
       console.error('Error fetching from Supabase:', error);
@@ -98,7 +99,7 @@ export const saveAppointmentsToSupabase = async (appointments: any[]): Promise<b
     // Transform appointments to the format expected by Supabase table
     const rows = appointments.map((appointment, index) => {
       const row: Record<string, any> = {
-        id: appointment.hnAppointmentID ? appointment.hnAppointmentID.toString() : index.toString(),
+        id: index.toString(), // Use index as the primary ID
         '1 col': appointment.appointmentNumber || '',
         '2 col': appointment.subject || '',
         '3 col': appointment.responsibleHnUserName || '',
@@ -163,47 +164,13 @@ export const saveAppointmentsToSupabase = async (appointments: any[]): Promise<b
   }
 };
 
-// Helper function to transform appointment to table row format
-function mapAppointmentToTableRow(appointment: any): string[] {
-  return mapAppointmentToTableData(appointment);
-}
-
-// This function should already exist, but make sure it includes all columns
-function mapAppointmentToTableData(appointment: any): string[] {
-  return [
-    appointment.appointment_number || '',
-    appointment.subject || '',
-    appointment.responsible_user || '',
-    appointment.tilbud || '',
-    appointment.montage || '',
-    appointment.underleverandor || '',
-    appointment.montage2 || '',
-    appointment.underleverandor2 || '',
-    appointment.materialer || '',
-    appointment.projektering_1 || '',
-    appointment.produktion || '',
-    appointment.montage_3 || '',
-    appointment.projektering_2 || '',
-    appointment.produktion_realized || '',
-    appointment.montage_3_realized || '',
-    appointment.total || '',
-    appointment.timer_tilbage_1 || '',
-    appointment.timer_tilbage_2 || '',
-    appointment.faerdig_pct_ex_montage_nu || '',
-    appointment.faerdig_pct_ex_montage_foer || '',
-    appointment.est_timer_ift_faerdig_pct || '',
-    appointment.plus_minus_timer || '',
-    appointment.afsat_fragt || '',
-    'regular-appointment'
-  ];
-}
-
 export const loadAppointmentsFromSupabase = async (): Promise<string[][] | null> => {
   try {
     console.log('Loading appointments from Supabase...');
     const { data, error } = await supabase
       .from('fokusark_table')
-      .select('*');
+      .select('*')
+      .order('id');
     
     if (error) {
       console.error('Error fetching appointments from Supabase:', error);
