@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   flexRender,
@@ -111,24 +110,76 @@ export default function MinimalStickyTable({
       meta: { groupIndex: 1 } as ColumnMeta
     },
     
-    // Generate additional columns with group indices
-    ...Array.from({ length: 5 }).map((_, i) => ({
-      accessorKey: `col${i}`,
-      header: `Group A ${i + 1}`,
+    // Updated column names for the Budget Group A columns
+    {
+      accessorKey: `col0`,
+      header: `Tilbud`, // Changed from 'Group A 1' to 'Tilbud'
       meta: { groupIndex: 2 } as ColumnMeta
-    })),
+    },
+    {
+      accessorKey: `col1`,
+      header: `Montage`,
+      meta: { groupIndex: 2 } as ColumnMeta
+    },
+    {
+      accessorKey: `col2`,
+      header: `Underleverandør`,
+      meta: { groupIndex: 2 } as ColumnMeta
+    },
+    {
+      accessorKey: `col3`,
+      header: `Montage 2`,
+      meta: { groupIndex: 2 } as ColumnMeta
+    },
+    {
+      accessorKey: `col4`,
+      header: `Underleverandør 2`,
+      meta: { groupIndex: 2 } as ColumnMeta
+    },
     
-    ...Array.from({ length: 4 }).map((_, i) => ({
-      accessorKey: `col${i + 5}`,
-      header: `Group B ${i + 1}`,
+    // Keep Group B columns the same but with better names
+    {
+      accessorKey: `col5`,
+      header: `Materialer`, 
       meta: { groupIndex: 3 } as ColumnMeta
-    })),
+    },
+    {
+      accessorKey: `col6`,
+      header: `Projektering`,
+      meta: { groupIndex: 3 } as ColumnMeta
+    },
+    {
+      accessorKey: `col7`,
+      header: `Produktion`,
+      meta: { groupIndex: 3 } as ColumnMeta
+    },
+    {
+      accessorKey: `col8`,
+      header: `Montage 3`,
+      meta: { groupIndex: 3 } as ColumnMeta
+    },
     
-    ...Array.from({ length: 4 }).map((_, i) => ({
-      accessorKey: `col${i + 9}`,
-      header: `Group C ${i + 1}`,
+    // Group C columns with better names
+    {
+      accessorKey: `col9`,
+      header: `Proj. Realiseret`,
       meta: { groupIndex: 4 } as ColumnMeta
-    })),
+    },
+    {
+      accessorKey: `col10`,
+      header: `Prod. Realiseret`,
+      meta: { groupIndex: 4 } as ColumnMeta
+    },
+    {
+      accessorKey: `col11`,
+      header: `Mont. Realiseret`,
+      meta: { groupIndex: 4 } as ColumnMeta
+    },
+    {
+      accessorKey: `col12`,
+      header: `Total Realiseret`,
+      meta: { groupIndex: 4 } as ColumnMeta
+    },
     
     {
       accessorKey: `col13`,
@@ -136,13 +187,18 @@ export default function MinimalStickyTable({
       meta: { groupIndex: 5 } as ColumnMeta
     },
     
-    // Updated to have 5 columns for Group D instead of 2
+    // Group D columns with better names
     ...Array.from({ length: 5 }).map((_, i) => ({
       accessorKey: `col${i + 14}`,
-      header: `Group D ${i + 1}`,
+      header: `${i === 0 ? 'Færdig % Nu' : 
+              i === 1 ? 'Færdig % Før' : 
+              i === 2 ? 'Est. Timer' : 
+              i === 3 ? '+/- Timer' : 
+              'Afsat Fragt'}`,
       meta: { groupIndex: 6 } as ColumnMeta
     })),
     
+    // Summary columns
     ...Array.from({ length: 2 }).map((_, i) => ({
       accessorKey: `col${i + 19}`,
       header: `Summary ${i + 1}`,
