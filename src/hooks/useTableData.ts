@@ -63,7 +63,7 @@ export const useTableData = () => {
               const details = await getAppointmentDetail(appointment.hnAppointmentID);
               
               if (details.done) {
-                return null;
+                return null; // Skip completed appointments
               }
               
               // Log the subject from the API
@@ -71,25 +71,29 @@ export const useTableData = () => {
               
               const responsibleUserName = userMap.get(details.responsibleHnUserID) || 'Unknown';
               
+              // Get all line items from the offer to calculate the total amount
               const { offerTotal, montageTotal, underleverandorTotal } = 
                 await getOfferLineItems(details.hnOfferID);
+              
+              // Convert offerTotal to a number for filtering
+              // Parse the Danish number format (e.g., "40.000,00" -> 40000)
+              const offerTotalNumber = parseFloat(offerTotal.replace(/\./g, '').replace(',', '.'));
+              
+              console.log(`Appointment ${appointment.appointmentNumber} offer total: ${offerTotalNumber}`);
+              
+              // Only include appointments with offer total >= 40,000
+              if (offerTotalNumber < 40000) {
+                console.log(`Skipping appointment ${appointment.appointmentNumber} - offer total below 40,000`);
+                return null;
+              }
               
               // Get realized hours from API
               const realizedHours = await getRealizedHours(appointment.hnAppointmentID);
               
-              const offerTotalNumber = parseFloat(offerTotal.replace(/[^0-9,]/g, '').replace(',', '.'));
-              
-              if (offerTotalNumber <= 40000) {
-                return null;
-              }
-              
-              // Use the appointmentNumber and subject directly from the API
-              console.log("Using appointment number:", appointment.appointmentNumber);
-              
               // Build the row of data
               const row = [
-                appointment.appointmentNumber, // Use this directly from the API
-                details.subject || 'N/A',     // Use the subject from the API
+                appointment.appointmentNumber, // Use the appointmentNumber from the API
+                details.subject || 'N/A',      // Use the subject from the API
                 responsibleUserName,
                 offerTotal,
                 montageTotal,
@@ -120,6 +124,7 @@ export const useTableData = () => {
               const isSubApp = isSubAppointment(appointment.appointmentNumber);
               row.push(isSubApp ? 'sub-appointment' : 'parent-appointment');
               
+              console.log(`Added appointment ${appointment.appointmentNumber} to table data`);
               return row;
             } catch (error) {
               console.error(`Error processing appointment ${appointment.hnAppointmentID}:`, error);
@@ -137,6 +142,8 @@ export const useTableData = () => {
           });
         }
         
+        console.log(`Total appointments processed: ${processedData.length}`);
+        
         if (processedData.length === 0) {
           const sampleData = generateTableData();
           console.log("Using sample data, first row:", sampleData[0]);
@@ -151,7 +158,7 @@ export const useTableData = () => {
           setTableData(processedData);
           toast({
             title: "Data loaded",
-            description: `Loaded ${processedData.length} appointments.`,
+            description: `Loaded ${processedData.length} appointments with offer values ≥ 40,000 kr.`,
             variant: "default",
           });
         }
