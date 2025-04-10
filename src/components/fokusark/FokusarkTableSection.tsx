@@ -12,7 +12,7 @@ const FokusarkTableSection: React.FC<FokusarkTableSectionProps> = ({
   tableData, 
   isLoading 
 }) => {
-  const { handleCellChange } = useFokusarkTable(tableData);
+  const { handleCellChange, handleCellBlur } = useFokusarkTable(tableData);
   
   if (isLoading) {
     return (
@@ -27,6 +27,7 @@ const FokusarkTableSection: React.FC<FokusarkTableSectionProps> = ({
       <FokusarkDataGrid 
         data={tableData}
         onCellChange={handleCellChange}
+        onCellBlur={handleCellBlur}
       />
     </div>
   );

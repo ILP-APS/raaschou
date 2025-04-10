@@ -127,6 +127,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
   
   // Handle cell changes
   const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {
+    // This function now only updates the UI without saving to the database
     if (!tableData[rowIndex]) {
       console.error("Invalid row index", rowIndex);
       toast.error("Failed to save changes: invalid row");
@@ -139,21 +140,40 @@ export const useFokusarkTable = (initialData: string[][]) => {
       newData[rowIndex][colIndex] = value;
       setTableData(newData);
       
+      return true;
+    } catch (error) {
+      console.error("Error updating cell:", error);
+      toast.error("Failed to save changes");
+      return false;
+    }
+  };
+  
+  // Handle cell blur (finalize cell edit)
+  const handleCellBlur = async (rowIndex: number, colIndex: number, value: string) => {
+    if (!tableData[rowIndex]) {
+      console.error("Invalid row index", rowIndex);
+      toast.error("Failed to save changes: invalid row");
+      return false;
+    }
+    
+    try {
       // Format numeric values for display (this won't affect the saved value)
       try {
         const numValue = parseNumber(value);
         if (!isNaN(numValue) && numValue !== 0) {
           const formattedValue = formatDanishNumber(numValue);
+          const newData = [...tableData];
           newData[rowIndex][colIndex] = formattedValue;
+          setTableData(newData);
         }
       } catch (e) {
         console.log("Not a number, keeping original value", value);
       }
       
       // Get the appointment number for the row
-      const appointmentNumber = newData[rowIndex][0]; // First column contains appointment number
+      const appointmentNumber = tableData[rowIndex][0]; // First column contains appointment number
       
-      console.log(`Updating cell: row=${rowIndex}, column=${colIndex}, appointmentNumber=${appointmentNumber}, value=${value}`);
+      console.log(`Saving cell: row=${rowIndex}, column=${colIndex}, appointmentNumber=${appointmentNumber}, value=${value}`);
       
       // Create update data
       const updateData: Record<string, any> = {
@@ -161,9 +181,9 @@ export const useFokusarkTable = (initialData: string[][]) => {
       };
       
       // Add the first 3 columns as identifiers to ensure we're updating the right row
-      updateData['1 col'] = newData[rowIndex][0] || ''; // Appointment number
-      updateData['2 col'] = newData[rowIndex][1] || ''; // Subject
-      updateData['3 col'] = newData[rowIndex][2] || ''; // Responsible
+      updateData['1 col'] = tableData[rowIndex][0] || ''; // Appointment number
+      updateData['2 col'] = tableData[rowIndex][1] || ''; // Subject
+      updateData['3 col'] = tableData[rowIndex][2] || ''; // Responsible
       
       // First check if this appointment already exists in the database
       const { data: existingRows } = await supabase
@@ -289,6 +309,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
     isLoading, 
     error,
     handleCellChange,
+    handleCellBlur,
     refreshData,
     isRefreshing
   };

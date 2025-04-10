@@ -8,7 +8,7 @@ import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 const FokusarkContent: React.FC = () => {
-  const { isLoading, tableData, error, handleCellChange, refreshData } = useFokusarkTable([]);
+  const { isLoading, tableData, error, handleCellChange, handleCellBlur, refreshData } = useFokusarkTable([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
   const handleRefresh = async () => {
@@ -65,6 +65,7 @@ const FokusarkContent: React.FC = () => {
         <MinimalStickyTable 
           tableData={tableData} 
           onCellChange={handleCellChange}
+          onCellBlur={handleCellBlur}
         />
       ) : (
         <div className="h-64 flex items-center justify-center">
