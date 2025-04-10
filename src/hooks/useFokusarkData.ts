@@ -14,8 +14,7 @@ export const useFokusarkData = () => {
         setIsLoading(true);
         setError(null);
         
-        // Generate sample data for now
-        // In a real scenario, this would be an API call
+        // Generate sample data with enough columns for our expanded structure
         const data = generateTableData(24); // Generate 24 rows to ensure we have enough data
         console.log(`Generated ${data.length} rows of sample data`);
         

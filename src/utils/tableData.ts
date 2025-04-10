@@ -33,16 +33,19 @@ export const generateTableData = (rowCount?: number) => {
     const users = ['John', 'Anna', 'Peter', 'Maria', 'Thomas', 'Sofie', 'Lars', 'Mette'];
     row.push(`${users[i % users.length]}`);
     
-    // For numeric columns, add some sample values
-    for (let j = 3; j <= 15; j++) {
+    // Generate more columns for the expanded Budget Group D (need at least 22 columns in total)
+    for (let j = 3; j <= 25; j++) {
       // Make some values larger to test cell formatting
       const baseValue = Math.random() * (j % 3 === 0 ? 5000 : 1000);
-      row.push(`${baseValue.toFixed(2)}`);
-    }
-    
-    // Add remaining columns
-    for (let j = 16; j <= 22; j++) {
-      row.push(`${j % 3 === 0 ? Math.floor(Math.random() * 100) + '%' : `R${i}C${j}`}`);
+      
+      // For columns representing Group D, use percentage format
+      if (j >= 14 && j <= 18) {
+        // Generate percentages for Group D columns
+        const percentage = Math.floor(Math.random() * 100);
+        row.push(`${percentage}%`);
+      } else {
+        row.push(`${baseValue.toFixed(2)}`);
+      }
     }
     
     // Add row type flag (every third row is a sub-appointment)

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   flexRender,
@@ -128,14 +129,15 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
       meta: { groupIndex: 5 } as ColumnMeta
     },
     
-    ...Array.from({ length: 2 }).map((_, i) => ({
+    // Updated to have 5 columns for Group D instead of 2
+    ...Array.from({ length: 5 }).map((_, i) => ({
       accessorKey: `col${i + 14}`,
       header: `Group D ${i + 1}`,
       meta: { groupIndex: 6 } as ColumnMeta
     })),
     
     ...Array.from({ length: 2 }).map((_, i) => ({
-      accessorKey: `col${i + 16}`,
+      accessorKey: `col${i + 19}`,
       header: `Summary ${i + 1}`,
       meta: { groupIndex: 7 } as ColumnMeta
     }))
@@ -155,7 +157,7 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
     { name: 'Budget Group B', span: 4, index: 3 },
     { name: 'Budget Group C', span: 4, index: 4 },
     { name: 'Special', span: 1, index: 5 },
-    { name: 'Budget Group D', span: 2, index: 6 },
+    { name: 'Budget Group D', span: 5, index: 6 }, // Updated span from 2 to 5
     { name: 'Summary', span: 2, index: 7 }
   ];
   
