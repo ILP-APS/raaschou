@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { formatDanishCurrency } from "@/utils/formatUtils";
 import { parseNumber } from "@/utils/numberFormatUtils";
 
@@ -16,28 +16,57 @@ const EditableCell: React.FC<EditableCellProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const prevValueRef = useRef(value);
+  
+  // Update internal state when prop value changes (but not during editing)
+  useEffect(() => {
+    if (!isEditing && value !== prevValueRef.current) {
+      setEditValue(value);
+      prevValueRef.current = value;
+    }
+  }, [value, isEditing]);
   
   const handleDoubleClick = () => {
     setIsEditing(true);
-    setEditValue(value);
+    // For currency values, remove formatting when starting to edit
+    if (isCurrency && value) {
+      try {
+        const numValue = parseNumber(value);
+        if (!isNaN(numValue)) {
+          setEditValue(String(numValue).replace('.', ','));
+        } else {
+          setEditValue(value);
+        }
+      } catch (e) {
+        setEditValue(value);
+      }
+    } else {
+      setEditValue(value);
+    }
   };
   
   const handleBlur = () => {
+    if (isEditing) {
+      finishEditing();
+    }
+  };
+  
+  const finishEditing = () => {
     setIsEditing(false);
-    if (onChange && editValue !== value) {
+    if (onChange && editValue !== prevValueRef.current) {
       onChange(editValue);
+      prevValueRef.current = editValue;
     }
   };
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      setIsEditing(false);
-      if (onChange && editValue !== value) {
-        onChange(editValue);
-      }
+      e.preventDefault();
+      finishEditing();
     } else if (e.key === 'Escape') {
       setIsEditing(false);
-      setEditValue(value);
+      setEditValue(prevValueRef.current);
     }
   };
   
@@ -50,12 +79,19 @@ const EditableCell: React.FC<EditableCellProps> = ({
     <div className="relative p-1 w-full h-full min-h-[36px]">
       {isEditing ? (
         <input
+          ref={inputRef}
           autoFocus
           className="w-full p-1 border border-primary rounded focus:outline-none"
           value={editValue}
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
+          // Prevent unwanted form submissions
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+            }
+          }}
         />
       ) : (
         <div 

@@ -83,9 +83,33 @@ export default function MinimalStickyTable({
     if (onCellChange) {
       console.log(`Editing cell at row ${rowIndex}, column ${colIndex}, new value: ${value}`);
       onCellChange(rowIndex, colIndex, value);
-      toast.success("Cell updated successfully");
     }
   }, [onCellChange]);
+  
+  const handleCurrencyEdit = React.useCallback((rowIndex: number, colIndex: number, value: string) => {
+    const regex = /^[0-9.,]*$/;
+    if (!regex.test(value) && value !== '') {
+      return;
+    }
+    
+    handleCellEdit(rowIndex, colIndex, value);
+  }, [handleCellEdit]);
+  
+  const finishCurrencyEdit = React.useCallback((rowIndex: number, colIndex: number, value: string) => {
+    setEditingCell(null);
+    
+    if (value) {
+      try {
+        const numValue = parseNumber(value);
+        if (!isNaN(numValue)) {
+          const formatted = numValue.toLocaleString('da-DK');
+          handleCellEdit(rowIndex, colIndex, formatted);
+        }
+      } catch (error) {
+        console.error("Error formatting number:", error);
+      }
+    }
+  }, [handleCellEdit]);
   
   const formatCellValue = (value: string, isMonetary: boolean = false) => {
     if (!value || value.trim() === '') return '';
@@ -141,31 +165,22 @@ export default function MinimalStickyTable({
       meta: { groupIndex: 2 } as ColumnMeta,
       cell: ({ getValue, row, column }) => {
         const value = getValue() as string;
+        const rowId = parseInt(row.id);
         
-        if (editingCell?.rowIndex === parseInt(row.id) && editingCell?.colIndex === 6) {
+        if (editingCell?.rowIndex === rowId && editingCell?.colIndex === 6) {
           return (
             <input
               type="text"
               inputMode="decimal"
               value={value}
-              onChange={(e) => {
-                const regex = /^[0-9.,]*$/;
-                if (regex.test(e.target.value) || e.target.value === '') {
-                  handleCellEdit(parseInt(row.id), 6, e.target.value);
-                }
-              }}
-              onBlur={(e) => {
-                setEditingCell(null);
-                if (e.target.value) {
-                  try {
-                    const numValue = parseFloat(e.target.value.replace(/\./g, '').replace(',', '.'));
-                    if (!isNaN(numValue)) {
-                      const formatted = numValue.toLocaleString('da-DK');
-                      handleCellEdit(parseInt(row.id), 6, formatted);
-                    }
-                  } catch (error) {
-                    console.error("Error formatting number:", error);
-                  }
+              onChange={(e) => handleCurrencyEdit(rowId, 6, e.target.value)}
+              onBlur={() => finishCurrencyEdit(rowId, 6, value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  finishCurrencyEdit(rowId, 6, value);
+                } else if (e.key === 'Escape') {
+                  setEditingCell(null);
                 }
               }}
               style={{
@@ -185,17 +200,12 @@ export default function MinimalStickyTable({
           );
         }
         
-        if (!value || value.trim() === '') {
-          return <div className="text-right font-mono"></div>;
-        }
-        
-        const numValue = parseNumber(value);
         return (
           <div 
             className="text-right font-mono cursor-pointer" 
-            onClick={() => setEditingCell({ rowIndex: parseInt(row.id), colIndex: 6 })}
+            onClick={() => setEditingCell({ rowIndex: rowId, colIndex: 6 })}
           >
-            {formatDanishCurrency(numValue)}
+            {!value || value.trim() === '' ? '' : `${formatDanishCurrency(parseNumber(value))} DKK`}
           </div>
         );
       }
@@ -206,31 +216,22 @@ export default function MinimalStickyTable({
       meta: { groupIndex: 2 } as ColumnMeta,
       cell: ({ getValue, row, column }) => {
         const value = getValue() as string;
+        const rowId = parseInt(row.id);
         
-        if (editingCell?.rowIndex === parseInt(row.id) && editingCell?.colIndex === 7) {
+        if (editingCell?.rowIndex === rowId && editingCell?.colIndex === 7) {
           return (
             <input
               type="text"
               inputMode="decimal"
               value={value}
-              onChange={(e) => {
-                const regex = /^[0-9.,]*$/;
-                if (regex.test(e.target.value) || e.target.value === '') {
-                  handleCellEdit(parseInt(row.id), 7, e.target.value);
-                }
-              }}
-              onBlur={(e) => {
-                setEditingCell(null);
-                if (e.target.value) {
-                  try {
-                    const numValue = parseFloat(e.target.value.replace(/\./g, '').replace(',', '.'));
-                    if (!isNaN(numValue)) {
-                      const formatted = numValue.toLocaleString('da-DK');
-                      handleCellEdit(parseInt(row.id), 7, formatted);
-                    }
-                  } catch (error) {
-                    console.error("Error formatting number:", error);
-                  }
+              onChange={(e) => handleCurrencyEdit(rowId, 7, e.target.value)}
+              onBlur={() => finishCurrencyEdit(rowId, 7, value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  finishCurrencyEdit(rowId, 7, value);
+                } else if (e.key === 'Escape') {
+                  setEditingCell(null);
                 }
               }}
               style={{
@@ -250,17 +251,12 @@ export default function MinimalStickyTable({
           );
         }
         
-        if (!value || value.trim() === '') {
-          return <div className="text-right font-mono"></div>;
-        }
-        
-        const numValue = parseNumber(value);
         return (
           <div 
             className="text-right font-mono cursor-pointer" 
-            onClick={() => setEditingCell({ rowIndex: parseInt(row.id), colIndex: 7 })}
+            onClick={() => setEditingCell({ rowIndex: rowId, colIndex: 7 })}
           >
-            {formatDanishCurrency(numValue)}
+            {!value || value.trim() === '' ? '' : `${formatDanishCurrency(parseNumber(value))} DKK`}
           </div>
         );
       }
@@ -337,7 +333,7 @@ export default function MinimalStickyTable({
       header: `Summary ${i + 1}`,
       meta: { groupIndex: 7 } as ColumnMeta
     }))
-  ], [handleCellEdit, editingCell]);
+  ], [handleCellEdit, handleCurrencyEdit, finishCurrencyEdit, editingCell]);
 
   const table = useReactTable({
     data,
