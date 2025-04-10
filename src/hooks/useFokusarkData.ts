@@ -51,10 +51,23 @@ export const useFokusarkData = () => {
     }
   }, []);
   
+  const updateCellValue = useCallback((rowIndex: number, colIndex: number, value: string) => {
+    setTableData(prevData => {
+      const newData = [...prevData];
+      if (newData[rowIndex]) {
+        const newRow = [...newData[rowIndex]];
+        newRow[colIndex] = value;
+        newData[rowIndex] = newRow;
+      }
+      return newData;
+    });
+  }, []);
+  
   return { 
     tableData, 
     isLoading,
     error,
-    refreshData
+    refreshData,
+    updateCellValue
   };
 };

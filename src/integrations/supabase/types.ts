@@ -9,6 +9,96 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      fokusark_table: {
+        Row: {
+          "1 col": string | null
+          "10 col": string | null
+          "11 col": string | null
+          "12 col": string | null
+          "13 col": string | null
+          "14 col": string | null
+          "15 col": string | null
+          "16 col": string | null
+          "17 col": string | null
+          "18 col": string | null
+          "19 col": string | null
+          "2 col": string | null
+          "20 col": string | null
+          "21 col": string | null
+          "22 col": string | null
+          "23 col": string | null
+          "24 col": string | null
+          "3 col": string | null
+          "4 col": string | null
+          "5 col": string | null
+          "6 col": string | null
+          "7 col": string | null
+          "8 col": string | null
+          "9 col": string | null
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          "1 col"?: string | null
+          "10 col"?: string | null
+          "11 col"?: string | null
+          "12 col"?: string | null
+          "13 col"?: string | null
+          "14 col"?: string | null
+          "15 col"?: string | null
+          "16 col"?: string | null
+          "17 col"?: string | null
+          "18 col"?: string | null
+          "19 col"?: string | null
+          "2 col"?: string | null
+          "20 col"?: string | null
+          "21 col"?: string | null
+          "22 col"?: string | null
+          "23 col"?: string | null
+          "24 col"?: string | null
+          "3 col"?: string | null
+          "4 col"?: string | null
+          "5 col"?: string | null
+          "6 col"?: string | null
+          "7 col"?: string | null
+          "8 col"?: string | null
+          "9 col"?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          "1 col"?: string | null
+          "10 col"?: string | null
+          "11 col"?: string | null
+          "12 col"?: string | null
+          "13 col"?: string | null
+          "14 col"?: string | null
+          "15 col"?: string | null
+          "16 col"?: string | null
+          "17 col"?: string | null
+          "18 col"?: string | null
+          "19 col"?: string | null
+          "2 col"?: string | null
+          "20 col"?: string | null
+          "21 col"?: string | null
+          "22 col"?: string | null
+          "23 col"?: string | null
+          "24 col"?: string | null
+          "3 col"?: string | null
+          "4 col"?: string | null
+          "5 col"?: string | null
+          "6 col"?: string | null
+          "7 col"?: string | null
+          "8 col"?: string | null
+          "9 col"?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           created_at: string
