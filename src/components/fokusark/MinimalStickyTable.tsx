@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   flexRender,
@@ -284,7 +283,6 @@ export default function MinimalStickyTable({
               return (
                 <TableRow 
                   key={row.id}
-                  className={isSubAppointment ? "bg-muted/30" : ""}
                 >
                   {row.getVisibleCells().map((cell, cellIdx) => {
                     const meta = cell.column.columnDef.meta as ColumnMeta | undefined;
@@ -317,9 +315,7 @@ export default function MinimalStickyTable({
                           left: isSticky ? (stickyIndex === 0 ? 0 : '150px') : undefined,
                           zIndex: isSticky ? 20 : undefined,
                           minWidth: stickyIndex === 0 ? '150px' : (stickyIndex === 1 ? '200px' : '150px'),
-                          backgroundColor: isSubAppointment ? 
-                            (isDarkMode ? 'hsl(var(--muted)/60)' : 'hsl(var(--muted)/30)') : 
-                            getGroupBgColor(groupIndex),
+                          backgroundColor: getGroupBgColor(groupIndex), // Use group background color for all rows
                           boxShadow: isSticky ? '1px 0 0 0 hsl(var(--border))' : undefined,
                           cursor: isReadOnly ? 'default' : 'pointer',
                           fontWeight: isReadOnly ? '500' : 'normal',

@@ -1,3 +1,4 @@
+
 /* Basic DataGrid styles - This file is retained for compatibility but will be phased out */
 /* The new styles are in FokusarkDataGridStyles.css */
 
@@ -33,13 +34,14 @@
   min-height: 400px;
 }
 
-/* Sub-appointment styling */
-.rdg-row.bg-muted\/20 {
-  background-color: hsl(var(--muted)/20);
+/* Sub-appointment styling - removed background color, keeping only indentation */
+.rdg-row .rdg-cell:first-child {
+  padding-left: 12px; /* Default padding */
 }
 
+/* Apply indentation to sub-appointments */
 .rdg-row.bg-muted\/20 .rdg-cell:first-child {
-  padding-left: 20px;
+  padding-left: 20px; /* Indented for sub-appointments */
 }
 
 /* Editable cell styling */

@@ -1,3 +1,4 @@
+
 /* Fokusark data grid styles for the shadcn-based implementation */
 
 /* Main container class */
@@ -93,10 +94,8 @@
   pointer-events: none;
 }
 
-/* Sub-appointment styling */
-.fokusark-table-container tr.bg-muted\/20 {
-  background-color: hsl(var(--muted)/20);
-}
+/* Sub-appointment styling - removed background color */
+/* Only keeping the indentation and other visual indicators now */
 
 /* Editable cell styling */
 .fokusark-table-container input {

@@ -253,13 +253,13 @@ const ShadcnFokusarkTable: React.FC<ShadcnFokusarkTableProps> = ({ data, onCellC
               return (
                 <TableRow 
                   key={row.id}
-                  className={isSubAppointment ? "bg-muted/20" : ""}
+                  // Removed the background class for sub-appointments
                   style={{
                     position: isFirstDataRow ? 'sticky' : 'static',
                     top: isFirstDataRow ? '41px' : undefined,
                     zIndex: isFirstDataRow ? 40 : 30,
                     backgroundColor: isFirstDataRow 
-                      ? (isSubAppointment ? 'hsl(var(--muted)/20)' : 'hsl(var(--background))')
+                      ? 'hsl(var(--background))'
                       : undefined,
                   }}
                 >
@@ -290,7 +290,7 @@ const ShadcnFokusarkTable: React.FC<ShadcnFokusarkTableProps> = ({ data, onCellC
                           left: isFrozen ? `${leftOffset}px` : undefined,
                           top: isFrozen && isFirstDataRow ? '41px' : undefined, // For first row frozen cells
                           zIndex,
-                          backgroundColor: isSubAppointment ? 'hsl(var(--muted)/20)' : 'hsl(var(--background))',
+                          backgroundColor: 'hsl(var(--background))', // Use standard background for all cells
                           boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : undefined,
                           borderRight: isFrozen ? '1px solid hsl(var(--border))' : undefined,
                           textAlign: colMeta?.alignment || 'left',

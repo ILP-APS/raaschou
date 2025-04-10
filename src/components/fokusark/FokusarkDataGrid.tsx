@@ -331,13 +331,12 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
               return (
                 <TableRow 
                   key={row.id}
-                  className={isSubAppointment ? "bg-muted/20" : ""}
                   style={{
                     position: isFirstDataRow ? 'sticky' : 'static',
                     top: '41px', // Height of the header row
                     zIndex: isFirstDataRow ? 40 : 30,
                     backgroundColor: isFirstDataRow 
-                      ? (isSubAppointment ? 'hsl(var(--muted)/20)' : 'hsl(var(--background))')
+                      ? 'hsl(var(--background))'
                       : undefined,
                   }}
                 >
@@ -367,7 +366,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange 
                           left: isFrozen ? `${leftOffset}px` : undefined,
                           top: isFrozen && isFirstDataRow ? '41px' : undefined, // For first row frozen cells
                           zIndex,
-                          backgroundColor: isSubAppointment ? 'hsl(var(--muted)/20)' : 'hsl(var(--background))',
+                          backgroundColor: 'hsl(var(--background))', // Use standard background color for all rows
                           boxShadow: isFrozen ? '4px 0 4px -2px rgba(0,0,0,0.15)' : undefined,
                           borderRight: isFrozen ? '1px solid hsl(var(--border))' : undefined,
                         }}
