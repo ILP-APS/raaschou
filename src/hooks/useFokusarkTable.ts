@@ -160,14 +160,40 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       console.log(`Updating cell in Supabase: appointment=${appointmentNumber}, column=${columnName}, value=${value}`);
       
-      // Update in Supabase using the correct column name
-      const { error } = await supabase
+      // First, check if a row with this appointment number exists
+      const { data: existingRows, error: fetchError } = await supabase
         .from('fokusark_table')
-        .update({ [columnName]: value })
+        .select('id')
         .eq('1 col', appointmentNumber);
+        
+      if (fetchError) {
+        console.error("Error checking for existing row:", fetchError);
+        toast.error("Failed to save changes");
+        return false;
+      }
       
-      if (error) {
-        console.error("Error updating cell:", error);
+      let result;
+      
+      if (existingRows && existingRows.length > 0) {
+        // Update existing row
+        result = await supabase
+          .from('fokusark_table')
+          .update({ [columnName]: value })
+          .eq('1 col', appointmentNumber);
+      } else {
+        // Insert new row with appointment number and the updated value
+        const newRow: Record<string, any> = {
+          '1 col': appointmentNumber
+        };
+        newRow[columnName] = value;
+        
+        result = await supabase
+          .from('fokusark_table')
+          .insert([newRow]);
+      }
+      
+      if (result.error) {
+        console.error("Error updating cell:", result.error);
         toast.error("Failed to save changes");
         return false;
       }
