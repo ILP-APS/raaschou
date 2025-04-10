@@ -320,25 +320,51 @@ export function mapAppointmentsToTableData(appointments: AppointmentResponse[]):
   return preloadUsers(appointments
     .map(app => app.responsibleHnUserID)
     .filter((id): id is number => id !== undefined && id !== null))
-    .then(() => Promise.all(appointments.map(async appointment => {
-      const row: string[] = Array(24).fill('');
-      row[0] = appointment.appointmentNumber || '';
-      row[1] = appointment.subject || '';
+    .then(async () => {
+      // Process each appointment to create rows
+      const rows = await Promise.all(appointments.map(async appointment => {
+        const row: string[] = Array(24).fill('');
+        row[0] = appointment.appointmentNumber || '';
+        row[1] = appointment.subject || '';
+        
+        // Get the responsible user's actual name
+        const responsibleUserName = appointment.responsibleHnUserID ? 
+          await getUserName(appointment.responsibleHnUserID) : 
+          'Unknown';
+        
+        row[2] = responsibleUserName;
+        
+        // Fetch offer data for column 4 if we have an offer ID
+        if (appointment.hnOfferID) {
+          try {
+            console.log(`Fetching offer data for appointment ${appointment.appointmentNumber}`);
+            const offerData = await fetchOfferLineItems(appointment.hnOfferID);
+            
+            // Add offer total to column 4
+            row[3] = offerData.offerTotal;
+            // Add montage total to column 4
+            row[4] = offerData.montageTotal;
+            // Add underleverandor total to column 5
+            row[5] = offerData.underleverandorTotal;
+          } catch (error) {
+            console.error(`Error fetching offer data for appointment ${appointment.appointmentNumber}:`, error);
+            // Set empty values if we can't fetch the data
+            row[3] = '';
+            row[4] = '';
+            row[5] = '';
+          }
+        }
+        
+        // Add a marker for sub-appointments in the last column (used internally)
+        if (appointment.isSubAppointment) {
+          row[23] = 'sub-appointment';
+        } else {
+          row[23] = 'parent-appointment';
+        }
+        
+        return row;
+      }));
       
-      // Get the responsible user's actual name
-      const responsibleUserName = appointment.responsibleHnUserID ? 
-        await getUserName(appointment.responsibleHnUserID) : 
-        'Unknown';
-      
-      row[2] = responsibleUserName;
-      
-      // Add a marker for sub-appointments in the last column (used internally)
-      if (appointment.isSubAppointment) {
-        row[23] = 'sub-appointment';
-      } else {
-        row[23] = 'parent-appointment';
-      }
-      
-      return row;
-    })));
+      return rows;
+    });
 }
