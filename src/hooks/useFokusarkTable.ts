@@ -2,7 +2,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { generateTableData } from '@/utils/tableData';
 import { toast } from 'sonner';
-import { fetchAppointments, mapAppointmentsToTableData } from '@/services/appointmentService';
+import { supabase } from '@/integrations/supabase/client';
+import { 
+  fetchAppointments, 
+  mapAppointmentsToTableData, 
+  saveAppointmentsToSupabase,
+  loadAppointmentsFromSupabase
+} from '@/services/appointmentService';
 
 export interface FokusarkTableData {
   data: string[][];
@@ -12,7 +18,7 @@ export interface FokusarkTableData {
 
 /**
  * Main hook for handling the Fokusark table functionality
- * Uses real data from the API mocks
+ * Uses real data from the API mocks and stores it in Supabase
  */
 export const useFokusarkTable = (initialData: string[][]) => {
   const [tableData, setTableData] = useState<string[][]>([]);
@@ -26,21 +32,47 @@ export const useFokusarkTable = (initialData: string[][]) => {
       // Skip if already initialized or data is already fetched
       if (isInitialized || isDataFetchedRef.current) return;
       
-      console.log(`Initializing table data from API`);
+      console.log(`Initializing table data from API and Supabase`);
       setIsLoading(true);
       setError(null);
       isDataFetchedRef.current = true;
       
       try {
-        // Get real data from the API mock
+        // First try to load data from Supabase
+        const supabaseData = await loadAppointmentsFromSupabase();
+        
+        // If we have data in Supabase, use it
+        if (supabaseData && supabaseData.length > 0) {
+          console.log(`Loaded ${supabaseData.length} rows from Supabase`);
+          setTableData(supabaseData);
+          setIsInitialized(true);
+          setIsLoading(false);
+          return;
+        }
+        
+        // If no data in Supabase, fetch from API and save to Supabase
+        console.log("No data in Supabase, fetching from API");
         const appointments = await fetchAppointments();
         
         if (appointments && appointments.length > 0) {
-          console.log(`Loaded real data: ${appointments.length} appointments`);
+          console.log(`Fetched ${appointments.length} appointments from API`);
+          
+          // Map appointments to table data format
           const mappedData = mapAppointmentsToTableData(appointments);
+          
+          // Save to Supabase
+          const saveSuccess = await saveAppointmentsToSupabase(appointments);
+          
+          if (saveSuccess) {
+            toast.success("Successfully saved appointment data to Supabase");
+          } else {
+            toast.error("Failed to save appointment data to Supabase");
+          }
+          
+          // Set the mapped data to state
           setTableData(mappedData);
         } 
-        // If no API data, use provided data as fallback
+        // If no API data either, use provided data as fallback
         else if (initialData && initialData.length > 0) {
           console.log(`Using provided data: ${initialData.length} rows`);
           setTableData(initialData);
@@ -82,6 +114,42 @@ export const useFokusarkTable = (initialData: string[][]) => {
     if (newData[rowIndex]) {
       newData[rowIndex][colIndex] = value;
       setTableData(newData);
+      
+      // Update the corresponding row in Supabase
+      try {
+        const { data, error } = await loadAppointmentsFromSupabase();
+        
+        if (error || !data || data.length <= rowIndex) {
+          console.error("Error getting Supabase row to update:", error);
+          return false;
+        }
+        
+        const rowToUpdate = data[rowIndex];
+        
+        if (!rowToUpdate || !rowToUpdate.id) {
+          console.error("Invalid row to update");
+          return false;
+        }
+        
+        // Update the specific cell in Supabase
+        const { error: updateError } = await supabase
+          .from('fokusark_table')
+          .update({ [`${colIndex + 1} col`]: value })
+          .eq('id', rowToUpdate.id);
+        
+        if (updateError) {
+          console.error("Error updating cell in Supabase:", updateError);
+          toast.error("Failed to save cell change to database");
+          return false;
+        }
+        
+        toast.success("Cell updated in database");
+      } catch (error) {
+        console.error("Error updating cell in Supabase:", error);
+        toast.error("Failed to save cell change to database");
+        return false;
+      }
+      
       return true;
     } else {
       console.warn(`Row ${rowIndex} does not exist, cannot update cell`);
@@ -95,10 +163,29 @@ export const useFokusarkTable = (initialData: string[][]) => {
     try {
       // Get fresh data from the API mock
       const appointments = await fetchAppointments();
+      
       if (appointments && appointments.length > 0) {
+        // Map to table data format
         const mappedData = mapAppointmentsToTableData(appointments);
-        setTableData(mappedData);
-        toast.success("Data refreshed successfully");
+        
+        // Save to Supabase
+        const saveSuccess = await saveAppointmentsToSupabase(appointments);
+        
+        if (saveSuccess) {
+          toast.success("Successfully refreshed and saved data to Supabase");
+        } else {
+          toast.error("Failed to save refreshed data to Supabase");
+        }
+        
+        // Load the fresh data from Supabase to ensure consistent view
+        const supabaseData = await loadAppointmentsFromSupabase();
+        
+        if (supabaseData && supabaseData.length > 0) {
+          setTableData(supabaseData);
+        } else {
+          // Fallback to mapped data if Supabase load fails
+          setTableData(mappedData);
+        }
       } else {
         toast.error("No data available from API");
         setTableData([]);
