@@ -55,7 +55,8 @@ export function createDefaultAppointment(): AppointmentDetail {
 export function createUserMap(users: User[]): Map<number, string> {
   const userMap = new Map<number, string>();
   users.forEach(user => {
-    userMap.set(user.hnUserID, user.fullName);
+    // Use the 'name' property instead of 'fullName' which doesn't exist on the User type
+    userMap.set(user.hnUserID, user.name);
   });
   return userMap;
 }
