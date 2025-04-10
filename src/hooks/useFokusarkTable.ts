@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { 
   fetchAppointments, 
@@ -14,76 +13,127 @@ export const useFokusarkTable = (initialData: string[][]) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const isInitialLoadRef = useRef(true);
   
   // Initial data load
   useEffect(() => {
+    // Only run once during initial mount
+    if (!isInitialLoadRef.current) {
+      return;
+    }
+    
     const loadData = async () => {
-      if (isRefreshing) return; // Prevent duplicate fetches
+      if (isRefreshing) {
+        console.log("Skipping load during refresh");
+        return; // Prevent duplicate fetches
+      }
       
       setIsLoading(true);
-      console.log('Loading data in useFokusarkTable');
+      setError(null);
+      console.log('Initial loading of data in useFokusarkTable');
       
       try {
-        // Always try to get fresh data from API first
-        const appointments = await fetchAppointments();
+        // First try loading from Supabase (faster and prevents unnecessary API calls)
+        console.log("First trying to load from Supabase cache");
+        const supabaseData = await loadAppointmentsFromSupabase();
         
-        if (appointments && appointments.length > 0) {
-          console.log(`Got ${appointments.length} appointments from API`);
+        if (supabaseData && supabaseData.length > 0) {
+          console.log(`Loaded ${supabaseData.length} rows from Supabase cache`);
+          setTableData(supabaseData);
+          setIsLoading(false);
           
-          // Map the data for display
-          const mappedData = mapAppointmentsToTableData(appointments);
-          setTableData(mappedData);
-          
-          // Save to Supabase in the background
-          saveAppointmentsToSupabase(appointments)
-            .then(success => {
-              if (success) {
-                console.log("Saved to Supabase successfully");
-              } else {
-                console.error("Failed to save to Supabase");
-              }
-            });
-        } else {
-          // Fallback: Try to load from Supabase
-          console.log("No data from API, trying Supabase");
-          const supabaseData = await loadAppointmentsFromSupabase();
-          
-          if (supabaseData && supabaseData.length > 0) {
-            console.log(`Loaded ${supabaseData.length} rows from Supabase`);
-            setTableData(supabaseData);
-          } else if (initialData && initialData.length > 0) {
-            // Last resort: use initial data
-            console.log("Using initialData as last resort");
-            setTableData(initialData);
-          } else {
-            setTableData([]);
-            toast.error("No data available from any source");
-          }
+          // After showing cached data, refresh in the background for fresh data
+          refreshDataInBackground();
+          return;
         }
+        
+        // If no data in Supabase, try the API
+        console.log("No data in Supabase cache, trying API directly");
+        await fetchAndProcessData();
       } catch (err) {
-        console.error("Error loading data:", err);
-        setError(err instanceof Error ? err : new Error("Unknown error"));
-        
-        // Attempt to load from Supabase as fallback
-        try {
-          const supabaseData = await loadAppointmentsFromSupabase();
-          if (supabaseData && supabaseData.length > 0) {
-            setTableData(supabaseData);
-            toast.warning("Using cached data from database. API connection failed.");
-          } else {
-            setTableData([]);
-          }
-        } catch (fallbackErr) {
-          console.error("Fallback error:", fallbackErr);
-          setTableData([]);
-        }
+        handleError(err);
       } finally {
         setIsLoading(false);
+        isInitialLoadRef.current = false;
       }
     };
     
     loadData();
-  }, [initialData, isRefreshing]);
+  }, []);
+  
+  // Separate function for fetching from API and processing data
+  const fetchAndProcessData = async () => {
+    try {
+      // Try to get fresh data from API
+      const appointments = await fetchAppointments();
+      
+      if (appointments && appointments.length > 0) {
+        console.log(`Got ${appointments.length} appointments from API`);
+        
+        // Map the data for display
+        const mappedData = mapAppointmentsToTableData(appointments);
+        setTableData(mappedData);
+        
+        // Save to Supabase in the background
+        saveAppointmentsToSupabase(appointments)
+          .then(success => {
+            if (success) {
+              console.log("Saved to Supabase successfully");
+            } else {
+              console.error("Failed to save to Supabase");
+            }
+          })
+          .catch(err => {
+            console.error("Error saving to Supabase:", err);
+          });
+        
+        return true;
+      } else {
+        console.warn("API returned no appointments");
+        setTableData(initialData || []);
+        return false;
+      }
+    } catch (err) {
+      throw err;
+    }
+  };
+  
+  // Function to refresh data in the background (without setting loading state)
+  const refreshDataInBackground = async () => {
+    console.log("Refreshing data in background...");
+    try {
+      await fetchAndProcessData();
+    } catch (err) {
+      console.error("Background refresh error:", err);
+      // Don't show error to user for background refreshes
+    }
+  };
+  
+  // Handle errors in a consistent way
+  const handleError = (err: any) => {
+    console.error("Error loading data:", err);
+    setError(err instanceof Error ? err : new Error(String(err)));
+    
+    // If we have initialData, use it as fallback
+    if (initialData && initialData.length > 0) {
+      console.log("Using initialData as fallback");
+      setTableData(initialData);
+    } else {
+      // Otherwise, try one more time to load from Supabase
+      loadAppointmentsFromSupabase()
+        .then(data => {
+          if (data && data.length > 0) {
+            console.log("Recovered with Supabase fallback data");
+            setTableData(data);
+            toast.warning("Using cached data. Failed to connect to API.");
+          }
+        })
+        .catch(() => {
+          console.error("Complete data loading failure");
+          setTableData([]);
+        });
+    }
+  };
   
   // Handle cell changes
   const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {
@@ -100,6 +150,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       if (!appointmentNumber) {
         console.error("Invalid appointment number");
+        toast.error("Failed to save: Missing appointment number");
         return false;
       }
       
@@ -126,35 +177,15 @@ export const useFokusarkTable = (initialData: string[][]) => {
   // Refresh data from API
   const refreshData = async () => {
     setIsRefreshing(true);
-    setIsLoading(true);
-    toast.info("Refreshing data from API...");
+    setError(null);
     
     try {
-      const appointments = await fetchAppointments();
-      
-      if (appointments && appointments.length > 0) {
-        console.log(`Fetched ${appointments.length} fresh appointments from API`);
-        
-        // Map to table data format
-        const mappedData = mapAppointmentsToTableData(appointments);
-        setTableData(mappedData);
-        
-        // Save to Supabase
-        const saveSuccess = await saveAppointmentsToSupabase(appointments);
-        
-        if (saveSuccess) {
-          toast.success(`Successfully refreshed and saved ${appointments.length} appointments`);
-        } else {
-          toast.error("Failed to save data to database");
-        }
-      } else {
-        toast.error("No data available from API");
-      }
-    } catch (error) {
-      console.error("Error refreshing data:", error);
-      toast.error("Failed to refresh data from API");
+      await fetchAndProcessData();
+      return true;
+    } catch (err) {
+      handleError(err);
+      return false;
     } finally {
-      setIsLoading(false);
       setIsRefreshing(false);
     }
   };

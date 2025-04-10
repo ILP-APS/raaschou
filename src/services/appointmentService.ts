@@ -28,7 +28,7 @@ export interface AppointmentResponse {
 }
 
 /**
- * Directly fetches appointment data from the API - no mock data
+ * Fetches appointment data from the API with proper error handling
  */
 export async function fetchAppointments(): Promise<AppointmentResponse[]> {
   console.log('Fetching real appointments from API');
@@ -42,7 +42,9 @@ export async function fetchAppointments(): Promise<AppointmentResponse[]> {
       headers: {
         'accept': 'text/plain',
         'ApiKey': apiKey
-      }
+      },
+      // Add cache: 'no-store' to prevent caching issues
+      cache: 'no-store'
     });
     
     if (!response.ok) {
@@ -52,7 +54,6 @@ export async function fetchAppointments(): Promise<AppointmentResponse[]> {
     }
     
     const data = await response.json();
-    console.log('API Response:', data);
     
     if (!Array.isArray(data)) {
       console.error('API returned non-array data:', data);
@@ -63,6 +64,7 @@ export async function fetchAppointments(): Promise<AppointmentResponse[]> {
     return data;
   } catch (error) {
     console.error('Error fetching appointments:', error);
+    // Re-throw the error to be handled by the caller
     throw error;
   }
 }
@@ -82,6 +84,11 @@ export async function saveAppointmentsToSupabase(appointments: AppointmentRespon
     
     if (deleteError) {
       console.error("Error clearing table:", deleteError);
+      return false;
+    }
+    
+    if (!appointments || appointments.length === 0) {
+      console.warn("No appointments to save");
       return false;
     }
     
@@ -112,6 +119,12 @@ export async function saveAppointmentsToSupabase(appointments: AppointmentRespon
       '23 col': '',
       '24 col': ''
     }));
+    
+    // Check if we have rows to insert
+    if (rows.length === 0) {
+      console.warn("No rows to insert");
+      return false;
+    }
     
     console.log("Inserting rows to Supabase:", rows.length);
     
