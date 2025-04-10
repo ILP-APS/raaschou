@@ -3,6 +3,9 @@ import React from "react";
 import { useFokusarkData } from "@/hooks/useFokusarkData";
 import FokusarkTableLoading from "./fokusark/FokusarkTableLoading";
 import MinimalStickyTable from "./fokusark/MinimalStickyTable";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface FokusarkTableProps {
   data: string[][];
@@ -10,6 +13,12 @@ interface FokusarkTableProps {
 
 const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   const { isLoading, refreshData } = useFokusarkData();
+  
+  console.log("FokusarkTable rendering with data:", {
+    isLoading,
+    dataLength: data?.length || 0,
+    firstRow: data && data.length > 0 ? data[0] : 'No data'
+  });
   
   // Show loading state while fetching data
   if (isLoading) {
@@ -20,11 +29,21 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
   if (!data || data.length === 0) {
     return (
       <div className="rounded-md w-full relative shadow-md border border-border p-8">
-        <div className="text-center">
-          <h3 className="text-lg font-medium mb-2">No data available</h3>
-          <p className="text-muted-foreground">
-            Try refreshing the page or using the "Refresh Realized Hours" button.
-          </p>
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>No data available</AlertTitle>
+          <AlertDescription>
+            No appointment data could be loaded. Try refreshing the data.
+          </AlertDescription>
+        </Alert>
+        <div className="flex justify-center">
+          <Button 
+            onClick={() => refreshData && refreshData()} 
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh Data
+          </Button>
         </div>
       </div>
     );

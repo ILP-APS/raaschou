@@ -15,6 +15,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
   const [tableData, setTableData] = useState<string[][]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   
   useEffect(() => {
     const initData = async () => {
@@ -24,17 +25,19 @@ export const useFokusarkTable = (initialData: string[][]) => {
       try {
         // Use provided data or generate sample data if none
         if (initialData && initialData.length > 0) {
-          console.log("Using provided data");
+          console.log("Using provided data:", initialData.slice(0, 2));
           // Use all rows without limitation
           setTableData(initialData);
         } else {
           console.log("No initial data, using generated data");
           const generatedData = generateTableData();
+          console.log("Generated sample data:", generatedData.slice(0, 2));
           setTableData(generatedData);
         }
         setIsInitialized(true);
       } catch (error) {
         console.error("Error initializing table data:", error);
+        setError(error instanceof Error ? error : new Error(String(error)));
         // Fallback to generated data
         const generatedData = generateTableData();
         setTableData(generatedData);
@@ -52,9 +55,10 @@ export const useFokusarkTable = (initialData: string[][]) => {
       initialDataLength: initialData?.length || 0,
       tableDataLength: tableData?.length || 0,
       isLoading,
-      isInitialized
+      isInitialized,
+      hasError: error !== null
     });
-  }, [initialData, tableData, isLoading, isInitialized]);
+  }, [initialData, tableData, isLoading, isInitialized, error]);
   
   const handleCellChange = (rowIndex: number, colIndex: number, value: string) => {
     console.log("Cell change:", rowIndex, colIndex, value);
@@ -66,5 +70,11 @@ export const useFokusarkTable = (initialData: string[][]) => {
     }
   };
   
-  return { tableData, isLoading, isInitialized, handleCellChange };
+  return { 
+    tableData, 
+    isLoading, 
+    isInitialized, 
+    error,
+    handleCellChange 
+  };
 };

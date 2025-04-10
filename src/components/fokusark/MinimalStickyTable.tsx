@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -30,9 +31,19 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   
+  // Debug logs to track data
+  useEffect(() => {
+    console.log("MinimalStickyTable received data:", {
+      rowCount: tableData?.length || 0,
+      hasData: tableData && tableData.length > 0,
+      firstRow: tableData && tableData.length > 0 ? tableData[0]?.slice(0, 3) : 'No data'
+    });
+  }, [tableData]);
+  
   // Transform tableData into usable data for the table
   const data = React.useMemo(() => {
     if (!tableData || tableData.length === 0) {
+      console.log("No table data provided, using default data");
       // Provide default data if none is passed
       return [
         { id: '1', name: 'Project 1', type: 'Type 1', col1: 'Value 1-1', col2: 'Value 1-2', col3: 'Value 1-3' },
@@ -40,28 +51,23 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
         { id: '3', name: 'Project 3', type: 'Type 3', col1: 'Value 3-1', col2: 'Value 3-2', col3: 'Value 3-3' },
         { id: '4', name: 'Project 4', type: 'Type 4', col1: 'Value 4-1', col2: 'Value 4-2', col3: 'Value 4-3' },
         { id: '5', name: 'Project 5', type: 'Type 1', col1: 'Value 5-1', col2: 'Value 5-2', col3: 'Value 5-3' },
-        { id: '6', name: 'Project 6', type: 'Type 2', col1: 'Value 6-1', col2: 'Value 6-2', col3: 'Value 6-3' },
-        { id: '7', name: 'Project 7', type: 'Type 3', col1: 'Value 7-1', col2: 'Value 7-2', col3: 'Value 7-3' },
-        { id: '8', name: 'Project 8', type: 'Type 4', col1: 'Value 8-1', col2: 'Value 8-2', col3: 'Value 8-3' },
-        { id: '9', name: 'Project 9', type: 'Type 1', col1: 'Value 9-1', col2: 'Value 9-2', col3: 'Value 9-3' },
-        { id: '10', name: 'Project 10', type: 'Type 2', col1: 'Value 10-1', col2: 'Value 10-2', col3: 'Value 10-3' },
       ];
     }
     
     // Log first few rows to see actual data structure
-    console.log("Sample table data structure (first 2 rows):", tableData.slice(0, 2));
+    console.log("Transforming table data structure (first 2 rows):", tableData.slice(0, 2));
     
     // Convert the 2D array data to objects
     return tableData.map((row, i) => {
       // Get the appointment number and subject from the row data
-      const appointmentNumber = row[0]; // This is the actual appointment number from API
-      const subject = row[1]; // This is the appointment subject from API
+      const appointmentNumber = row[0] || `${i + 1}`; // This is the actual appointment number from API
+      const subject = row[1] || `Project ${i + 1}`; // This is the appointment subject from API
       
       console.log(`Row ${i}: appointment number = ${appointmentNumber}, subject = ${subject}`);
       
       const rowObj: Record<string, string> = {
         id: appointmentNumber, // Use the actual appointment number as id
-        name: subject || `Project ${i + 1}`, // Use the actual subject from API data
+        name: subject, // Use the actual subject from API data
         type: row[2] || `Type ${i % 4 + 1}`, // Responsible person
       };
       
@@ -158,6 +164,15 @@ export default function MinimalStickyTable({ tableData = [] }: MinimalStickyTabl
   };
 
   const headerHeight = '41px';
+
+  if (data.length === 0) {
+    console.log("No data to display in table");
+    return (
+      <div className="table-wrapper bg-background border border-border rounded-md p-6 text-center">
+        <p className="text-muted-foreground">No data available for display.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="table-wrapper" style={{
