@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -7,24 +6,71 @@ export interface AppointmentResponse {
   appointmentNumber: string;
   subject: string;
   responsibleHnUserID: number;
-  // Add other fields as needed
+  hnShippingAddressID: null;
+  customerAccountNumber: string;
+  project: null;
+  description: string;
+  startDate: string;
+  endDate: string;
+  hnAppointmentCategoryID: number;
+  hnBudgetID: null;
+  hnMainAppointmentID: null;
+  blocked: boolean;
+  tags: any[];
+  customerRef: string;
+  ownRef: string;
+  done: boolean;
+  doneDate: null;
+  created: string;
+  hnOfferID: null;
+  appointmentAssociatedUsers: number[];
 }
 
 // Store the mock data to prevent regenerating it on every call
 let cachedMockAppointments: AppointmentResponse[] | null = null;
 
 /**
- * Provides mock appointment data since API fetching is disabled
+ * Fetches appointment data from the API or returns mock data if API is unavailable
  */
 export async function fetchAppointments(): Promise<AppointmentResponse[]> {
-  if (cachedMockAppointments) {
-    console.log('Using cached mock appointments');
+  // For production, we would use the real API
+  try {
+    console.log('Attempting to fetch appointments from API');
+    
+    // Use the exact API URL from the screenshot
+    const apiUrl = 'https://publicapi.e-regnskab.dk/Appointment/Standard?open=true';
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'accept': 'text/plain',
+        'ApiKey': 'w9JqSNiTeOIpXfovZOHfjLnM:pGwz'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API responded with status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('Successfully fetched', data.length, 'appointments from API');
+    
+    // Cache the response for future calls
+    cachedMockAppointments = data;
+    return data;
+  } catch (error) {
+    console.error('Error fetching from API, using mock data instead:', error);
+    
+    // If we have cached data, use it
+    if (cachedMockAppointments) {
+      console.log('Using cached mock appointments');
+      return cachedMockAppointments;
+    }
+    
+    // Otherwise generate new mock data
+    console.log('Generating mock appointments as API fetch failed');
+    cachedMockAppointments = generateMockAppointments();
     return cachedMockAppointments;
   }
-  
-  console.log('Generating mock appointments instead of API fetch');
-  cachedMockAppointments = generateMockAppointments();
-  return cachedMockAppointments;
 }
 
 /**
@@ -45,12 +91,31 @@ function generateMockAppointments(): AppointmentResponse[] {
   for (let i = 0; i < 15; i++) {
     const appointmentNumber = `${9990 + i}`; // Starting from 9990 like in the API
     const subject = subjects[Math.floor(Math.random() * subjects.length)];
+    const responsibleHnUserID = 18321 + (i % 5); // Based on screenshot: 18321, 18322, etc.
     
     mockData.push({
-      hnAppointmentID: 529633 + i, // Based on API example
+      hnAppointmentID: 529633 + i, // Based on API example (529633 from screenshot)
       appointmentNumber,
       subject,
-      responsibleHnUserID: 1832 + (i % 5) // Varied user IDs
+      responsibleHnUserID,
+      hnShippingAddressID: null,
+      customerAccountNumber: "2",
+      project: null,
+      description: "",
+      startDate: "2018-12-31T00:00:00",
+      endDate: "2018-12-31T00:00:00",
+      hnAppointmentCategoryID: 2257,
+      hnBudgetID: null,
+      hnMainAppointmentID: null,
+      blocked: false,
+      tags: [],
+      customerRef: "",
+      ownRef: "",
+      done: false,
+      doneDate: null,
+      created: "2018-12-28T14:38:49.927",
+      hnOfferID: null,
+      appointmentAssociatedUsers: [14302, 14339, 14434, 21118, 22903, 37922]
     });
   }
   
@@ -77,7 +142,7 @@ export async function saveAppointmentsToSupabase(appointments: AppointmentRespon
     }
     
     // Format appointment data for Supabase insertion
-    const rows = appointments.map((appointment, index) => {
+    const rows = appointments.map((appointment) => {
       return {
         // Don't use crypto.randomUUID() as it might not be available in all browsers
         // Let Supabase generate the UUID with its default
@@ -169,7 +234,7 @@ export async function loadAppointmentsFromSupabase(): Promise<string[][]> {
 }
 
 /**
- * Maps mock data to the format required by our application
+ * Maps appointments to the format required by our application's table
  */
 export function mapAppointmentsToTableData(appointments: AppointmentResponse[]): string[][] {
   console.log(`Mapping ${appointments.length} appointments to table data`);

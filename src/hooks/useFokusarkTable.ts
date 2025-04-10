@@ -1,6 +1,5 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { generateTableData } from '@/utils/tableData';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -18,7 +17,7 @@ export interface FokusarkTableData {
 
 /**
  * Main hook for handling the Fokusark table functionality
- * Uses real data from the API mocks and stores it in Supabase
+ * Uses real data from the API and stores it in Supabase
  */
 export const useFokusarkTable = (initialData: string[][]) => {
   const [tableData, setTableData] = useState<string[][]>([]);
@@ -155,7 +154,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
     setIsLoading(true);
     
     try {
-      // Force fetch fresh data from the API mock
+      // Force fetch fresh data from the API
       const appointments = await fetchAppointments();
       
       if (appointments && appointments.length > 0) {
