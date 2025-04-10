@@ -21,10 +21,20 @@ export const useAppointments = () => {
         // Log a sample of the first appointment's subject to verify it exists
         if (fetchedAppointments.length > 0) {
           console.log("Sample appointment subject:", fetchedAppointments[0].subject);
+          console.log("First appointment details:", {
+            id: fetchedAppointments[0].hnAppointmentID,
+            number: fetchedAppointments[0].appointmentNumber,
+            subject: fetchedAppointments[0].subject,
+            responsibleUserId: fetchedAppointments[0].responsibleHnUserID
+          });
         }
         
         const sortedAppointments = sortAndGroupAppointments(fetchedAppointments);
         console.log(`After sorting and grouping: ${sortedAppointments.length} appointments`);
+        
+        if (sortedAppointments.length > 0) {
+          console.log("First sorted appointment subject:", sortedAppointments[0].subject);
+        }
         
         setAppointments(sortedAppointments);
       } catch (err) {

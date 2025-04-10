@@ -20,7 +20,14 @@ export const fetchOpenAppointments = async () => {
     subject: data[0].subject,
     responsibleUserID: data[0].responsibleHnUserID
   } : "No data");
-  return data;
+  
+  // Make sure each appointment has the required properties
+  const processedData = data.map((appointment: any) => ({
+    ...appointment,
+    subject: appointment.subject || 'No subject' // Ensure subject exists
+  }));
+  
+  return processedData;
 };
 
 // Fetch appointment details by ID

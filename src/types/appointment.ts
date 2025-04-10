@@ -1,4 +1,3 @@
-
 export interface CustomerAddress {
   accountNumber: string;
   hnCustomerID: number;
@@ -36,6 +35,8 @@ export interface Appointment {
   customerAddress: CustomerAddress;
   shippingAddress: ShippingAddress | null;
   appointmentNumber: string;
+  subject: string;
+  responsibleHnUserID?: number;
 }
 
 export interface AppointmentDetail {

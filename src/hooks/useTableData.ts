@@ -56,7 +56,7 @@ export const useTableData = () => {
         if (appointments.length > 0) {
           console.log("First appointment from useAppointments:", {
             number: appointments[0].appointmentNumber,
-            subject: appointments[0].subject, // Log subject explicitly
+            subject: appointments[0].subject, // This should now work with our type definition
             id: appointments[0].hnAppointmentID
           });
         }
@@ -124,7 +124,7 @@ export const useTableData = () => {
               // Build the row of data
               const row = [
                 appointment.appointmentNumber, // Use the real appointment number
-                details.subject || 'N/A',      // Use the real subject from API
+                details.subject || appointment.subject || 'N/A', // Use the subject from details or appointment
                 responsibleUserName,           // Use the real responsible user
                 offerTotal,
                 montageTotal,
