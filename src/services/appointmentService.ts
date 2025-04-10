@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { getUserName, preloadUsers } from "@/utils/userUtils";
 
 export interface AppointmentResponse {
   hnAppointmentID: number;
@@ -24,8 +25,8 @@ export interface AppointmentResponse {
   created: string;
   hnOfferID: number | null;
   appointmentAssociatedUsers: number[];
-  isSubAppointment?: boolean; // Added to track sub-appointments
-  parentAppointmentNumber?: string; // Added to track parent appointment number
+  isSubAppointment?: boolean;
+  parentAppointmentNumber?: string;
 }
 
 /**
@@ -201,33 +202,50 @@ export async function saveAppointmentsToSupabase(appointments: AppointmentRespon
       return false;
     }
     
-    // Format the appointments for Supabase insertion
-    const rows = appointments.map((appointment) => ({
-      '1 col': appointment.appointmentNumber || '',
-      '2 col': appointment.subject || '',
-      '3 col': `User ${appointment.responsibleHnUserID}`,
-      '4 col': '',
-      '5 col': '',
-      '6 col': '',
-      '7 col': '',
-      '8 col': '',
-      '9 col': '',
-      '10 col': '',
-      '11 col': '',
-      '12 col': '',
-      '13 col': '',
-      '14 col': '',
-      '15 col': '',
-      '16 col': '',
-      '17 col': '',
-      '18 col': '',
-      '19 col': '',
-      '20 col': '',
-      '21 col': '',
-      '22 col': '',
-      '23 col': '',
-      '24 col': ''
-    }));
+    // Preload user data for all appointments to improve performance
+    const userIds = appointments
+      .map(app => app.responsibleHnUserID)
+      .filter((id): id is number => id !== undefined && id !== null);
+    
+    console.log(`Preloading ${userIds.length} user details...`);
+    await preloadUsers(userIds);
+    
+    // Format the appointments for Supabase insertion, getting user names as needed
+    const rowPromises = appointments.map(async (appointment) => {
+      // Get the responsible user's actual name
+      const responsibleUserName = appointment.responsibleHnUserID ? 
+        await getUserName(appointment.responsibleHnUserID) : 
+        'Unknown';
+      
+      return {
+        '1 col': appointment.appointmentNumber || '',
+        '2 col': appointment.subject || '',
+        '3 col': responsibleUserName,
+        '4 col': '',
+        '5 col': '',
+        '6 col': '',
+        '7 col': '',
+        '8 col': '',
+        '9 col': '',
+        '10 col': '',
+        '11 col': '',
+        '12 col': '',
+        '13 col': '',
+        '14 col': '',
+        '15 col': '',
+        '16 col': '',
+        '17 col': '',
+        '18 col': '',
+        '19 col': '',
+        '20 col': '',
+        '21 col': '',
+        '22 col': '',
+        '23 col': '',
+        '24 col': ''
+      };
+    });
+    
+    const rows = await Promise.all(rowPromises);
     
     // Check if we have rows to insert
     if (rows.length === 0) {
@@ -298,20 +316,29 @@ export async function loadAppointmentsFromSupabase(): Promise<string[][]> {
 /**
  * Maps appointments to table data
  */
-export function mapAppointmentsToTableData(appointments: AppointmentResponse[]): string[][] {
-  return appointments.map(appointment => {
-    const row: string[] = Array(24).fill('');
-    row[0] = appointment.appointmentNumber || '';
-    row[1] = appointment.subject || '';
-    row[2] = `User ${appointment.responsibleHnUserID}`;
-    
-    // Add a marker for sub-appointments in the last column (used internally)
-    if (appointment.isSubAppointment) {
-      row[23] = 'sub-appointment';
-    } else {
-      row[23] = 'parent-appointment';
-    }
-    
-    return row;
-  });
+export function mapAppointmentsToTableData(appointments: AppointmentResponse[]): Promise<string[][]> {
+  return preloadUsers(appointments
+    .map(app => app.responsibleHnUserID)
+    .filter((id): id is number => id !== undefined && id !== null))
+    .then(() => Promise.all(appointments.map(async appointment => {
+      const row: string[] = Array(24).fill('');
+      row[0] = appointment.appointmentNumber || '';
+      row[1] = appointment.subject || '';
+      
+      // Get the responsible user's actual name
+      const responsibleUserName = appointment.responsibleHnUserID ? 
+        await getUserName(appointment.responsibleHnUserID) : 
+        'Unknown';
+      
+      row[2] = responsibleUserName;
+      
+      // Add a marker for sub-appointments in the last column (used internally)
+      if (appointment.isSubAppointment) {
+        row[23] = 'sub-appointment';
+      } else {
+        row[23] = 'parent-appointment';
+      }
+      
+      return row;
+    })));
 }

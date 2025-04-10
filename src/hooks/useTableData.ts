@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useAppointments } from "./useAppointments";
 import { useUsers } from "./useUsers";
 import { 
-  createUserMap, 
   getAppointmentDetail, 
   getOfferLineItems,
   getRealizedHours,
@@ -12,6 +11,7 @@ import {
 import { generateTableData } from "@/utils/tableData";
 import { useToast } from "@/hooks/use-toast";
 import { updateRealizedHours } from "@/api/fokusarkAppointmentsApi";
+import { getUserName, preloadUsers } from "@/utils/userUtils";
 
 export const useTableData = () => {
   const [tableData, setTableData] = useState<string[][]>([]);
@@ -56,13 +56,18 @@ export const useTableData = () => {
         if (appointments.length > 0) {
           console.log("First appointment from useAppointments:", {
             number: appointments[0].appointmentNumber,
-            subject: appointments[0].subject, // This should now work with our type definition
+            subject: appointments[0].subject,
             id: appointments[0].hnAppointmentID
           });
         }
         
-        const userMap = createUserMap(users);
-        console.log(`Created user map with ${userMap.size} users`);
+        // Preload all user data to reduce API calls
+        const userIds = appointments
+          .map(app => app.responsibleHnUserID)
+          .filter((id): id is number => id !== undefined && id !== null);
+        
+        console.log(`Preloading ${userIds.length} user details...`);
+        await preloadUsers(userIds);
         
         const processedData: string[][] = [];
         const batchSize = 10;
@@ -95,8 +100,11 @@ export const useTableData = () => {
               
               console.log(`Appointment ${appointment.appointmentNumber} subject:`, details.subject);
               
-              // Get responsible user name
-              const responsibleUserName = userMap.get(details.responsibleHnUserID) || 'Unknown';
+              // Get responsible user name using the new utility function
+              const responsibleUserName = details.responsibleHnUserID ? 
+                await getUserName(details.responsibleHnUserID) :
+                'Unknown';
+              
               console.log(`Responsible user for appointment ${appointment.appointmentNumber}: ${responsibleUserName}`);
               
               // Get offer line items
@@ -125,7 +133,7 @@ export const useTableData = () => {
               const row = [
                 appointment.appointmentNumber, // Use the real appointment number
                 details.subject || appointment.subject || 'N/A', // Use the subject from details or appointment
-                responsibleUserName,           // Use the real responsible user
+                responsibleUserName,           // Use the real responsible user name
                 offerTotal,
                 montageTotal,
                 underleverandorTotal,
@@ -182,7 +190,7 @@ export const useTableData = () => {
         } else {
           console.log("Using real API data, first row:", {
             appointmentNumber: processedData[0][0],
-            subject: processedData[0][1], // Log the subject explicitly
+            subject: processedData[0][1], 
             responsibleUser: processedData[0][2]
           });
           setTableData(processedData);
