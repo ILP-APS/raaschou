@@ -37,20 +37,8 @@ export const useFokusarkTable = (initialData: string[][]) => {
       isDataFetchedRef.current = true;
       
       try {
-        // First try to load data from Supabase
-        const supabaseData = await loadAppointmentsFromSupabase();
-        
-        // If we have data in Supabase, use it
-        if (supabaseData && supabaseData.length > 0) {
-          console.log(`Loaded ${supabaseData.length} rows from Supabase`);
-          setTableData(supabaseData);
-          setIsInitialized(true);
-          setIsLoading(false);
-          return;
-        }
-        
-        // If no data in Supabase, fetch from API and save to Supabase
-        console.log("No data in Supabase, fetching from API");
+        // Always prioritize fresh data from the API 
+        console.log("Fetching fresh data from API");
         const appointments = await fetchAppointments();
         
         if (appointments && appointments.length > 0) {
@@ -63,30 +51,61 @@ export const useFokusarkTable = (initialData: string[][]) => {
           const saveSuccess = await saveAppointmentsToSupabase(appointments);
           
           if (saveSuccess) {
-            toast.success("Successfully saved appointment data to Supabase");
+            toast.success("Successfully saved real appointment data to Supabase");
           } else {
             toast.error("Failed to save appointment data to Supabase");
           }
           
           // Set the mapped data to state
           setTableData(mappedData);
-        } 
-        // If no API data either, use provided data as fallback
-        else if (initialData && initialData.length > 0) {
-          console.log(`Using provided data: ${initialData.length} rows`);
-          setTableData(initialData);
-        } else {
-          console.log("No data available");
-          setTableData([]);
+          setIsInitialized(true);
+          setIsLoading(false);
+          return;
+        }
+        // If no API data, try loading from Supabase as fallback
+        else {
+          console.log("No data available from API, checking Supabase");
+          const supabaseData = await loadAppointmentsFromSupabase();
+          
+          if (supabaseData && supabaseData.length > 0) {
+            console.log(`Loaded ${supabaseData.length} rows from Supabase as fallback`);
+            setTableData(supabaseData);
+          } else if (initialData && initialData.length > 0) {
+            console.log(`Using provided initial data as last resort: ${initialData.length} rows`);
+            setTableData(initialData);
+          } else {
+            console.log("No data available from any source");
+            setTableData([]);
+            toast.error("No appointment data available");
+          }
         }
         
         setIsInitialized(true);
       } catch (error) {
         console.error("Error initializing table data:", error);
         setError(error instanceof Error ? error : new Error('Unknown error'));
-        setTableData([]);
+        
+        // Try loading from Supabase as fallback if API failed
+        try {
+          const supabaseData = await loadAppointmentsFromSupabase();
+          if (supabaseData && supabaseData.length > 0) {
+            console.log(`Loaded ${supabaseData.length} rows from Supabase after API failure`);
+            setTableData(supabaseData);
+            toast.warning("Using cached data. API connection failed.");
+          } else if (initialData && initialData.length > 0) {
+            console.log(`Using provided initial data after API and DB failure: ${initialData.length} rows`);
+            setTableData(initialData);
+            toast.error("Using backup data. API and database connection failed.");
+          } else {
+            setTableData([]);
+          }
+        } catch (fallbackError) {
+          console.error("Fallback error:", fallbackError);
+          setTableData([]);
+        }
       } finally {
         setIsLoading(false);
+        setIsInitialized(true);
       }
     };
     
@@ -152,12 +171,15 @@ export const useFokusarkTable = (initialData: string[][]) => {
   
   const refreshData = async () => {
     setIsLoading(true);
+    toast.info("Refreshing data from API...");
     
     try {
       // Force fetch fresh data from the API
       const appointments = await fetchAppointments();
       
       if (appointments && appointments.length > 0) {
+        console.log(`Fetched ${appointments.length} fresh appointments from API`);
+        
         // Map to table data format
         const mappedData = mapAppointmentsToTableData(appointments);
         
@@ -165,17 +187,8 @@ export const useFokusarkTable = (initialData: string[][]) => {
         const saveSuccess = await saveAppointmentsToSupabase(appointments);
         
         if (saveSuccess) {
-          toast.success("Successfully refreshed and saved data to Supabase");
-          
-          // Load the fresh data from Supabase to ensure consistent view
-          const supabaseData = await loadAppointmentsFromSupabase();
-          
-          if (supabaseData && supabaseData.length > 0) {
-            setTableData(supabaseData);
-          } else {
-            // Fallback to mapped data if Supabase load fails
-            setTableData(mappedData);
-          }
+          toast.success("Successfully refreshed and saved real data to Supabase");
+          setTableData(mappedData);
         } else {
           toast.error("Failed to save refreshed data to Supabase");
           // Still update the UI with the new data even if save failed
@@ -183,12 +196,10 @@ export const useFokusarkTable = (initialData: string[][]) => {
         }
       } else {
         toast.error("No data available from API");
-        setTableData([]);
       }
     } catch (error) {
       console.error("Error refreshing data:", error);
-      toast.error("Failed to refresh data");
-      setTableData([]);
+      toast.error("Failed to refresh data from API");
     } finally {
       setIsLoading(false);
     }

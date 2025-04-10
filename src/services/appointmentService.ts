@@ -1,3 +1,4 @@
+
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -26,18 +27,14 @@ export interface AppointmentResponse {
   appointmentAssociatedUsers: number[];
 }
 
-// Store the mock data to prevent regenerating it on every call
-let cachedMockAppointments: AppointmentResponse[] | null = null;
-
 /**
- * Fetches appointment data from the API or returns mock data if API is unavailable
+ * Fetches appointment data from the API
  */
 export async function fetchAppointments(): Promise<AppointmentResponse[]> {
-  // For production, we would use the real API
   try {
-    console.log('Attempting to fetch appointments from API');
+    console.log('Fetching real appointments from API');
     
-    // Use the exact API URL from the screenshot
+    // Use the exact API URL from the user's screenshot
     const apiUrl = 'https://publicapi.e-regnskab.dk/Appointment/Standard?open=true';
     const response = await fetch(apiUrl, {
       method: 'GET',
@@ -48,79 +45,32 @@ export async function fetchAppointments(): Promise<AppointmentResponse[]> {
     });
     
     if (!response.ok) {
+      console.error(`API responded with status: ${response.status}`);
       throw new Error(`API responded with status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log('Successfully fetched', data.length, 'appointments from API');
+    console.log('Successfully fetched', data.length, 'real appointments from API');
     
-    // Cache the response for future calls
-    cachedMockAppointments = data;
-    return data;
-  } catch (error) {
-    console.error('Error fetching from API, using mock data instead:', error);
-    
-    // If we have cached data, use it
-    if (cachedMockAppointments) {
-      console.log('Using cached mock appointments');
-      return cachedMockAppointments;
+    if (!data || data.length === 0) {
+      console.error('API returned empty data array');
+      throw new Error('No appointment data available from API');
     }
     
-    // Otherwise generate new mock data
-    console.log('Generating mock appointments as API fetch failed');
-    cachedMockAppointments = generateMockAppointments();
-    return cachedMockAppointments;
-  }
-}
-
-/**
- * Generates mock appointment data for development and testing
- * that matches the structure seen in the API response
- */
-function generateMockAppointments(): AppointmentResponse[] {
-  const mockData: AppointmentResponse[] = [];
-  
-  // Real subjects from the API
-  const subjects = [
-    "Skoleophold m.v.", "Tilbygning", "Kontorudvidelse", 
-    "Køkkenrenovering", "Vinduesudskiftning", "Tagudskiftning",
-    "Facaderenovering", "Energirenovering", "Kloakrenovering"
-  ];
-  
-  // Generate appointment numbers like in the API (4-digit format)
-  for (let i = 0; i < 15; i++) {
-    const appointmentNumber = `${9990 + i}`; // Starting from 9990 like in the API
-    const subject = subjects[Math.floor(Math.random() * subjects.length)];
-    const responsibleHnUserID = 18321 + (i % 5); // Based on screenshot: 18321, 18322, etc.
+    // Log a sample of the first appointment to verify data structure
+    if (data.length > 0) {
+      console.log('Sample appointment data:', {
+        id: data[0].hnAppointmentID,
+        number: data[0].appointmentNumber,
+        subject: data[0].subject
+      });
+    }
     
-    mockData.push({
-      hnAppointmentID: 529633 + i, // Based on API example (529633 from screenshot)
-      appointmentNumber,
-      subject,
-      responsibleHnUserID,
-      hnShippingAddressID: null,
-      customerAccountNumber: "2",
-      project: null,
-      description: "",
-      startDate: "2018-12-31T00:00:00",
-      endDate: "2018-12-31T00:00:00",
-      hnAppointmentCategoryID: 2257,
-      hnBudgetID: null,
-      hnMainAppointmentID: null,
-      blocked: false,
-      tags: [],
-      customerRef: "",
-      ownRef: "",
-      done: false,
-      doneDate: null,
-      created: "2018-12-28T14:38:49.927",
-      hnOfferID: null,
-      appointmentAssociatedUsers: [14302, 14339, 14434, 21118, 22903, 37922]
-    });
+    return data;
+  } catch (error) {
+    console.error('Error fetching from API:', error);
+    throw error; // Propagate the error instead of returning mock data
   }
-  
-  console.log(`Generated ${mockData.length} mock appointments that match API format`);
-  return mockData;
 }
 
 /**
@@ -134,7 +84,7 @@ export async function saveAppointmentsToSupabase(appointments: AppointmentRespon
     const { error: deleteError } = await supabase
       .from('fokusark_table')
       .delete()
-      .not('id', 'is', null); // Delete all rows (safer than hardcoding a UUID)
+      .not('id', 'is', null); // Delete all rows
     
     if (deleteError) {
       console.error("Error clearing existing fokusark_table data:", deleteError);
@@ -184,7 +134,7 @@ export async function saveAppointmentsToSupabase(appointments: AppointmentRespon
       return false;
     }
     
-    console.log("Successfully saved appointments to Supabase");
+    console.log("Successfully saved real appointments to Supabase");
     return true;
   } catch (error) {
     console.error("Error saving appointments to Supabase:", error);
@@ -246,11 +196,7 @@ export function mapAppointmentsToTableData(appointments: AppointmentResponse[]):
     row[1] = appointment.subject || '';
     row[2] = `User ${appointment.responsibleHnUserID}`;
     
-    // Add some mock budget values for the demo
-    row[3] = (Math.floor(Math.random() * 5000) + 500).toFixed(2);
-    row[4] = (Math.floor(Math.random() * 1000) + 100).toFixed(2);
-    row[5] = (Math.floor(Math.random() * 1000) + 100).toFixed(2);
-    
+    // The rest of the columns will be empty
     return row;
   });
 }

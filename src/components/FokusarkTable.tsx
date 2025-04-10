@@ -25,25 +25,20 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
     return (
       <div className="rounded-md w-full relative shadow-md border border-border p-8" style={{ minHeight: '600px' }}>
         <div className="text-center">
-          <h3 className="text-lg font-medium mb-2">No data available</h3>
+          <h3 className="text-lg font-medium mb-2">No data available from API</h3>
           <p className="text-muted-foreground mb-4">
-            Try refreshing the page or using the "Refresh Data" button.
+            Unable to fetch real appointment data. Try refreshing the data.
           </p>
           <Button 
             onClick={refreshData}
             className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
           >
             <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh Data
+            Refresh Data from API
           </Button>
         </div>
       </div>
     );
-  }
-
-  // If we have an error but also have data (fallback data), show a warning toast
-  if (error && tableData.length > 0) {
-    console.warn("Displaying fallback data due to an error:", error);
   }
 
   // Add detailed debugging information about the data being passed
@@ -55,16 +50,22 @@ const FokusarkTable: React.FC<FokusarkTableProps> = ({ data }) => {
 
   return (
     <div className="rounded-md w-full relative" style={{ minHeight: '600px' }}>
-      <MinimalStickyTable tableData={tableData} onCellChange={handleCellChange} />
-      <div className="mt-4 flex justify-end">
+      <div className="mb-4 flex justify-between items-center">
+        <div>
+          <p className="text-sm text-muted-foreground">
+            Showing {tableData.length} appointments from API
+          </p>
+        </div>
         <Button 
           onClick={refreshData}
           className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
         >
           <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh Data
+          Refresh Data from API
         </Button>
       </div>
+      
+      <MinimalStickyTable tableData={tableData} onCellChange={handleCellChange} />
     </div>
   );
 };
