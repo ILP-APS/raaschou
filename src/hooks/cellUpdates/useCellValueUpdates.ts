@@ -1,4 +1,3 @@
-
 import { useToast } from "@/hooks/use-toast";
 import { updateAppointmentField, loadFokusarkAppointments, transformAppointmentsToDisplayData } from "@/services/fokusarkAppointmentService";
 import { formatPercentageInput } from "@/utils/fokusarkCalculations";
@@ -46,8 +45,12 @@ export const useCellValueUpdates = ({
     colIndex: number,
     value: string
   ) => {
+    // Log the raw input value before any processing
+    console.log(`Raw input value for update: "${value}" (appointment: ${appointmentNumber}, column: ${colIndex})`);
+    
     // Clean the value - remove DKK suffix if present
     const cleanValue = value.replace(/ DKK$/, '');
+    console.log(`Cleaned value for update: "${cleanValue}"`);
     
     // Don't update if nothing changed
     if (
@@ -94,14 +97,23 @@ export const useCellValueUpdates = ({
         try {
           // For currency columns (including 6, 7), use the parseNumber function
           if (isCurrencyColumn(colIndex)) {
-            parsedValue = parseNumber(cleanValue);
-            console.log(`Parsed currency value ${cleanValue} to ${parsedValue} for column ${colIndex}`);
+            // First check if the input is a plain number with no separators
+            if (/^\d+$/.test(cleanValue)) {
+              parsedValue = parseInt(cleanValue, 10);
+              console.log(`Parsed plain number: ${cleanValue} -> ${parsedValue}`);
+            } else {
+              // Otherwise use the parseNumber function for formatted input
+              parsedValue = parseNumber(cleanValue);
+              console.log(`Parsed formatted number: ${cleanValue} -> ${parsedValue}`);
+            }
           } else {
             // For other numeric values, attempt basic parsing
             parsedValue = parseFloat(cleanValue.replace(/\./g, '').replace(',', '.'));
+            console.log(`Parsed non-currency value: ${cleanValue} -> ${parsedValue}`);
           }
           
           if (isNaN(parsedValue)) {
+            console.log(`Value parsed as NaN, defaulting to 0: "${cleanValue}"`);
             parsedValue = 0;
           }
         } catch (e) {
@@ -109,11 +121,13 @@ export const useCellValueUpdates = ({
           parsedValue = 0;
         }
         
-        console.log(`Updating ${fieldName} for appointment ${appointmentNumber} to ${parsedValue}`);
+        console.log(`Sending to database: ${fieldName} for appointment ${appointmentNumber} = ${parsedValue}`);
         
         // Process the update
         updateAppointmentField(appointmentNumber, fieldName, parsedValue)
           .then(updatedAppointment => {
+            console.log(`Database update successful: ${fieldName} = ${parsedValue} for ${appointmentNumber}`);
+            
             // Update appointments state with updated appointment
             setAppointments(prev => 
               prev.map(app => 

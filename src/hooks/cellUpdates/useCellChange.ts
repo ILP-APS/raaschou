@@ -1,4 +1,3 @@
-
 import { FokusarkAppointment } from "@/api/fokusarkAppointmentsApi";
 import { Dispatch, SetStateAction, useRef } from 'react';
 import { useUIUpdates } from "./useUIUpdates";
@@ -79,19 +78,26 @@ export const useCellChange = ({
     try {
       // For currency columns, ensure proper parsing
       if (isCurrencyColumn(colIndex)) {
-        // Parse the numeric value using our utility function
-        try {
-          const numericValue = parseNumber(value);
-          console.log(`Parsed numeric value for saving: ${value} -> ${numericValue}`);
-          // Convert to string for the database update
+        // First check if the input is a plain number with no separators
+        if (/^\d+$/.test(value)) {
+          const numericValue = parseInt(value, 10);
+          console.log(`Parsed plain number for blur event: ${value} -> ${numericValue}`);
           value = String(numericValue);
-        } catch (e) {
-          console.error(`Error parsing number for column ${colIndex}:`, e);
+        } else {
+          // Otherwise parse using our utility function
+          try {
+            const numericValue = parseNumber(value);
+            console.log(`Parsed formatted number for blur event: ${value} -> ${numericValue}`);
+            value = String(numericValue);
+          } catch (e) {
+            console.error(`Error parsing number for column ${colIndex}:`, e);
+          }
         }
       }
       
       // Remove currency suffix if present before saving
       const cleanValue = value.replace(/ DKK$/, '');
+      console.log(`Final value being sent to database: "${cleanValue}"`);
       
       // Update cell value in database
       const updatedAppointment = await updateCellValueInDb(appointmentNumber, colIndex, cleanValue);
