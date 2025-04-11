@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -176,22 +177,26 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       let rawNumericValue;
       
-      if (/^\d+$/.test(valueToSave)) {
-        rawNumericValue = parseInt(valueToSave, 10);
-        console.log(`SAVE OPERATION: Plain number detected: "${valueToSave}" parsed as ${rawNumericValue}`);
-      } 
-      else if (/^[\d\.,]+$/.test(valueToSave)) {
-        rawNumericValue = parseNumber(valueToSave);
-        console.log(`SAVE OPERATION: Formatted number detected: "${valueToSave}" parsed as ${rawNumericValue}`);
-      } 
-      else {
-        rawNumericValue = 0;
-        console.log(`SAVE OPERATION: Invalid number format: "${valueToSave}" defaulting to 0`);
+      // Special handling for columns 6 and 7 which are numeric input fields
+      if (colIndex === 6 || colIndex === 7) {
+        // If it's a plain number with no separators
+        if (/^\d+$/.test(valueToSave)) {
+          rawNumericValue = parseInt(valueToSave, 10);
+          console.log(`SAVE OPERATION: Plain number detected: "${valueToSave}" parsed as ${rawNumericValue}`);
+        } 
+        // If it has formatting (periods or commas)
+        else if (/^[\d\.,]+$/.test(valueToSave)) {
+          rawNumericValue = parseNumber(valueToSave);
+          console.log(`SAVE OPERATION: Formatted number detected: "${valueToSave}" parsed as ${rawNumericValue}`);
+        } 
+        else {
+          rawNumericValue = 0;
+          console.log(`SAVE OPERATION: Invalid number format: "${valueToSave}" defaulting to 0`);
+        }
+        
+        // Ensure we save the raw numeric value for column 6 and 7
+        valueToSave = String(rawNumericValue);
       }
-      
-      valueToSave = String(rawNumericValue);
-      
-      console.log(`SAVE OPERATION: Final numeric value for column ${colIndex}: ${valueToSave}`);
       
       console.log(`SAVE OPERATION: Final value to save to Supabase: appointment ${appointmentNumber}, column=${colIndex + 1}, value=${valueToSave}`);
       
@@ -202,10 +207,12 @@ export const useFokusarkTable = (initialData: string[][]) => {
         [`${colIndex + 1} col`]: valueToSave
       };
       
+      // Make sure essential columns are set
       updateData['1 col'] = tableData[rowIndex][0] || '';
       updateData['2 col'] = tableData[rowIndex][1] || '';
       updateData['3 col'] = tableData[rowIndex][2] || '';
       
+      // First check if a row exists for this appointment
       const { data: existingRows, error: fetchError } = await supabase
         .from('fokusark_table')
         .select('id')
@@ -219,6 +226,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       let result;
       
+      // Update or insert based on whether a row exists
       if (existingRows && existingRows.length > 0) {
         console.log(`SAVE OPERATION: Updating existing row for appointment ${appointmentNumber}, column ${colIndex + 1}`, updateData);
         console.log(`SAVE OPERATION: Row ID: ${existingRows[0].id}`);
@@ -253,6 +261,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
         return false;
       }
       
+      // Verify the save operation by selecting the row again
       const { data: verifyData, error: verifyError } = await supabase
         .from('fokusark_table')
         .select(`${colIndex + 1} col`)
@@ -266,17 +275,13 @@ export const useFokusarkTable = (initialData: string[][]) => {
         const savedValue = verifyData[`${colIndex + 1} col`];
         console.log(`SAVE OPERATION: Verification: Value saved in database: "${savedValue}"`);
         
+        // Additional verification for columns 6 and 7 (Montage 2 and Underleverandør 2)
         if (colIndex === 6 || colIndex === 7) {
-          const savedNumberValue = parseFloat(savedValue);
-          const expectedNumberValue = parseFloat(valueToSave);
-          
-          console.log(`SAVE OPERATION: Verification comparing values - Expected: ${expectedNumberValue}, Actual: ${savedNumberValue}`);
-          
-          if (isNaN(savedNumberValue) || isNaN(expectedNumberValue) || savedNumberValue !== expectedNumberValue) {
+          if (savedValue !== valueToSave) {
             console.warn(`SAVE OPERATION: Value mismatch! Expected ${valueToSave} but got ${savedValue}`);
             toast.warning("Warning: Saved value may be incorrect. Please refresh and check.", { id: toastId });
           } else {
-            console.log(`SAVE OPERATION: Values match correctly - ${expectedNumberValue} = ${savedNumberValue}`);
+            console.log(`SAVE OPERATION: Values match correctly: ${valueToSave} = ${savedValue}`);
             toast.success(`Changes saved successfully for appointment ${appointmentNumber}`, { id: toastId });
           }
         } else if (savedValue !== valueToSave) {
@@ -288,6 +293,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
         }
       }
       
+      // Update the UI for columns 6 and 7 to show formatted currency value
       if (colIndex === 6 || colIndex === 7) {
         const rawValue = parseNumber(valueToSave);
         const displayValue = `${formatDanishNumber(rawValue)} DKK`;

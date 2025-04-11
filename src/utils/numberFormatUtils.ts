@@ -35,12 +35,14 @@ export const parseNumber = (value: string): number => {
   
   const result = parseFloat(cleanValue);
   
-  // Special logging for large numbers or NaN results
-  if (result > 1000000 || isNaN(result)) {
-    console.log(`Special number parsing: "${value}" -> "${withoutDKK}" -> "${cleanValue}" -> ${result}`);
+  // Check if the result is NaN or the same as the input (which can happen if parsing failed)
+  if (isNaN(result)) {
+    console.log(`Failed to parse number, returning 0: "${value}" -> 0`);
+    return 0;
   }
   
-  return isNaN(result) ? 0 : result;
+  console.log(`Successfully parsed number: "${value}" -> ${result}`);
+  return result;
 };
 
 /**
