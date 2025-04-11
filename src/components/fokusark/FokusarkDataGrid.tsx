@@ -80,51 +80,65 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
     if (onCellBlur) {
       console.log(`Cell blur event fired at row ${rowIndex}, column ${colIndex}, value: "${value}"`);
       
-      // Ensure we're saving the numeric value correctly for money columns
-      if (colIndex === 6 || colIndex === 7) { // Montage2 or Underleverandor2
-        // Log detailed information about the value before saving
+      toast.loading(`Saving changes...`, { id: `save-${rowIndex}-${colIndex}` });
+      
+      if (colIndex === 6 || colIndex === 7) {
         try {
           const numValue = parseNumber(value);
-          console.log(`Parsed value for blur event: ${value} -> ${numValue} (parsed as number)`);
+          console.log(`Parsed value for blur event: "${value}" -> ${numValue} (parsed as number)`);
           
-          // If the value has "DKK" suffix, add it to ensure consistent formatting in UI
           if (!value.includes("DKK") && numValue !== 0) {
-            value = `${value} DKK`;
+            const formattedValue = `${formatDanishCurrency(numValue)}`;
+            
+            if (onCellChange) {
+              onCellChange(rowIndex, colIndex, formattedValue);
+            }
+            
+            onCellBlur(rowIndex, colIndex, formattedValue);
+          } else {
+            onCellBlur(rowIndex, colIndex, value);
           }
         } catch (e) {
           console.warn(`Failed to parse number during blur: ${value}`, e);
+          onCellBlur(rowIndex, colIndex, value);
         }
+      } else {
+        onCellBlur(rowIndex, colIndex, value);
       }
-      
-      toast.info(`Saving changes for row ${rowIndex + 1}...`);
-      onCellBlur(rowIndex, colIndex, value);
     }
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, rowIndex: number, colIndex: number, value: string) => {
     if (e.key === 'Enter' && onCellBlur) {
       console.log(`Enter key pressed at row ${rowIndex}, column ${colIndex}, value: "${value}"`);
-      e.preventDefault(); // Prevent form submission
+      e.preventDefault();
       
-      // Special handling for money columns
-      if (colIndex === 6 || colIndex === 7) { // Montage2 or Underleverandor2
+      toast.loading(`Saving changes...`, { id: `save-${rowIndex}-${colIndex}` });
+      
+      if (colIndex === 6 || colIndex === 7) {
         try {
           const numValue = parseNumber(value);
-          console.log(`Parsed value for Enter key event: ${value} -> ${numValue} (parsed as number)`);
+          console.log(`Parsed value for Enter key event: "${value}" -> ${numValue} (parsed as number)`);
           
-          // Ensure the value has proper formatting when displayed
           if (!value.includes("DKK") && numValue !== 0) {
-            value = `${value} DKK`;
+            const formattedValue = `${formatDanishCurrency(numValue)}`;
+            
+            if (onCellChange) {
+              onCellChange(rowIndex, colIndex, formattedValue);
+            }
+            
+            onCellBlur(rowIndex, colIndex, formattedValue);
+          } else {
+            onCellBlur(rowIndex, colIndex, value);
           }
         } catch (e) {
           console.warn(`Failed to parse number during Enter key press: ${value}`, e);
+          onCellBlur(rowIndex, colIndex, value);
         }
+      } else {
+        onCellBlur(rowIndex, colIndex, value);
       }
       
-      toast.info(`Saving changes for row ${rowIndex + 1}...`);
-      onCellBlur(rowIndex, colIndex, value);
-      
-      // Move focus away from the input to simulate blur
       (e.target as HTMLElement).blur();
     }
   };

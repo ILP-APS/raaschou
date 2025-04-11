@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -156,30 +157,38 @@ export const useFokusarkTable = (initialData: string[][]) => {
     }
     
     try {
-      console.log(`Saving cell value: row=${rowIndex}, column=${colIndex}, value=${value}`);
-      
-      // Get the appointment number for the row
       const appointmentNumber = tableData[rowIndex][0]; // First column contains appointment number
+      console.log(`Saving cell value: row=${rowIndex}, column=${colIndex}, value=${value} for appointment ${appointmentNumber}`);
       
       // For numeric values, ensure we preserve the raw input
       // Remove formatting artifacts but keep the value intact
       let valueToSave = value.trim();
       
-      // Remove "DKK" suffix and any thousands separators, but keep decimal point
+      // Remove "DKK" suffix if present
       if (valueToSave.includes("DKK")) {
-        valueToSave = valueToSave.replace(" DKK", "");
+        valueToSave = valueToSave.replace(/ DKK/g, "");
       }
       
       // For columns 6 and 7 (Montage2 and Underleverandor2) which are money values
       // Make sure we store the proper numeric value
       if (colIndex === 6 || colIndex === 7) {
-        // Replace thousands separator (.) with empty string, and decimal separator (,) with period
-        valueToSave = valueToSave.replace(/\./g, "").replace(",", ".");
+        // This is a critical fix: properly parse Danish formatted numbers 
+        // (where . is thousands separator and , is decimal point)
+        const rawNumericValue = parseNumber(valueToSave);
         
-        console.log(`Processing numeric value for column ${colIndex}. Original: ${value}, Processed: ${valueToSave}`);
+        // Store the raw number value as a string without formatting
+        valueToSave = String(rawNumericValue);
+        
+        console.log(`Processing numeric value for column ${colIndex}:
+          - Original input: ${value}
+          - Cleaned value: ${valueToSave} 
+          - Parsed as number: ${rawNumericValue}`);
       }
       
       console.log(`Saving cell for appointment ${appointmentNumber}, column=${colIndex + 1}, value=${valueToSave}`);
+      
+      // Display saving notification
+      toast.loading(`Saving changes for appointment ${appointmentNumber}...`);
       
       // Create update data
       const updateData: Record<string, any> = {
@@ -252,7 +261,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
         }
       }
       
-      toast.success("Changes saved successfully");
+      toast.success(`Changes saved successfully for appointment ${appointmentNumber}`);
       return true;
     } catch (error) {
       console.error("Error updating cell:", error);
