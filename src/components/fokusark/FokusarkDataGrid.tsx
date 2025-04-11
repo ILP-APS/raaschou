@@ -87,17 +87,8 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
           const numValue = parseNumber(value);
           console.log(`Parsed value for blur event: "${value}" -> ${numValue} (parsed as number)`);
           
-          if (!value.includes("DKK") && numValue !== 0) {
-            const formattedValue = `${formatDanishCurrency(numValue)}`;
-            
-            if (onCellChange) {
-              onCellChange(rowIndex, colIndex, formattedValue);
-            }
-            
-            onCellBlur(rowIndex, colIndex, String(numValue));
-          } else {
-            onCellBlur(rowIndex, colIndex, value);
-          }
+          // Send the raw number value to the server
+          onCellBlur(rowIndex, colIndex, String(numValue));
         } catch (e) {
           console.warn(`Failed to parse number during blur: ${value}`, e);
           onCellBlur(rowIndex, colIndex, value);
@@ -120,17 +111,8 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
           const numValue = parseNumber(value);
           console.log(`Parsed value for Enter key event: "${value}" -> ${numValue} (parsed as number)`);
           
-          if (!value.includes("DKK") && numValue !== 0) {
-            const formattedValue = `${formatDanishCurrency(numValue)}`;
-            
-            if (onCellChange) {
-              onCellChange(rowIndex, colIndex, formattedValue);
-            }
-            
-            onCellBlur(rowIndex, colIndex, String(numValue));
-          } else {
-            onCellBlur(rowIndex, colIndex, value);
-          }
+          // Send the raw number value to the server
+          onCellBlur(rowIndex, colIndex, String(numValue));
         } catch (e) {
           console.warn(`Failed to parse number during Enter key press: ${value}`, e);
           onCellBlur(rowIndex, colIndex, value);

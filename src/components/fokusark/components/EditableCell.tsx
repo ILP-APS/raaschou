@@ -37,11 +37,17 @@ const EditableCell: React.FC<EditableCellProps> = ({
     // For currency values, remove formatting when starting to edit
     if (isCurrency && value) {
       try {
-        const numValue = parseNumber(value);
+        // First remove DKK suffix
+        const cleanValue = value.replace(/ DKK$/, '');
+        
+        // Then parse the numeric value
+        const numValue = parseNumber(cleanValue);
+        
         if (!isNaN(numValue)) {
+          // Use Danish format for editing (comma as decimal separator)
           setEditValue(String(numValue).replace('.', ','));
         } else {
-          setEditValue(value.replace(/ DKK$/, ''));
+          setEditValue(cleanValue);
         }
       } catch (e) {
         setEditValue(value.replace(/ DKK$/, ''));
@@ -59,11 +65,30 @@ const EditableCell: React.FC<EditableCellProps> = ({
   
   const finishEditing = () => {
     setIsEditing(false);
+    
     // Only trigger onChange if the value has actually changed
     if (onChange && editValue !== prevValueRef.current && !hasUpdatedRef.current) {
       hasUpdatedRef.current = true;
-      onChange(editValue);
-      prevValueRef.current = editValue;
+      
+      // For currency values, ensure we pass numeric values without formatting
+      if (isCurrency) {
+        try {
+          // Parse the value to a number
+          const numValue = parseNumber(editValue);
+          
+          // Pass the raw number value as a string
+          onChange(String(numValue));
+          
+          // Update the previous value to the formatted display value
+          prevValueRef.current = formatDanishCurrency(numValue);
+        } catch (e) {
+          onChange(editValue);
+          prevValueRef.current = editValue;
+        }
+      } else {
+        onChange(editValue);
+        prevValueRef.current = editValue;
+      }
     }
   };
   
@@ -99,7 +124,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
   
   // Format display value if it's a currency
   const displayValue = isCurrency && value ? 
-    `${formatDanishCurrency(parseNumber(value))}` : 
+    formatDanishCurrency(parseNumber(value)) : 
     value;
   
   return (

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -284,12 +285,37 @@ export const useFokusarkTable = (initialData: string[][]) => {
         console.warn("Could not verify data was saved correctly:", verifyError);
       } else {
         console.log(`Verification: Value saved in database: ${verifyData[`${colIndex + 1} col`]}`);
-        if (verifyData[`${colIndex + 1} col`] !== valueToSave) {
+        
+        // For numeric columns, verify if the values match (accounting for potential string/number type differences)
+        if (colIndex === 6 || colIndex === 7) {
+          // Parse both values to numbers to compare them
+          const savedNumberValue = parseFloat(verifyData[`${colIndex + 1} col`]);
+          const expectedNumberValue = parseFloat(valueToSave);
+          
+          if (isNaN(savedNumberValue) || isNaN(expectedNumberValue) || savedNumberValue !== expectedNumberValue) {
+            console.warn(`Value mismatch! Expected ${valueToSave} but got ${verifyData[`${colIndex + 1} col`]}`);
+            toast.warning("Warning: Saved value may be incorrect. Please refresh and check.");
+          }
+        } else if (verifyData[`${colIndex + 1} col`] !== valueToSave) {
           console.warn(`Value mismatch! Expected ${valueToSave} but got ${verifyData[`${colIndex + 1} col`]}`);
         }
       }
       
+      // Display confirmation to the user
       toast.success(`Changes saved successfully for appointment ${appointmentNumber}`);
+      
+      // For money columns, update the UI with formatted values after successful save
+      if (colIndex === 6 || colIndex === 7) {
+        const rawValue = parseNumber(valueToSave);
+        const displayValue = `${formatDanishNumber(rawValue)} DKK`;
+        console.log(`Updating UI with formatted value: ${displayValue}`);
+        
+        // Update the UI with the formatted value
+        const newData = [...tableData];
+        newData[rowIndex][colIndex] = displayValue;
+        setTableData(newData);
+      }
+      
       return true;
     } catch (error) {
       console.error("Error updating cell:", error);
