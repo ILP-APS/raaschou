@@ -187,7 +187,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
     
     try {
       const appointmentNumber = tableData[rowIndex][0]; // First column contains appointment number
-      console.log(`Saving cell value: row=${rowIndex}, column=${colIndex}, value=${value} for appointment ${appointmentNumber}`);
+      console.log(`SAVE OPERATION: Saving cell value: row=${rowIndex}, column=${colIndex}, value=${value} for appointment ${appointmentNumber}`);
       
       // For numeric values, ensure we preserve the raw input
       // Remove formatting artifacts but keep the value intact
@@ -196,25 +196,36 @@ export const useFokusarkTable = (initialData: string[][]) => {
       // Remove "DKK" suffix if present
       if (valueToSave.includes("DKK")) {
         valueToSave = valueToSave.replace(/ DKK/g, "");
+        console.log(`SAVE OPERATION: Removed DKK suffix, value now: ${valueToSave}`);
       }
       
       // For columns 6 and 7 (Montage2 and Underleverandor2) which are money values
       // Make sure we store the proper numeric value
       if (colIndex === 6 || colIndex === 7) {
-        // Parse Danish formatted numbers correctly
-        const rawNumericValue = parseNumber(valueToSave);
+        // First check if this is a plain number with no formatting
+        let rawNumericValue;
+        
+        if (/^\d+$/.test(valueToSave)) {
+          // If it's just digits, parse it directly
+          rawNumericValue = parseInt(valueToSave, 10);
+          console.log(`SAVE OPERATION: Value is a plain number, parsed as: ${rawNumericValue}`);
+        } else {
+          // Otherwise parse as Danish formatted number
+          rawNumericValue = parseNumber(valueToSave);
+          console.log(`SAVE OPERATION: Value is a formatted number, parsed as: ${rawNumericValue}`);
+        }
         
         // Store the raw number value as a string without formatting
         valueToSave = String(rawNumericValue);
         
-        console.log(`Processing numeric value for column ${colIndex}:
+        console.log(`SAVE OPERATION: Processing numeric value for column ${colIndex}:
           - Original input: ${value}
           - Cleaned value: ${valueToSave} 
           - Parsed as number: ${rawNumericValue}
           - This will be saved to Supabase`);
       }
       
-      console.log(`Saving cell for appointment ${appointmentNumber}, column=${colIndex + 1}, value=${valueToSave}`);
+      console.log(`SAVE OPERATION: Final value to save to Supabase: appointment ${appointmentNumber}, column=${colIndex + 1}, value=${valueToSave}`);
       
       // Display saving notification
       toast.loading(`Saving changes for appointment ${appointmentNumber}...`);
@@ -236,7 +247,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
         .eq('1 col', appointmentNumber);
       
       if (fetchError) {
-        console.error("Error checking existing rows:", fetchError);
+        console.error("SAVE OPERATION: Error checking existing rows:", fetchError);
         toast.error("Failed to save changes to database");
         return false;
       }
@@ -245,7 +256,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       if (existingRows && existingRows.length > 0) {
         // Update existing row
-        console.log(`Updating existing row for appointment ${appointmentNumber}, column ${colIndex + 1}`, updateData);
+        console.log(`SAVE OPERATION: Updating existing row for appointment ${appointmentNumber}, column ${colIndex + 1}`, updateData);
         const { data, error } = await supabase
           .from('fokusark_table')
           .update(updateData)
@@ -253,23 +264,23 @@ export const useFokusarkTable = (initialData: string[][]) => {
           .select();
           
         result = { data, error };
-        console.log(`Update result:`, error ? `Error: ${error.message}` : `Success, updated ${data?.length} rows`);
+        console.log(`SAVE OPERATION: Update result:`, error ? `Error: ${error.message}` : `Success, updated ${data?.length} rows`);
       } else {
         // Insert new row with a proper UUID
         updateData.id = crypto.randomUUID();
         
-        console.log(`Inserting new row for appointment ${appointmentNumber}, column ${colIndex + 1}`, updateData);
+        console.log(`SAVE OPERATION: Inserting new row for appointment ${appointmentNumber}, column ${colIndex + 1}`, updateData);
         const { data, error } = await supabase
           .from('fokusark_table')
           .insert([updateData])
           .select();
           
         result = { data, error };
-        console.log(`Insert result:`, error ? `Error: ${error.message}` : `Success, inserted ${data?.length} rows`);
+        console.log(`SAVE OPERATION: Insert result:`, error ? `Error: ${error.message}` : `Success, inserted ${data?.length} rows`);
       }
       
       if (result.error) {
-        console.error("Error updating Supabase:", result.error);
+        console.error("SAVE OPERATION: Error updating Supabase:", result.error);
         toast.error("Failed to save changes to database");
         return false;
       }
@@ -282,9 +293,9 @@ export const useFokusarkTable = (initialData: string[][]) => {
         .single();
       
       if (verifyError) {
-        console.warn("Could not verify data was saved correctly:", verifyError);
+        console.warn("SAVE OPERATION: Could not verify data was saved correctly:", verifyError);
       } else {
-        console.log(`Verification: Value saved in database: ${verifyData[`${colIndex + 1} col`]}`);
+        console.log(`SAVE OPERATION: Verification: Value saved in database: ${verifyData[`${colIndex + 1} col`]}`);
         
         // For numeric columns, verify if the values match (accounting for potential string/number type differences)
         if (colIndex === 6 || colIndex === 7) {
@@ -292,12 +303,18 @@ export const useFokusarkTable = (initialData: string[][]) => {
           const savedNumberValue = parseFloat(verifyData[`${colIndex + 1} col`]);
           const expectedNumberValue = parseFloat(valueToSave);
           
+          console.log(`SAVE OPERATION: Verification comparing values - Expected: ${expectedNumberValue}, Actual: ${savedNumberValue}`);
+          
           if (isNaN(savedNumberValue) || isNaN(expectedNumberValue) || savedNumberValue !== expectedNumberValue) {
-            console.warn(`Value mismatch! Expected ${valueToSave} but got ${verifyData[`${colIndex + 1} col`]}`);
+            console.warn(`SAVE OPERATION: Value mismatch! Expected ${valueToSave} but got ${verifyData[`${colIndex + 1} col`]}`);
             toast.warning("Warning: Saved value may be incorrect. Please refresh and check.");
+          } else {
+            console.log(`SAVE OPERATION: Values match correctly - ${expectedNumberValue} = ${savedNumberValue}`);
           }
         } else if (verifyData[`${colIndex + 1} col`] !== valueToSave) {
-          console.warn(`Value mismatch! Expected ${valueToSave} but got ${verifyData[`${colIndex + 1} col`]}`);
+          console.warn(`SAVE OPERATION: Value mismatch! Expected ${valueToSave} but got ${verifyData[`${colIndex + 1} col`]}`);
+        } else {
+          console.log(`SAVE OPERATION: Values match correctly for non-numeric field`);
         }
       }
       
@@ -308,7 +325,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
       if (colIndex === 6 || colIndex === 7) {
         const rawValue = parseNumber(valueToSave);
         const displayValue = `${formatDanishNumber(rawValue)} DKK`;
-        console.log(`Updating UI with formatted value: ${displayValue}`);
+        console.log(`SAVE OPERATION: Updating UI with formatted value: ${displayValue}`);
         
         // Update the UI with the formatted value
         const newData = [...tableData];
@@ -318,7 +335,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       return true;
     } catch (error) {
-      console.error("Error updating cell:", error);
+      console.error("SAVE OPERATION: Error updating cell:", error);
       toast.error("Failed to save changes");
       return false;
     }
