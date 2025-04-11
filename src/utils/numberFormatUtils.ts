@@ -16,11 +16,16 @@ export const parseNumber = (value: string): number => {
   // Remove "DKK" suffix if present
   const withoutDKK = value.replace(/ DKK$/, '').trim();
   
-  // Remove periods (thousands separators in Danish) and replace comma with dot
+  // Danish format uses period as thousands separator and comma as decimal
+  // We need to remove all periods and replace comma with dot for JavaScript parsing
   const cleanValue = withoutDKK.replace(/\./g, '').replace(',', '.');
+  
+  // Add debug log to track the transformation
+  console.log(`Parsing number: "${value}" -> "${withoutDKK}" -> "${cleanValue}"`);
+  
   const result = parseFloat(cleanValue);
   
-  // Add debug log for special values like appointment 24371
+  // Add debug log for special values
   if (result > 1000000 || isNaN(result)) {
     console.log(`Special number parsing: "${value}" -> "${withoutDKK}" -> "${cleanValue}" -> ${result}`);
   }

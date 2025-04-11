@@ -87,7 +87,6 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
           const numValue = parseNumber(value);
           console.log(`Parsed value for blur event: "${value}" -> ${numValue} (parsed as number)`);
           
-          // Send the raw number value to the server
           onCellBlur(rowIndex, colIndex, String(numValue));
         } catch (e) {
           console.warn(`Failed to parse number during blur: ${value}`, e);
@@ -111,7 +110,6 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
           const numValue = parseNumber(value);
           console.log(`Parsed value for Enter key event: "${value}" -> ${numValue} (parsed as number)`);
           
-          // Send the raw number value to the server
           onCellBlur(rowIndex, colIndex, String(numValue));
         } catch (e) {
           console.warn(`Failed to parse number during Enter key press: ${value}`, e);

@@ -73,8 +73,10 @@ const EditableCell: React.FC<EditableCellProps> = ({
       // For currency values, ensure we pass numeric values without formatting
       if (isCurrency) {
         try {
-          // Parse the value to a number
+          // Parse the value to a number using our utility function
           const numValue = parseNumber(editValue);
+          
+          console.log(`EditableCell finishEditing: parsed ${editValue} to ${numValue}`);
           
           // Pass the raw number value as a string
           onChange(String(numValue));
@@ -82,6 +84,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
           // Update the previous value to the formatted display value
           prevValueRef.current = formatDanishCurrency(numValue);
         } catch (e) {
+          console.error('Error parsing number in EditableCell:', e);
           onChange(editValue);
           prevValueRef.current = editValue;
         }
@@ -107,7 +110,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
     const newValue = e.target.value;
     // For currency, only allow numbers, commas, and periods
     if (isCurrency) {
-      // Allow empty string, or digits with optional comma/period
+      // Allow empty string, or digits with optional comma/period and optional additional digits
       if (newValue === '' || /^[0-9]*[,.]?[0-9]*$/.test(newValue)) {
         setEditValue(newValue);
       }

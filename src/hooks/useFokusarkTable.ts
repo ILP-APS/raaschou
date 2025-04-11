@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -202,7 +201,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
       // For columns 6 and 7 (Montage2 and Underleverandor2) which are money values
       // Make sure we store the proper numeric value
       if (colIndex === 6 || colIndex === 7) {
-        // Parse Danish formatted numbers (e.g., "2.000" -> 2000)
+        // Parse Danish formatted numbers correctly
         const rawNumericValue = parseNumber(valueToSave);
         
         // Store the raw number value as a string without formatting
@@ -211,7 +210,8 @@ export const useFokusarkTable = (initialData: string[][]) => {
         console.log(`Processing numeric value for column ${colIndex}:
           - Original input: ${value}
           - Cleaned value: ${valueToSave} 
-          - Parsed as number: ${rawNumericValue}`);
+          - Parsed as number: ${rawNumericValue}
+          - This will be saved to Supabase`);
       }
       
       console.log(`Saving cell for appointment ${appointmentNumber}, column=${colIndex + 1}, value=${valueToSave}`);
