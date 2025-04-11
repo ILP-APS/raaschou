@@ -2,6 +2,7 @@
 import { useToast } from "@/hooks/use-toast";
 import { updateAppointmentField, loadFokusarkAppointments, transformAppointmentsToDisplayData } from "@/services/fokusarkAppointmentService";
 import { formatPercentageInput } from "@/utils/fokusarkCalculations";
+import { parseNumber } from "@/utils/numberFormatUtils";
 import { FokusarkAppointment } from "@/api/fokusarkAppointmentsApi";
 import { Dispatch, SetStateAction, useRef } from 'react';
 import { useFieldMapping } from "./useFieldMapping";
@@ -91,11 +92,20 @@ export const useCellValueUpdates = ({
         // Parse numeric value for database update
         let parsedValue;
         try {
-          parsedValue = parseFloat(cleanValue.replace(/\./g, '').replace(',', '.'));
+          // For currency columns (including 6, 7), use the parseNumber function
+          if (isCurrencyColumn(colIndex)) {
+            parsedValue = parseNumber(cleanValue);
+            console.log(`Parsed currency value ${cleanValue} to ${parsedValue} for column ${colIndex}`);
+          } else {
+            // For other numeric values, attempt basic parsing
+            parsedValue = parseFloat(cleanValue.replace(/\./g, '').replace(',', '.'));
+          }
+          
           if (isNaN(parsedValue)) {
             parsedValue = 0;
           }
         } catch (e) {
+          console.error(`Error parsing value "${cleanValue}" for column ${colIndex}:`, e);
           parsedValue = 0;
         }
         

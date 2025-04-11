@@ -5,6 +5,7 @@ import { useUIUpdates } from "./useUIUpdates";
 import { useCellValueUpdates } from "./useCellValueUpdates";
 import { useRecalculationHandler } from "./useRecalculationHandler";
 import { formatPercentageInput } from "@/utils/fokusarkCalculations";
+import { parseNumber } from "@/utils/numberFormatUtils";
 
 interface UseCellChangeProps {
   tableData: string[][],
@@ -76,6 +77,19 @@ export const useCellChange = ({
     console.log(`Finalizing cell update for appointment ${appointmentNumber}, column ${colIndex}, value: ${value}`);
     
     try {
+      // For currency columns, ensure proper parsing
+      if (isCurrencyColumn(colIndex)) {
+        // Parse the numeric value using our utility function
+        try {
+          const numericValue = parseNumber(value);
+          console.log(`Parsed numeric value for saving: ${value} -> ${numericValue}`);
+          // Convert to string for the database update
+          value = String(numericValue);
+        } catch (e) {
+          console.error(`Error parsing number for column ${colIndex}:`, e);
+        }
+      }
+      
       // Remove currency suffix if present before saving
       const cleanValue = value.replace(/ DKK$/, '');
       
