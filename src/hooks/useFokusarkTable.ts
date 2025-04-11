@@ -16,9 +16,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const isInitialLoadRef = useRef(true);
   
-  // Initial data load
   useEffect(() => {
-    // Only run once during initial mount
     if (!isInitialLoadRef.current) {
       return;
     }
@@ -26,7 +24,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
     const loadData = async () => {
       if (isRefreshing) {
         console.log("Skipping load during refresh");
-        return; // Prevent duplicate fetches
+        return;
       }
       
       setIsLoading(true);
@@ -34,14 +32,11 @@ export const useFokusarkTable = (initialData: string[][]) => {
       console.log('Initial loading of data in useFokusarkTable');
       
       try {
-        // First try loading from Supabase (faster)
-        console.log("Loading from Supabase");
         let supabaseData = await loadAppointmentsFromSupabase();
         
         if (supabaseData && supabaseData.length > 0) {
           console.log(`Loaded ${supabaseData.length} rows from Supabase`);
           
-          // Sort the data by appointment number (column 0)
           supabaseData = sortTableData(supabaseData);
           console.log("Data sorted by appointment number");
           
@@ -51,7 +46,6 @@ export const useFokusarkTable = (initialData: string[][]) => {
           return;
         }
         
-        // If no data in Supabase, try the API and save to Supabase
         console.log("No data in Supabase, trying API");
         const success = await fetchAndProcessData();
         
@@ -71,14 +65,11 @@ export const useFokusarkTable = (initialData: string[][]) => {
     loadData();
   }, [initialData]);
   
-  // Helper function to sort table data by appointment number
   const sortTableData = (data: string[][]): string[][] => {
     return [...data].sort((a, b) => {
-      // Extract numeric part from appointment numbers (e.g., "25119-2" -> 25119)
       const numA = parseInt(a[0]?.split('-')[0] || '0');
       const numB = parseInt(b[0]?.split('-')[0] || '0');
       
-      // If main numbers are the same, check for suffix
       if (numA === numB) {
         const suffixA = a[0]?.split('-')[1] ? parseInt(a[0].split('-')[1]) : 0;
         const suffixB = b[0]?.split('-')[1] ? parseInt(b[0].split('-')[1]) : 0;
@@ -89,24 +80,18 @@ export const useFokusarkTable = (initialData: string[][]) => {
     });
   };
   
-  // Separate function for fetching from API and processing data
   const fetchAndProcessData = async () => {
     try {
-      // Try to get fresh data from API
       const appointments = await fetchAppointments();
       
       if (appointments && appointments.length > 0) {
         console.log(`Got ${appointments.length} appointments from API`);
         
-        // Map the data for display
         const mappedData = await mapAppointmentsToTableData(appointments);
-        
-        // Sort the data
         const sortedData = sortTableData(mappedData);
         
         setTableData(sortedData);
         
-        // Save to Supabase
         const saveSuccess = await saveAppointmentsToSupabase(appointments);
         if (saveSuccess) {
           console.log("Saved to Supabase successfully");
@@ -124,18 +109,15 @@ export const useFokusarkTable = (initialData: string[][]) => {
     }
   };
   
-  // Handle errors in a consistent way
   const handleError = (err: any) => {
     console.error("Error loading data:", err);
     setError(err instanceof Error ? err : new Error(String(err)));
     
-    // If we have initialData, use it as fallback
     if (initialData && initialData.length > 0) {
       console.log("Using initialData as fallback");
       const sortedInitialData = sortTableData(initialData);
       setTableData(sortedInitialData);
     } else {
-      // Otherwise, try one more time to load from Supabase
       loadAppointmentsFromSupabase()
         .then(data => {
           if (data && data.length > 0) {
@@ -154,9 +136,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
     }
   };
   
-  // Handle cell changes
   const handleCellChange = async (rowIndex: number, colIndex: number, value: string) => {
-    // This function now only updates the UI without saving to the database
     if (!tableData[rowIndex]) {
       console.error("Invalid row index", rowIndex);
       toast.error("Failed to update: invalid row");
@@ -164,7 +144,6 @@ export const useFokusarkTable = (initialData: string[][]) => {
     }
     
     try {
-      // Update the cell value in the local state
       const newData = [...tableData];
       newData[rowIndex][colIndex] = value;
       setTableData(newData);
@@ -177,7 +156,6 @@ export const useFokusarkTable = (initialData: string[][]) => {
     }
   };
   
-  // Handle cell blur (finalize cell edit)
   const handleCellBlur = async (rowIndex: number, colIndex: number, value: string) => {
     if (!tableData[rowIndex]) {
       console.error("Invalid row index", rowIndex);
@@ -186,61 +164,48 @@ export const useFokusarkTable = (initialData: string[][]) => {
     }
     
     try {
-      const appointmentNumber = tableData[rowIndex][0]; // First column contains appointment number
+      const appointmentNumber = tableData[rowIndex][0];
       console.log(`SAVE OPERATION: Saving cell value: row=${rowIndex}, column=${colIndex}, value=${value} for appointment ${appointmentNumber}`);
       
-      // For numeric values, ensure we preserve the raw input
-      // Remove formatting artifacts but keep the value intact
       let valueToSave = value.trim();
       
-      // Remove "DKK" suffix if present
       if (valueToSave.includes("DKK")) {
         valueToSave = valueToSave.replace(/ DKK/g, "");
         console.log(`SAVE OPERATION: Removed DKK suffix, value now: ${valueToSave}`);
       }
       
-      // For columns 6 and 7 (Montage2 and Underleverandor2) which are money values
-      // Make sure we store the proper numeric value
-      if (colIndex === 6 || colIndex === 7) {
-        // First check if this is a plain number with no formatting
-        let rawNumericValue;
-        
-        if (/^\d+$/.test(valueToSave)) {
-          // If it's just digits, parse it directly
-          rawNumericValue = parseInt(valueToSave, 10);
-          console.log(`SAVE OPERATION: Value is a plain number, parsed as: ${rawNumericValue}`);
-        } else {
-          // Otherwise parse as Danish formatted number
-          rawNumericValue = parseNumber(valueToSave);
-          console.log(`SAVE OPERATION: Value is a formatted number, parsed as: ${rawNumericValue}`);
-        }
-        
-        // Store the raw number value as a string without formatting
-        valueToSave = String(rawNumericValue);
-        
-        console.log(`SAVE OPERATION: Processing numeric value for column ${colIndex}:
-          - Original input: ${value}
-          - Cleaned value: ${valueToSave} 
-          - Parsed as number: ${rawNumericValue}
-          - This will be saved to Supabase`);
+      let rawNumericValue;
+      
+      if (/^\d+$/.test(valueToSave)) {
+        rawNumericValue = parseInt(valueToSave, 10);
+        console.log(`SAVE OPERATION: Plain number detected: "${valueToSave}" parsed as ${rawNumericValue}`);
+      } 
+      else if (/^[\d\.,]+$/.test(valueToSave)) {
+        rawNumericValue = parseNumber(valueToSave);
+        console.log(`SAVE OPERATION: Formatted number detected: "${valueToSave}" parsed as ${rawNumericValue}`);
+      } 
+      else {
+        rawNumericValue = 0;
+        console.log(`SAVE OPERATION: Invalid number format: "${valueToSave}" defaulting to 0`);
       }
+      
+      valueToSave = String(rawNumericValue);
+      
+      console.log(`SAVE OPERATION: Final numeric value for column ${colIndex}: ${valueToSave}`);
       
       console.log(`SAVE OPERATION: Final value to save to Supabase: appointment ${appointmentNumber}, column=${colIndex + 1}, value=${valueToSave}`);
       
-      // Display saving notification
-      toast.loading(`Saving changes for appointment ${appointmentNumber}...`);
+      const toastId = `saving-${appointmentNumber}-${colIndex}`;
+      toast.loading(`Saving changes for appointment ${appointmentNumber}...`, { id: toastId });
       
-      // Create update data
       const updateData: Record<string, any> = {
         [`${colIndex + 1} col`]: valueToSave
       };
       
-      // Add the first 3 columns as identifiers to ensure we're updating the right row
-      updateData['1 col'] = tableData[rowIndex][0] || ''; // Appointment number
-      updateData['2 col'] = tableData[rowIndex][1] || ''; // Subject
-      updateData['3 col'] = tableData[rowIndex][2] || ''; // Responsible
+      updateData['1 col'] = tableData[rowIndex][0] || '';
+      updateData['2 col'] = tableData[rowIndex][1] || '';
+      updateData['3 col'] = tableData[rowIndex][2] || '';
       
-      // First check if this appointment already exists in the database
       const { data: existingRows, error: fetchError } = await supabase
         .from('fokusark_table')
         .select('id')
@@ -248,15 +213,16 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       if (fetchError) {
         console.error("SAVE OPERATION: Error checking existing rows:", fetchError);
-        toast.error("Failed to save changes to database");
+        toast.error("Failed to save changes to database", { id: toastId });
         return false;
       }
       
       let result;
       
       if (existingRows && existingRows.length > 0) {
-        // Update existing row
         console.log(`SAVE OPERATION: Updating existing row for appointment ${appointmentNumber}, column ${colIndex + 1}`, updateData);
+        console.log(`SAVE OPERATION: Row ID: ${existingRows[0].id}`);
+        
         const { data, error } = await supabase
           .from('fokusark_table')
           .update(updateData)
@@ -266,10 +232,12 @@ export const useFokusarkTable = (initialData: string[][]) => {
         result = { data, error };
         console.log(`SAVE OPERATION: Update result:`, error ? `Error: ${error.message}` : `Success, updated ${data?.length} rows`);
       } else {
-        // Insert new row with a proper UUID
-        updateData.id = crypto.randomUUID();
+        const rowId = crypto.randomUUID();
+        updateData.id = rowId;
         
         console.log(`SAVE OPERATION: Inserting new row for appointment ${appointmentNumber}, column ${colIndex + 1}`, updateData);
+        console.log(`SAVE OPERATION: Generated row ID: ${rowId}`);
+        
         const { data, error } = await supabase
           .from('fokusark_table')
           .insert([updateData])
@@ -281,11 +249,10 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       if (result.error) {
         console.error("SAVE OPERATION: Error updating Supabase:", result.error);
-        toast.error("Failed to save changes to database");
+        toast.error("Failed to save changes to database", { id: toastId });
         return false;
       }
       
-      // Double check that the data was stored correctly by fetching it back
       const { data: verifyData, error: verifyError } = await supabase
         .from('fokusark_table')
         .select(`${colIndex + 1} col`)
@@ -294,40 +261,38 @@ export const useFokusarkTable = (initialData: string[][]) => {
       
       if (verifyError) {
         console.warn("SAVE OPERATION: Could not verify data was saved correctly:", verifyError);
+        toast.warning("Changes saved, but could not verify", { id: toastId });
       } else {
-        console.log(`SAVE OPERATION: Verification: Value saved in database: ${verifyData[`${colIndex + 1} col`]}`);
+        const savedValue = verifyData[`${colIndex + 1} col`];
+        console.log(`SAVE OPERATION: Verification: Value saved in database: "${savedValue}"`);
         
-        // For numeric columns, verify if the values match (accounting for potential string/number type differences)
         if (colIndex === 6 || colIndex === 7) {
-          // Parse both values to numbers to compare them
-          const savedNumberValue = parseFloat(verifyData[`${colIndex + 1} col`]);
+          const savedNumberValue = parseFloat(savedValue);
           const expectedNumberValue = parseFloat(valueToSave);
           
           console.log(`SAVE OPERATION: Verification comparing values - Expected: ${expectedNumberValue}, Actual: ${savedNumberValue}`);
           
           if (isNaN(savedNumberValue) || isNaN(expectedNumberValue) || savedNumberValue !== expectedNumberValue) {
-            console.warn(`SAVE OPERATION: Value mismatch! Expected ${valueToSave} but got ${verifyData[`${colIndex + 1} col`]}`);
-            toast.warning("Warning: Saved value may be incorrect. Please refresh and check.");
+            console.warn(`SAVE OPERATION: Value mismatch! Expected ${valueToSave} but got ${savedValue}`);
+            toast.warning("Warning: Saved value may be incorrect. Please refresh and check.", { id: toastId });
           } else {
             console.log(`SAVE OPERATION: Values match correctly - ${expectedNumberValue} = ${savedNumberValue}`);
+            toast.success(`Changes saved successfully for appointment ${appointmentNumber}`, { id: toastId });
           }
-        } else if (verifyData[`${colIndex + 1} col`] !== valueToSave) {
-          console.warn(`SAVE OPERATION: Value mismatch! Expected ${valueToSave} but got ${verifyData[`${colIndex + 1} col`]}`);
+        } else if (savedValue !== valueToSave) {
+          console.warn(`SAVE OPERATION: Value mismatch! Expected ${valueToSave} but got ${savedValue}`);
+          toast.warning("Warning: Saved value may be incorrect. Please refresh and check.", { id: toastId });
         } else {
           console.log(`SAVE OPERATION: Values match correctly for non-numeric field`);
+          toast.success(`Changes saved successfully for appointment ${appointmentNumber}`, { id: toastId });
         }
       }
       
-      // Display confirmation to the user
-      toast.success(`Changes saved successfully for appointment ${appointmentNumber}`);
-      
-      // For money columns, update the UI with formatted values after successful save
       if (colIndex === 6 || colIndex === 7) {
         const rawValue = parseNumber(valueToSave);
         const displayValue = `${formatDanishNumber(rawValue)} DKK`;
         console.log(`SAVE OPERATION: Updating UI with formatted value: ${displayValue}`);
         
-        // Update the UI with the formatted value
         const newData = [...tableData];
         newData[rowIndex][colIndex] = displayValue;
         setTableData(newData);
@@ -341,14 +306,12 @@ export const useFokusarkTable = (initialData: string[][]) => {
     }
   };
   
-  // Refresh data from API and Supabase
   const refreshData = async () => {
     setIsRefreshing(true);
     setError(null);
     toast.info("Refreshing data from database...");
     
     try {
-      // First, try to get data directly from Supabase without fallbacks
       console.log("Refresh: Loading all data from Supabase...");
       const { data, error } = await supabase
         .from('fokusark_table')
@@ -363,7 +326,6 @@ export const useFokusarkTable = (initialData: string[][]) => {
       if (data && data.length > 0) {
         console.log(`Refresh: Loaded ${data.length} rows directly from Supabase`);
         
-        // Transform the data to the expected format
         const tableData: string[][] = data.map(row => [
           row['1 col'] || '',
           row['2 col'] || '',
@@ -391,7 +353,6 @@ export const useFokusarkTable = (initialData: string[][]) => {
           'regular-appointment'
         ]);
         
-        // Sort the data
         const sortedTableData = sortTableData(tableData);
         
         setTableData(sortedTableData);
@@ -400,7 +361,6 @@ export const useFokusarkTable = (initialData: string[][]) => {
         return true;
       }
       
-      // If no data in Supabase or the data is empty, fall back to API
       console.log("Refresh: No data in Supabase, trying API");
       const success = await fetchAndProcessData();
       if (!success) {

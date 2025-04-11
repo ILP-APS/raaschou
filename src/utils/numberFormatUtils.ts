@@ -30,12 +30,12 @@ export const parseNumber = (value: string): number => {
   // We need to remove all periods and replace comma with dot for JavaScript parsing
   const cleanValue = withoutDKK.replace(/\./g, '').replace(',', '.');
   
-  // Add debug log to track the transformation
+  // Log the parsing steps
   console.log(`Parsing formatted number: "${value}" -> "${withoutDKK}" -> "${cleanValue}"`);
   
   const result = parseFloat(cleanValue);
   
-  // Add debug log for special values
+  // Special logging for large numbers or NaN results
   if (result > 1000000 || isNaN(result)) {
     console.log(`Special number parsing: "${value}" -> "${withoutDKK}" -> "${cleanValue}" -> ${result}`);
   }
