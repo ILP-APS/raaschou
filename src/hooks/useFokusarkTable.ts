@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -130,7 +129,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
     // This function now only updates the UI without saving to the database
     if (!tableData[rowIndex]) {
       console.error("Invalid row index", rowIndex);
-      toast.error("Failed to save changes: invalid row");
+      toast.error("Failed to update: invalid row");
       return false;
     }
     
@@ -143,7 +142,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
       return true;
     } catch (error) {
       console.error("Error updating cell:", error);
-      toast.error("Failed to save changes");
+      toast.error("Failed to update cell value");
       return false;
     }
   };
@@ -159,34 +158,32 @@ export const useFokusarkTable = (initialData: string[][]) => {
     try {
       console.log(`Saving cell value: row=${rowIndex}, column=${colIndex}, value=${value}`);
       
-      // Clean up the input value - very important for numbers!
-      let cleanValue = value.trim();
-      
-      // For numeric values, ensure proper Danish format for display, but save the raw value
-      try {
-        const numValue = parseNumber(value);
-        if (!isNaN(numValue)) {
-          // Store the raw input as the clean value to save to DB
-          cleanValue = value.trim();
-          // Format for display in UI
-          const formattedValue = formatDanishNumber(numValue);
-          const newData = [...tableData];
-          newData[rowIndex][colIndex] = formattedValue;
-          setTableData(newData);
-          console.log(`Formatted ${value} to ${formattedValue} for display, saving raw value: ${cleanValue}`);
-        }
-      } catch (e) {
-        console.log("Not a number, keeping original value", value);
-      }
-      
       // Get the appointment number for the row
       const appointmentNumber = tableData[rowIndex][0]; // First column contains appointment number
       
-      console.log(`Saving cell for appointment ${appointmentNumber}, column=${colIndex}, value=${cleanValue}`);
+      // For numeric values, ensure we preserve the raw input
+      // Remove formatting artifacts but keep the value intact
+      let valueToSave = value.trim();
+      
+      // Remove "DKK" suffix and any thousands separators, but keep decimal point
+      if (valueToSave.includes("DKK")) {
+        valueToSave = valueToSave.replace(" DKK", "");
+      }
+      
+      // For columns 6 and 7 (Montage2 and Underleverandor2) which are money values
+      // Make sure we store the proper numeric value
+      if (colIndex === 6 || colIndex === 7) {
+        // Replace thousands separator (.) with empty string, and decimal separator (,) with period
+        valueToSave = valueToSave.replace(/\./g, "").replace(",", ".");
+        
+        console.log(`Processing numeric value for column ${colIndex}. Original: ${value}, Processed: ${valueToSave}`);
+      }
+      
+      console.log(`Saving cell for appointment ${appointmentNumber}, column=${colIndex + 1}, value=${valueToSave}`);
       
       // Create update data
       const updateData: Record<string, any> = {
-        [`${colIndex + 1} col`]: cleanValue
+        [`${colIndex + 1} col`]: valueToSave
       };
       
       // Add the first 3 columns as identifiers to ensure we're updating the right row
@@ -239,7 +236,23 @@ export const useFokusarkTable = (initialData: string[][]) => {
         return false;
       }
       
-      toast.success("Cell updated successfully");
+      // Double check that the data was stored correctly by fetching it back
+      const { data: verifyData, error: verifyError } = await supabase
+        .from('fokusark_table')
+        .select(`${colIndex + 1} col`)
+        .eq('1 col', appointmentNumber)
+        .single();
+      
+      if (verifyError) {
+        console.warn("Could not verify data was saved correctly:", verifyError);
+      } else {
+        console.log(`Verification: Value saved in database: ${verifyData[`${colIndex + 1} col`]}`);
+        if (verifyData[`${colIndex + 1} col`] !== valueToSave) {
+          console.warn(`Value mismatch! Expected ${valueToSave} but got ${verifyData[`${colIndex + 1} col`]}`);
+        }
+      }
+      
+      toast.success("Changes saved successfully");
       return true;
     } catch (error) {
       console.error("Error updating cell:", error);

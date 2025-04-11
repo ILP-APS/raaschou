@@ -17,6 +17,7 @@ import { useTheme } from "next-themes";
 import "./FokusarkDataGridStyles.css";
 import { formatDanishCurrency } from "@/utils/formatUtils";
 import { parseNumber } from "@/utils/numberFormatUtils";
+import { toast } from "sonner";
 
 interface FokusarkColumnMeta {
   frozen?: boolean;
@@ -77,16 +78,52 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
 
   const handleInputBlur = (rowIndex: number, colIndex: number, value: string) => {
     if (onCellBlur) {
-      console.log(`[DEBUG] Cell blur at row ${rowIndex}, column ${colIndex}, value: "${value}"`);
+      console.log(`Cell blur event fired at row ${rowIndex}, column ${colIndex}, value: "${value}"`);
+      
+      // Ensure we're saving the numeric value correctly for money columns
+      if (colIndex === 6 || colIndex === 7) { // Montage2 or Underleverandor2
+        // Log detailed information about the value before saving
+        try {
+          const numValue = parseNumber(value);
+          console.log(`Parsed value for blur event: ${value} -> ${numValue} (parsed as number)`);
+          
+          // If the value has "DKK" suffix, add it to ensure consistent formatting in UI
+          if (!value.includes("DKK") && numValue !== 0) {
+            value = `${value} DKK`;
+          }
+        } catch (e) {
+          console.warn(`Failed to parse number during blur: ${value}`, e);
+        }
+      }
+      
+      toast.info(`Saving changes for row ${rowIndex + 1}...`);
       onCellBlur(rowIndex, colIndex, value);
     }
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, rowIndex: number, colIndex: number, value: string) => {
     if (e.key === 'Enter' && onCellBlur) {
-      console.log(`[DEBUG] Cell Enter key at row ${rowIndex}, column ${colIndex}, value: "${value}"`);
+      console.log(`Enter key pressed at row ${rowIndex}, column ${colIndex}, value: "${value}"`);
       e.preventDefault(); // Prevent form submission
+      
+      // Special handling for money columns
+      if (colIndex === 6 || colIndex === 7) { // Montage2 or Underleverandor2
+        try {
+          const numValue = parseNumber(value);
+          console.log(`Parsed value for Enter key event: ${value} -> ${numValue} (parsed as number)`);
+          
+          // Ensure the value has proper formatting when displayed
+          if (!value.includes("DKK") && numValue !== 0) {
+            value = `${value} DKK`;
+          }
+        } catch (e) {
+          console.warn(`Failed to parse number during Enter key press: ${value}`, e);
+        }
+      }
+      
+      toast.info(`Saving changes for row ${rowIndex + 1}...`);
       onCellBlur(rowIndex, colIndex, value);
+      
       // Move focus away from the input to simulate blur
       (e.target as HTMLElement).blur();
     }
@@ -163,6 +200,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
               value={value}
               onChange={e => {
                 if (onCellChange) {
+                  console.log(`Montage2 input changed to: ${e.target.value}`);
                   onCellChange(rowId, colIndex, e.target.value);
                 }
                 
@@ -171,9 +209,11 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
                 setRows(newRows);
               }}
               onBlur={e => {
+                console.log(`Montage2 input blur with value: ${e.target.value}`);
                 handleInputBlur(rowId, colIndex, e.target.value);
               }}
               onKeyDown={e => {
+                console.log(`Montage2 key down: ${e.key}, value: ${e.currentTarget.value}`);
                 handleInputKeyDown(e, rowId, colIndex, e.currentTarget.value);
               }}
               className="w-full bg-transparent border-0 focus:ring-1 focus:ring-primary text-right font-mono"
@@ -203,6 +243,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
               value={value}
               onChange={e => {
                 if (onCellChange) {
+                  console.log(`Underleverandor2 input changed to: ${e.target.value}`);
                   onCellChange(rowId, colIndex, e.target.value);
                 }
                 
@@ -211,9 +252,11 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
                 setRows(newRows);
               }}
               onBlur={e => {
+                console.log(`Underleverandor2 input blur with value: ${e.target.value}`);
                 handleInputBlur(rowId, colIndex, e.target.value);
               }}
               onKeyDown={e => {
+                console.log(`Underleverandor2 key down: ${e.key}, value: ${e.currentTarget.value}`);
                 handleInputKeyDown(e, rowId, colIndex, e.currentTarget.value);
               }}
               className="w-full bg-transparent border-0 focus:ring-1 focus:ring-primary text-right font-mono"
