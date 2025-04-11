@@ -37,10 +37,15 @@ export const useFokusarkTable = (initialData: string[][]) => {
       try {
         // First try loading from Supabase (faster)
         console.log("Loading from Supabase");
-        const supabaseData = await loadAppointmentsFromSupabase();
+        let supabaseData = await loadAppointmentsFromSupabase();
         
         if (supabaseData && supabaseData.length > 0) {
           console.log(`Loaded ${supabaseData.length} rows from Supabase`);
+          
+          // Sort the data by appointment number (column 0)
+          supabaseData = sortTableData(supabaseData);
+          console.log("Data sorted by appointment number");
+          
           setTableData(supabaseData);
           setIsLoading(false);
           isInitialLoadRef.current = false;
@@ -53,7 +58,8 @@ export const useFokusarkTable = (initialData: string[][]) => {
         
         if (!success && initialData && initialData.length > 0) {
           console.log("API failed, using initialData as fallback");
-          setTableData(initialData);
+          const sortedInitialData = sortTableData(initialData);
+          setTableData(sortedInitialData);
         }
       } catch (err) {
         handleError(err);
@@ -66,6 +72,24 @@ export const useFokusarkTable = (initialData: string[][]) => {
     loadData();
   }, [initialData]);
   
+  // Helper function to sort table data by appointment number
+  const sortTableData = (data: string[][]): string[][] => {
+    return [...data].sort((a, b) => {
+      // Extract numeric part from appointment numbers (e.g., "25119-2" -> 25119)
+      const numA = parseInt(a[0]?.split('-')[0] || '0');
+      const numB = parseInt(b[0]?.split('-')[0] || '0');
+      
+      // If main numbers are the same, check for suffix
+      if (numA === numB) {
+        const suffixA = a[0]?.split('-')[1] ? parseInt(a[0].split('-')[1]) : 0;
+        const suffixB = b[0]?.split('-')[1] ? parseInt(b[0].split('-')[1]) : 0;
+        return suffixA - suffixB;
+      }
+      
+      return numA - numB;
+    });
+  };
+  
   // Separate function for fetching from API and processing data
   const fetchAndProcessData = async () => {
     try {
@@ -77,7 +101,11 @@ export const useFokusarkTable = (initialData: string[][]) => {
         
         // Map the data for display
         const mappedData = await mapAppointmentsToTableData(appointments);
-        setTableData(mappedData);
+        
+        // Sort the data
+        const sortedData = sortTableData(mappedData);
+        
+        setTableData(sortedData);
         
         // Save to Supabase
         const saveSuccess = await saveAppointmentsToSupabase(appointments);
@@ -105,14 +133,16 @@ export const useFokusarkTable = (initialData: string[][]) => {
     // If we have initialData, use it as fallback
     if (initialData && initialData.length > 0) {
       console.log("Using initialData as fallback");
-      setTableData(initialData);
+      const sortedInitialData = sortTableData(initialData);
+      setTableData(sortedInitialData);
     } else {
       // Otherwise, try one more time to load from Supabase
       loadAppointmentsFromSupabase()
         .then(data => {
           if (data && data.length > 0) {
             console.log("Recovered with Supabase fallback data");
-            setTableData(data);
+            const sortedData = sortTableData(data);
+            setTableData(sortedData);
             toast.warning("Using cached data. Failed to connect to API.");
           } else {
             setTableData([]);
@@ -320,7 +350,10 @@ export const useFokusarkTable = (initialData: string[][]) => {
           'regular-appointment'
         ]);
         
-        setTableData(tableData);
+        // Sort the data
+        const sortedTableData = sortTableData(tableData);
+        
+        setTableData(sortedTableData);
         toast.success("Data refreshed from database");
         setIsRefreshing(false);
         return true;
