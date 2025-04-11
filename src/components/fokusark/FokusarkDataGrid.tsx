@@ -75,6 +75,23 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
     });
   };
 
+  const handleInputBlur = (rowIndex: number, colIndex: number, value: string) => {
+    if (onCellBlur) {
+      console.log(`[DEBUG] Cell blur at row ${rowIndex}, column ${colIndex}, value: "${value}"`);
+      onCellBlur(rowIndex, colIndex, value);
+    }
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, rowIndex: number, colIndex: number, value: string) => {
+    if (e.key === 'Enter' && onCellBlur) {
+      console.log(`[DEBUG] Cell Enter key at row ${rowIndex}, column ${colIndex}, value: "${value}"`);
+      e.preventDefault(); // Prevent form submission
+      onCellBlur(rowIndex, colIndex, value);
+      // Move focus away from the input to simulate blur
+      (e.target as HTMLElement).blur();
+    }
+  };
+
   const columns: ColumnDef<FokusarkRow, any>[] = [
     {
       accessorKey: 'nr',
@@ -137,36 +154,27 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
         }
         
         const numValue = parseNumber(value);
+        const rowId = parseInt(row.id);
+        const colIndex = 6; // Index of montage2 column
         
         return (
           <div className="flex justify-between">
             <input
               value={value}
               onChange={e => {
-                const rowIndex = parseInt(row.id);
-                const colKey = column.id;
-                const colIndex = 6; // Index of montage2 column
-                onCellChange?.(rowIndex, colIndex, e.target.value);
+                if (onCellChange) {
+                  onCellChange(rowId, colIndex, e.target.value);
+                }
                 
                 const newRows = [...rows];
-                newRows[rowIndex][colKey] = e.target.value;
+                newRows[rowId][column.id] = e.target.value;
                 setRows(newRows);
               }}
               onBlur={e => {
-                if (onCellBlur) {
-                  const rowIndex = parseInt(row.id);
-                  const colIndex = 6; // Index of montage2 column
-                  console.log(`Montage2 cell blur at row ${rowIndex}, column ${colIndex}, value: ${e.target.value}`);
-                  onCellBlur(rowIndex, colIndex, e.target.value);
-                }
+                handleInputBlur(rowId, colIndex, e.target.value);
               }}
               onKeyDown={e => {
-                if (e.key === 'Enter' && onCellBlur) {
-                  const rowIndex = parseInt(row.id);
-                  const colIndex = 6; // Index of montage2 column
-                  console.log(`Montage2 cell Enter key at row ${rowIndex}, column ${colIndex}, value: ${e.currentTarget.value}`);
-                  onCellBlur(rowIndex, colIndex, e.currentTarget.value);
-                }
+                handleInputKeyDown(e, rowId, colIndex, e.currentTarget.value);
               }}
               className="w-full bg-transparent border-0 focus:ring-1 focus:ring-primary text-right font-mono"
             />
@@ -186,36 +194,27 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
         }
         
         const numValue = parseNumber(value);
+        const rowId = parseInt(row.id);
+        const colIndex = 7; // Index of underleverandor2 column
         
         return (
           <div className="flex justify-between">
             <input
               value={value}
               onChange={e => {
-                const rowIndex = parseInt(row.id);
-                const colKey = column.id;
-                const colIndex = 7; // Index of underleverandor2 column
-                onCellChange?.(rowIndex, colIndex, e.target.value);
+                if (onCellChange) {
+                  onCellChange(rowId, colIndex, e.target.value);
+                }
                 
                 const newRows = [...rows];
-                newRows[rowIndex][colKey] = e.target.value;
+                newRows[rowId][column.id] = e.target.value;
                 setRows(newRows);
               }}
               onBlur={e => {
-                if (onCellBlur) {
-                  const rowIndex = parseInt(row.id);
-                  const colIndex = 7; // Index of underleverandor2 column
-                  console.log(`Underleverandor2 cell blur at row ${rowIndex}, column ${colIndex}, value: ${e.target.value}`);
-                  onCellBlur(rowIndex, colIndex, e.target.value);
-                }
+                handleInputBlur(rowId, colIndex, e.target.value);
               }}
               onKeyDown={e => {
-                if (e.key === 'Enter' && onCellBlur) {
-                  const rowIndex = parseInt(row.id);
-                  const colIndex = 7; // Index of underleverandor2 column
-                  console.log(`Underleverandor2 cell Enter key at row ${rowIndex}, column ${colIndex}, value: ${e.currentTarget.value}`);
-                  onCellBlur(rowIndex, colIndex, e.currentTarget.value);
-                }
+                handleInputKeyDown(e, rowId, colIndex, e.currentTarget.value);
               }}
               className="w-full bg-transparent border-0 focus:ring-1 focus:ring-primary text-right font-mono"
             />

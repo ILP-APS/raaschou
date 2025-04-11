@@ -159,14 +159,21 @@ export const useFokusarkTable = (initialData: string[][]) => {
     try {
       console.log(`Saving cell value: row=${rowIndex}, column=${colIndex}, value=${value}`);
       
-      // Format numeric values for display (this won't affect the saved value)
+      // Clean up the input value - very important for numbers!
+      let cleanValue = value.trim();
+      
+      // For numeric values, ensure proper Danish format for display, but save the raw value
       try {
         const numValue = parseNumber(value);
-        if (!isNaN(numValue) && numValue !== 0) {
+        if (!isNaN(numValue)) {
+          // Store the raw input as the clean value to save to DB
+          cleanValue = value.trim();
+          // Format for display in UI
           const formattedValue = formatDanishNumber(numValue);
           const newData = [...tableData];
           newData[rowIndex][colIndex] = formattedValue;
           setTableData(newData);
+          console.log(`Formatted ${value} to ${formattedValue} for display, saving raw value: ${cleanValue}`);
         }
       } catch (e) {
         console.log("Not a number, keeping original value", value);
@@ -175,11 +182,11 @@ export const useFokusarkTable = (initialData: string[][]) => {
       // Get the appointment number for the row
       const appointmentNumber = tableData[rowIndex][0]; // First column contains appointment number
       
-      console.log(`Saving cell: row=${rowIndex}, column=${colIndex}, appointmentNumber=${appointmentNumber}, value=${value}`);
+      console.log(`Saving cell for appointment ${appointmentNumber}, column=${colIndex}, value=${cleanValue}`);
       
       // Create update data
       const updateData: Record<string, any> = {
-        [`${colIndex + 1} col`]: value
+        [`${colIndex + 1} col`]: cleanValue
       };
       
       // Add the first 3 columns as identifiers to ensure we're updating the right row
@@ -211,6 +218,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
           .select();
           
         result = { data, error };
+        console.log(`Update result:`, error ? `Error: ${error.message}` : `Success, updated ${data?.length} rows`);
       } else {
         // Insert new row with a proper UUID
         updateData.id = crypto.randomUUID();
@@ -222,6 +230,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
           .select();
           
         result = { data, error };
+        console.log(`Insert result:`, error ? `Error: ${error.message}` : `Success, inserted ${data?.length} rows`);
       }
       
       if (result.error) {
