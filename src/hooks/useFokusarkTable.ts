@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -202,8 +201,7 @@ export const useFokusarkTable = (initialData: string[][]) => {
       // For columns 6 and 7 (Montage2 and Underleverandor2) which are money values
       // Make sure we store the proper numeric value
       if (colIndex === 6 || colIndex === 7) {
-        // This is a critical fix: properly parse Danish formatted numbers 
-        // (where . is thousands separator and , is decimal point)
+        // Parse Danish formatted numbers (e.g., "2.000" -> 2000)
         const rawNumericValue = parseNumber(valueToSave);
         
         // Store the raw number value as a string without formatting

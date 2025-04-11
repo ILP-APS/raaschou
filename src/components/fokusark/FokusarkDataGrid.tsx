@@ -94,7 +94,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
               onCellChange(rowIndex, colIndex, formattedValue);
             }
             
-            onCellBlur(rowIndex, colIndex, formattedValue);
+            onCellBlur(rowIndex, colIndex, String(numValue));
           } else {
             onCellBlur(rowIndex, colIndex, value);
           }
@@ -127,7 +127,7 @@ const FokusarkDataGrid: React.FC<FokusarkDataGridProps> = ({ data, onCellChange,
               onCellChange(rowIndex, colIndex, formattedValue);
             }
             
-            onCellBlur(rowIndex, colIndex, formattedValue);
+            onCellBlur(rowIndex, colIndex, String(numValue));
           } else {
             onCellBlur(rowIndex, colIndex, value);
           }
