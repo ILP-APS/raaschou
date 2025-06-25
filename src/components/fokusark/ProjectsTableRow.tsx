@@ -24,10 +24,10 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
   return (
     <TableRow className={index % 2 === 0 ? "bg-background" : "bg-muted/20"}>
       {/* Aftale */}
-      <TableCell className="sticky left-0 bg-inherit border-r font-medium z-10">
+      <TableCell className="bg-inherit border-r font-medium">
         {project.id}
       </TableCell>
-      <TableCell className="sticky left-24 bg-inherit border-r min-w-[200px] z-10">
+      <TableCell className="bg-inherit border-r min-w-[200px]">
         {project.name || "-"}
       </TableCell>
       <TableCell className="text-center border-r">

@@ -33,8 +33,8 @@ export const ProjectsTableHeaders: React.FC = () => {
       {/* Column Headers */}
       <TableRow>
         {/* Aftale */}
-        <TableHead className="sticky left-0 bg-background border-r z-10">Projekt ID</TableHead>
-        <TableHead className="sticky left-24 bg-background border-r min-w-[200px] z-10">Projekt Navn/Emne</TableHead>
+        <TableHead className="bg-inherit border-r">Projekt ID</TableHead>
+        <TableHead className="bg-inherit border-r min-w-[200px]">Projekt Navn/Emne</TableHead>
         <TableHead className="text-center border-r">Ansvarlig</TableHead>
         
         {/* Tilbud */}
