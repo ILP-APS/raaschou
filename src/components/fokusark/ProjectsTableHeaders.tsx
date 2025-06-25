@@ -7,8 +7,12 @@ export const ProjectsTableHeaders: React.FC = () => {
     <TableHeader>
       {/* Group Headers */}
       <TableRow className="bg-muted/30">
-        {/* Aftale */}
-        <TableHead className="text-center font-semibold border-r" colSpan={3}>
+        {/* Aftale - Frozen columns */}
+        <TableHead 
+          className="sticky z-30 bg-muted/30 text-center font-semibold border-r" 
+          colSpan={3}
+          style={{ left: 0 }}
+        >
           Aftale
         </TableHead>
         <TableHead className="text-center font-semibold border-r" colSpan={4}>
@@ -33,10 +37,25 @@ export const ProjectsTableHeaders: React.FC = () => {
       
       {/* Column Headers */}
       <TableRow className="bg-muted/30">
-        {/* Aftale */}
-        <TableHead className="border-r">Projekt ID</TableHead>
-        <TableHead className="border-r">Projekt Navn/Emne</TableHead>
-        <TableHead className="text-center border-r">Ansvarlig</TableHead>
+        {/* Aftale - Frozen columns */}
+        <TableHead 
+          className="sticky z-30 bg-muted/30 border-r"
+          style={{ left: 0, minWidth: '150px', width: '150px' }}
+        >
+          Projekt ID
+        </TableHead>
+        <TableHead 
+          className="sticky z-30 bg-muted/30 border-r"
+          style={{ left: '150px', minWidth: '300px', width: '300px' }}
+        >
+          Projekt Navn/Emne
+        </TableHead>
+        <TableHead 
+          className="sticky z-30 bg-muted/30 text-center border-r"
+          style={{ left: '450px', minWidth: '100px', width: '100px' }}
+        >
+          Ansvarlig
+        </TableHead>
         
         {/* Tilbud */}
         <TableHead className="text-right border-r">Tilbudsbeløb i alt</TableHead>

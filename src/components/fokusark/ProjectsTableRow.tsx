@@ -57,16 +57,27 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
     }
   };
 
+  // Get background color based on row pattern
+  const getRowBgColor = () => {
+    if (isSubProject) return "bg-muted/10";
+    return index === 0 || index % 2 === 0 ? "bg-background" : "bg-muted/20";
+  };
+
+  const rowBgColor = getRowBgColor();
+
   return (
     <TableRow className={cn(
-      index === 0 || index % 2 === 0 ? "bg-background" : "bg-muted/20",
-      isSubProject && "bg-muted/10" // Slightly different background for sub-projects
+      rowBgColor
     )}>
-      {/* Aftale */}
-      <TableCell className={cn(
-        "border-r font-medium",
-        isSubProject && "pl-8" // Indent sub-projects
-      )}>
+      {/* Aftale - Frozen columns */}
+      <TableCell 
+        className={cn(
+          "sticky z-20 border-r font-medium",
+          rowBgColor,
+          isSubProject && "pl-8" // Indent sub-projects
+        )}
+        style={{ left: 0, minWidth: '150px', width: '150px' }}
+      >
         <div className="flex items-center gap-2">
           {isParent && hasChildren && (
             <button
@@ -89,10 +100,14 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
           </span>
         </div>
       </TableCell>
-      <TableCell className={cn(
-        "border-r",
-        isSubProject && "pl-8" // Indent sub-projects
-      )}>
+      <TableCell 
+        className={cn(
+          "sticky z-20 border-r",
+          rowBgColor,
+          isSubProject && "pl-8" // Indent sub-projects
+        )}
+        style={{ left: '150px', minWidth: '300px', width: '300px' }}
+      >
         <span className={cn(
           isParent && hasChildren && "font-semibold",
           isSubProject && "text-muted-foreground"
@@ -100,7 +115,13 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
           {project.name || "-"}
         </span>
       </TableCell>
-      <TableCell className="text-center border-r">
+      <TableCell 
+        className={cn(
+          "sticky z-20 text-center border-r",
+          rowBgColor
+        )}
+        style={{ left: '450px', minWidth: '100px', width: '100px' }}
+      >
         {extractInitials(project.responsible_person_initials)}
       </TableCell>
       
