@@ -1,9 +1,6 @@
 
 import React from "react";
-import {
-  Table,
-  TableBody,
-} from "@/components/ui/table";
+import { Table, TableBody } from "@/components/ui/table";
 import { useProjects } from "@/hooks/useProjects";
 import { useDragScroll } from "@/hooks/useDragScroll";
 import { ProjectsTableHeader } from "./ProjectsTableHeader";
@@ -12,7 +9,13 @@ import "./FokusarkTableStyles.css";
 
 const ProjectsTable: React.FC = () => {
   const { projects, loading, updateCompletionPercentage } = useProjects();
-  const { containerRef, handleMouseDown } = useDragScroll();
+  const { 
+    containerRef, 
+    handleMouseDown, 
+    handleMouseLeave, 
+    handleMouseUp, 
+    handleMouseMove 
+  } = useDragScroll();
 
   if (loading) {
     return (
@@ -25,6 +28,7 @@ const ProjectsTable: React.FC = () => {
     );
   }
 
+  // Render logic for no projects
   if (projects.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -41,6 +45,9 @@ const ProjectsTable: React.FC = () => {
       ref={containerRef}
       className="w-full overflow-auto border rounded-lg hover:cursor-grab"
       onMouseDown={handleMouseDown}
+      onMouseLeave={handleMouseLeave}
+      onMouseUp={handleMouseUp}
+      onMouseMove={handleMouseMove}
     >
       <Table>
         <ProjectsTableHeader />

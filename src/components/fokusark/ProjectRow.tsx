@@ -19,8 +19,8 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
   const [editingCell, setEditingCell] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>("");
 
-  // Handle cell click for editing - now works properly with drag scroll
-  const handleCellClick = (e: React.MouseEvent, projectId: string, currentValue: number | null) => {
+  // Handle cell click for editing - simplified without event conflicts
+  const handleCellClick = (projectId: string, currentValue: number | null) => {
     setEditingCell(projectId);
     setEditValue(currentValue?.toString() || "");
   };
@@ -115,7 +115,7 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
         ) : (
           <div 
             className="cursor-pointer hover:bg-muted/50 p-1 rounded"
-            onClick={(e) => handleCellClick(e, project.id, project.completion_percentage_manual)}
+            onClick={() => handleCellClick(project.id, project.completion_percentage_manual)}
           >
             {project.completion_percentage_manual ? formatDanishNumber(project.completion_percentage_manual) + '%' : '-'}
           </div>
