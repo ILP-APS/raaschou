@@ -8,14 +8,15 @@ export const useHoldScroll = () => {
   const [scrollStart, setScrollStart] = useState({ x: 0, y: 0 });
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    // Don't start dragging if clicking on input elements or editable content
+    // Only prevent dragging on specific interactive elements
     const target = e.target as HTMLElement;
-    if (target.tagName === 'INPUT' || target.contentEditable === 'true' || target.closest('[contenteditable="true"]')) {
+    if (target.tagName === 'INPUT' || target.tagName === 'BUTTON') {
       return;
     }
 
     if (e.button !== 0) return; // Only handle left mouse button
     
+    console.log('Mouse down - starting drag');
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY });
     
@@ -24,6 +25,7 @@ export const useHoldScroll = () => {
         x: containerRef.current.scrollLeft,
         y: containerRef.current.scrollTop
       });
+      console.log('Scroll start:', containerRef.current.scrollLeft, containerRef.current.scrollTop);
     }
     
     // Prevent text selection while dragging
@@ -36,13 +38,15 @@ export const useHoldScroll = () => {
     const deltaX = dragStart.x - e.clientX;
     const deltaY = dragStart.y - e.clientY;
 
-    // Apply scroll with sensitivity multiplier
-    const sensitivity = 1;
-    containerRef.current.scrollLeft = scrollStart.x + (deltaX * sensitivity);
-    containerRef.current.scrollTop = scrollStart.y + (deltaY * sensitivity);
+    // Apply scroll
+    containerRef.current.scrollLeft = scrollStart.x + deltaX;
+    containerRef.current.scrollTop = scrollStart.y + deltaY;
+    
+    console.log('Dragging - delta:', deltaX, deltaY, 'new scroll:', containerRef.current.scrollLeft);
   }, [isDragging, dragStart, scrollStart]);
 
   const handleMouseUp = useCallback(() => {
+    console.log('Mouse up - ending drag');
     setIsDragging(false);
   }, []);
 

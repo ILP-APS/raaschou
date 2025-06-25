@@ -19,6 +19,7 @@ export const EditablePercentageCell: React.FC<EditablePercentageCellProps> = ({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent drag scrolling when clicking on editable cell
+    e.preventDefault(); // Prevent any default behavior
     setIsEditing(true);
     setEditValue(value?.toString() || "");
   };
@@ -41,6 +42,11 @@ export const EditablePercentageCell: React.FC<EditablePercentageCellProps> = ({
     }
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Prevent drag when interacting with input elements
+    e.stopPropagation();
+  };
+
   if (isEditing) {
     return (
       <Input
@@ -48,6 +54,7 @@ export const EditablePercentageCell: React.FC<EditablePercentageCellProps> = ({
         onChange={(e) => setEditValue(e.target.value)}
         onBlur={handleSave}
         onKeyDown={handleKeyDown}
+        onMouseDown={handleMouseDown}
         className="w-full text-right"
         autoFocus
         type="number"
@@ -61,6 +68,7 @@ export const EditablePercentageCell: React.FC<EditablePercentageCellProps> = ({
   return (
     <div
       onClick={handleClick}
+      onMouseDown={handleMouseDown}
       className="cursor-pointer hover:bg-muted/50 p-2 -m-2 rounded text-right"
     >
       {value !== null ? formatDanishNumber(value) : "-"}

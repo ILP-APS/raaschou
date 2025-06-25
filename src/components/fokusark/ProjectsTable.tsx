@@ -26,7 +26,8 @@ const ProjectsTable: React.FC = () => {
         className="w-full overflow-auto border border-border rounded-lg"
         style={{ 
           cursor: isDragging ? 'grabbing' : 'grab',
-          userSelect: isDragging ? 'none' : 'auto'
+          userSelect: isDragging ? 'none' : 'auto',
+          minWidth: '800px' // Ensure we have enough width to trigger horizontal scroll
         }}
         onMouseDown={handleMouseDown}
       >
