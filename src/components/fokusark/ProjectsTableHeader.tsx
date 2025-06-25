@@ -37,34 +37,34 @@ export const ProjectsTableHeader: React.FC = () => {
       </TableRow>
       <TableRow>
         {/* Aftale */}
-        <TableHead className="sticky left-0 bg-background z-10 border-r">Projekt ID</TableHead>
-        <TableHead className="sticky left-20 bg-background z-10 border-r">Projekt Navn/Emne</TableHead>
-        <TableHead className="border-r-2 border-border">Ansvarlig</TableHead>
+        <TableHead className="sticky-column sticky-col-0 sticky-header sticky-corner bg-background border-r">Projekt ID</TableHead>
+        <TableHead className="sticky-column sticky-col-1 sticky-header sticky-corner bg-background border-r">Projekt Navn/Emne</TableHead>
+        <TableHead className="sticky-header bg-background border-r-2 border-border">Ansvarlig</TableHead>
         {/* Tilbud */}
-        <TableHead className="text-right">Tilbudsbeløb i alt</TableHead>
-        <TableHead className="text-right">Heraf Montage</TableHead>
-        <TableHead className="text-right">Heraf Underleverandør</TableHead>
-        <TableHead className="text-right border-r-2 border-border">Beregnet Materialebeløb</TableHead>
+        <TableHead className="sticky-header bg-background text-right">Tilbudsbeløb i alt</TableHead>
+        <TableHead className="sticky-header bg-background text-right">Heraf Montage</TableHead>
+        <TableHead className="sticky-header bg-background text-right">Heraf Underleverandør</TableHead>
+        <TableHead className="sticky-header bg-background text-right border-r-2 border-border">Beregnet Materialebeløb</TableHead>
         {/* Estimeret */}
-        <TableHead className="text-right">Estimeret timer - Projektering</TableHead>
-        <TableHead className="text-right">Estimeret timer - Produktion</TableHead>
-        <TableHead className="text-right border-r-2 border-border">Estimeret timer - Montage</TableHead>
+        <TableHead className="sticky-header bg-background text-right">Estimeret timer - Projektering</TableHead>
+        <TableHead className="sticky-header bg-background text-right">Estimeret timer - Produktion</TableHead>
+        <TableHead className="sticky-header bg-background text-right border-r-2 border-border">Estimeret timer - Montage</TableHead>
         {/* Realiseret */}
-        <TableHead className="text-right">Brugte timer - Projektering</TableHead>
-        <TableHead className="text-right">Brugte timer - Produktion</TableHead>
-        <TableHead className="text-right">Brugte timer - Montage</TableHead>
-        <TableHead className="text-right border-r-2 border-border">Total antal timer brugt</TableHead>
+        <TableHead className="sticky-header bg-background text-right">Brugte timer - Projektering</TableHead>
+        <TableHead className="sticky-header bg-background text-right">Brugte timer - Produktion</TableHead>
+        <TableHead className="sticky-header bg-background text-right">Brugte timer - Montage</TableHead>
+        <TableHead className="sticky-header bg-background text-right border-r-2 border-border">Total antal timer brugt</TableHead>
         {/* Projektering */}
-        <TableHead className="text-right border-r-2 border-border">Timer tilbage - Projektering</TableHead>
+        <TableHead className="sticky-header bg-background text-right border-r-2 border-border">Timer tilbage - Projektering</TableHead>
         {/* Produktions stadie */}
-        <TableHead className="text-right">Timer tilbage - Produktion</TableHead>
-        <TableHead className="text-right">Færdig% (NU)</TableHead>
-        <TableHead className="text-right">Færdig% (FØR)</TableHead>
-        <TableHead className="text-right">Estimeret timer ift. Færdig%</TableHead>
-        <TableHead className="text-right border-r-2 border-border">+/- Timer</TableHead>
+        <TableHead className="sticky-header bg-background text-right">Timer tilbage - Produktion</TableHead>
+        <TableHead className="sticky-header bg-background text-right">Færdig% (NU)</TableHead>
+        <TableHead className="sticky-header bg-background text-right">Færdig% (FØR)</TableHead>
+        <TableHead className="sticky-header bg-background text-right">Estimeret timer ift. Færdig%</TableHead>
+        <TableHead className="sticky-header bg-background text-right border-r-2 border-border">+/- Timer</TableHead>
         {/* Montage */}
-        <TableHead className="text-right">Timer tilbage - Montage</TableHead>
-        <TableHead className="text-right">Afsat Fragt</TableHead>
+        <TableHead className="sticky-header bg-background text-right">Timer tilbage - Montage</TableHead>
+        <TableHead className="sticky-header bg-background text-right">Afsat Fragt</TableHead>
       </TableRow>
     </TableHeader>
   );

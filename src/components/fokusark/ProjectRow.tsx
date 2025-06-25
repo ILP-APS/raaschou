@@ -49,10 +49,10 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
       className={index % 2 === 0 ? "bg-background" : "bg-muted/25"}
     >
       {/* Aftale */}
-      <TableCell className="sticky left-0 bg-inherit z-10 border-r font-mono text-sm">
+      <TableCell className="sticky-column sticky-col-0 bg-inherit border-r font-mono text-sm">
         {project.id}
       </TableCell>
-      <TableCell className="sticky left-20 bg-inherit z-10 border-r font-medium min-w-48">
+      <TableCell className="sticky-column sticky-col-1 bg-inherit border-r font-medium">
         {project.name || '-'}
       </TableCell>
       <TableCell className="border-r-2 border-border text-center">
