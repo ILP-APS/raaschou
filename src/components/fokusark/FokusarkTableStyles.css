@@ -1,97 +1,16 @@
 
-/* Hide scrollbars completely while maintaining scroll functionality */
-::-webkit-scrollbar {
-  display: none;
-}
-
-/* Firefox */
-* {
-  scrollbar-width: none;
-}
-
-/* Native scroll container with fade indicators */
-.fokusark-native-scroll-container {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.5rem;
-}
-
-/* Fade indicators for scroll areas */
-.scroll-fade-left {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 20px;
-  height: 100%;
-  background: linear-gradient(to right, hsl(var(--background)) 0%, transparent 100%);
-  z-index: 10;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.scroll-fade-right {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 20px;
-  height: 100%;
-  background: linear-gradient(to left, hsl(var(--background)) 0%, transparent 100%);
-  z-index: 10;
-  pointer-events: none;
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
-/* Show left fade when scrolled */
-.fokusark-native-scroll-container:has(.fokusark-scroll-wrapper:not(:horizontal-scroll-start)) .scroll-fade-left {
-  opacity: 1;
-}
-
-/* Hide right fade when at end */
-.fokusark-native-scroll-container:has(.fokusark-scroll-wrapper:horizontal-scroll-end) .scroll-fade-right {
-  opacity: 0;
-}
-
-/* Main scroll wrapper with drag functionality */
-.fokusark-scroll-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  overflow-y: auto;
-  max-height: 70vh;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  /* Hide scrollbars */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  /* Drag cursor styles */
-  cursor: grab;
-  touch-action: none; /* Prevent default touch behaviors during drag */
-}
-
-.fokusark-scroll-wrapper::-webkit-scrollbar {
-  display: none;
-}
-
-/* Native HTML Table Styles - This is the key fix! */
+/* Basic table styling */
 .fokusark-native-table {
-  min-width: 2400px !important; /* Force minimum width to enable horizontal scrolling */
-  width: max-content !important; /* Allow table to expand based on content */
-  table-layout: auto !important; /* Allow flexible column widths */
+  width: 100%;
   border-collapse: collapse;
-  caption-bottom: true;
   font-size: 0.875rem;
   line-height: 1.25rem;
 }
 
-/* Native table cell styles that match Shadcn appearance */
 .fokusark-native-table th {
   height: 3rem;
   padding: 0 1rem;
   text-align: left;
-  align-items: center;
   font-weight: 500;
   color: hsl(var(--muted-foreground));
   background-color: hsl(var(--background));
@@ -100,15 +19,8 @@
 
 .fokusark-native-table td {
   padding: 1rem;
-  align-items: center;
   background-color: hsl(var(--background));
   border-bottom: 1px solid hsl(var(--border));
-}
-
-/* Row hover effects */
-.fokusark-native-table tbody tr {
-  border-bottom: 1px solid hsl(var(--border));
-  transition: background-color 0.2s ease;
 }
 
 .fokusark-native-table tbody tr:hover {
@@ -119,29 +31,12 @@
   border-bottom: 0;
 }
 
-/* Active dragging state */
-.fokusark-scroll-wrapper.dragging {
-  cursor: grabbing !important;
-  user-select: none;
-}
-
-/* Prevent text selection during drag on all child elements */
-.fokusark-scroll-wrapper.dragging * {
-  user-select: none !important;
-  pointer-events: none;
-}
-
-/* Re-enable pointer events for input elements during drag */
-.fokusark-scroll-wrapper.dragging input {
-  pointer-events: auto;
-}
-
-/* Critical styles for sticky columns with !important to ensure they take precedence */
+/* Sticky column styles */
 .sticky-column {
   position: sticky !important;
   z-index: 20 !important;
-  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.15) !important;
   background-color: hsl(var(--background)) !important;
+  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.15) !important;
 }
 
 .sticky-header {
@@ -158,58 +53,43 @@
   background-color: hsl(var(--background)) !important;
 }
 
-/* Column-specific styles with flexible widths for sticky columns */
 .sticky-col-0 {
   left: 0 !important;
-  min-width: 80px !important;
   width: 80px !important;
+  min-width: 80px !important;
 }
 
 .sticky-col-1 {
   left: 80px !important;
+  width: 250px !important;
   min-width: 250px !important;
-  width: auto !important;
 }
 
-/* Flexible column widths for better readability */
-.fokusark-native-table th,
-.fokusark-native-table td {
+/* Column widths */
+th, td {
   min-width: 120px;
   padding: 8px 12px;
   white-space: nowrap;
 }
 
-/* Specific minimum widths for key columns */
-.fokusark-native-table th:nth-child(1),
-.fokusark-native-table td:nth-child(1) {
-  min-width: 80px;
+th:nth-child(1), td:nth-child(1) {
   width: 80px;
+  min-width: 80px;
 }
 
-.fokusark-native-table th:nth-child(2),
-.fokusark-native-table td:nth-child(2) {
+th:nth-child(2), td:nth-child(2) {
+  width: 250px;
   min-width: 250px;
-  width: auto;
 }
 
-.fokusark-native-table th:nth-child(3),
-.fokusark-native-table td:nth-child(3) {
+th:nth-child(3), td:nth-child(3) {
   min-width: 120px;
 }
 
-/* Currency and number columns - generous minimum widths */
-.fokusark-native-table th:nth-child(n+4):nth-child(-n+7),
-.fokusark-native-table td:nth-child(n+4):nth-child(-n+7) {
+th:nth-child(n+4):nth-child(-n+7), td:nth-child(n+4):nth-child(-n+7) {
   min-width: 150px;
 }
 
-/* Time columns - adequate width for time display */
-.fokusark-native-table th:nth-child(n+8):nth-child(-n+22),
-.fokusark-native-table td:nth-child(n+8):nth-child(-n+22) {
+th:nth-child(n+8):nth-child(-n+22), td:nth-child(n+8):nth-child(-n+22) {
   min-width: 130px;
-}
-
-/* Touch and pointer support */
-.fokusark-scroll-wrapper {
-  overscroll-behavior: contain;
 }

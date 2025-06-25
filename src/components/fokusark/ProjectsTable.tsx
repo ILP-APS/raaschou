@@ -40,32 +40,40 @@ const ProjectsTable: React.FC = () => {
   }
 
   return (
-    <div className="fokusark-native-scroll-container">
-      <div className="scroll-fade-left"></div>
-      <div className="scroll-fade-right"></div>
+    <div className="w-full h-full overflow-hidden border border-border rounded-lg">
       <div 
         ref={containerRef}
-        className={`fokusark-scroll-wrapper ${isDragging ? 'dragging' : ''}`}
+        className={`w-full h-full overflow-auto ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerLeave}
-        style={{ cursor: 'grab' }}
+        style={{ 
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
       >
-        <table className="fokusark-native-table">
-          <ProjectsTableHeader />
-          <tbody>
-            {projects.map((project, index) => (
-              <ProjectRow
-                key={project.id}
-                project={project}
-                index={index}
-                onUpdateCompletionPercentage={updateCompletionPercentage}
-              />
-            ))}
-          </tbody>
-        </table>
+        <div style={{ width: '2400px', minWidth: '2400px' }}>
+          <table className="w-full border-collapse text-sm">
+            <ProjectsTableHeader />
+            <tbody>
+              {projects.map((project, index) => (
+                <ProjectRow
+                  key={project.id}
+                  project={project}
+                  index={index}
+                  onUpdateCompletionPercentage={updateCompletionPercentage}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
+      <style jsx>{`
+        div::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 };
