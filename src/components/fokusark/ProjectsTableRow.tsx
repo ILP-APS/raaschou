@@ -1,21 +1,31 @@
-
 import React from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { formatDanishNumber, formatDanishCurrency, extractInitials } from "@/utils/formatUtils";
 import { Project } from "@/types/project";
 import { EditablePercentageCell } from "./EditablePercentageCell";
 import { cn } from "@/lib/utils";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface ProjectsTableRowProps {
   project: Project;
   index: number;
+  isSubProject?: boolean;
+  isParent?: boolean;
+  hasChildren?: boolean;
+  isExpanded?: boolean;
   onUpdateCompletionPercentage: (projectId: string, value: number) => void;
+  onToggleCollapse?: () => void;
 }
 
 export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
   project,
   index,
+  isSubProject = false,
+  isParent = false,
+  hasChildren = false,
+  isExpanded = false,
   onUpdateCompletionPercentage,
+  onToggleCollapse,
 }) => {
   const formatValue = (value: number | null, isNumber = false): string => {
     if (value === null || value === undefined) return "-";
@@ -39,14 +49,55 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
     return "";
   };
 
+  const handleToggleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onToggleCollapse) {
+      onToggleCollapse();
+    }
+  };
+
   return (
-    <TableRow className={index === 0 || index % 2 === 0 ? "bg-background" : "bg-muted/20"}>
+    <TableRow className={cn(
+      index === 0 || index % 2 === 0 ? "bg-background" : "bg-muted/20",
+      isSubProject && "bg-muted/10" // Slightly different background for sub-projects
+    )}>
       {/* Aftale */}
-      <TableCell className="bg-inherit border-r font-medium">
-        {project.id}
+      <TableCell className={cn(
+        "bg-inherit border-r font-medium",
+        isSubProject && "pl-8" // Indent sub-projects
+      )}>
+        <div className="flex items-center gap-2">
+          {isParent && hasChildren && (
+            <button
+              onClick={handleToggleClick}
+              className="p-1 hover:bg-muted rounded transition-colors"
+              aria-label={isExpanded ? "Collapse" : "Expand"}
+            >
+              {isExpanded ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </button>
+          )}
+          <span className={cn(
+            isParent && hasChildren && "font-semibold",
+            isSubProject && "text-muted-foreground"
+          )}>
+            {project.id}
+          </span>
+        </div>
       </TableCell>
-      <TableCell className="bg-inherit border-r min-w-[200px]">
-        {project.name || "-"}
+      <TableCell className={cn(
+        "bg-inherit border-r min-w-[200px]",
+        isSubProject && "pl-8" // Indent sub-projects
+      )}>
+        <span className={cn(
+          isParent && hasChildren && "font-semibold",
+          isSubProject && "text-muted-foreground"
+        )}>
+          {project.name || "-"}
+        </span>
       </TableCell>
       <TableCell className="text-center border-r">
         {extractInitials(project.responsible_person_initials)}
