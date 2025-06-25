@@ -1,5 +1,4 @@
 
-
 /* Hide scrollbars completely while maintaining scroll functionality */
 ::-webkit-scrollbar {
   display: none;
@@ -8,6 +7,69 @@
 /* Firefox */
 * {
   scrollbar-width: none;
+}
+
+/* Native scroll container with fade indicators */
+.fokusark-native-scroll-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+}
+
+/* Fade indicators for scroll areas */
+.scroll-fade-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 100%;
+  background: linear-gradient(to right, hsl(var(--background)) 0%, transparent 100%);
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.scroll-fade-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 100%;
+  background: linear-gradient(to left, hsl(var(--background)) 0%, transparent 100%);
+  z-index: 10;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Show left fade when scrolled */
+.fokusark-native-scroll-container:has(.fokusark-scroll-wrapper:not(:horizontal-scroll-start)) .scroll-fade-left {
+  opacity: 1;
+}
+
+/* Hide right fade when at end */
+.fokusark-native-scroll-container:has(.fokusark-scroll-wrapper:horizontal-scroll-end) .scroll-fade-right {
+  opacity: 0;
+}
+
+/* Main scroll wrapper */
+.fokusark-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 70vh;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  /* Hide scrollbars */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.fokusark-scroll-wrapper::-webkit-scrollbar {
+  display: none;
 }
 
 /* Table container for horizontal scrolling */
@@ -62,7 +124,14 @@
   background-color: inherit !important;
 }
 
-/* Cursor styles for drag functionality */
-.grabbing {
-  cursor: grabbing !important;
+/* Add subtle hover effect for better UX */
+.fokusark-scroll-wrapper:hover {
+  /* Optionally show a subtle shadow to indicate interactivity */
+  box-shadow: inset 0 0 0 1px hsl(var(--ring) / 0.2);
+}
+
+/* Touch and pointer support */
+.fokusark-scroll-wrapper {
+  touch-action: pan-x pan-y;
+  overscroll-behavior: contain;
 }

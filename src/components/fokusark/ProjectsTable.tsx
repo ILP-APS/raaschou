@@ -2,18 +2,12 @@
 import React from "react";
 import { Table, TableBody } from "@/components/ui/table";
 import { useProjects } from "@/hooks/useProjects";
-import { useDragScroll } from "@/hooks/useDragScroll";
 import { ProjectsTableHeader } from "./ProjectsTableHeader";
 import { ProjectRow } from "./ProjectRow";
 import "./FokusarkTableStyles.css";
 
 const ProjectsTable: React.FC = () => {
   const { projects, loading, updateCompletionPercentage } = useProjects();
-  const { 
-    containerRef, 
-    handleMouseDown, 
-    handleMouseLeave
-  } = useDragScroll();
 
   if (loading) {
     return (
@@ -38,25 +32,24 @@ const ProjectsTable: React.FC = () => {
   }
 
   return (
-    <div 
-      ref={containerRef}
-      className="w-full overflow-auto border rounded-lg hover:cursor-grab"
-      onMouseDown={handleMouseDown}
-      onMouseLeave={handleMouseLeave}
-    >
-      <Table>
-        <ProjectsTableHeader />
-        <TableBody>
-          {projects.map((project, index) => (
-            <ProjectRow
-              key={project.id}
-              project={project}
-              index={index}
-              onUpdateCompletionPercentage={updateCompletionPercentage}
-            />
-          ))}
-        </TableBody>
-      </Table>
+    <div className="fokusark-native-scroll-container">
+      <div className="scroll-fade-left"></div>
+      <div className="scroll-fade-right"></div>
+      <div className="fokusark-scroll-wrapper">
+        <Table>
+          <ProjectsTableHeader />
+          <TableBody>
+            {projects.map((project, index) => (
+              <ProjectRow
+                key={project.id}
+                project={project}
+                index={index}
+                onUpdateCompletionPercentage={updateCompletionPercentage}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
