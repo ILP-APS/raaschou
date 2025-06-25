@@ -1,12 +1,16 @@
 
 import React from "react";
-import { TableCell, TableRow } from "@/components/ui/table";
-import { formatDanishNumber, formatDanishCurrency, extractInitials } from "@/utils/formatUtils";
+import { TableRow } from "@/components/ui/table";
 import { Project } from "@/types/project";
-import { EditablePercentageCell } from "./EditablePercentageCell";
-import { EditableCurrencyCell } from "./EditableCurrencyCell";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ProjectIdentifierCell } from "./cells/ProjectIdentifierCell";
+import { ProjectNameCell } from "./cells/ProjectNameCell";
+import { ResponsiblePersonCell } from "./cells/ResponsiblePersonCell";
+import { EditableManualAmountCell } from "./cells/EditableManualAmountCell";
+import { EditableCompletionPercentageCell } from "./cells/EditableCompletionPercentageCell";
+import { ConditionalValueCell } from "./cells/ConditionalValueCell";
+import { BasicValueCell } from "./cells/BasicValueCell";
+import { getRowBgColor } from "./utils/rowStyleUtils";
 
 interface ProjectsTableRowProps {
   project: Project;
@@ -33,215 +37,81 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
   onUpdateManualSubcontractorAmount,
   onToggleCollapse,
 }) => {
-  const formatValue = (value: number | null, isNumber = false): string => {
-    if (value === null || value === undefined) return "-";
-    return isNumber ? formatDanishNumber(value) : formatDanishCurrency(value);
-  };
-
-  // Utility function to get conditional background class based on numeric value
-  const getConditionalCellClass = (value: number | null): string => {
-    if (value === null || value === undefined || isNaN(value)) {
-      return ""; // No special styling for null/invalid values
-    }
-    
-    if (value > 15) {
-      return "bg-green-100";
-    } else if (value >= -10 && value <= 15) {
-      return "bg-yellow-100";
-    } else if (value < -10) {
-      return "bg-red-100";
-    }
-    
-    return "";
-  };
-
-  const handleToggleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onToggleCollapse) {
-      onToggleCollapse();
-    }
-  };
-
-  // Get background color based on row pattern - using fully opaque colors for frozen columns
-  const getRowBgColor = () => {
-    if (isSubProject) return "bg-muted";
-    return index === 0 || index % 2 === 0 ? "bg-background" : "bg-muted";
-  };
-
-  const rowBgColor = getRowBgColor();
+  const rowBgColor = getRowBgColor(isSubProject, index);
 
   return (
-    <TableRow className={cn(
-      rowBgColor
-    )}>
+    <TableRow className={cn(rowBgColor)}>
       {/* Aftale - Frozen columns */}
-      <TableCell 
-        className={cn(
-          "sticky z-20 font-medium",
-          rowBgColor,
-          isSubProject && "pl-8" // Indent sub-projects
-        )}
-        style={{ left: 0, minWidth: '150px', width: '150px' }}
-      >
-        <div className="flex items-center gap-2">
-          {isParent && hasChildren && (
-            <button
-              onClick={handleToggleClick}
-              className="p-1 hover:bg-muted rounded transition-colors"
-              aria-label={isExpanded ? "Collapse" : "Expand"}
-            >
-              {isExpanded ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </button>
-          )}
-          <span className={cn(
-            isParent && hasChildren && "font-semibold",
-            isSubProject && "text-muted-foreground"
-          )}>
-            {project.id}
-          </span>
-        </div>
-      </TableCell>
-      <TableCell 
-        className={cn(
-          "sticky z-20",
-          rowBgColor,
-          isSubProject && "pl-8" // Indent sub-projects
-        )}
-        style={{ left: '150px', minWidth: '300px', width: '300px' }}
-      >
-        <span className={cn(
-          isParent && hasChildren && "font-semibold",
-          isSubProject && "text-muted-foreground"
-        )}>
-          {project.name || "-"}
-        </span>
-      </TableCell>
-      <TableCell 
-        className={cn(
-          "sticky z-20 text-center",
-          rowBgColor
-        )}
-        style={{ 
-          left: '450px', 
-          minWidth: '100px', 
-          width: '100px',
-          boxShadow: '1px 0 0 0 hsl(var(--border))'
-        }}
-      >
-        {extractInitials(project.responsible_person_initials)}
-      </TableCell>
+      <ProjectIdentifierCell
+        projectId={project.id}
+        isSubProject={isSubProject}
+        isParent={isParent}
+        hasChildren={hasChildren}
+        isExpanded={isExpanded}
+        rowBgColor={rowBgColor}
+        onToggleCollapse={onToggleCollapse}
+      />
+      <ProjectNameCell
+        projectName={project.name}
+        isSubProject={isSubProject}
+        isParent={isParent}
+        hasChildren={hasChildren}
+        rowBgColor={rowBgColor}
+      />
+      <ResponsiblePersonCell
+        responsiblePersonInitials={project.responsible_person_initials}
+        rowBgColor={rowBgColor}
+      />
       
       {/* Tilbud */}
-      <TableCell className="text-right border-r">
-        {formatValue(project.offer_amount)}
-      </TableCell>
-      <TableCell className="text-right border-r">
-        {formatValue(project.assembly_amount)}
-      </TableCell>
-      <TableCell className="text-right border-r">
-        {formatValue(project.subcontractor_amount)}
-      </TableCell>
-      <TableCell className="text-right border-r">
-        {isSubProject ? (
-          <div className="p-2 -m-2 text-right bg-blue-50 rounded">
-            {project.manual_assembly_amount !== null ? formatDanishCurrency(project.manual_assembly_amount) : "-"}
-          </div>
-        ) : (
-          <EditableCurrencyCell
-            value={project.manual_assembly_amount}
-            projectId={project.id}
-            onUpdate={onUpdateManualAssemblyAmount}
-            fieldType="assembly"
-          />
-        )}
-      </TableCell>
-      <TableCell className="text-right border-r">
-        {isSubProject ? (
-          <div className="p-2 -m-2 text-right bg-blue-50 rounded">
-            {project.manual_subcontractor_amount !== null ? formatDanishCurrency(project.manual_subcontractor_amount) : "-"}
-          </div>
-        ) : (
-          <EditableCurrencyCell
-            value={project.manual_subcontractor_amount}
-            projectId={project.id}
-            onUpdate={onUpdateManualSubcontractorAmount}
-            fieldType="subcontractor"
-          />
-        )}
-      </TableCell>
-      <TableCell className="text-right border-r">
-        {formatValue(project.materials_amount)}
-      </TableCell>
+      <BasicValueCell value={project.offer_amount} />
+      <BasicValueCell value={project.assembly_amount} />
+      <BasicValueCell value={project.subcontractor_amount} />
+      <EditableManualAmountCell
+        value={project.manual_assembly_amount}
+        projectId={project.id}
+        fieldType="assembly"
+        isSubProject={isSubProject}
+        onUpdate={onUpdateManualAssemblyAmount}
+      />
+      <EditableManualAmountCell
+        value={project.manual_subcontractor_amount}
+        projectId={project.id}
+        fieldType="subcontractor"
+        isSubProject={isSubProject}
+        onUpdate={onUpdateManualSubcontractorAmount}
+      />
+      <BasicValueCell value={project.materials_amount} />
       
       {/* Estimeret */}
-      <TableCell className="text-right border-r">
-        {formatValue(project.hours_estimated_projecting, true)}
-      </TableCell>
-      <TableCell className="text-right border-r">
-        {formatValue(project.hours_estimated_production, true)}
-      </TableCell>
-      <TableCell className="text-right border-r">
-        {formatValue(project.hours_estimated_assembly, true)}
-      </TableCell>
+      <BasicValueCell value={project.hours_estimated_projecting} isNumber />
+      <BasicValueCell value={project.hours_estimated_production} isNumber />
+      <BasicValueCell value={project.hours_estimated_assembly} isNumber />
       
       {/* Realiseret */}
-      <TableCell className="text-right border-r">
-        {formatValue(project.hours_used_projecting, true)}
-      </TableCell>
-      <TableCell className="text-right border-r">
-        {formatValue(project.hours_used_production, true)}
-      </TableCell>
-      <TableCell className="text-right border-r">
-        {formatValue(project.hours_used_assembly, true)}
-      </TableCell>
-      <TableCell className="text-right border-r">
-        {formatValue(project.hours_used_total, true)}
-      </TableCell>
+      <BasicValueCell value={project.hours_used_projecting} isNumber />
+      <BasicValueCell value={project.hours_used_production} isNumber />
+      <BasicValueCell value={project.hours_used_assembly} isNumber />
+      <BasicValueCell value={project.hours_used_total} isNumber />
       
-      {/* Projektering - hours_remaining_projecting with conditional styling */}
-      <TableCell className={cn("text-right border-r", getConditionalCellClass(project.hours_remaining_projecting))}>
-        {formatValue(project.hours_remaining_projecting, true)}
-      </TableCell>
+      {/* Projektering */}
+      <ConditionalValueCell value={project.hours_remaining_projecting} />
       
       {/* Produktions stadie */}
-      <TableCell className="text-right border-r">
-        {formatValue(project.hours_remaining_production, true)}
-      </TableCell>
-      <TableCell className="text-right border-r">
-        {isSubProject ? (
-          <div className="p-2 -m-2 text-right">
-            {project.completion_percentage_manual !== null ? formatDanishNumber(project.completion_percentage_manual) + '%' : "-"}
-          </div>
-        ) : (
-          <EditablePercentageCell
-            value={project.completion_percentage_manual}
-            projectId={project.id}
-            onUpdate={onUpdateCompletionPercentage}
-          />
-        )}
-      </TableCell>
-      <TableCell className="text-right border-r">
-        {formatValue(project.completion_percentage_previous, true)}
-      </TableCell>
-      <TableCell className="text-right border-r">
-        {formatValue(project.hours_estimated_by_completion, true)}
-      </TableCell>
-      {/* plus_minus_hours with conditional styling */}
-      <TableCell className={cn("text-right border-r", getConditionalCellClass(project.plus_minus_hours))}>
-        {formatValue(project.plus_minus_hours, true)}
-      </TableCell>
+      <BasicValueCell value={project.hours_remaining_production} isNumber />
+      <EditableCompletionPercentageCell
+        value={project.completion_percentage_manual}
+        projectId={project.id}
+        isSubProject={isSubProject}
+        onUpdate={onUpdateCompletionPercentage}
+      />
+      <BasicValueCell value={project.completion_percentage_previous} isNumber />
+      <BasicValueCell value={project.hours_estimated_by_completion} isNumber />
+      <ConditionalValueCell value={project.plus_minus_hours} />
       
-      {/* Montage - hours_remaining_assembly with conditional styling */}
-      <TableCell className={cn("text-right border-r", getConditionalCellClass(project.hours_remaining_assembly))}>
-        {formatValue(project.hours_remaining_assembly, true)}
-      </TableCell>
-      <TableCell className="text-right">
-        {formatValue(project.allocated_freight_amount)}
-      </TableCell>
+      {/* Montage */}
+      <ConditionalValueCell value={project.hours_remaining_assembly} />
+      <BasicValueCell value={project.allocated_freight_amount} className="text-right" />
     </TableRow>
   );
 };
