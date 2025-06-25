@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Table,
   TableBody,
@@ -43,6 +43,13 @@ const ProjectsTable: React.FC = () => {
   const [editingCell, setEditingCell] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>("");
   const { toast } = useToast();
+
+  // Drag scrolling state
+  const [isDragging, setIsDragging] = useState(false);
+  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [scrollStart, setScrollStart] = useState({ left: 0, top: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Fetch projects data
   const fetchProjects = async () => {
@@ -124,6 +131,64 @@ const ProjectsTable: React.FC = () => {
     }
   };
 
+  // Drag scrolling handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (isCtrlPressed && !editingCell) {
+      e.preventDefault();
+      setIsDragging(true);
+      setDragStart({ x: e.clientX, y: e.clientY });
+      if (containerRef.current) {
+        setScrollStart({
+          left: containerRef.current.scrollLeft,
+          top: containerRef.current.scrollTop,
+        });
+      }
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && containerRef.current) {
+      e.preventDefault();
+      const deltaX = e.clientX - dragStart.x;
+      const deltaY = e.clientY - dragStart.y;
+      
+      containerRef.current.scrollLeft = scrollStart.left - deltaX;
+      containerRef.current.scrollTop = scrollStart.top - deltaY;
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  // Keyboard event handlers for CTRL key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey) {
+        setIsCtrlPressed(true);
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (!e.ctrlKey) {
+        setIsCtrlPressed(false);
+        setIsDragging(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
   // Set up real-time subscription
   useEffect(() => {
     fetchProjects();
@@ -171,7 +236,16 @@ const ProjectsTable: React.FC = () => {
   }
 
   return (
-    <div className="w-full overflow-auto border rounded-lg">
+    <div 
+      ref={containerRef}
+      className={`w-full overflow-auto border rounded-lg ${
+        isCtrlPressed && !editingCell ? 'cursor-grab' : ''
+      } ${isDragging ? 'cursor-grabbing select-none' : ''}`}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
+    >
       <Table>
         <TableHeader>
           <TableRow>
