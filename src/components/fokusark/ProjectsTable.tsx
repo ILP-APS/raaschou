@@ -63,6 +63,8 @@ const ProjectsTable: React.FC = () => {
               project={project}
               index={index}
               onUpdateCompletionPercentage={updateCompletionPercentage}
+              onMouseDown={handleMouseDown}
+              isCtrlPressed={isCtrlPressed}
             />
           ))}
         </TableBody>

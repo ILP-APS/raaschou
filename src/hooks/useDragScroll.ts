@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from "react";
 
 export const useDragScroll = () => {
@@ -29,11 +30,13 @@ export const useDragScroll = () => {
     }
   }, [isDragging]);
 
-  // Drag scrolling handlers
+  // Drag scrolling handlers - now works with any child element
   const handleMouseDown = (e: React.MouseEvent, editingCell: string | null) => {
+    // Only start drag if CTRL is pressed and no cell is being edited
     if (isCtrlPressed && !editingCell) {
       e.preventDefault();
-      console.log('Starting drag');
+      e.stopPropagation();
+      console.log('Starting drag from element:', e.target);
       setIsDragging(true);
       setDragStart({ x: e.clientX, y: e.clientY });
       if (containerRef.current) {
