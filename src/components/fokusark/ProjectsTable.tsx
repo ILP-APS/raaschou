@@ -9,7 +9,7 @@ import { Project } from "@/types/project";
 
 const ProjectsTable: React.FC = () => {
   const { projects, loading, updateCompletionPercentage } = useProjects();
-  const { containerProps } = useHoldScroll();
+  const { containerRef, isDragging, handleMouseDown } = useHoldScroll();
 
   if (loading) {
     return (
@@ -22,8 +22,13 @@ const ProjectsTable: React.FC = () => {
   return (
     <div className="w-full">
       <div
-        {...containerProps}
+        ref={containerRef}
         className="w-full overflow-auto border border-border rounded-lg"
+        style={{ 
+          cursor: isDragging ? 'grabbing' : 'grab',
+          userSelect: isDragging ? 'none' : 'auto'
+        }}
+        onMouseDown={handleMouseDown}
       >
         <Table className="min-w-[2000px]">
           <ProjectsTableHeaders />

@@ -79,13 +79,5 @@ export const useHoldScroll = () => {
     containerRef,
     isDragging,
     handleMouseDown,
-    containerProps: {
-      ref: containerRef,
-      onMouseDown: handleMouseDown,
-      style: { 
-        cursor: isDragging ? 'grabbing' : 'grab',
-        userSelect: isDragging ? 'none' as const : 'auto' as const
-      }
-    }
   };
 };
