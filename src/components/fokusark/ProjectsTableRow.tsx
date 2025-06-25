@@ -146,20 +146,32 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
         {formatValue(project.subcontractor_amount)}
       </TableCell>
       <TableCell className="text-right border-r">
-        <EditableCurrencyCell
-          value={project.manual_assembly_amount}
-          projectId={project.id}
-          onUpdate={onUpdateManualAssemblyAmount}
-          fieldType="assembly"
-        />
+        {isSubProject ? (
+          <div className="p-2 -m-2 text-right bg-blue-50 rounded">
+            {project.manual_assembly_amount !== null ? formatDanishCurrency(project.manual_assembly_amount) : "-"}
+          </div>
+        ) : (
+          <EditableCurrencyCell
+            value={project.manual_assembly_amount}
+            projectId={project.id}
+            onUpdate={onUpdateManualAssemblyAmount}
+            fieldType="assembly"
+          />
+        )}
       </TableCell>
       <TableCell className="text-right border-r">
-        <EditableCurrencyCell
-          value={project.manual_subcontractor_amount}
-          projectId={project.id}
-          onUpdate={onUpdateManualSubcontractorAmount}
-          fieldType="subcontractor"
-        />
+        {isSubProject ? (
+          <div className="p-2 -m-2 text-right bg-blue-50 rounded">
+            {project.manual_subcontractor_amount !== null ? formatDanishCurrency(project.manual_subcontractor_amount) : "-"}
+          </div>
+        ) : (
+          <EditableCurrencyCell
+            value={project.manual_subcontractor_amount}
+            projectId={project.id}
+            onUpdate={onUpdateManualSubcontractorAmount}
+            fieldType="subcontractor"
+          />
+        )}
       </TableCell>
       <TableCell className="text-right border-r">
         {formatValue(project.materials_amount)}
@@ -200,11 +212,17 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
         {formatValue(project.hours_remaining_production, true)}
       </TableCell>
       <TableCell className="text-right border-r">
-        <EditablePercentageCell
-          value={project.completion_percentage_manual}
-          projectId={project.id}
-          onUpdate={onUpdateCompletionPercentage}
-        />
+        {isSubProject ? (
+          <div className="p-2 -m-2 text-right">
+            {project.completion_percentage_manual !== null ? formatDanishNumber(project.completion_percentage_manual) + '%' : "-"}
+          </div>
+        ) : (
+          <EditablePercentageCell
+            value={project.completion_percentage_manual}
+            projectId={project.id}
+            onUpdate={onUpdateCompletionPercentage}
+          />
+        )}
       </TableCell>
       <TableCell className="text-right border-r">
         {formatValue(project.completion_percentage_previous, true)}
