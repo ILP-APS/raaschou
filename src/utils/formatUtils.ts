@@ -4,11 +4,11 @@
  */
 export const formatDanishNumber = (value: number): string => {
   // Check for NaN
-  if (isNaN(value)) return '0,00';
+  if (isNaN(value)) return '0';
 
   return value.toLocaleString('da-DK', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   });
 };
 
