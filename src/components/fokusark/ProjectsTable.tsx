@@ -10,7 +10,7 @@ import { Project } from "@/types/project";
 import { parseProjectHierarchy, flattenHierarchy, ProjectHierarchy } from "@/utils/projectHierarchy";
 
 const ProjectsTable: React.FC = () => {
-  const { projects, loading, updateCompletionPercentage } = useProjects();
+  const { projects, loading, updateCompletionPercentage, updateManualAssemblyAmount, updateManualSubcontractorAmount } = useProjects();
   const { containerRef, isDragging, handleMouseDown } = useHoldScroll();
   const { state } = useSidebar();
   const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(new Set());
@@ -108,6 +108,8 @@ const ProjectsTable: React.FC = () => {
                   hasChildren={hasChildren}
                   isExpanded={isExpanded}
                   onUpdateCompletionPercentage={updateCompletionPercentage}
+                  onUpdateManualAssemblyAmount={updateManualAssemblyAmount}
+                  onUpdateManualSubcontractorAmount={updateManualSubcontractorAmount}
                   onToggleCollapse={() => toggleProjectCollapse(project.id)}
                 />
               );

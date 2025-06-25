@@ -4,6 +4,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { formatDanishNumber, formatDanishCurrency, extractInitials } from "@/utils/formatUtils";
 import { Project } from "@/types/project";
 import { EditablePercentageCell } from "./EditablePercentageCell";
+import { EditableCurrencyCell } from "./EditableCurrencyCell";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
@@ -15,6 +16,8 @@ interface ProjectsTableRowProps {
   hasChildren?: boolean;
   isExpanded?: boolean;
   onUpdateCompletionPercentage: (projectId: string, value: number) => void;
+  onUpdateManualAssemblyAmount: (projectId: string, value: number) => void;
+  onUpdateManualSubcontractorAmount: (projectId: string, value: number) => void;
   onToggleCollapse?: () => void;
 }
 
@@ -26,6 +29,8 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
   hasChildren = false,
   isExpanded = false,
   onUpdateCompletionPercentage,
+  onUpdateManualAssemblyAmount,
+  onUpdateManualSubcontractorAmount,
   onToggleCollapse,
 }) => {
   const formatValue = (value: number | null, isNumber = false): string => {
@@ -139,6 +144,22 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
       </TableCell>
       <TableCell className="text-right border-r">
         {formatValue(project.subcontractor_amount)}
+      </TableCell>
+      <TableCell className="text-right border-r">
+        <EditableCurrencyCell
+          value={project.manual_assembly_amount}
+          projectId={project.id}
+          onUpdate={onUpdateManualAssemblyAmount}
+          fieldType="assembly"
+        />
+      </TableCell>
+      <TableCell className="text-right border-r">
+        <EditableCurrencyCell
+          value={project.manual_subcontractor_amount}
+          projectId={project.id}
+          onUpdate={onUpdateManualSubcontractorAmount}
+          fieldType="subcontractor"
+        />
       </TableCell>
       <TableCell className="text-right border-r">
         {formatValue(project.materials_amount)}

@@ -6,6 +6,8 @@ export interface Project {
   offer_amount: number | null;
   assembly_amount: number | null;
   subcontractor_amount: number | null;
+  manual_assembly_amount: number | null;
+  manual_subcontractor_amount: number | null;
   materials_amount: number | null;
   hours_estimated_projecting: number | null;
   hours_estimated_production: number | null;

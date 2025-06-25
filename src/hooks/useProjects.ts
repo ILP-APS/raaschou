@@ -65,6 +65,66 @@ export const useProjects = () => {
     }
   };
 
+  // Update manual assembly amount
+  const updateManualAssemblyAmount = async (projectId: string, value: number) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ manual_assembly_amount: value })
+        .eq('id', projectId);
+
+      if (error) {
+        console.error('Error updating manual assembly amount:', error);
+        toast({
+          title: "Error updating manual assembly amount",
+          description: "There was a problem saving the changes.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Manual assembly amount updated",
+        description: "The manual assembly amount has been saved successfully.",
+      });
+
+      // Refresh the data to get updated calculations
+      fetchProjects();
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  // Update manual subcontractor amount
+  const updateManualSubcontractorAmount = async (projectId: string, value: number) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ manual_subcontractor_amount: value })
+        .eq('id', projectId);
+
+      if (error) {
+        console.error('Error updating manual subcontractor amount:', error);
+        toast({
+          title: "Error updating manual subcontractor amount",
+          description: "There was a problem saving the changes.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Manual subcontractor amount updated",
+        description: "The manual subcontractor amount has been saved successfully.",
+      });
+
+      // Refresh the data to get updated calculations
+      fetchProjects();
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   // Set up real-time subscription
   useEffect(() => {
     fetchProjects();
@@ -93,5 +153,7 @@ export const useProjects = () => {
     projects,
     loading,
     updateCompletionPercentage,
+    updateManualAssemblyAmount,
+    updateManualSubcontractorAmount,
   };
 };

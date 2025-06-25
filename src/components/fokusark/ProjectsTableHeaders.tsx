@@ -18,7 +18,7 @@ export const ProjectsTableHeaders: React.FC = () => {
         >
           Aftale
         </TableHead>
-        <TableHead className="text-center font-semibold border-r" colSpan={4}>
+        <TableHead className="text-center font-semibold border-r" colSpan={6}>
           Tilbud
         </TableHead>
         <TableHead className="text-center font-semibold border-r" colSpan={3}>
@@ -68,6 +68,8 @@ export const ProjectsTableHeaders: React.FC = () => {
         <TableHead className="text-right border-r">Tilbudsbeløb i alt</TableHead>
         <TableHead className="text-right border-r">Heraf Montage</TableHead>
         <TableHead className="text-right border-r">Heraf Underleverandør</TableHead>
+        <TableHead className="text-right border-r bg-blue-50">Manuel Montage</TableHead>
+        <TableHead className="text-right border-r bg-blue-50">Manuel Underlev.</TableHead>
         <TableHead className="text-right border-r">Beregnet Materialebeløb</TableHead>
         
         <TableHead className="text-right border-r">Est. timer - Proj.</TableHead>

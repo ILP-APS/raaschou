@@ -70,6 +70,8 @@ export type Database = {
           id: string
           last_api_update: string | null
           last_calculation_update: string | null
+          manual_assembly_amount: number | null
+          manual_subcontractor_amount: number | null
           materials_amount: number | null
           name: string | null
           offer_amount: number | null
@@ -96,6 +98,8 @@ export type Database = {
           id: string
           last_api_update?: string | null
           last_calculation_update?: string | null
+          manual_assembly_amount?: number | null
+          manual_subcontractor_amount?: number | null
           materials_amount?: number | null
           name?: string | null
           offer_amount?: number | null
@@ -122,6 +126,8 @@ export type Database = {
           id?: string
           last_api_update?: string | null
           last_calculation_update?: string | null
+          manual_assembly_amount?: number | null
+          manual_subcontractor_amount?: number | null
           materials_amount?: number | null
           name?: string | null
           offer_amount?: number | null
