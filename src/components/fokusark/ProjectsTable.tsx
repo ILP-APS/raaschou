@@ -133,8 +133,10 @@ const ProjectsTable: React.FC = () => {
 
   // Drag scrolling handlers
   const handleMouseDown = (e: React.MouseEvent) => {
+    console.log('Mouse down - CTRL pressed:', isCtrlPressed, 'Editing cell:', editingCell);
     if (isCtrlPressed && !editingCell) {
       e.preventDefault();
+      console.log('Starting drag');
       setIsDragging(true);
       setDragStart({ x: e.clientX, y: e.clientY });
       if (containerRef.current) {
@@ -158,6 +160,9 @@ const ProjectsTable: React.FC = () => {
   };
 
   const handleMouseUp = () => {
+    if (isDragging) {
+      console.log('Ending drag');
+    }
     setIsDragging(false);
   };
 
@@ -168,24 +173,31 @@ const ProjectsTable: React.FC = () => {
   // Keyboard event handlers for CTRL key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey) {
+      if (e.key === 'Control' || e.ctrlKey) {
+        console.log('CTRL pressed');
         setIsCtrlPressed(true);
       }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (!e.ctrlKey) {
+      if (e.key === 'Control' || !e.ctrlKey) {
+        console.log('CTRL released');
         setIsCtrlPressed(false);
         setIsDragging(false);
       }
     };
 
+    // Add event listeners to both window and document for better coverage
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
     };
   }, []);
 
