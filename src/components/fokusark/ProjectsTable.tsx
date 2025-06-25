@@ -16,9 +16,6 @@ const ProjectsTable: React.FC = () => {
     isDragging,
     isCtrlPressed,
     handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
-    handleMouseLeave,
   } = useDragScroll();
 
   if (loading) {
@@ -49,12 +46,9 @@ const ProjectsTable: React.FC = () => {
       className={`w-full overflow-auto border rounded-lg ${
         isCtrlPressed ? 'cursor-grab' : ''
       } ${isDragging ? 'cursor-grabbing select-none' : ''}`}
-      onMouseDown={(e) => handleMouseDown(e, null)}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseLeave}
+      onMouseDown={handleMouseDown}
     >
-      <Table>
+      <Table className={isDragging ? 'pointer-events-none-children' : ''}>
         <ProjectsTableHeader />
         <TableBody>
           {projects.map((project, index) => (
@@ -63,8 +57,8 @@ const ProjectsTable: React.FC = () => {
               project={project}
               index={index}
               onUpdateCompletionPercentage={updateCompletionPercentage}
-              onMouseDown={handleMouseDown}
               isCtrlPressed={isCtrlPressed}
+              isDragging={isDragging}
             />
           ))}
         </TableBody>
