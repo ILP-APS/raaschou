@@ -4,14 +4,13 @@ import { useProjects } from "@/hooks/useProjects";
 import { useHoldScroll } from "@/hooks/useHoldScroll";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Table, TableBody } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { ProjectsTableHeaders } from "./ProjectsTableHeaders";
 import { ProjectsTableRow } from "./ProjectsTableRow";
 import { Project } from "@/types/project";
 
 const ProjectsTable: React.FC = () => {
   const { projects, loading, updateCompletionPercentage } = useProjects();
-  const { containerRef, isDragging, handleMouseDown, debugContainer, testManualScroll } = useHoldScroll();
+  const { containerRef, isDragging, handleMouseDown } = useHoldScroll();
   const { state } = useSidebar();
 
   // Calculate dynamic width based on sidebar state
@@ -35,21 +34,6 @@ const ProjectsTable: React.FC = () => {
 
   return (
     <div className="w-full space-y-4">
-      {/* Debug Controls */}
-      <div className="flex gap-2 p-2 bg-muted/20 rounded">
-        <Button onClick={debugContainer} variant="outline" size="sm">
-          Debug Container
-        </Button>
-        <Button onClick={testManualScroll} variant="outline" size="sm">
-          Test Manual Scroll
-        </Button>
-        <div className="text-sm text-muted-foreground flex items-center">
-          Status: {isDragging ? 'Dragging' : 'Ready'} | 
-          Projects: {projects.length} |
-          Sidebar: {state}
-        </div>
-      </div>
-
       {/* Scrollable Table Container */}
       <div
         ref={containerRef}
