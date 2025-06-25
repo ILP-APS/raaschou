@@ -44,60 +44,71 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
 
   return (
     <tr>
-      {/* Aftale */}
-      <td className="sticky-column sticky-col-0 border-r font-mono text-sm">
+      {/* Aftale - Projekt ID (Sticky Column 1) */}
+      <td className="sticky-column sticky-col-0 sticky-header border-r font-mono text-sm">
         {project.id}
       </td>
-      <td className="sticky-column sticky-col-1 border-r font-medium">
+      {/* Aftale - Projekt Navn (Sticky Column 2) */}
+      <td className="sticky-column sticky-col-1 sticky-header border-r font-medium">
         {project.name || '-'}
       </td>
+      {/* Aftale - Ansvarlig */}
       <td className="border-r-2 text-center">
         {project.responsible_person_initials || '-'}
       </td>
-      {/* Tilbud */}
+      {/* Tilbud - Tilbudsbeløb i alt */}
       <td className="text-right font-mono">
         {project.offer_amount ? formatDanishCurrency(project.offer_amount) : '-'}
       </td>
+      {/* Tilbud - Heraf Montage */}
       <td className="text-right font-mono">
         {project.assembly_amount ? formatDanishCurrency(project.assembly_amount) : '-'}
       </td>
+      {/* Tilbud - Heraf Underleverandør */}
       <td className="text-right font-mono">
         {project.subcontractor_amount ? formatDanishCurrency(project.subcontractor_amount) : '-'}
       </td>
+      {/* Tilbud - Beregnet Materialebeløb */}
       <td className="text-right font-mono border-r-2">
         {project.materials_amount ? formatDanishCurrency(project.materials_amount) : '-'}
       </td>
-      {/* Estimeret */}
+      {/* Estimeret - Projektering */}
       <td className="text-right font-mono">
         {project.hours_estimated_projecting ? formatDanishNumber(project.hours_estimated_projecting) : '-'}
       </td>
+      {/* Estimeret - Produktion */}
       <td className="text-right font-mono">
         {project.hours_estimated_production ? formatDanishNumber(project.hours_estimated_production) : '-'}
       </td>
+      {/* Estimeret - Montage */}
       <td className="text-right font-mono border-r-2">
         {project.hours_estimated_assembly ? formatDanishNumber(project.hours_estimated_assembly) : '-'}
       </td>
-      {/* Realiseret */}
+      {/* Realiseret - Projektering */}
       <td className="text-right font-mono">
         {project.hours_used_projecting ? formatDanishNumber(project.hours_used_projecting) : '-'}
       </td>
+      {/* Realiseret - Produktion */}
       <td className="text-right font-mono">
         {project.hours_used_production ? formatDanishNumber(project.hours_used_production) : '-'}
       </td>
+      {/* Realiseret - Montage */}
       <td className="text-right font-mono">
         {project.hours_used_assembly ? formatDanishNumber(project.hours_used_assembly) : '-'}
       </td>
+      {/* Realiseret - Total */}
       <td className="text-right font-mono border-r-2">
         {project.hours_used_total ? formatDanishNumber(project.hours_used_total) : '-'}
       </td>
-      {/* Projektering */}
+      {/* Projektering - Timer tilbage */}
       <td className="text-right font-mono border-r-2">
         {project.hours_remaining_projecting ? formatDanishNumber(project.hours_remaining_projecting) : '-'}
       </td>
-      {/* Produktions stadie */}
+      {/* Produktions stadie - Timer tilbage */}
       <td className="text-right font-mono">
         {project.hours_remaining_production ? formatDanishNumber(project.hours_remaining_production) : '-'}
       </td>
+      {/* Produktions stadie - Færdig% (NU) - Editable */}
       <td className="text-right font-mono">
         {editingCell === project.id ? (
           <Input
@@ -117,19 +128,23 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
           </div>
         )}
       </td>
+      {/* Produktions stadie - Færdig% (FØR) */}
       <td className="text-right font-mono">
         {project.completion_percentage_previous ? formatDanishNumber(project.completion_percentage_previous) + '%' : '-'}
       </td>
+      {/* Produktions stadie - Estimeret timer ift. Færdig% */}
       <td className="text-right font-mono">
         {project.hours_estimated_by_completion ? formatDanishNumber(project.hours_estimated_by_completion) : '-'}
       </td>
+      {/* Produktions stadie - +/- Timer */}
       <td className="text-right font-mono border-r-2">
         {project.plus_minus_hours ? formatDanishNumber(project.plus_minus_hours) : '-'}
       </td>
-      {/* Montage */}
+      {/* Montage - Timer tilbage */}
       <td className="text-right font-mono">
         {project.hours_remaining_assembly ? formatDanishNumber(project.hours_remaining_assembly) : '-'}
       </td>
+      {/* Montage - Afsat Fragt */}
       <td className="text-right font-mono">
         {project.allocated_freight_amount ? formatDanishCurrency(project.allocated_freight_amount) : '-'}
       </td>

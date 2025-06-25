@@ -52,7 +52,7 @@
   display: none;
 }
 
-/* Sticky column styles with proper backgrounds */
+/* Fixed sticky column styles with proper z-index layering */
 .sticky-column {
   position: sticky !important;
   z-index: 20 !important;
@@ -69,21 +69,37 @@
 
 .sticky-corner {
   position: sticky !important;
-  z-index: 60 !important;
+  z-index: 50 !important;
   top: 0 !important;
   background-color: hsl(var(--muted) / 0.5) !important;
 }
 
+/* Sticky column positioning and sizing */
 .sticky-col-0 {
   left: 0 !important;
   width: 100px !important;
   min-width: 100px !important;
+  max-width: 100px !important;
 }
 
 .sticky-col-1 {
   left: 100px !important;
   width: 300px !important;
   min-width: 300px !important;
+  max-width: 300px !important;
+}
+
+/* Ensure sticky rows in tbody have correct background */
+.fokusark-native-table tbody tr .sticky-column {
+  background-color: inherit !important;
+}
+
+.fokusark-native-table tbody tr:nth-child(even) .sticky-column {
+  background-color: hsl(var(--muted) / 0.25) !important;
+}
+
+.fokusark-native-table tbody tr:hover .sticky-column {
+  background-color: hsl(var(--muted) / 0.5) !important;
 }
 
 /* Column widths for proper spacing */
@@ -91,30 +107,35 @@
 .fokusark-native-table td:nth-child(1) {
   width: 100px;
   min-width: 100px;
+  max-width: 100px;
 }
 
 .fokusark-native-table th:nth-child(2), 
 .fokusark-native-table td:nth-child(2) {
   width: 300px;
   min-width: 300px;
+  max-width: 300px;
 }
 
 .fokusark-native-table th:nth-child(3), 
 .fokusark-native-table td:nth-child(3) {
   width: 150px;
   min-width: 150px;
+  max-width: 150px;
 }
 
 .fokusark-native-table th:nth-child(n+4):nth-child(-n+7), 
 .fokusark-native-table td:nth-child(n+4):nth-child(-n+7) {
   width: 140px;
   min-width: 140px;
+  max-width: 140px;
 }
 
 .fokusark-native-table th:nth-child(n+8):nth-child(-n+22), 
 .fokusark-native-table td:nth-child(n+8):nth-child(-n+22) {
   width: 130px;
   min-width: 130px;
+  max-width: 130px;
 }
 
 /* Section borders for grouped columns */

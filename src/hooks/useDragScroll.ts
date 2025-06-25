@@ -25,7 +25,7 @@ export const useDragScroll = () => {
 
     // Only start drag if clicking on the container itself or table elements, not input elements
     const target = e.target as HTMLElement;
-    if (target.tagName === 'INPUT' || target.closest('input')) {
+    if (target.tagName === 'INPUT' || target.closest('input') || target.closest('.cursor-pointer')) {
       return;
     }
 
@@ -55,8 +55,12 @@ export const useDragScroll = () => {
     const deltaX = e.clientX - dragState.startX;
     const deltaY = e.clientY - dragState.startY;
     
-    container.scrollLeft = dragState.scrollLeft - deltaX;
-    container.scrollTop = dragState.scrollTop - deltaY;
+    // Apply smooth scrolling with momentum
+    const newScrollLeft = Math.max(0, dragState.scrollLeft - deltaX);
+    const newScrollTop = Math.max(0, dragState.scrollTop - deltaY);
+    
+    container.scrollLeft = newScrollLeft;
+    container.scrollTop = newScrollTop;
   }, [dragState]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
