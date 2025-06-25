@@ -4,6 +4,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { formatDanishNumber, formatDanishCurrency, extractInitials } from "@/utils/formatUtils";
 import { Project } from "@/types/project";
 import { EditablePercentageCell } from "./EditablePercentageCell";
+import { cn } from "@/lib/utils";
 
 interface ProjectsTableRowProps {
   project: Project;
@@ -19,6 +20,23 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
   const formatValue = (value: number | null, isNumber = false): string => {
     if (value === null || value === undefined) return "-";
     return isNumber ? formatDanishNumber(value) : formatDanishCurrency(value);
+  };
+
+  // Utility function to get conditional background class based on numeric value
+  const getConditionalCellClass = (value: number | null): string => {
+    if (value === null || value === undefined || isNaN(value)) {
+      return ""; // No special styling for null/invalid values
+    }
+    
+    if (value > 15) {
+      return "bg-green-100";
+    } else if (value >= -10 && value <= 15) {
+      return "bg-yellow-100";
+    } else if (value < -10) {
+      return "bg-red-100";
+    }
+    
+    return "";
   };
 
   return (
@@ -73,8 +91,8 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
         {formatValue(project.hours_used_total, true)}
       </TableCell>
       
-      {/* Projektering */}
-      <TableCell className="text-right border-r">
+      {/* Projektering - hours_remaining_projecting with conditional styling */}
+      <TableCell className={cn("text-right border-r", getConditionalCellClass(project.hours_remaining_projecting))}>
         {formatValue(project.hours_remaining_projecting, true)}
       </TableCell>
       
@@ -95,12 +113,13 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
       <TableCell className="text-right border-r">
         {formatValue(project.hours_estimated_by_completion, true)}
       </TableCell>
-      <TableCell className="text-right border-r">
+      {/* plus_minus_hours with conditional styling */}
+      <TableCell className={cn("text-right border-r", getConditionalCellClass(project.plus_minus_hours))}>
         {formatValue(project.plus_minus_hours, true)}
       </TableCell>
       
-      {/* Montage */}
-      <TableCell className="text-right border-r">
+      {/* Montage - hours_remaining_assembly with conditional styling */}
+      <TableCell className={cn("text-right border-r", getConditionalCellClass(project.hours_remaining_assembly))}>
         {formatValue(project.hours_remaining_assembly, true)}
       </TableCell>
       <TableCell className="text-right">
