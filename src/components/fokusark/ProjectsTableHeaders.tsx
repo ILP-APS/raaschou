@@ -1,4 +1,3 @@
-
 import React from "react";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -7,6 +6,7 @@ export const ProjectsTableHeaders: React.FC = () => {
     <TableHeader>
       {/* Group Headers */}
       <TableRow className="bg-muted/30">
+        {/* Aftale */}
         <TableHead className="text-center font-semibold border-r" colSpan={3}>
           Aftale
         </TableHead>
@@ -31,7 +31,7 @@ export const ProjectsTableHeaders: React.FC = () => {
       </TableRow>
       
       {/* Column Headers */}
-      <TableRow>
+      <TableRow className="bg-muted/30">
         {/* Aftale */}
         <TableHead className="bg-inherit border-r">Projekt ID</TableHead>
         <TableHead className="bg-inherit border-r min-w-[200px]">Projekt Navn/Emne</TableHead>
