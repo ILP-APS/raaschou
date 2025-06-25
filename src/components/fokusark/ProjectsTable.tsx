@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Table,
   TableBody,
@@ -17,20 +17,6 @@ const ProjectsTable: React.FC = () => {
     isDragging,
     handleMouseDown,
   } = useDragScroll();
-
-  // Debug scrollable dimensions
-  useEffect(() => {
-    if (containerRef.current) {
-      const container = containerRef.current;
-      console.log('Container dimensions:', {
-        scrollWidth: container.scrollWidth,
-        clientWidth: container.clientWidth,
-        offsetWidth: container.offsetWidth,
-        scrollLeft: container.scrollLeft,
-        isScrollable: container.scrollWidth > container.clientWidth
-      });
-    }
-  }, [projects]);
 
   if (loading) {
     return (
@@ -62,7 +48,7 @@ const ProjectsTable: React.FC = () => {
       }`}
       onMouseDown={handleMouseDown}
     >
-      <Table className="fokusark-table-force-width">
+      <Table>
         <ProjectsTableHeader />
         <TableBody>
           {projects.map((project, index) => (
