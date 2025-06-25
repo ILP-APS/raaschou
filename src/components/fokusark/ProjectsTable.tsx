@@ -12,12 +12,7 @@ import "./FokusarkTableStyles.css";
 
 const ProjectsTable: React.FC = () => {
   const { projects, loading, updateCompletionPercentage } = useProjects();
-  const {
-    containerRef,
-    isDragging,
-    handleMouseDown,
-    handleMouseLeave,
-  } = useDragScroll();
+  const { containerRef, handleMouseDown } = useDragScroll();
 
   if (loading) {
     return (
@@ -44,11 +39,8 @@ const ProjectsTable: React.FC = () => {
   return (
     <div 
       ref={containerRef}
-      className={`w-full overflow-auto border rounded-lg hover:cursor-grab ${
-        isDragging ? 'cursor-grabbing select-none' : ''
-      }`}
+      className="w-full overflow-auto border rounded-lg hover:cursor-grab"
       onMouseDown={handleMouseDown}
-      onMouseLeave={handleMouseLeave}
     >
       <Table>
         <ProjectsTableHeader />

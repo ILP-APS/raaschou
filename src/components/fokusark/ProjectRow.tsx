@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
@@ -20,9 +21,6 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
 
   // Handle cell click for editing - now works properly with drag scroll
   const handleCellClick = (e: React.MouseEvent, projectId: string, currentValue: number | null) => {
-    // Only handle if this was a genuine click (not part of a drag operation)
-    // The drag scroll hook now properly distinguishes between clicks and drags
-    e.stopPropagation();
     setEditingCell(projectId);
     setEditValue(currentValue?.toString() || "");
   };
