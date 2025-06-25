@@ -64,13 +64,3 @@
 .bg-enforce {
   background-color: inherit !important;
 }
-
-/* Drag scroll functionality - disable pointer events on children during drag */
-.pointer-events-none-children * {
-  pointer-events: none !important;
-}
-
-/* But allow the table itself to receive events */
-.pointer-events-none-children {
-  pointer-events: auto !important;
-}

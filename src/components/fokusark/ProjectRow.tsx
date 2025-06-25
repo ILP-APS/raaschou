@@ -9,27 +9,19 @@ interface ProjectRowProps {
   project: Project;
   index: number;
   onUpdateCompletionPercentage: (projectId: string, value: number) => Promise<void>;
-  isCtrlPressed: boolean;
-  isDragging: boolean;
 }
 
 export const ProjectRow: React.FC<ProjectRowProps> = ({
   project,
   index,
   onUpdateCompletionPercentage,
-  isCtrlPressed,
-  isDragging,
 }) => {
   const [editingCell, setEditingCell] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>("");
 
-  // Handle cell editing
+  // Simplified cell editing - no need to check for CTRL or drag state
+  // The master event controller handles those cases at the container level
   const handleCellClick = (e: React.MouseEvent, projectId: string, currentValue: number | null) => {
-    // Don't start editing during drag or when CTRL is pressed
-    if (isDragging || isCtrlPressed) {
-      return;
-    }
-    
     e.stopPropagation();
     setEditingCell(projectId);
     setEditValue(currentValue?.toString() || "");
