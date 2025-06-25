@@ -2,6 +2,7 @@
 import React from "react";
 import { useProjects } from "@/hooks/useProjects";
 import { useHoldScroll } from "@/hooks/useHoldScroll";
+import { useSidebar } from "@/components/ui/sidebar";
 import { Table, TableBody } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ProjectsTableHeaders } from "./ProjectsTableHeaders";
@@ -11,6 +12,18 @@ import { Project } from "@/types/project";
 const ProjectsTable: React.FC = () => {
   const { projects, loading, updateCompletionPercentage } = useProjects();
   const { containerRef, isDragging, handleMouseDown, debugContainer, testManualScroll } = useHoldScroll();
+  const { state } = useSidebar();
+
+  // Calculate dynamic width based on sidebar state
+  const getContainerWidth = () => {
+    if (state === "expanded") {
+      // When sidebar is expanded (16rem = 256px), subtract sidebar width and padding
+      return "calc(100vw - 16rem - 2rem)";
+    } else {
+      // When sidebar is collapsed (3rem = 48px), subtract icon width and padding
+      return "calc(100vw - 3rem - 2rem)";
+    }
+  };
 
   if (loading) {
     return (
@@ -32,7 +45,8 @@ const ProjectsTable: React.FC = () => {
         </Button>
         <div className="text-sm text-muted-foreground flex items-center">
           Status: {isDragging ? 'Dragging' : 'Ready'} | 
-          Projects: {projects.length}
+          Projects: {projects.length} |
+          Sidebar: {state}
         </div>
       </div>
 
@@ -43,7 +57,7 @@ const ProjectsTable: React.FC = () => {
         style={{ 
           height: '600px', // Fixed height to ensure vertical scrolling capability  
           maxWidth: '100vw', // Constraint to viewport width
-          width: '1200px', // Fixed width smaller than table's minWidth
+          width: getContainerWidth(), // Dynamic width based on sidebar state
           overflow: 'auto', // Critical for scrolling
           cursor: isDragging ? 'grabbing' : 'grab',
           userSelect: isDragging ? 'none' : 'auto',
