@@ -4,10 +4,10 @@ import React from "react";
 const FokusarkDescription: React.FC = () => {
   return (
     <p className="text-sm text-muted-foreground mb-6">
-      Welcome to the Fokusark dashboard. This is a clean slate ready for new functionality.
+      This table displays all projects from the database with real-time updates. All project data is read-only except for the "Færdig% (NU)" field which you can edit by clicking on it.
       <br />
       <span className="text-primary font-medium">
-        You can now build new features and components here.
+        Changes to completion percentage will automatically trigger recalculations in the database.
       </span>
     </p>
   );

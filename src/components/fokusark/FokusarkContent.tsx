@@ -1,6 +1,7 @@
 
 import React from "react";
 import FokusarkDescription from "./FokusarkDescription";
+import ProjectsTable from "./ProjectsTable";
 
 const FokusarkContent: React.FC = () => {
   return (
@@ -10,10 +11,8 @@ const FokusarkContent: React.FC = () => {
         <FokusarkDescription />
       </div>
       
-      <div className="flex-1 p-8 border border-dashed border-muted-foreground rounded-lg">
-        <p className="text-muted-foreground text-center">
-          Content area ready for new functionality
-        </p>
+      <div className="flex-1">
+        <ProjectsTable />
       </div>
     </div>
   );
