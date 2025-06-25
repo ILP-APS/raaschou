@@ -19,7 +19,7 @@ const FokusarkHeader: React.FC = () => {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem className="hidden md:block">
-            <BreadcrumbLink href="#">Operations</BreadcrumbLink>
+            <BreadcrumbLink href="#">RAASCHOU</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="hidden md:block" />
           <BreadcrumbItem>
