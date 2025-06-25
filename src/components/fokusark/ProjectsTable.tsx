@@ -16,6 +16,7 @@ const ProjectsTable: React.FC = () => {
     containerRef,
     isDragging,
     handleMouseDown,
+    handleMouseLeave,
   } = useDragScroll();
 
   if (loading) {
@@ -47,6 +48,7 @@ const ProjectsTable: React.FC = () => {
         isDragging ? 'cursor-grabbing select-none' : ''
       }`}
       onMouseDown={handleMouseDown}
+      onMouseLeave={handleMouseLeave}
     >
       <Table>
         <ProjectsTableHeader />
