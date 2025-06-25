@@ -2,6 +2,7 @@
 /* Basic table styling */
 .fokusark-native-table {
   width: 100%;
+  min-width: 2400px;
   border-collapse: collapse;
   font-size: 0.875rem;
   line-height: 1.25rem;
@@ -29,6 +30,16 @@
 
 .fokusark-native-table tbody tr:last-child {
   border-bottom: 0;
+}
+
+/* Hide scrollbars */
+.fokusark-scroll-container {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.fokusark-scroll-container::-webkit-scrollbar {
+  display: none;
 }
 
 /* Sticky column styles */
