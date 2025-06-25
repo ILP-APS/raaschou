@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { useProjects } from "@/hooks/useProjects";
+import { useHoldScroll } from "@/hooks/useHoldScroll";
 import {
   Table,
   TableBody,
@@ -9,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { formatDanishNumber, formatDanishCurrency } from "@/utils/formatUtils";
 import { Project } from "@/types/project";
@@ -28,7 +28,8 @@ const EditablePercentageCell: React.FC<EditablePercentageCellProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value?.toString() || "");
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent drag scrolling when clicking on editable cell
     setIsEditing(true);
     setEditValue(value?.toString() || "");
   };
@@ -63,6 +64,7 @@ const EditablePercentageCell: React.FC<EditablePercentageCellProps> = ({
         type="number"
         min="0"
         max="100"
+        onClick={(e) => e.stopPropagation()}
       />
     );
   }
@@ -79,6 +81,7 @@ const EditablePercentageCell: React.FC<EditablePercentageCellProps> = ({
 
 const ProjectsTable: React.FC = () => {
   const { projects, loading, updateCompletionPercentage } = useProjects();
+  const { containerProps } = useHoldScroll();
 
   const formatValue = (value: number | null, isNumber = false): string => {
     if (value === null || value === undefined) return "-";
@@ -95,7 +98,10 @@ const ProjectsTable: React.FC = () => {
 
   return (
     <div className="w-full">
-      <ScrollArea className="w-full overflow-x-auto">
+      <div
+        {...containerProps}
+        className="w-full overflow-auto border border-border rounded-lg"
+      >
         <Table className="min-w-[2000px]">
           <TableHeader>
             {/* Group Headers */}
@@ -126,8 +132,8 @@ const ProjectsTable: React.FC = () => {
             {/* Column Headers */}
             <TableRow>
               {/* Aftale */}
-              <TableHead className="sticky left-0 bg-background border-r">Projekt ID</TableHead>
-              <TableHead className="sticky left-24 bg-background border-r min-w-[200px]">Projekt Navn/Emne</TableHead>
+              <TableHead className="sticky left-0 bg-background border-r z-10">Projekt ID</TableHead>
+              <TableHead className="sticky left-24 bg-background border-r min-w-[200px] z-10">Projekt Navn/Emne</TableHead>
               <TableHead className="text-center border-r">Ansvarlig</TableHead>
               
               {/* Tilbud */}
@@ -166,10 +172,10 @@ const ProjectsTable: React.FC = () => {
             {projects.map((project: Project, index) => (
               <TableRow key={project.id} className={index % 2 === 0 ? "bg-background" : "bg-muted/20"}>
                 {/* Aftale */}
-                <TableCell className="sticky left-0 bg-inherit border-r font-medium">
+                <TableCell className="sticky left-0 bg-inherit border-r font-medium z-10">
                   {project.id}
                 </TableCell>
-                <TableCell className="sticky left-24 bg-inherit border-r min-w-[200px]">
+                <TableCell className="sticky left-24 bg-inherit border-r min-w-[200px] z-10">
                   {project.name || "-"}
                 </TableCell>
                 <TableCell className="text-center border-r">
@@ -252,7 +258,7 @@ const ProjectsTable: React.FC = () => {
             ))}
           </TableBody>
         </Table>
-      </ScrollArea>
+      </div>
     </div>
   );
 };
