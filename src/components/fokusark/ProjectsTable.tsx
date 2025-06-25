@@ -12,9 +12,7 @@ const ProjectsTable: React.FC = () => {
   const { 
     containerRef, 
     handleMouseDown, 
-    handleMouseLeave, 
-    handleMouseUp, 
-    handleMouseMove 
+    handleMouseLeave
   } = useDragScroll();
 
   if (loading) {
@@ -28,7 +26,6 @@ const ProjectsTable: React.FC = () => {
     );
   }
 
-  // Render logic for no projects
   if (projects.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -46,8 +43,6 @@ const ProjectsTable: React.FC = () => {
       className="w-full overflow-auto border rounded-lg hover:cursor-grab"
       onMouseDown={handleMouseDown}
       onMouseLeave={handleMouseLeave}
-      onMouseUp={handleMouseUp}
-      onMouseMove={handleMouseMove}
     >
       <Table>
         <ProjectsTableHeader />
