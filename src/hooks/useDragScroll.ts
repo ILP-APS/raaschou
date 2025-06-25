@@ -12,13 +12,26 @@ export const useDragScroll = () => {
       e.preventDefault();
       e.stopPropagation();
       
-      console.log('Starting drag operation with CTRL');
+      const container = containerRef.current;
+      
+      // Enhanced debugging
+      console.log('=== DRAG INITIATED ===');
+      console.log('Container scroll dimensions:', {
+        scrollWidth: container.scrollWidth,
+        clientWidth: container.clientWidth,
+        scrollLeft: container.scrollLeft,
+        scrollTop: container.scrollTop,
+        canScrollHorizontally: container.scrollWidth > container.clientWidth,
+        canScrollVertically: container.scrollHeight > container.clientHeight
+      });
+      console.log('Mouse position:', { x: e.clientX, y: e.clientY });
+      
       setIsDragging(true);
       
       const startX = e.clientX;
       const startY = e.clientY;
-      const startScrollLeft = containerRef.current.scrollLeft;
-      const startScrollTop = containerRef.current.scrollTop;
+      const startScrollLeft = container.scrollLeft;
+      const startScrollTop = container.scrollTop;
 
       // Global mouse move handler
       const handleDocumentMouseMove = (event: MouseEvent) => {
@@ -28,15 +41,22 @@ export const useDragScroll = () => {
         const deltaX = event.clientX - startX;
         const deltaY = event.clientY - startY;
         
-        containerRef.current.scrollLeft = startScrollLeft - deltaX;
-        containerRef.current.scrollTop = startScrollTop - deltaY;
+        const newScrollLeft = startScrollLeft - deltaX;
+        const newScrollTop = startScrollTop - deltaY;
         
-        console.log('Dragging - deltaX:', deltaX, 'deltaY:', deltaY);
+        containerRef.current.scrollLeft = newScrollLeft;
+        containerRef.current.scrollTop = newScrollTop;
+        
+        console.log('Dragging - deltaX:', deltaX, 'deltaY:', deltaY, 'newScrollLeft:', newScrollLeft, 'actualScrollLeft:', containerRef.current.scrollLeft);
       };
 
       // Global mouse up handler
       const handleDocumentMouseUp = () => {
-        console.log('Drag ended');
+        console.log('=== DRAG ENDED ===');
+        console.log('Final scroll position:', {
+          scrollLeft: containerRef.current?.scrollLeft,
+          scrollTop: containerRef.current?.scrollTop
+        });
         setIsDragging(false);
         document.removeEventListener('mousemove', handleDocumentMouseMove);
         document.removeEventListener('mouseup', handleDocumentMouseUp);

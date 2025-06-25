@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -8,6 +8,7 @@ import { useProjects } from "@/hooks/useProjects";
 import { useDragScroll } from "@/hooks/useDragScroll";
 import { ProjectsTableHeader } from "./ProjectsTableHeader";
 import { ProjectRow } from "./ProjectRow";
+import "./FokusarkTableStyles.css";
 
 const ProjectsTable: React.FC = () => {
   const { projects, loading, updateCompletionPercentage } = useProjects();
@@ -16,6 +17,20 @@ const ProjectsTable: React.FC = () => {
     isDragging,
     handleMouseDown,
   } = useDragScroll();
+
+  // Debug scrollable dimensions
+  useEffect(() => {
+    if (containerRef.current) {
+      const container = containerRef.current;
+      console.log('Container dimensions:', {
+        scrollWidth: container.scrollWidth,
+        clientWidth: container.clientWidth,
+        offsetWidth: container.offsetWidth,
+        scrollLeft: container.scrollLeft,
+        isScrollable: container.scrollWidth > container.clientWidth
+      });
+    }
+  }, [projects]);
 
   if (loading) {
     return (
@@ -47,7 +62,7 @@ const ProjectsTable: React.FC = () => {
       }`}
       onMouseDown={handleMouseDown}
     >
-      <Table>
+      <Table className="fokusark-table-force-width">
         <ProjectsTableHeader />
         <TableBody>
           {projects.map((project, index) => (

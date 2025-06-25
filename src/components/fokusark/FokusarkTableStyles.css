@@ -32,6 +32,11 @@
   border-radius: 0.5rem;
 }
 
+/* TEMPORARY: Force table to be wider than viewport for testing drag functionality */
+.fokusark-table-force-width {
+  min-width: 150vw !important;
+}
+
 /* Critical styles for sticky columns with !important to ensure they take precedence */
 .sticky-column {
   position: sticky !important;
