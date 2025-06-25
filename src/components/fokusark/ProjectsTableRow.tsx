@@ -1,3 +1,4 @@
+
 import React from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { formatDanishNumber, formatDanishCurrency, extractInitials } from "@/utils/formatUtils";
@@ -61,9 +62,9 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
       index === 0 || index % 2 === 0 ? "bg-background" : "bg-muted/20",
       isSubProject && "bg-muted/10" // Slightly different background for sub-projects
     )}>
-      {/* Aftale */}
+      {/* Aftale - Frozen columns */}
       <TableCell className={cn(
-        "bg-inherit border-r font-medium",
+        "sticky left-0 z-10 bg-inherit border-r font-medium min-w-[120px]",
         isSubProject && "pl-8" // Indent sub-projects
       )}>
         <div className="flex items-center gap-2">
@@ -89,7 +90,7 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
         </div>
       </TableCell>
       <TableCell className={cn(
-        "bg-inherit border-r min-w-[200px]",
+        "sticky left-[120px] z-10 bg-inherit border-r min-w-[200px]",
         isSubProject && "pl-8" // Indent sub-projects
       )}>
         <span className={cn(
@@ -99,11 +100,11 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
           {project.name || "-"}
         </span>
       </TableCell>
-      <TableCell className="text-center border-r">
+      <TableCell className="sticky left-[320px] z-10 bg-inherit text-center border-r-2 border-border min-w-[100px]">
         {extractInitials(project.responsible_person_initials)}
       </TableCell>
       
-      {/* Tilbud */}
+      {/* Tilbud - Scrollable columns */}
       <TableCell className="text-right border-r">
         {formatValue(project.offer_amount)}
       </TableCell>

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -6,8 +7,8 @@ export const ProjectsTableHeaders: React.FC = () => {
     <TableHeader>
       {/* Group Headers */}
       <TableRow className="bg-muted/30">
-        {/* Aftale */}
-        <TableHead className="text-center font-semibold border-r" colSpan={3}>
+        {/* Aftale - Frozen columns */}
+        <TableHead className="sticky left-0 z-30 bg-muted/30 text-center font-semibold border-r-2 border-border" colSpan={3}>
           Aftale
         </TableHead>
         <TableHead className="text-center font-semibold border-r" colSpan={4}>
@@ -32,12 +33,12 @@ export const ProjectsTableHeaders: React.FC = () => {
       
       {/* Column Headers */}
       <TableRow className="bg-muted/30">
-        {/* Aftale */}
-        <TableHead className="bg-inherit border-r">Projekt ID</TableHead>
-        <TableHead className="bg-inherit border-r min-w-[200px]">Projekt Navn/Emne</TableHead>
-        <TableHead className="text-center border-r">Ansvarlig</TableHead>
+        {/* Aftale - Frozen columns */}
+        <TableHead className="sticky left-0 z-20 bg-muted/30 border-r min-w-[120px]">Projekt ID</TableHead>
+        <TableHead className="sticky left-[120px] z-20 bg-muted/30 border-r min-w-[200px]">Projekt Navn/Emne</TableHead>
+        <TableHead className="sticky left-[320px] z-20 bg-muted/30 text-center border-r-2 border-border min-w-[100px]">Ansvarlig</TableHead>
         
-        {/* Tilbud */}
+        {/* Tilbud - Scrollable columns */}
         <TableHead className="text-right border-r">Tilbudsbeløb i alt</TableHead>
         <TableHead className="text-right border-r">Heraf Montage</TableHead>
         <TableHead className="text-right border-r">Heraf Underleverandør</TableHead>
