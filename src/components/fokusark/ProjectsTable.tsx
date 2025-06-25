@@ -40,7 +40,7 @@ const ProjectsTable: React.FC = () => {
   }
 
   return (
-    <div className="w-full h-full overflow-hidden border border-border rounded-lg">
+    <div className="w-full h-full overflow-hidden border border-border rounded-lg bg-background">
       <div 
         ref={containerRef}
         className={`w-full h-full overflow-auto fokusark-scroll-container ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
@@ -49,7 +49,7 @@ const ProjectsTable: React.FC = () => {
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerLeave}
       >
-        <div style={{ width: '2400px', minWidth: '2400px' }}>
+        <div style={{ width: '3200px', minWidth: '3200px' }}>
           <table className="fokusark-native-table">
             <ProjectsTableHeader />
             <tbody>

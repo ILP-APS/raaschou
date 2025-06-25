@@ -18,7 +18,7 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
   const [editingCell, setEditingCell] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>("");
 
-  // Handle cell click for editing - simplified without event conflicts
+  // Handle cell click for editing
   const handleCellClick = (projectId: string, currentValue: number | null) => {
     setEditingCell(projectId);
     setEditValue(currentValue?.toString() || "");
@@ -43,10 +43,7 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
   };
 
   return (
-    <tr 
-      key={project.id} 
-      className={index % 2 === 0 ? "bg-background" : "bg-muted/25"}
-    >
+    <tr>
       {/* Aftale */}
       <td className="sticky-column sticky-col-0 border-r font-mono text-sm">
         {project.id}
@@ -54,7 +51,7 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
       <td className="sticky-column sticky-col-1 border-r font-medium">
         {project.name || '-'}
       </td>
-      <td className="border-r-2 border-border text-center">
+      <td className="border-r-2 text-center">
         {project.responsible_person_initials || '-'}
       </td>
       {/* Tilbud */}
@@ -67,7 +64,7 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
       <td className="text-right font-mono">
         {project.subcontractor_amount ? formatDanishCurrency(project.subcontractor_amount) : '-'}
       </td>
-      <td className="text-right font-mono border-r-2 border-border">
+      <td className="text-right font-mono border-r-2">
         {project.materials_amount ? formatDanishCurrency(project.materials_amount) : '-'}
       </td>
       {/* Estimeret */}
@@ -77,7 +74,7 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
       <td className="text-right font-mono">
         {project.hours_estimated_production ? formatDanishNumber(project.hours_estimated_production) : '-'}
       </td>
-      <td className="text-right font-mono border-r-2 border-border">
+      <td className="text-right font-mono border-r-2">
         {project.hours_estimated_assembly ? formatDanishNumber(project.hours_estimated_assembly) : '-'}
       </td>
       {/* Realiseret */}
@@ -90,11 +87,11 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
       <td className="text-right font-mono">
         {project.hours_used_assembly ? formatDanishNumber(project.hours_used_assembly) : '-'}
       </td>
-      <td className="text-right font-mono border-r-2 border-border">
+      <td className="text-right font-mono border-r-2">
         {project.hours_used_total ? formatDanishNumber(project.hours_used_total) : '-'}
       </td>
       {/* Projektering */}
-      <td className="text-right font-mono border-r-2 border-border">
+      <td className="text-right font-mono border-r-2">
         {project.hours_remaining_projecting ? formatDanishNumber(project.hours_remaining_projecting) : '-'}
       </td>
       {/* Produktions stadie */}
@@ -108,12 +105,12 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={() => handleCellSave(project.id)}
             onKeyDown={(e) => handleKeyDown(e, project.id)}
-            className="w-20 text-right"
+            className="w-20 text-right bg-background"
             autoFocus
           />
         ) : (
           <div 
-            className="cursor-pointer hover:bg-muted/50 p-1 rounded"
+            className="cursor-pointer hover:bg-muted/50 p-1 rounded transition-colors"
             onClick={() => handleCellClick(project.id, project.completion_percentage_manual)}
           >
             {project.completion_percentage_manual ? formatDanishNumber(project.completion_percentage_manual) + '%' : '-'}
@@ -126,7 +123,7 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
       <td className="text-right font-mono">
         {project.hours_estimated_by_completion ? formatDanishNumber(project.hours_estimated_by_completion) : '-'}
       </td>
-      <td className="text-right font-mono border-r-2 border-border">
+      <td className="text-right font-mono border-r-2">
         {project.plus_minus_hours ? formatDanishNumber(project.plus_minus_hours) : '-'}
       </td>
       {/* Montage */}
