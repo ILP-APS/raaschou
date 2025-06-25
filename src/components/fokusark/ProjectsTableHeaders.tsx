@@ -9,7 +9,7 @@ export const ProjectsTableHeaders: React.FC = () => {
       <TableRow className="bg-muted/30">
         {/* Aftale - Frozen columns */}
         <TableHead 
-          className="sticky z-30 bg-muted/30 text-center font-semibold border-r" 
+          className="sticky z-30 bg-muted text-center font-semibold border-r" 
           colSpan={3}
           style={{ left: 0 }}
         >
@@ -39,19 +39,19 @@ export const ProjectsTableHeaders: React.FC = () => {
       <TableRow className="bg-muted/30">
         {/* Aftale - Frozen columns */}
         <TableHead 
-          className="sticky z-30 bg-muted/30 border-r"
+          className="sticky z-30 bg-muted border-r"
           style={{ left: 0, minWidth: '150px', width: '150px' }}
         >
           Projekt ID
         </TableHead>
         <TableHead 
-          className="sticky z-30 bg-muted/30 border-r"
+          className="sticky z-30 bg-muted border-r"
           style={{ left: '150px', minWidth: '300px', width: '300px' }}
         >
           Projekt Navn/Emne
         </TableHead>
         <TableHead 
-          className="sticky z-30 bg-muted/30 text-center border-r"
+          className="sticky z-30 bg-muted text-center border-r"
           style={{ left: '450px', minWidth: '100px', width: '100px' }}
         >
           Ansvarlig
