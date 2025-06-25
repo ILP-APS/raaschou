@@ -4,7 +4,7 @@ import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const ProjectsTableHeaders: React.FC = () => {
   return (
-    <TableHeader>
+    <TableHeader className="sticky top-0 z-40 bg-background">
       {/* Group Headers */}
       <TableRow className="bg-muted/30">
         {/* Aftale - Frozen columns */}
