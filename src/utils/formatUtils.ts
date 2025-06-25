@@ -27,3 +27,17 @@ export const formatDanishCurrency = (value: number): string => {
   
   return `${formattedValue} DKK`;
 };
+
+/**
+ * Extract initials from a full name
+ * Examples: "Mads Raaschou" -> "MR", "Magnus Bo Andersen" -> "MBA"
+ */
+export const extractInitials = (fullName: string | null): string => {
+  if (!fullName || fullName.trim() === '') return '-';
+  
+  return fullName
+    .trim()
+    .split(' ')
+    .map(name => name.charAt(0).toUpperCase())
+    .join('');
+};

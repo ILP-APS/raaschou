@@ -1,6 +1,7 @@
+
 import React from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { formatDanishNumber, formatDanishCurrency } from "@/utils/formatUtils";
+import { formatDanishNumber, formatDanishCurrency, extractInitials } from "@/utils/formatUtils";
 import { Project } from "@/types/project";
 import { EditablePercentageCell } from "./EditablePercentageCell";
 
@@ -30,7 +31,7 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
         {project.name || "-"}
       </TableCell>
       <TableCell className="text-center border-r">
-        {project.responsible_person_initials || "-"}
+        {extractInitials(project.responsible_person_initials)}
       </TableCell>
       
       {/* Tilbud */}
