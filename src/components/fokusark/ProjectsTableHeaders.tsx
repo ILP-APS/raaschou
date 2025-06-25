@@ -34,9 +34,9 @@ export const ProjectsTableHeaders: React.FC = () => {
       {/* Column Headers */}
       <TableRow className="bg-muted/30">
         {/* Aftale - Frozen columns */}
-        <TableHead className="sticky left-0 z-20 bg-muted/30 border-r min-w-[120px]">Projekt ID</TableHead>
-        <TableHead className="sticky left-[120px] z-20 bg-muted/30 border-r min-w-[200px]">Projekt Navn/Emne</TableHead>
-        <TableHead className="sticky left-[320px] z-20 bg-muted/30 text-center border-r-2 border-border min-w-[100px]">Ansvarlig</TableHead>
+        <TableHead className="sticky left-0 z-20 bg-muted/30 border-r min-w-[80px] w-[80px]">Projekt ID</TableHead>
+        <TableHead className="sticky left-[80px] z-20 bg-muted/30 border-r min-w-[150px] w-[150px]">Projekt Navn/Emne</TableHead>
+        <TableHead className="sticky left-[230px] z-20 bg-muted/30 text-center border-r-2 border-border min-w-[80px] w-[80px]">Ansvarlig</TableHead>
         
         {/* Tilbud - Scrollable columns */}
         <TableHead className="text-right border-r">Tilbudsbeløb i alt</TableHead>
