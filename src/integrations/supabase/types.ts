@@ -9,123 +9,143 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      fokusark_table: {
+      offer_line_items: {
         Row: {
-          "1 col": string | null
-          "10 col": string | null
-          "11 col": string | null
-          "12 col": string | null
-          "13 col": string | null
-          "14 col": string | null
-          "15 col": string | null
-          "16 col": string | null
-          "17 col": string | null
-          "18 col": string | null
-          "19 col": string | null
-          "2 col": string | null
-          "20 col": string | null
-          "21 col": string | null
-          "22 col": string | null
-          "23 col": string | null
-          "24 col": string | null
-          "3 col": string | null
-          "4 col": string | null
-          "5 col": string | null
-          "6 col": string | null
-          "7 col": string | null
-          "8 col": string | null
-          "9 col": string | null
-          created_at: string
-          id: string
-          updated_at: string
+          description: string | null
+          hnBudgetLineID: number | null
+          hnLineID: number
+          project_id: string | null
+          salesPriceStandardCurrency: number | null
+          totalPriceStandardCurrency: number | null
+          unitName: string | null
+          units: number | null
         }
         Insert: {
-          "1 col"?: string | null
-          "10 col"?: string | null
-          "11 col"?: string | null
-          "12 col"?: string | null
-          "13 col"?: string | null
-          "14 col"?: string | null
-          "15 col"?: string | null
-          "16 col"?: string | null
-          "17 col"?: string | null
-          "18 col"?: string | null
-          "19 col"?: string | null
-          "2 col"?: string | null
-          "20 col"?: string | null
-          "21 col"?: string | null
-          "22 col"?: string | null
-          "23 col"?: string | null
-          "24 col"?: string | null
-          "3 col"?: string | null
-          "4 col"?: string | null
-          "5 col"?: string | null
-          "6 col"?: string | null
-          "7 col"?: string | null
-          "8 col"?: string | null
-          "9 col"?: string | null
-          created_at?: string
-          id?: string
-          updated_at?: string
+          description?: string | null
+          hnBudgetLineID?: number | null
+          hnLineID: number
+          project_id?: string | null
+          salesPriceStandardCurrency?: number | null
+          totalPriceStandardCurrency?: number | null
+          unitName?: string | null
+          units?: number | null
         }
         Update: {
-          "1 col"?: string | null
-          "10 col"?: string | null
-          "11 col"?: string | null
-          "12 col"?: string | null
-          "13 col"?: string | null
-          "14 col"?: string | null
-          "15 col"?: string | null
-          "16 col"?: string | null
-          "17 col"?: string | null
-          "18 col"?: string | null
-          "19 col"?: string | null
-          "2 col"?: string | null
-          "20 col"?: string | null
-          "21 col"?: string | null
-          "22 col"?: string | null
-          "23 col"?: string | null
-          "24 col"?: string | null
-          "3 col"?: string | null
-          "4 col"?: string | null
-          "5 col"?: string | null
-          "6 col"?: string | null
-          "7 col"?: string | null
-          "8 col"?: string | null
-          "9 col"?: string | null
-          created_at?: string
+          description?: string | null
+          hnBudgetLineID?: number | null
+          hnLineID?: number
+          project_id?: string | null
+          salesPriceStandardCurrency?: number | null
+          totalPriceStandardCurrency?: number | null
+          unitName?: string | null
+          units?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_line_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          allocated_freight_amount: number | null
+          assembly_amount: number | null
+          completion_percentage_manual: number | null
+          completion_percentage_previous: number | null
+          hours_estimated_assembly: number | null
+          hours_estimated_by_completion: number | null
+          hours_estimated_production: number | null
+          hours_estimated_projecting: number | null
+          hours_remaining_assembly: number | null
+          hours_remaining_production: number | null
+          hours_remaining_projecting: number | null
+          hours_used_assembly: number | null
+          hours_used_production: number | null
+          hours_used_projecting: number | null
+          hours_used_total: number | null
+          id: string
+          last_api_update: string | null
+          last_calculation_update: string | null
+          materials_amount: number | null
+          name: string | null
+          offer_amount: number | null
+          plus_minus_hours: number | null
+          responsible_person_initials: string | null
+          subcontractor_amount: number | null
+        }
+        Insert: {
+          allocated_freight_amount?: number | null
+          assembly_amount?: number | null
+          completion_percentage_manual?: number | null
+          completion_percentage_previous?: number | null
+          hours_estimated_assembly?: number | null
+          hours_estimated_by_completion?: number | null
+          hours_estimated_production?: number | null
+          hours_estimated_projecting?: number | null
+          hours_remaining_assembly?: number | null
+          hours_remaining_production?: number | null
+          hours_remaining_projecting?: number | null
+          hours_used_assembly?: number | null
+          hours_used_production?: number | null
+          hours_used_projecting?: number | null
+          hours_used_total?: number | null
+          id: string
+          last_api_update?: string | null
+          last_calculation_update?: string | null
+          materials_amount?: number | null
+          name?: string | null
+          offer_amount?: number | null
+          plus_minus_hours?: number | null
+          responsible_person_initials?: string | null
+          subcontractor_amount?: number | null
+        }
+        Update: {
+          allocated_freight_amount?: number | null
+          assembly_amount?: number | null
+          completion_percentage_manual?: number | null
+          completion_percentage_previous?: number | null
+          hours_estimated_assembly?: number | null
+          hours_estimated_by_completion?: number | null
+          hours_estimated_production?: number | null
+          hours_estimated_projecting?: number | null
+          hours_remaining_assembly?: number | null
+          hours_remaining_production?: number | null
+          hours_remaining_projecting?: number | null
+          hours_used_assembly?: number | null
+          hours_used_production?: number | null
+          hours_used_projecting?: number | null
+          hours_used_total?: number | null
           id?: string
-          updated_at?: string
+          last_api_update?: string | null
+          last_calculation_update?: string | null
+          materials_amount?: number | null
+          name?: string | null
+          offer_amount?: number | null
+          plus_minus_hours?: number | null
+          responsible_person_initials?: string | null
+          subcontractor_amount?: number | null
         }
         Relationships: []
       }
-      tasks: {
+      settings: {
         Row: {
-          created_at: string
-          id: string
-          status: string
-          task_id: string
-          title: string
-          type: string
-          updated_at: string
+          description: string | null
+          key: string
+          value: number | null
         }
         Insert: {
-          created_at?: string
-          id?: string
-          status: string
-          task_id: string
-          title: string
-          type: string
-          updated_at?: string
+          description?: string | null
+          key: string
+          value?: number | null
         }
         Update: {
-          created_at?: string
-          id?: string
-          status?: string
-          task_id?: string
-          title?: string
-          type?: string
-          updated_at?: string
+          description?: string | null
+          key?: string
+          value?: number | null
         }
         Relationships: []
       }
@@ -134,7 +154,70 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_completion_metrics: {
+        Args: { project_id: string }
+        Returns: undefined
+      }
+      calculate_project_metrics: {
+        Args: { project_id: string }
+        Returns: undefined
+      }
+      get_setting: {
+        Args: { p_key: string }
+        Returns: number
+      }
+      upsert_offer_line_item: {
+        Args: {
+          p_hnlineid: number
+          p_project_id: string
+          p_description: string
+          p_units: number
+          p_unitname: string
+          p_salespricestandardcurrency: number
+          p_totalpricestandardcurrency: number
+          p_hnbudgetlineid: number
+        }
+        Returns: undefined
+      }
+      upsert_project: {
+        Args: {
+          p_id: string
+          p_name: string
+          p_responsible_person_initials: string
+          p_offer_amount: number
+          p_assembly_amount: number
+          p_subcontractor_amount: number
+          p_hours_used_projecting: number
+          p_hours_used_production: number
+          p_hours_used_assembly: number
+          p_materials_amount: number
+          p_hours_estimated_projecting: number
+          p_hours_estimated_production: number
+          p_hours_estimated_assembly: number
+          p_hours_used_total: number
+          p_hours_remaining_projecting: number
+          p_hours_remaining_production: number
+          p_hours_remaining_assembly: number
+          p_allocated_freight_amount: number
+          p_last_api_update: string
+        }
+        Returns: undefined
+      }
+      upsert_project_from_n8n: {
+        Args: {
+          p_id: string
+          p_name: string
+          p_responsible_person_initials: string
+          p_offer_amount: number
+          p_assembly_amount: number
+          p_subcontractor_amount: number
+          p_hours_used_projecting: number
+          p_hours_used_production: number
+          p_hours_used_assembly: number
+          p_last_api_update: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
