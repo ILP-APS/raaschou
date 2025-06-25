@@ -57,10 +57,10 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
     }
   };
 
-  // Get background color based on row pattern
+  // Get background color based on row pattern - using fully opaque colors for frozen columns
   const getRowBgColor = () => {
-    if (isSubProject) return "bg-muted/10";
-    return index === 0 || index % 2 === 0 ? "bg-background" : "bg-muted/20";
+    if (isSubProject) return "bg-muted";
+    return index === 0 || index % 2 === 0 ? "bg-background" : "bg-muted";
   };
 
   const rowBgColor = getRowBgColor();
