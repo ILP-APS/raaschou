@@ -75,10 +75,11 @@
   display: none;
 }
 
-/* Force table to be wide enough for horizontal scrolling but allow flexible column widths */
-.fokusark-scroll-wrapper table {
-  min-width: 2400px; /* Force minimum width to enable horizontal scrolling */
-  width: max-content; /* Allow table to expand based on content */
+/* Force table to be wide enough for horizontal scrolling - FIXED SELECTOR */
+.fokusark-scroll-wrapper [data-table="true"] {
+  min-width: 2400px !important; /* Force minimum width to enable horizontal scrolling */
+  width: max-content !important; /* Allow table to expand based on content */
+  table-layout: auto !important; /* Allow flexible column widths */
 }
 
 /* Active dragging state */
@@ -122,18 +123,21 @@
   position: sticky !important;
   z-index: 20 !important;
   box-shadow: 2px 0 5px -2px rgba(0,0,0,0.15) !important;
+  background-color: hsl(var(--background)) !important; /* Fixed from bg-inherit */
 }
 
 .sticky-header {
   position: sticky !important;
   z-index: 30 !important;
   top: 0 !important;
+  background-color: hsl(var(--background)) !important; /* Fixed from bg-inherit */
 }
 
 .sticky-corner {
   position: sticky !important;
   z-index: 60 !important;
   top: 0 !important;
+  background-color: hsl(var(--background)) !important; /* Fixed from bg-inherit */
 }
 
 /* Column-specific styles with flexible widths for sticky columns */

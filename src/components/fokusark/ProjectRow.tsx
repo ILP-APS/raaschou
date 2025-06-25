@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
@@ -49,10 +48,10 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
       className={index % 2 === 0 ? "bg-background" : "bg-muted/25"}
     >
       {/* Aftale */}
-      <TableCell className="sticky-column sticky-col-0 bg-inherit border-r font-mono text-sm">
+      <TableCell className="sticky-column sticky-col-0 border-r font-mono text-sm">
         {project.id}
       </TableCell>
-      <TableCell className="sticky-column sticky-col-1 bg-inherit border-r font-medium">
+      <TableCell className="sticky-column sticky-col-1 border-r font-medium">
         {project.name || '-'}
       </TableCell>
       <TableCell className="border-r-2 border-border text-center">

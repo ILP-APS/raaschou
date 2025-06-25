@@ -53,7 +53,7 @@ const ProjectsTable: React.FC = () => {
         onPointerLeave={handlePointerLeave}
         style={{ cursor: 'grab' }}
       >
-        <Table>
+        <Table data-table="true">
           <ProjectsTableHeader />
           <TableBody>
             {projects.map((project, index) => (
