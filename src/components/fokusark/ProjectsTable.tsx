@@ -2,12 +2,21 @@
 import React from "react";
 import { Table, TableBody } from "@/components/ui/table";
 import { useProjects } from "@/hooks/useProjects";
+import { useDragScroll } from "@/hooks/useDragScroll";
 import { ProjectsTableHeader } from "./ProjectsTableHeader";
 import { ProjectRow } from "./ProjectRow";
 import "./FokusarkTableStyles.css";
 
 const ProjectsTable: React.FC = () => {
   const { projects, loading, updateCompletionPercentage } = useProjects();
+  const { 
+    containerRef, 
+    handlePointerDown, 
+    handlePointerMove,
+    handlePointerUp,
+    handlePointerLeave,
+    isDragging
+  } = useDragScroll();
 
   if (loading) {
     return (
@@ -35,7 +44,15 @@ const ProjectsTable: React.FC = () => {
     <div className="fokusark-native-scroll-container">
       <div className="scroll-fade-left"></div>
       <div className="scroll-fade-right"></div>
-      <div className="fokusark-scroll-wrapper">
+      <div 
+        ref={containerRef}
+        className={`fokusark-scroll-wrapper ${isDragging ? 'dragging' : ''}`}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerLeave}
+        style={{ cursor: 'grab' }}
+      >
         <Table>
           <ProjectsTableHeader />
           <TableBody>
