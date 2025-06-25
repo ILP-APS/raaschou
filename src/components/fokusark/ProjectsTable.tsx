@@ -39,7 +39,8 @@ const ProjectsTable: React.FC = () => {
         ref={containerRef}
         className="w-full border border-border rounded-lg"
         style={{ 
-          height: '600px', // Fixed height to ensure vertical scrolling capability  
+          height: 'calc(100vh - 252px)', // Dynamic height: viewport - header(64px) - padding(48px) - description(120px) - buffer(20px)
+          minHeight: '400px', // Minimum height for usability on small screens
           maxWidth: '100vw', // Constraint to viewport width
           width: getContainerWidth(), // Dynamic width based on sidebar state
           overflow: 'auto', // Critical for scrolling
