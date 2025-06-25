@@ -61,6 +61,8 @@ export const parseProjectHierarchy = (projects: Project[]): ProjectHierarchy[] =
         offer_amount: null,
         assembly_amount: null,
         subcontractor_amount: null,
+        manual_assembly_amount: null,
+        manual_subcontractor_amount: null,
         materials_amount: null,
         hours_estimated_projecting: null,
         hours_estimated_production: null,
