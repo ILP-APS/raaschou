@@ -42,6 +42,8 @@ const ProjectsTable: React.FC = () => {
         className="w-full border border-border rounded-lg"
         style={{ 
           height: '600px', // Fixed height to ensure vertical scrolling capability  
+          maxWidth: '100vw', // Constraint to viewport width
+          width: '1200px', // Fixed width smaller than table's minWidth
           overflow: 'auto', // Critical for scrolling
           cursor: isDragging ? 'grabbing' : 'grab',
           userSelect: isDragging ? 'none' : 'auto',
