@@ -1,6 +1,7 @@
 
 import React from "react";
 import FokusarkDescription from "./FokusarkDescription";
+import ProjectsTable from "./ProjectsTable";
 
 const FokusarkContent: React.FC = () => {
   return (
@@ -10,14 +11,8 @@ const FokusarkContent: React.FC = () => {
         <FokusarkDescription />
       </div>
       
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h3 className="text-lg font-medium text-muted-foreground">Table Ready for Rebuild</h3>
-          <p className="text-sm text-muted-foreground max-w-md">
-            The previous table implementation has been removed. 
-            Ready to build a new table from scratch with your requirements.
-          </p>
-        </div>
+      <div className="flex-1">
+        <ProjectsTable />
       </div>
     </div>
   );
