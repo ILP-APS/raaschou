@@ -62,12 +62,12 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
       index === 0 || index % 2 === 0 ? "bg-background" : "bg-muted/20",
       isSubProject && "bg-muted/10" // Slightly different background for sub-projects
     )}>
-      {/* Aftale - Frozen columns */}
+      {/* Aftale */}
       <TableCell className={cn(
-        "sticky left-0 z-10 bg-inherit border-r font-medium min-w-[80px] w-[80px]",
-        isSubProject && "pl-6" // Reduced indent for sub-projects due to smaller width
+        "border-r font-medium",
+        isSubProject && "pl-8" // Indent sub-projects
       )}>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           {isParent && hasChildren && (
             <button
               onClick={handleToggleClick}
@@ -75,14 +75,13 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
               aria-label={isExpanded ? "Collapse" : "Expand"}
             >
               {isExpanded ? (
-                <ChevronDown className="h-3 w-3" />
+                <ChevronDown className="h-4 w-4" />
               ) : (
-                <ChevronRight className="h-3 w-3" />
+                <ChevronRight className="h-4 w-4" />
               )}
             </button>
           )}
           <span className={cn(
-            "text-xs", // Smaller text for compact column
             isParent && hasChildren && "font-semibold",
             isSubProject && "text-muted-foreground"
           )}>
@@ -91,22 +90,21 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
         </div>
       </TableCell>
       <TableCell className={cn(
-        "sticky left-[80px] z-10 bg-inherit border-r min-w-[150px] w-[150px]",
-        isSubProject && "pl-6" // Reduced indent for sub-projects
+        "border-r",
+        isSubProject && "pl-8" // Indent sub-projects
       )}>
         <span className={cn(
-          "text-xs truncate block", // Smaller text and truncate for compact column
           isParent && hasChildren && "font-semibold",
           isSubProject && "text-muted-foreground"
         )}>
           {project.name || "-"}
         </span>
       </TableCell>
-      <TableCell className="sticky left-[230px] z-10 bg-inherit text-center border-r-2 border-border min-w-[80px] w-[80px]">
-        <span className="text-xs">{extractInitials(project.responsible_person_initials)}</span>
+      <TableCell className="text-center border-r">
+        {extractInitials(project.responsible_person_initials)}
       </TableCell>
       
-      {/* Tilbud - Scrollable columns */}
+      {/* Tilbud */}
       <TableCell className="text-right border-r">
         {formatValue(project.offer_amount)}
       </TableCell>

@@ -7,8 +7,8 @@ export const ProjectsTableHeaders: React.FC = () => {
     <TableHeader>
       {/* Group Headers */}
       <TableRow className="bg-muted/30">
-        {/* Aftale - Frozen columns */}
-        <TableHead className="sticky left-0 z-30 bg-muted/30 text-center font-semibold border-r-2 border-border" colSpan={3}>
+        {/* Aftale */}
+        <TableHead className="text-center font-semibold border-r" colSpan={3}>
           Aftale
         </TableHead>
         <TableHead className="text-center font-semibold border-r" colSpan={4}>
@@ -33,12 +33,12 @@ export const ProjectsTableHeaders: React.FC = () => {
       
       {/* Column Headers */}
       <TableRow className="bg-muted/30">
-        {/* Aftale - Frozen columns */}
-        <TableHead className="sticky left-0 z-20 bg-muted/30 border-r min-w-[80px] w-[80px]">Projekt ID</TableHead>
-        <TableHead className="sticky left-[80px] z-20 bg-muted/30 border-r min-w-[150px] w-[150px]">Projekt Navn/Emne</TableHead>
-        <TableHead className="sticky left-[230px] z-20 bg-muted/30 text-center border-r-2 border-border min-w-[80px] w-[80px]">Ansvarlig</TableHead>
+        {/* Aftale */}
+        <TableHead className="border-r">Projekt ID</TableHead>
+        <TableHead className="border-r">Projekt Navn/Emne</TableHead>
+        <TableHead className="text-center border-r">Ansvarlig</TableHead>
         
-        {/* Tilbud - Scrollable columns */}
+        {/* Tilbud */}
         <TableHead className="text-right border-r">Tilbudsbeløb i alt</TableHead>
         <TableHead className="text-right border-r">Heraf Montage</TableHead>
         <TableHead className="text-right border-r">Heraf Underleverandør</TableHead>
