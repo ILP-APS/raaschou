@@ -75,10 +75,10 @@
   display: none;
 }
 
-/* Force table to be wide enough for horizontal scrolling */
+/* Force table to be wide enough for horizontal scrolling but allow flexible column widths */
 .fokusark-scroll-wrapper table {
   min-width: 2400px; /* Force minimum width to enable horizontal scrolling */
-  table-layout: fixed; /* Use fixed layout for predictable column sizing */
+  width: max-content; /* Allow table to expand based on content */
 }
 
 /* Active dragging state */
@@ -136,61 +136,55 @@
   top: 0 !important;
 }
 
-/* Column-specific styles with fixed widths */
+/* Column-specific styles with flexible widths for sticky columns */
 .sticky-col-0 {
   left: 0 !important;
-  width: 80px !important;
   min-width: 80px !important;
-  max-width: 80px !important;
+  width: 80px !important;
 }
 
 .sticky-col-1 {
   left: 80px !important;
-  width: 200px !important;
-  min-width: 200px !important;
-  max-width: 200px !important;
+  min-width: 250px !important; /* Increased from 200px for better readability */
+  width: auto !important; /* Allow flexible width */
 }
 
-/* Define standard column widths for horizontal scrolling */
+/* Flexible column widths for better readability */
 .fokusark-scroll-wrapper th,
 .fokusark-scroll-wrapper td {
   min-width: 120px; /* Minimum readable width for most columns */
+  padding: 8px 12px; /* Adequate padding for readability */
   white-space: nowrap; /* Prevent text wrapping */
 }
 
-/* Specific column widths for better readability */
+/* Specific minimum widths for key columns */
 .fokusark-scroll-wrapper th:nth-child(1),
 .fokusark-scroll-wrapper td:nth-child(1) {
-  width: 80px;
   min-width: 80px;
-  max-width: 80px;
+  width: 80px;
 }
 
 .fokusark-scroll-wrapper th:nth-child(2),
 .fokusark-scroll-wrapper td:nth-child(2) {
-  width: 200px;
-  min-width: 200px;
-  max-width: 200px;
+  min-width: 250px; /* Increased for project names */
+  width: auto; /* Allow expansion for long project names */
 }
 
 .fokusark-scroll-wrapper th:nth-child(3),
 .fokusark-scroll-wrapper td:nth-child(3) {
-  width: 100px;
-  min-width: 100px;
+  min-width: 120px;
 }
 
-/* Currency and number columns - wider for readability */
+/* Currency and number columns - generous minimum widths */
 .fokusark-scroll-wrapper th:nth-child(n+4):nth-child(-n+7),
 .fokusark-scroll-wrapper td:nth-child(n+4):nth-child(-n+7) {
-  width: 140px;
-  min-width: 140px;
+  min-width: 150px;
 }
 
-/* Time columns */
+/* Time columns - adequate width for time display */
 .fokusark-scroll-wrapper th:nth-child(n+8):nth-child(-n+22),
 .fokusark-scroll-wrapper td:nth-child(n+8):nth-child(-n+22) {
-  width: 120px;
-  min-width: 120px;
+  min-width: 130px;
 }
 
 /* Background color enforcement for sticky elements */
