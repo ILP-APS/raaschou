@@ -1,5 +1,5 @@
+
 import React, { useState } from "react";
-import { TableCell, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { formatDanishNumber, formatDanishCurrency } from "@/utils/formatUtils";
 import { Project } from "@/types/project";
@@ -43,65 +43,65 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
   };
 
   return (
-    <TableRow 
+    <tr 
       key={project.id} 
       className={index % 2 === 0 ? "bg-background" : "bg-muted/25"}
     >
       {/* Aftale */}
-      <TableCell className="sticky-column sticky-col-0 border-r font-mono text-sm">
+      <td className="sticky-column sticky-col-0 border-r font-mono text-sm">
         {project.id}
-      </TableCell>
-      <TableCell className="sticky-column sticky-col-1 border-r font-medium">
+      </td>
+      <td className="sticky-column sticky-col-1 border-r font-medium">
         {project.name || '-'}
-      </TableCell>
-      <TableCell className="border-r-2 border-border text-center">
+      </td>
+      <td className="border-r-2 border-border text-center">
         {project.responsible_person_initials || '-'}
-      </TableCell>
+      </td>
       {/* Tilbud */}
-      <TableCell className="text-right font-mono">
+      <td className="text-right font-mono">
         {project.offer_amount ? formatDanishCurrency(project.offer_amount) : '-'}
-      </TableCell>
-      <TableCell className="text-right font-mono">
+      </td>
+      <td className="text-right font-mono">
         {project.assembly_amount ? formatDanishCurrency(project.assembly_amount) : '-'}
-      </TableCell>
-      <TableCell className="text-right font-mono">
+      </td>
+      <td className="text-right font-mono">
         {project.subcontractor_amount ? formatDanishCurrency(project.subcontractor_amount) : '-'}
-      </TableCell>
-      <TableCell className="text-right font-mono border-r-2 border-border">
+      </td>
+      <td className="text-right font-mono border-r-2 border-border">
         {project.materials_amount ? formatDanishCurrency(project.materials_amount) : '-'}
-      </TableCell>
+      </td>
       {/* Estimeret */}
-      <TableCell className="text-right font-mono">
+      <td className="text-right font-mono">
         {project.hours_estimated_projecting ? formatDanishNumber(project.hours_estimated_projecting) : '-'}
-      </TableCell>
-      <TableCell className="text-right font-mono">
+      </td>
+      <td className="text-right font-mono">
         {project.hours_estimated_production ? formatDanishNumber(project.hours_estimated_production) : '-'}
-      </TableCell>
-      <TableCell className="text-right font-mono border-r-2 border-border">
+      </td>
+      <td className="text-right font-mono border-r-2 border-border">
         {project.hours_estimated_assembly ? formatDanishNumber(project.hours_estimated_assembly) : '-'}
-      </TableCell>
+      </td>
       {/* Realiseret */}
-      <TableCell className="text-right font-mono">
+      <td className="text-right font-mono">
         {project.hours_used_projecting ? formatDanishNumber(project.hours_used_projecting) : '-'}
-      </TableCell>
-      <TableCell className="text-right font-mono">
+      </td>
+      <td className="text-right font-mono">
         {project.hours_used_production ? formatDanishNumber(project.hours_used_production) : '-'}
-      </TableCell>
-      <TableCell className="text-right font-mono">
+      </td>
+      <td className="text-right font-mono">
         {project.hours_used_assembly ? formatDanishNumber(project.hours_used_assembly) : '-'}
-      </TableCell>
-      <TableCell className="text-right font-mono border-r-2 border-border">
+      </td>
+      <td className="text-right font-mono border-r-2 border-border">
         {project.hours_used_total ? formatDanishNumber(project.hours_used_total) : '-'}
-      </TableCell>
+      </td>
       {/* Projektering */}
-      <TableCell className="text-right font-mono border-r-2 border-border">
+      <td className="text-right font-mono border-r-2 border-border">
         {project.hours_remaining_projecting ? formatDanishNumber(project.hours_remaining_projecting) : '-'}
-      </TableCell>
+      </td>
       {/* Produktions stadie */}
-      <TableCell className="text-right font-mono">
+      <td className="text-right font-mono">
         {project.hours_remaining_production ? formatDanishNumber(project.hours_remaining_production) : '-'}
-      </TableCell>
-      <TableCell className="text-right font-mono">
+      </td>
+      <td className="text-right font-mono">
         {editingCell === project.id ? (
           <Input
             value={editValue}
@@ -119,23 +119,23 @@ export const ProjectRow: React.FC<ProjectRowProps> = ({
             {project.completion_percentage_manual ? formatDanishNumber(project.completion_percentage_manual) + '%' : '-'}
           </div>
         )}
-      </TableCell>
-      <TableCell className="text-right font-mono">
+      </td>
+      <td className="text-right font-mono">
         {project.completion_percentage_previous ? formatDanishNumber(project.completion_percentage_previous) + '%' : '-'}
-      </TableCell>
-      <TableCell className="text-right font-mono">
+      </td>
+      <td className="text-right font-mono">
         {project.hours_estimated_by_completion ? formatDanishNumber(project.hours_estimated_by_completion) : '-'}
-      </TableCell>
-      <TableCell className="text-right font-mono border-r-2 border-border">
+      </td>
+      <td className="text-right font-mono border-r-2 border-border">
         {project.plus_minus_hours ? formatDanishNumber(project.plus_minus_hours) : '-'}
-      </TableCell>
+      </td>
       {/* Montage */}
-      <TableCell className="text-right font-mono">
+      <td className="text-right font-mono">
         {project.hours_remaining_assembly ? formatDanishNumber(project.hours_remaining_assembly) : '-'}
-      </TableCell>
-      <TableCell className="text-right font-mono">
+      </td>
+      <td className="text-right font-mono">
         {project.allocated_freight_amount ? formatDanishCurrency(project.allocated_freight_amount) : '-'}
-      </TableCell>
-    </TableRow>
+      </td>
+    </tr>
   );
 };

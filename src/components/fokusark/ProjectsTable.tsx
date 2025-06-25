@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Table, TableBody } from "@/components/ui/table";
 import { useProjects } from "@/hooks/useProjects";
 import { useDragScroll } from "@/hooks/useDragScroll";
 import { ProjectsTableHeader } from "./ProjectsTableHeader";
@@ -53,9 +52,9 @@ const ProjectsTable: React.FC = () => {
         onPointerLeave={handlePointerLeave}
         style={{ cursor: 'grab' }}
       >
-        <Table data-table="true">
+        <table className="fokusark-native-table">
           <ProjectsTableHeader />
-          <TableBody>
+          <tbody>
             {projects.map((project, index) => (
               <ProjectRow
                 key={project.id}
@@ -64,8 +63,8 @@ const ProjectsTable: React.FC = () => {
                 onUpdateCompletionPercentage={updateCompletionPercentage}
               />
             ))}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
     </div>
   );

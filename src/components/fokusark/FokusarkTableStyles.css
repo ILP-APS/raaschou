@@ -75,11 +75,48 @@
   display: none;
 }
 
-/* Force table to be wide enough for horizontal scrolling - FIXED SELECTOR */
-.fokusark-scroll-wrapper [data-table="true"] {
+/* Native HTML Table Styles - This is the key fix! */
+.fokusark-native-table {
   min-width: 2400px !important; /* Force minimum width to enable horizontal scrolling */
   width: max-content !important; /* Allow table to expand based on content */
   table-layout: auto !important; /* Allow flexible column widths */
+  border-collapse: collapse;
+  caption-bottom: true;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+/* Native table cell styles that match Shadcn appearance */
+.fokusark-native-table th {
+  height: 3rem;
+  padding: 0 1rem;
+  text-align: left;
+  align-items: center;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  background-color: hsl(var(--background));
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.fokusark-native-table td {
+  padding: 1rem;
+  align-items: center;
+  background-color: hsl(var(--background));
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+/* Row hover effects */
+.fokusark-native-table tbody tr {
+  border-bottom: 1px solid hsl(var(--border));
+  transition: background-color 0.2s ease;
+}
+
+.fokusark-native-table tbody tr:hover {
+  background-color: hsl(var(--muted) / 0.5) !important;
+}
+
+.fokusark-native-table tbody tr:last-child {
+  border-bottom: 0;
 }
 
 /* Active dragging state */
@@ -99,45 +136,26 @@
   pointer-events: auto;
 }
 
-/* Table container for horizontal scrolling */
-.fokusark-table-container {
-  position: relative;
-  width: 100%;
-  overflow-x: auto;
-  overflow-y: auto;
-  max-height: 70vh;
-  -webkit-overflow-scrolling: touch;
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.5rem;
-  /* Hide scrollbars */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.fokusark-table-container::-webkit-scrollbar {
-  display: none;
-}
-
 /* Critical styles for sticky columns with !important to ensure they take precedence */
 .sticky-column {
   position: sticky !important;
   z-index: 20 !important;
   box-shadow: 2px 0 5px -2px rgba(0,0,0,0.15) !important;
-  background-color: hsl(var(--background)) !important; /* Fixed from bg-inherit */
+  background-color: hsl(var(--background)) !important;
 }
 
 .sticky-header {
   position: sticky !important;
   z-index: 30 !important;
   top: 0 !important;
-  background-color: hsl(var(--background)) !important; /* Fixed from bg-inherit */
+  background-color: hsl(var(--background)) !important;
 }
 
 .sticky-corner {
   position: sticky !important;
   z-index: 60 !important;
   top: 0 !important;
-  background-color: hsl(var(--background)) !important; /* Fixed from bg-inherit */
+  background-color: hsl(var(--background)) !important;
 }
 
 /* Column-specific styles with flexible widths for sticky columns */
@@ -149,56 +167,46 @@
 
 .sticky-col-1 {
   left: 80px !important;
-  min-width: 250px !important; /* Increased from 200px for better readability */
-  width: auto !important; /* Allow flexible width */
+  min-width: 250px !important;
+  width: auto !important;
 }
 
 /* Flexible column widths for better readability */
-.fokusark-scroll-wrapper th,
-.fokusark-scroll-wrapper td {
-  min-width: 120px; /* Minimum readable width for most columns */
-  padding: 8px 12px; /* Adequate padding for readability */
-  white-space: nowrap; /* Prevent text wrapping */
+.fokusark-native-table th,
+.fokusark-native-table td {
+  min-width: 120px;
+  padding: 8px 12px;
+  white-space: nowrap;
 }
 
 /* Specific minimum widths for key columns */
-.fokusark-scroll-wrapper th:nth-child(1),
-.fokusark-scroll-wrapper td:nth-child(1) {
+.fokusark-native-table th:nth-child(1),
+.fokusark-native-table td:nth-child(1) {
   min-width: 80px;
   width: 80px;
 }
 
-.fokusark-scroll-wrapper th:nth-child(2),
-.fokusark-scroll-wrapper td:nth-child(2) {
-  min-width: 250px; /* Increased for project names */
-  width: auto; /* Allow expansion for long project names */
+.fokusark-native-table th:nth-child(2),
+.fokusark-native-table td:nth-child(2) {
+  min-width: 250px;
+  width: auto;
 }
 
-.fokusark-scroll-wrapper th:nth-child(3),
-.fokusark-scroll-wrapper td:nth-child(3) {
+.fokusark-native-table th:nth-child(3),
+.fokusark-native-table td:nth-child(3) {
   min-width: 120px;
 }
 
 /* Currency and number columns - generous minimum widths */
-.fokusark-scroll-wrapper th:nth-child(n+4):nth-child(-n+7),
-.fokusark-scroll-wrapper td:nth-child(n+4):nth-child(-n+7) {
+.fokusark-native-table th:nth-child(n+4):nth-child(-n+7),
+.fokusark-native-table td:nth-child(n+4):nth-child(-n+7) {
   min-width: 150px;
 }
 
 /* Time columns - adequate width for time display */
-.fokusark-scroll-wrapper th:nth-child(n+8):nth-child(-n+22),
-.fokusark-scroll-wrapper td:nth-child(n+8):nth-child(-n+22) {
+.fokusark-native-table th:nth-child(n+8):nth-child(-n+22),
+.fokusark-native-table td:nth-child(n+8):nth-child(-n+22) {
   min-width: 130px;
-}
-
-/* Background color enforcement for sticky elements */
-.bg-enforce {
-  background-color: inherit !important;
-}
-
-/* Hover effect for better UX */
-.fokusark-scroll-wrapper:hover {
-  box-shadow: inset 0 0 0 1px hsl(var(--ring) / 0.2);
 }
 
 /* Touch and pointer support */
