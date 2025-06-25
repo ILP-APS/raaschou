@@ -72,7 +72,7 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
       {/* Aftale - Frozen columns */}
       <TableCell 
         className={cn(
-          "sticky z-20 border-r font-medium",
+          "sticky z-20 font-medium",
           rowBgColor,
           isSubProject && "pl-8" // Indent sub-projects
         )}
@@ -102,7 +102,7 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
       </TableCell>
       <TableCell 
         className={cn(
-          "sticky z-20 border-r",
+          "sticky z-20",
           rowBgColor,
           isSubProject && "pl-8" // Indent sub-projects
         )}
@@ -117,10 +117,15 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
       </TableCell>
       <TableCell 
         className={cn(
-          "sticky z-20 text-center border-r",
+          "sticky z-20 text-center",
           rowBgColor
         )}
-        style={{ left: '450px', minWidth: '100px', width: '100px' }}
+        style={{ 
+          left: '450px', 
+          minWidth: '100px', 
+          width: '100px',
+          boxShadow: '1px 0 0 0 hsl(var(--border))'
+        }}
       >
         {extractInitials(project.responsible_person_initials)}
       </TableCell>
