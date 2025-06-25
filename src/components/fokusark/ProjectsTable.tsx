@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Table,
@@ -51,7 +50,7 @@ const ProjectsTable: React.FC = () => {
       const { data, error } = await supabase
         .from('projects')
         .select('*')
-        .order('name');
+        .order('id', { ascending: true });
 
       if (error) {
         console.error('Error fetching projects:', error);
