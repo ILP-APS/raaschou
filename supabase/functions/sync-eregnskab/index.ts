@@ -31,6 +31,49 @@ async function eregnskabFetch(path: string, apiKey: string) {
   return res.json();
 }
 
+// Fetch item lines in year-based chunks to stay under 50k limit
+async function fetchItemLinesInChunks(apiKey: string): Promise<any[]> {
+  const allLines: any[] = [];
+  const currentYear = new Date().getFullYear();
+  // Fetch last 5 years in parallel
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+  
+  const results = await Promise.allSettled(
+    years.map(year => 
+      eregnskabFetch(`/Appointment/Standard/Line/Item?from=${year}-01-01&to=${year}-12-31`, apiKey)
+    )
+  );
+  
+  for (const r of results) {
+    if (r.status === "fulfilled" && r.value) {
+      allLines.push(...r.value);
+    }
+  }
+  return allLines;
+}
+
+// Fetch budget lines in year-based chunks to stay under 50k limit
+async function fetchBudgetLinesInChunks(openAppointmentIds: Set<number>, apiKey: string): Promise<any[]> {
+  // Budget lines don't support date filtering the same way
+  // Try fetching per appointment in batches of 50 concurrent
+  const allLines: any[] = [];
+  const ids = Array.from(openAppointmentIds);
+  const batchSize = 50;
+  
+  for (let i = 0; i < ids.length; i += batchSize) {
+    const batch = ids.slice(i, i + batchSize);
+    const results = await Promise.allSettled(
+      batch.map(id => eregnskabFetch(`/Appointment/Budget/Line?hnAppointmentID=${id}`, apiKey))
+    );
+    for (const r of results) {
+      if (r.status === "fulfilled" && r.value) {
+        allLines.push(...r.value);
+      }
+    }
+  }
+  return allLines;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -49,7 +92,7 @@ serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // 1. Fetch bulk data in parallel
-    console.log("Fetching data from e-regnskab...");
+    console.log("Fetching core data from e-regnskab...");
     const [appointments, workLines, users] = await Promise.all([
       eregnskabFetch("/Appointment/Standard?open=true", EREGNSKAB_API_KEY),
       eregnskabFetch("/Appointment/Standard/Line/Work", EREGNSKAB_API_KEY),
@@ -57,7 +100,26 @@ serve(async (req) => {
     ]);
 
     if (!appointments) throw new Error("Failed to fetch appointments");
+    
+    const openAppointmentIds = new Set<number>(appointments.map((a: any) => a.hnAppointmentID));
     console.log(`Fetched ${appointments.length} appointments, ${workLines?.length || 0} work lines`);
+
+    // 2. Fetch item lines and budget lines (with chunking to avoid limits)
+    console.log("Fetching item lines and budget lines...");
+    const [itemLines, budgetLines] = await Promise.all([
+      fetchItemLinesInChunks(EREGNSKAB_API_KEY),
+      fetchBudgetLinesInChunks(openAppointmentIds, EREGNSKAB_API_KEY),
+    ]);
+    
+    console.log(`Fetched ${itemLines.length} item lines, ${budgetLines.length} budget lines`);
+
+    // Log sample data for debugging
+    if (itemLines.length > 0) {
+      console.log("Sample item line:", JSON.stringify(itemLines[0]));
+    }
+    if (budgetLines.length > 0) {
+      console.log("Sample budget line:", JSON.stringify(budgetLines[0]));
+    }
 
     // Build user initials map
     const userMap = new Map<number, string>();
@@ -84,64 +146,40 @@ serve(async (req) => {
       }
     }
 
-    // 2. Fetch item lines and budget lines per appointment in parallel batches
-    const appointmentIds = appointments.map((a: any) => a.hnAppointmentID);
-    
-    // Fetch item lines per appointment (API requires hnAppointmentID param)
-    console.log("Fetching item lines and budget lines per appointment...");
+    // Group item lines by appointment ID → amounts (only for open appointments)
+    const amountsByAppointment = new Map<number, { offer_amount: number }>();
     const itemLinesByAppointment = new Map<number, any[]>();
-    const amountsByAppointment = new Map<number, { offer_amount: number; materials_amount: number }>();
-    const budgetByAppointment = new Map<number, { projektering: number; produktion: number; montage: number }>();
-
-    // Process in batches of 20 concurrent API calls
-    const apiBatchSize = 20;
-    for (let i = 0; i < appointmentIds.length; i += apiBatchSize) {
-      const batchIds = appointmentIds.slice(i, i + apiBatchSize);
-      const results = await Promise.allSettled(
-        batchIds.flatMap((appId: number) => [
-          eregnskabFetch(`/Appointment/Standard/Line/Item?hnAppointmentID=${appId}`, EREGNSKAB_API_KEY)
-            .then(lines => ({ type: "items" as const, appId, lines })),
-          eregnskabFetch(`/Appointment/Budget/Line?hnAppointmentID=${appId}`, EREGNSKAB_API_KEY)
-            .then(lines => ({ type: "budget" as const, appId, lines })),
-        ])
-      );
-
-      for (const r of results) {
-        if (r.status !== "fulfilled" || !r.value.lines) continue;
-        const { type, appId, lines } = r.value;
-
-        if (type === "items") {
-          // Log first sample
-          if (itemLinesByAppointment.size === 0 && lines.length > 0) {
-            console.log("Sample item line:", JSON.stringify(lines[0]));
-          }
-          
-          itemLinesByAppointment.set(appId, lines);
-          const amounts = { offer_amount: 0, materials_amount: 0 };
-          for (const line of lines) {
-            const total = line.totalPriceStandardCurrency || 0;
-            amounts.offer_amount += total;
-            amounts.materials_amount += total;
-          }
-          amountsByAppointment.set(appId, amounts);
-        } else if (type === "budget") {
-          // Log first sample
-          if (budgetByAppointment.size === 0 && lines.length > 0) {
-            console.log("Sample budget line:", JSON.stringify(lines[0]));
-          }
-
-          const budget = { projektering: 0, produktion: 0, montage: 0 };
-          for (const line of lines) {
-            const units = line.units || 0;
-            const category = workTypeCategoryMap[line.hnWorkTypeID];
-            if (category) budget[category] += units;
-          }
-          budgetByAppointment.set(appId, budget);
-        }
+    for (const line of itemLines) {
+      const appId = line.hnAppointmentID;
+      if (!appId || !openAppointmentIds.has(appId)) continue;
+      
+      if (!amountsByAppointment.has(appId)) {
+        amountsByAppointment.set(appId, { offer_amount: 0 });
       }
+      const amounts = amountsByAppointment.get(appId)!;
+      amounts.offer_amount += line.totalPriceStandardCurrency || 0;
+
+      if (!itemLinesByAppointment.has(appId)) {
+        itemLinesByAppointment.set(appId, []);
+      }
+      itemLinesByAppointment.get(appId)!.push(line);
     }
 
-    console.log(`Fetched item lines for ${itemLinesByAppointment.size} appointments, budget lines for ${budgetByAppointment.size} appointments`);
+    // Group budget lines by appointment ID → estimated hours per category
+    const budgetByAppointment = new Map<number, { projektering: number; produktion: number; montage: number }>();
+    for (const line of budgetLines) {
+      const appId = line.hnAppointmentID;
+      if (!appId) continue;
+      if (!budgetByAppointment.has(appId)) {
+        budgetByAppointment.set(appId, { projektering: 0, produktion: 0, montage: 0 });
+      }
+      const budget = budgetByAppointment.get(appId)!;
+      const units = line.units || 0;
+      const category = workTypeCategoryMap[line.hnWorkTypeID];
+      if (category) budget[category] += units;
+    }
+
+    console.log(`Grouped: ${amountsByAppointment.size} appointments with item lines, ${budgetByAppointment.size} with budget lines`);
 
     const now = new Date().toISOString();
     let upserted = 0;
@@ -158,7 +196,7 @@ serve(async (req) => {
           const appointmentNumber = apt.appointmentNumber;
           const initials = userMap.get(apt.responsibleHnUserID) || `${apt.responsibleHnUserID}`;
           const hours = workByAppointment.get(appId) || { projektering: 0, produktion: 0, montage: 0, total: 0 };
-          const amounts = amountsByAppointment.get(appId) || { offer_amount: 0, materials_amount: 0 };
+          const amounts = amountsByAppointment.get(appId) || { offer_amount: 0 };
           const budget = budgetByAppointment.get(appId) || { projektering: 0, produktion: 0, montage: 0 };
 
           // Calculate remaining hours
@@ -176,7 +214,7 @@ serve(async (req) => {
             p_hours_used_projecting: hours.projektering,
             p_hours_used_production: hours.produktion,
             p_hours_used_assembly: hours.montage,
-            p_materials_amount: amounts.materials_amount,
+            p_materials_amount: 0,
             p_hours_estimated_projecting: budget.projektering,
             p_hours_estimated_production: budget.produktion,
             p_hours_estimated_assembly: budget.montage,
