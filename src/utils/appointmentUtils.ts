@@ -67,71 +67,16 @@ export const fetchUsers = async () => {
   return users;
 };
 
-// Fetch offer line items from the API - this now fetches real data or fallback to mock data
+// Offer line items are now fetched via the sync-eregnskab edge function
+// This function is kept for backward compatibility but returns empty data
 export const fetchOfferLineItems = async (offerId: number) => {
-  console.log(`Fetching offer line items for offer ID ${offerId}`);
-  
-  try {
-    const apiUrl = `https://publicapi.e-regnskab.dk/Offer/Standard/Line/Item?hnOfferID=${offerId}`;
-    const apiKey = 'w9Jq5NiTeOIpXfovZ0Hf1jLnM:pGwZ';
-    
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'accept': 'text/plain',
-        'ApiKey': apiKey
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    console.log(`Successfully fetched ${data.length} offer line items`);
-    
-    // Calculate totals from the actual API data
-    let offerTotal = 0;
-    let montageTotal = 0;
-    let underleverandorTotal = 0;
-    
-    // Sum up all totalPriceStandardCurrency values
-    data.forEach(item => {
-      if (item.totalPriceStandardCurrency) {
-        offerTotal += parseFloat(item.totalPriceStandardCurrency);
-      }
-      
-      // Check if the description contains certain keywords to categorize
-      const description = item.description ? item.description.toLowerCase() : '';
-      if (description.includes('montage') || description.includes('montering')) {
-        montageTotal += parseFloat(item.totalPriceStandardCurrency || 0);
-      } else if (description.includes('underleverand') || description.includes('ekstern')) {
-        underleverandorTotal += parseFloat(item.totalPriceStandardCurrency || 0);
-      }
-    });
-    
-    // Format numbers as strings with Danish number format
-    return {
-      offerTotal: offerTotal.toFixed(2).replace('.', ','),
-      montageTotal: montageTotal.toFixed(2).replace('.', ','),
-      underleverandorTotal: underleverandorTotal.toFixed(2).replace('.', ','),
-      rawData: data // Include the raw data for further processing if needed
-    };
-  } catch (error) {
-    console.error(`Error fetching offer line items: ${error}`);
-    
-    // Fallback to mock data
-    const total = Math.floor(Math.random() * 50000) + 40000;
-    const montage = Math.floor(total * 0.2);
-    const underleverandor = Math.floor(total * 0.15);
-    
-    return {
-      offerTotal: total.toFixed(2).replace('.', ','),
-      montageTotal: montage.toFixed(2).replace('.', ','),
-      underleverandorTotal: underleverandor.toFixed(2).replace('.', ','),
-      rawData: [] // Empty array for mock data
-    };
-  }
+  console.log(`Offer line items for offer ${offerId} are now synced via edge function`);
+  return {
+    offerTotal: "0,00",
+    montageTotal: "0,00",
+    underleverandorTotal: "0,00",
+    rawData: [],
+  };
 };
 
 // Mock fetch appointment line work data
