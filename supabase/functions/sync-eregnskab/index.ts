@@ -35,7 +35,6 @@ async function eregnskabFetch(path: string, apiKey: string) {
 async function fetchItemLinesInChunks(apiKey: string): Promise<any[]> {
   const allLines: any[] = [];
   const currentYear = new Date().getFullYear();
-  // Fetch last 5 years in parallel
   const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
   
   const results = await Promise.allSettled(
@@ -47,28 +46,6 @@ async function fetchItemLinesInChunks(apiKey: string): Promise<any[]> {
   for (const r of results) {
     if (r.status === "fulfilled" && r.value) {
       allLines.push(...r.value);
-    }
-  }
-  return allLines;
-}
-
-// Fetch budget lines in year-based chunks to stay under 50k limit
-async function fetchBudgetLinesInChunks(openAppointmentIds: Set<number>, apiKey: string): Promise<any[]> {
-  // Budget lines don't support date filtering the same way
-  // Try fetching per appointment in batches of 50 concurrent
-  const allLines: any[] = [];
-  const ids = Array.from(openAppointmentIds);
-  const batchSize = 50;
-  
-  for (let i = 0; i < ids.length; i += batchSize) {
-    const batch = ids.slice(i, i + batchSize);
-    const results = await Promise.allSettled(
-      batch.map(id => eregnskabFetch(`/Appointment/Budget/Line?hnAppointmentID=${id}`, apiKey))
-    );
-    for (const r of results) {
-      if (r.status === "fulfilled" && r.value) {
-        allLines.push(...r.value);
-      }
     }
   }
   return allLines;
@@ -91,34 +68,21 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // 1. Fetch bulk data in parallel
-    console.log("Fetching core data from e-regnskab...");
-    const [appointments, workLines, users] = await Promise.all([
+    // 1. Fetch all bulk data in parallel (appointments, work lines, users, item lines)
+    console.log("Fetching data from e-regnskab...");
+    const [appointments, workLines, users, itemLines] = await Promise.all([
       eregnskabFetch("/Appointment/Standard?open=true", EREGNSKAB_API_KEY),
       eregnskabFetch("/Appointment/Standard/Line/Work", EREGNSKAB_API_KEY),
       eregnskabFetch("/User", EREGNSKAB_API_KEY),
+      fetchItemLinesInChunks(EREGNSKAB_API_KEY),
     ]);
 
     if (!appointments) throw new Error("Failed to fetch appointments");
-    
-    const openAppointmentIds = new Set<number>(appointments.map((a: any) => a.hnAppointmentID));
-    console.log(`Fetched ${appointments.length} appointments, ${workLines?.length || 0} work lines`);
+    console.log(`Fetched ${appointments.length} appointments, ${workLines?.length || 0} work lines, ${itemLines.length} item lines`);
 
-    // 2. Fetch item lines and budget lines (with chunking to avoid limits)
-    console.log("Fetching item lines and budget lines...");
-    const [itemLines, budgetLines] = await Promise.all([
-      fetchItemLinesInChunks(EREGNSKAB_API_KEY),
-      fetchBudgetLinesInChunks(openAppointmentIds, EREGNSKAB_API_KEY),
-    ]);
-    
-    console.log(`Fetched ${itemLines.length} item lines, ${budgetLines.length} budget lines`);
-
-    // Log sample data for debugging
+    // Log sample item line for debugging
     if (itemLines.length > 0) {
       console.log("Sample item line:", JSON.stringify(itemLines[0]));
-    }
-    if (budgetLines.length > 0) {
-      console.log("Sample budget line:", JSON.stringify(budgetLines[0]));
     }
 
     // Build user initials map
@@ -128,6 +92,9 @@ serve(async (req) => {
         userMap.set(u.hnUserID, u.initials || u.name || `User ${u.hnUserID}`);
       }
     }
+
+    // Build set of open appointment IDs for filtering
+    const openAppointmentIds = new Set<number>(appointments.map((a: any) => a.hnAppointmentID));
 
     // Group work lines by appointment ID → hours
     const workByAppointment = new Map<number, { projektering: number; produktion: number; montage: number; total: number }>();
@@ -146,18 +113,14 @@ serve(async (req) => {
       }
     }
 
-    // Group item lines by appointment ID → amounts (only for open appointments)
-    const amountsByAppointment = new Map<number, { offer_amount: number }>();
+    // Group item lines by appointment ID → offer_amount + collect for offer_line_items upsert
+    const amountsByAppointment = new Map<number, number>();
     const itemLinesByAppointment = new Map<number, any[]>();
     for (const line of itemLines) {
       const appId = line.hnAppointmentID;
       if (!appId || !openAppointmentIds.has(appId)) continue;
       
-      if (!amountsByAppointment.has(appId)) {
-        amountsByAppointment.set(appId, { offer_amount: 0 });
-      }
-      const amounts = amountsByAppointment.get(appId)!;
-      amounts.offer_amount += line.totalPriceStandardCurrency || 0;
+      amountsByAppointment.set(appId, (amountsByAppointment.get(appId) || 0) + (line.totalPriceStandardCurrency || 0));
 
       if (!itemLinesByAppointment.has(appId)) {
         itemLinesByAppointment.set(appId, []);
@@ -165,28 +128,14 @@ serve(async (req) => {
       itemLinesByAppointment.get(appId)!.push(line);
     }
 
-    // Group budget lines by appointment ID → estimated hours per category
-    const budgetByAppointment = new Map<number, { projektering: number; produktion: number; montage: number }>();
-    for (const line of budgetLines) {
-      const appId = line.hnAppointmentID;
-      if (!appId) continue;
-      if (!budgetByAppointment.has(appId)) {
-        budgetByAppointment.set(appId, { projektering: 0, produktion: 0, montage: 0 });
-      }
-      const budget = budgetByAppointment.get(appId)!;
-      const units = line.units || 0;
-      const category = workTypeCategoryMap[line.hnWorkTypeID];
-      if (category) budget[category] += units;
-    }
-
-    console.log(`Grouped: ${amountsByAppointment.size} appointments with item lines, ${budgetByAppointment.size} with budget lines`);
+    console.log(`Grouped item lines for ${amountsByAppointment.size} open appointments`);
 
     const now = new Date().toISOString();
     let upserted = 0;
     let errors = 0;
     let lineItemsUpserted = 0;
 
-    // 3. Upsert projects in batches
+    // 2. Upsert projects in batches
     const batchSize = 10;
     for (let i = 0; i < appointments.length; i += batchSize) {
       const batch = appointments.slice(i, i + batchSize);
@@ -196,32 +145,26 @@ serve(async (req) => {
           const appointmentNumber = apt.appointmentNumber;
           const initials = userMap.get(apt.responsibleHnUserID) || `${apt.responsibleHnUserID}`;
           const hours = workByAppointment.get(appId) || { projektering: 0, produktion: 0, montage: 0, total: 0 };
-          const amounts = amountsByAppointment.get(appId) || { offer_amount: 0 };
-          const budget = budgetByAppointment.get(appId) || { projektering: 0, produktion: 0, montage: 0 };
-
-          // Calculate remaining hours
-          const remainingProjektering = Math.max(0, budget.projektering - hours.projektering);
-          const remainingProduktion = Math.max(0, budget.produktion - hours.produktion);
-          const remainingMontage = Math.max(0, budget.montage - hours.montage);
+          const offerAmount = amountsByAppointment.get(appId) || 0;
 
           const { error } = await supabase.rpc("upsert_project", {
             p_id: appointmentNumber,
             p_name: apt.subject || "",
             p_responsible_person_initials: initials,
-            p_offer_amount: amounts.offer_amount,
+            p_offer_amount: offerAmount,
             p_assembly_amount: 0,
             p_subcontractor_amount: 0,
             p_hours_used_projecting: hours.projektering,
             p_hours_used_production: hours.produktion,
             p_hours_used_assembly: hours.montage,
             p_materials_amount: 0,
-            p_hours_estimated_projecting: budget.projektering,
-            p_hours_estimated_production: budget.produktion,
-            p_hours_estimated_assembly: budget.montage,
+            p_hours_estimated_projecting: 0,
+            p_hours_estimated_production: 0,
+            p_hours_estimated_assembly: 0,
             p_hours_used_total: hours.total,
-            p_hours_remaining_projecting: remainingProjektering,
-            p_hours_remaining_production: remainingProduktion,
-            p_hours_remaining_assembly: remainingMontage,
+            p_hours_remaining_projecting: 0,
+            p_hours_remaining_production: 0,
+            p_hours_remaining_assembly: 0,
             p_allocated_freight_amount: 0,
             p_last_api_update: now,
           });
@@ -242,7 +185,7 @@ serve(async (req) => {
               p_hnbudgetlineid: line.hnBudgetLineID || 0,
             });
             if (lineError) {
-              console.error(`Line item upsert error for ${appointmentNumber}:`, lineError);
+              console.error(`Line item error ${appointmentNumber}:`, lineError);
             } else {
               lineItemsUpserted++;
             }
