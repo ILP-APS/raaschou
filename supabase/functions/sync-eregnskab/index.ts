@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const EREGNSKAB_BASE = "https://publicapi.e-regnskab.dk";
 
-// Work type → category mapping (same as frontend workTypeMapping.ts)
+// Work type → category mapping
 const workTypeCategoryMap: Record<number, "projektering" | "produktion" | "montage"> = {
   3585: "projektering", 4326: "projektering", 6759: "projektering", 11591: "projektering",
   3568: "produktion", 3576: "produktion", 3578: "produktion", 3579: "produktion",
@@ -25,9 +25,22 @@ async function eregnskabFetch(path: string, apiKey: string) {
   });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`e-regnskab ${path} failed [${res.status}]: ${text}`);
+    console.error(`e-regnskab ${path} failed [${res.status}]: ${text}`);
+    return null;
   }
   return res.json();
+}
+
+function calculateHoursFromWorkLines(workLines: any[]) {
+  const hours = { projektering: 0, produktion: 0, montage: 0, total: 0 };
+  if (!workLines) return hours;
+  for (const line of workLines) {
+    const units = line.units || 0;
+    const category = workTypeCategoryMap[line.hnWorkTypeID];
+    if (category) hours[category] += units;
+    hours.total += units;
+  }
+  return hours;
 }
 
 serve(async (req) => {
@@ -47,116 +60,101 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    console.log("Fetching open appointments from e-regnskab...");
-
     // 1. Fetch all open standard appointments
+    console.log("Fetching open appointments...");
     const appointments = await eregnskabFetch("/Appointment/Standard?open=true", EREGNSKAB_API_KEY);
+    if (!appointments) throw new Error("Failed to fetch appointments");
     console.log(`Fetched ${appointments.length} open appointments`);
 
-    // 2. Fetch all work lines (realized hours) in one call
-    const workLines = await eregnskabFetch("/Appointment/Standard/Line/Work", EREGNSKAB_API_KEY);
-    console.log(`Fetched ${workLines.length} work lines`);
-
-    // 3. Fetch all offer line items in one call
-    const offerLineItems = await eregnskabFetch("/Appointment/Standard/Line/Item", EREGNSKAB_API_KEY);
-    console.log(`Fetched ${offerLineItems.length} offer line items`);
-
-    // 4. Fetch budget lines (estimated hours)
-    const budgetLines = await eregnskabFetch("/Appointment/Budget/Line", EREGNSKAB_API_KEY);
-    console.log(`Fetched ${budgetLines.length} budget lines`);
-
-    // Group work lines by appointment ID
-    const workByAppointment = new Map<number, { projektering: number; produktion: number; montage: number; total: number }>();
-    for (const line of workLines) {
-      const appId = line.hnAppointmentID;
-      if (!appId) continue;
-      if (!workByAppointment.has(appId)) {
-        workByAppointment.set(appId, { projektering: 0, produktion: 0, montage: 0, total: 0 });
-      }
-      const hours = workByAppointment.get(appId)!;
-      const units = line.units || 0;
-      const category = workTypeCategoryMap[line.hnWorkTypeID] || null;
-      if (category) hours[category] += units;
-      hours.total += units;
-    }
-
-    // Group offer line items by appointment - calculate offer totals
-    const offerByAppointment = new Map<string, { offerTotal: number; items: any[] }>();
-    for (const item of offerLineItems) {
-      // Items have hnAppointmentID or we link via appointmentNumber
-      const appNumber = item.appointmentNumber || item.hnAppointmentID?.toString();
-      if (!appNumber) continue;
-      if (!offerByAppointment.has(appNumber)) {
-        offerByAppointment.set(appNumber, { offerTotal: 0, items: [] });
-      }
-      const offer = offerByAppointment.get(appNumber)!;
-      offer.offerTotal += item.totalPriceStandardCurrency || 0;
-      offer.items.push(item);
-    }
-
-    // Group budget lines by budget ID for estimated hours
-    const budgetByBudgetId = new Map<number, { projektering: number; produktion: number; montage: number }>();
-    for (const line of budgetLines) {
-      const budgetId = line.hnBudgetID;
-      if (!budgetId) continue;
-      if (!budgetByBudgetId.has(budgetId)) {
-        budgetByBudgetId.set(budgetId, { projektering: 0, produktion: 0, montage: 0 });
-      }
-      // Budget lines may have work type categories too
-      const est = budgetByBudgetId.get(budgetId)!;
-      const units = line.units || 0;
-      const category = workTypeCategoryMap[line.hnWorkTypeID] || null;
-      if (category) est[category] += units;
-    }
-
-    // 5. Fetch users for initials mapping
+    // 2. Fetch users for initials mapping
     let userMap = new Map<number, string>();
     try {
       const users = await eregnskabFetch("/User", EREGNSKAB_API_KEY);
-      for (const u of users) {
-        userMap.set(u.hnUserID, u.initials || u.name || `User ${u.hnUserID}`);
+      if (users) {
+        for (const u of users) {
+          userMap.set(u.hnUserID, u.initials || u.name || `User ${u.hnUserID}`);
+        }
       }
     } catch (e) {
-      console.warn("Could not fetch users, using IDs instead:", e);
+      console.warn("Could not fetch users:", e);
     }
 
     const now = new Date().toISOString();
     let upserted = 0;
     let errors = 0;
 
-    // 6. Upsert each appointment into Supabase
+    // 3. Process each appointment
     for (const apt of appointments) {
       try {
         const appId = apt.hnAppointmentID;
         const appointmentNumber = apt.appointmentNumber;
-        const hours = workByAppointment.get(appId) || { projektering: 0, produktion: 0, montage: 0, total: 0 };
-        const budget = apt.hnBudgetID ? budgetByBudgetId.get(apt.hnBudgetID) : null;
-        const offer = offerByAppointment.get(appointmentNumber);
         const initials = userMap.get(apt.responsibleHnUserID) || `${apt.responsibleHnUserID}`;
 
-        // Calculate remaining hours
-        const estProjektering = budget?.projektering || 0;
-        const estProduktion = budget?.produktion || 0;
-        const estMontage = budget?.montage || 0;
+        // Fetch work lines for this appointment (realized hours)
+        const workLines = await eregnskabFetch(
+          `/Appointment/Standard/Line/Work?hnAppointmentID=${appId}`,
+          EREGNSKAB_API_KEY
+        );
+        const hours = calculateHoursFromWorkLines(workLines || []);
 
+        // Fetch offer line items for this appointment
+        const lineItems = await eregnskabFetch(
+          `/Appointment/Standard/${appId}/Line/Item`,
+          EREGNSKAB_API_KEY
+        );
+
+        // Calculate offer total and categorize items
+        let offerTotal = 0;
+        let assemblyAmount = 0;
+        let subcontractorAmount = 0;
+        if (lineItems) {
+          for (const item of lineItems) {
+            const total = item.totalPriceStandardCurrency || 0;
+            offerTotal += total;
+            const desc = (item.description || "").toLowerCase();
+            if (desc.includes("montage") || desc.includes("montering")) {
+              assemblyAmount += total;
+            } else if (desc.includes("underleverand") || desc.includes("ekstern")) {
+              subcontractorAmount += total;
+            }
+          }
+        }
+
+        // Fetch budget lines for estimated hours (if budget exists)
+        let estHours = { projektering: 0, produktion: 0, montage: 0 };
+        if (apt.hnBudgetID) {
+          const budgetLines = await eregnskabFetch(
+            `/Appointment/Budget/Line?hnBudgetID=${apt.hnBudgetID}`,
+            EREGNSKAB_API_KEY
+          );
+          if (budgetLines) {
+            for (const line of budgetLines) {
+              const units = line.units || 0;
+              const category = workTypeCategoryMap[line.hnWorkTypeID];
+              if (category) estHours[category] += units;
+            }
+          }
+        }
+
+        // Upsert project
         const { error } = await supabase.rpc("upsert_project", {
           p_id: appointmentNumber,
           p_name: apt.subject || "",
           p_responsible_person_initials: initials,
-          p_offer_amount: offer?.offerTotal || 0,
-          p_assembly_amount: 0, // Will be calculated from offer line items
-          p_subcontractor_amount: 0,
+          p_offer_amount: offerTotal,
+          p_assembly_amount: assemblyAmount,
+          p_subcontractor_amount: subcontractorAmount,
           p_hours_used_projecting: hours.projektering,
           p_hours_used_production: hours.produktion,
           p_hours_used_assembly: hours.montage,
           p_materials_amount: 0,
-          p_hours_estimated_projecting: estProjektering,
-          p_hours_estimated_production: estProduktion,
-          p_hours_estimated_assembly: estMontage,
+          p_hours_estimated_projecting: estHours.projektering,
+          p_hours_estimated_production: estHours.produktion,
+          p_hours_estimated_assembly: estHours.montage,
           p_hours_used_total: hours.total,
-          p_hours_remaining_projecting: estProjektering - hours.projektering,
-          p_hours_remaining_production: estProduktion - hours.produktion,
-          p_hours_remaining_assembly: estMontage - hours.montage,
+          p_hours_remaining_projecting: estHours.projektering - hours.projektering,
+          p_hours_remaining_production: estHours.produktion - hours.produktion,
+          p_hours_remaining_assembly: estHours.montage - hours.montage,
           p_allocated_freight_amount: 0,
           p_last_api_update: now,
         });
@@ -169,8 +167,9 @@ serve(async (req) => {
         }
 
         // Upsert offer line items
-        if (offer?.items) {
-          for (const item of offer.items) {
+        if (lineItems) {
+          for (const item of lineItems) {
+            if (!item.hnLineID) continue;
             await supabase.rpc("upsert_offer_line_item", {
               p_hnlineid: item.hnLineID,
               p_project_id: appointmentNumber,
@@ -184,7 +183,7 @@ serve(async (req) => {
           }
         }
       } catch (e) {
-        console.error(`Error processing appointment:`, e);
+        console.error(`Error processing appointment ${apt.appointmentNumber}:`, e);
         errors++;
       }
     }
