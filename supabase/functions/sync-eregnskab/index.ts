@@ -119,16 +119,18 @@ serve(async (req) => {
     console.log(`Item lines grouped for ${offerByAppointment.size} open appointments`);
 
     const now = new Date().toISOString();
+    const isSubAppointment = (id: string) => /^\d+-\d+$/.test(id);
 
-    // 2. Build batch of project rows for upsert
-    const projectRows = appointments.map((apt: any) => {
+    // 2. Build and FILTER project rows
+    const allProjectRows = appointments.map((apt: any) => {
       const appId = apt.hnAppointmentID;
       const hours = workByAppointment.get(appId) || { projektering: 0, produktion: 0, montage: 0, total: 0 };
       const offerAmount = offerByAppointment.get(appId) || 0;
       const initials = userMap.get(apt.responsibleHnUserID) || `${apt.responsibleHnUserID}`;
+      const appointmentNumber = String(apt.appointmentNumber);
 
       return {
-        id: apt.appointmentNumber,
+        id: appointmentNumber,
         name: apt.subject || "",
         responsible_person_initials: initials,
         offer_amount: offerAmount,
@@ -147,10 +149,24 @@ serve(async (req) => {
         hours_remaining_assembly: 0,
         allocated_freight_amount: 0,
         last_api_update: now,
+        _is_sub: isSubAppointment(appointmentNumber),
       };
     });
 
-    // 3. Batch upsert projects (chunks of 50 to avoid payload limits)
+    // Filter: include sub-appointments always, otherwise require offer_amount > 25000
+    const projectRows = allProjectRows
+      .filter((row) => {
+        if (row._is_sub) return true;
+        if (row.offer_amount <= 0) return false;
+        if (row.offer_amount < 25000) return false;
+        return true;
+      })
+      .map(({ _is_sub, ...rest }) => rest);
+
+    const excludedCount = allProjectRows.length - projectRows.length;
+    console.log(`Filtered: ${projectRows.length} included, ${excludedCount} excluded`);
+
+    // 3. Batch upsert projects (chunks of 50)
     let upserted = 0;
     let errors = 0;
     for (let i = 0; i < projectRows.length; i += 50) {
@@ -164,6 +180,37 @@ serve(async (req) => {
         errors += batch.length;
       } else {
         upserted += batch.length;
+      }
+    }
+
+    // 4. Clean up projects that no longer match filter criteria
+    const validIds = new Set(projectRows.map((r) => r.id));
+    const { data: existingProjects } = await supabase
+      .from("projects")
+      .select("id, offer_amount");
+    
+    if (existingProjects) {
+      const toDelete = existingProjects
+        .filter((p) => !validIds.has(p.id))
+        .filter((p) => {
+          // Only delete if it was API-synced and doesn't match new criteria
+          if (isSubAppointment(p.id)) return false;
+          if ((p.offer_amount || 0) <= 0) return true;
+          if ((p.offer_amount || 0) < 25000) return true;
+          return false;
+        })
+        .map((p) => p.id);
+
+      if (toDelete.length > 0) {
+        const { error: delError } = await supabase
+          .from("projects")
+          .delete()
+          .in("id", toDelete);
+        if (delError) {
+          console.error("Cleanup delete error:", delError);
+        } else {
+          console.log(`Cleaned up ${toDelete.length} projects below filter threshold`);
+        }
       }
     }
 

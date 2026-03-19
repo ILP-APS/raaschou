@@ -1,0 +1,1 @@
+CREATE POLICY "Allow service role delete" ON public.projects FOR DELETE TO service_role USING (true);
