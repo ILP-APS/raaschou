@@ -151,54 +151,31 @@ export interface OfferLineItem {
   hnUserID: number;
 }
 
-// Function to get appointment details
+// Appointment details are now fetched via the sync-eregnskab edge function
 export const getAppointmentDetail = async (appointmentId: number): Promise<AppointmentDetail> => {
-  try {
-    const apiUrl = `https://publicapi.e-regnskab.dk/Appointment/Standard/${appointmentId}`;
-    const apiKey = 'w9Jq5NiTeOIpXfovZ0Hf1jLnM:pGwZ';
-    
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'accept': 'text/plain',
-        'ApiKey': apiKey
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error(`Error fetching appointment detail for ID ${appointmentId}:`, error);
-    
-    // Return mock data in case of error
-    return {
-      hnAppointmentID: appointmentId,
-      hnShippingAddressID: null,
-      appointmentNumber: appointmentId.toString(),
-      customerAccountNumber: "100123",
-      responsibleHnUserID: 14302, // Using a real user ID from the system
-      subject: "Mock appointment detail",
-      project: null,
-      description: "Mock description",
-      startDate: new Date().toISOString(),
-      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      hnAppointmentCategoryID: 1,
-      hnBudgetID: null,
-      hnMainAppointmentID: null,
-      blocked: false,
-      tags: [],
-      customerRef: "",
-      notes: "",
-      done: false,
-      doneDate: null,
-      created: new Date().toISOString(),
-      hnOfferID: 2667581, // Using a real offer ID from the system
-      appointmentAssociatedUsers: []
-    };
-  }
+  console.log(`Appointment details for ${appointmentId} are now synced via edge function`);
+  return {
+    hnAppointmentID: appointmentId,
+    hnShippingAddressID: null,
+    appointmentNumber: appointmentId.toString(),
+    customerAccountNumber: "",
+    responsibleHnUserID: 0,
+    subject: "",
+    project: null,
+    description: "",
+    startDate: new Date().toISOString(),
+    endDate: new Date().toISOString(),
+    hnAppointmentCategoryID: 0,
+    hnBudgetID: null,
+    hnMainAppointmentID: null,
+    blocked: false,
+    tags: [],
+    customerRef: "",
+    notes: "",
+    done: false,
+    doneDate: null,
+    created: new Date().toISOString(),
+  };
 };
 
 // Function to get offer line items
