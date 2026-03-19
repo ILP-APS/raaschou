@@ -67,71 +67,16 @@ export const fetchUsers = async () => {
   return users;
 };
 
-// Fetch offer line items from the API - this now fetches real data or fallback to mock data
+// Offer line items are now fetched via the sync-eregnskab edge function
+// This function is kept for backward compatibility but returns empty data
 export const fetchOfferLineItems = async (offerId: number) => {
-  console.log(`Fetching offer line items for offer ID ${offerId}`);
-  
-  try {
-    const apiUrl = `https://publicapi.e-regnskab.dk/Offer/Standard/Line/Item?hnOfferID=${offerId}`;
-    const apiKey = 'w9Jq5NiTeOIpXfovZ0Hf1jLnM:pGwZ';
-    
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'accept': 'text/plain',
-        'ApiKey': apiKey
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    console.log(`Successfully fetched ${data.length} offer line items`);
-    
-    // Calculate totals from the actual API data
-    let offerTotal = 0;
-    let montageTotal = 0;
-    let underleverandorTotal = 0;
-    
-    // Sum up all totalPriceStandardCurrency values
-    data.forEach(item => {
-      if (item.totalPriceStandardCurrency) {
-        offerTotal += parseFloat(item.totalPriceStandardCurrency);
-      }
-      
-      // Check if the description contains certain keywords to categorize
-      const description = item.description ? item.description.toLowerCase() : '';
-      if (description.includes('montage') || description.includes('montering')) {
-        montageTotal += parseFloat(item.totalPriceStandardCurrency || 0);
-      } else if (description.includes('underleverand') || description.includes('ekstern')) {
-        underleverandorTotal += parseFloat(item.totalPriceStandardCurrency || 0);
-      }
-    });
-    
-    // Format numbers as strings with Danish number format
-    return {
-      offerTotal: offerTotal.toFixed(2).replace('.', ','),
-      montageTotal: montageTotal.toFixed(2).replace('.', ','),
-      underleverandorTotal: underleverandorTotal.toFixed(2).replace('.', ','),
-      rawData: data // Include the raw data for further processing if needed
-    };
-  } catch (error) {
-    console.error(`Error fetching offer line items: ${error}`);
-    
-    // Fallback to mock data
-    const total = Math.floor(Math.random() * 50000) + 40000;
-    const montage = Math.floor(total * 0.2);
-    const underleverandor = Math.floor(total * 0.15);
-    
-    return {
-      offerTotal: total.toFixed(2).replace('.', ','),
-      montageTotal: montage.toFixed(2).replace('.', ','),
-      underleverandorTotal: underleverandor.toFixed(2).replace('.', ','),
-      rawData: [] // Empty array for mock data
-    };
-  }
+  console.log(`Offer line items for offer ${offerId} are now synced via edge function`);
+  return {
+    offerTotal: "0,00",
+    montageTotal: "0,00",
+    underleverandorTotal: "0,00",
+    rawData: [],
+  };
 };
 
 // Mock fetch appointment line work data
@@ -206,54 +151,31 @@ export interface OfferLineItem {
   hnUserID: number;
 }
 
-// Function to get appointment details
+// Appointment details are now fetched via the sync-eregnskab edge function
 export const getAppointmentDetail = async (appointmentId: number): Promise<AppointmentDetail> => {
-  try {
-    const apiUrl = `https://publicapi.e-regnskab.dk/Appointment/Standard/${appointmentId}`;
-    const apiKey = 'w9Jq5NiTeOIpXfovZ0Hf1jLnM:pGwZ';
-    
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'accept': 'text/plain',
-        'ApiKey': apiKey
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error(`Error fetching appointment detail for ID ${appointmentId}:`, error);
-    
-    // Return mock data in case of error
-    return {
-      hnAppointmentID: appointmentId,
-      hnShippingAddressID: null,
-      appointmentNumber: appointmentId.toString(),
-      customerAccountNumber: "100123",
-      responsibleHnUserID: 14302, // Using a real user ID from the system
-      subject: "Mock appointment detail",
-      project: null,
-      description: "Mock description",
-      startDate: new Date().toISOString(),
-      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      hnAppointmentCategoryID: 1,
-      hnBudgetID: null,
-      hnMainAppointmentID: null,
-      blocked: false,
-      tags: [],
-      customerRef: "",
-      notes: "",
-      done: false,
-      doneDate: null,
-      created: new Date().toISOString(),
-      hnOfferID: 2667581, // Using a real offer ID from the system
-      appointmentAssociatedUsers: []
-    };
-  }
+  console.log(`Appointment details for ${appointmentId} are now synced via edge function`);
+  return {
+    hnAppointmentID: appointmentId,
+    hnShippingAddressID: null,
+    appointmentNumber: appointmentId.toString(),
+    customerAccountNumber: "",
+    responsibleHnUserID: 0,
+    subject: "",
+    project: null,
+    description: "",
+    startDate: new Date().toISOString(),
+    endDate: new Date().toISOString(),
+    hnAppointmentCategoryID: 0,
+    hnBudgetID: null,
+    hnMainAppointmentID: null,
+    blocked: false,
+    tags: [],
+    customerRef: "",
+    notes: "",
+    done: false,
+    doneDate: null,
+    created: new Date().toISOString(),
+  };
 };
 
 // Function to get offer line items
