@@ -170,27 +170,6 @@ serve(async (req) => {
           });
 
           if (error) throw error;
-
-          // Upsert individual item lines into offer_line_items
-          const lines = itemLinesByAppointment.get(appId) || [];
-          for (const line of lines) {
-            const { error: lineError } = await supabase.rpc("upsert_offer_line_item", {
-              p_hnlineid: line.hnLineID,
-              p_project_id: appointmentNumber,
-              p_description: line.description || "",
-              p_units: line.units || 0,
-              p_unitname: line.unitName || "",
-              p_salespricestandardcurrency: line.salesPriceStandardCurrency || 0,
-              p_totalpricestandardcurrency: line.totalPriceStandardCurrency || 0,
-              p_hnbudgetlineid: line.hnBudgetLineID || 0,
-            });
-            if (lineError) {
-              console.error(`Line item error ${appointmentNumber}:`, lineError);
-            } else {
-              lineItemsUpserted++;
-            }
-          }
-
           return appointmentNumber;
         })
       );
