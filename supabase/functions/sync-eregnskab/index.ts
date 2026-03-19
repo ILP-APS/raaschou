@@ -9,7 +9,6 @@ const corsHeaders = {
 
 const EREGNSKAB_BASE = "https://publicapi.e-regnskab.dk";
 
-// Work type → category mapping
 const workTypeCategoryMap: Record<number, "projektering" | "produktion" | "montage"> = {
   3585: "projektering", 4326: "projektering", 6759: "projektering", 11591: "projektering",
   3568: "produktion", 3576: "produktion", 3578: "produktion", 3579: "produktion",
@@ -25,10 +24,32 @@ async function eregnskabFetch(path: string, apiKey: string) {
   });
   if (!res.ok) {
     const text = await res.text();
-    console.error(`e-regnskab ${path} failed [${res.status}]: ${text}`);
+    console.error(`e-regnskab ${path} failed [${res.status}]: ${text.substring(0, 200)}`);
     return null;
   }
   return res.json();
+}
+
+async function fetchItemLinesInChunks(apiKey: string): Promise<any[]> {
+  const allLines: any[] = [];
+  const currentYear = new Date().getFullYear();
+  // Use 6-month chunks for recent years to avoid API timeouts
+  const chunks: string[] = [];
+  for (let year = currentYear; year >= currentYear - 2; year--) {
+    chunks.push(`from=${year}-01-01&to=${year}-06-30`);
+    chunks.push(`from=${year}-07-01&to=${year}-12-31`);
+  }
+  
+  const results = await Promise.allSettled(
+    chunks.map(q => eregnskabFetch(`/Appointment/Standard/Line/Item?${q}`, apiKey))
+  );
+  
+  for (const r of results) {
+    if (r.status === "fulfilled" && r.value) {
+      allLines.push(...r.value);
+    }
+  }
+  return allLines;
 }
 
 serve(async (req) => {
@@ -48,16 +69,17 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // 1. Fetch appointments + work lines in parallel (both are bulk calls)
+    // 1. Fetch all data in parallel
     console.log("Fetching data from e-regnskab...");
-    const [appointments, workLines, users] = await Promise.all([
+    const [appointments, workLines, users, itemLines] = await Promise.all([
       eregnskabFetch("/Appointment/Standard?open=true", EREGNSKAB_API_KEY),
       eregnskabFetch("/Appointment/Standard/Line/Work", EREGNSKAB_API_KEY),
       eregnskabFetch("/User", EREGNSKAB_API_KEY),
+      fetchItemLinesInChunks(EREGNSKAB_API_KEY),
     ]);
 
     if (!appointments) throw new Error("Failed to fetch appointments");
-    console.log(`Fetched ${appointments.length} appointments, ${workLines?.length || 0} work lines`);
+    console.log(`Fetched ${appointments.length} appointments, ${workLines?.length || 0} work lines, ${itemLines.length} item lines`);
 
     // Build user initials map
     const userMap = new Map<number, string>();
@@ -66,6 +88,8 @@ serve(async (req) => {
         userMap.set(u.hnUserID, u.initials || u.name || `User ${u.hnUserID}`);
       }
     }
+
+    const openAppointmentIds = new Set<number>(appointments.map((a: any) => a.hnAppointmentID));
 
     // Group work lines by appointment ID
     const workByAppointment = new Map<number, { projektering: number; produktion: number; montage: number; total: number }>();
@@ -76,62 +100,70 @@ serve(async (req) => {
         if (!workByAppointment.has(appId)) {
           workByAppointment.set(appId, { projektering: 0, produktion: 0, montage: 0, total: 0 });
         }
-        const hours = workByAppointment.get(appId)!;
+        const h = workByAppointment.get(appId)!;
         const units = line.units || 0;
-        const category = workTypeCategoryMap[line.hnWorkTypeID];
-        if (category) hours[category] += units;
-        hours.total += units;
+        const cat = workTypeCategoryMap[line.hnWorkTypeID];
+        if (cat) h[cat] += units;
+        h.total += units;
       }
     }
 
+    // Group item lines by appointment ID → offer_amount
+    const offerByAppointment = new Map<number, number>();
+    for (const line of itemLines) {
+      const appId = line.hnAppointmentID;
+      if (!appId || !openAppointmentIds.has(appId)) continue;
+      offerByAppointment.set(appId, (offerByAppointment.get(appId) || 0) + (line.totalPriceStandardCurrency || 0));
+    }
+
+    console.log(`Item lines grouped for ${offerByAppointment.size} open appointments`);
+
     const now = new Date().toISOString();
+
+    // 2. Build batch of project rows for upsert
+    const projectRows = appointments.map((apt: any) => {
+      const appId = apt.hnAppointmentID;
+      const hours = workByAppointment.get(appId) || { projektering: 0, produktion: 0, montage: 0, total: 0 };
+      const offerAmount = offerByAppointment.get(appId) || 0;
+      const initials = userMap.get(apt.responsibleHnUserID) || `${apt.responsibleHnUserID}`;
+
+      return {
+        id: apt.appointmentNumber,
+        name: apt.subject || "",
+        responsible_person_initials: initials,
+        offer_amount: offerAmount,
+        assembly_amount: 0,
+        subcontractor_amount: 0,
+        hours_used_projecting: hours.projektering,
+        hours_used_production: hours.produktion,
+        hours_used_assembly: hours.montage,
+        materials_amount: 0,
+        hours_estimated_projecting: 0,
+        hours_estimated_production: 0,
+        hours_estimated_assembly: 0,
+        hours_used_total: hours.total,
+        hours_remaining_projecting: 0,
+        hours_remaining_production: 0,
+        hours_remaining_assembly: 0,
+        allocated_freight_amount: 0,
+        last_api_update: now,
+      };
+    });
+
+    // 3. Batch upsert projects (chunks of 50 to avoid payload limits)
     let upserted = 0;
     let errors = 0;
-
-    // Process in batches of 10 concurrent upserts
-    const batchSize = 10;
-    for (let i = 0; i < appointments.length; i += batchSize) {
-      const batch = appointments.slice(i, i + batchSize);
-      const results = await Promise.allSettled(
-        batch.map(async (apt: any) => {
-          const appId = apt.hnAppointmentID;
-          const appointmentNumber = apt.appointmentNumber;
-          const initials = userMap.get(apt.responsibleHnUserID) || `${apt.responsibleHnUserID}`;
-          const hours = workByAppointment.get(appId) || { projektering: 0, produktion: 0, montage: 0, total: 0 };
-
-          const { error } = await supabase.rpc("upsert_project", {
-            p_id: appointmentNumber,
-            p_name: apt.subject || "",
-            p_responsible_person_initials: initials,
-            p_offer_amount: 0,
-            p_assembly_amount: 0,
-            p_subcontractor_amount: 0,
-            p_hours_used_projecting: hours.projektering,
-            p_hours_used_production: hours.produktion,
-            p_hours_used_assembly: hours.montage,
-            p_materials_amount: 0,
-            p_hours_estimated_projecting: 0,
-            p_hours_estimated_production: 0,
-            p_hours_estimated_assembly: 0,
-            p_hours_used_total: hours.total,
-            p_hours_remaining_projecting: 0,
-            p_hours_remaining_production: 0,
-            p_hours_remaining_assembly: 0,
-            p_allocated_freight_amount: 0,
-            p_last_api_update: now,
-          });
-
-          if (error) throw error;
-          return appointmentNumber;
-        })
-      );
-
-      for (const r of results) {
-        if (r.status === "fulfilled") upserted++;
-        else {
-          console.error("Upsert error:", r.reason);
-          errors++;
-        }
+    for (let i = 0; i < projectRows.length; i += 50) {
+      const batch = projectRows.slice(i, i + 50);
+      const { error } = await supabase
+        .from("projects")
+        .upsert(batch, { onConflict: "id" });
+      
+      if (error) {
+        console.error("Batch upsert error:", error);
+        errors += batch.length;
+      } else {
+        upserted += batch.length;
       }
     }
 
@@ -142,6 +174,7 @@ serve(async (req) => {
         success: true,
         appointments_fetched: appointments.length,
         projects_upserted: upserted,
+        item_lines_fetched: itemLines.length,
         errors,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
