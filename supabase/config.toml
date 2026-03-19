@@ -1,1 +1,4 @@
 project_id = "femtmeufuuwrwachkjux"
+
+[functions.sync-eregnskab]
+verify_jwt = false
