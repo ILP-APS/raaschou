@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import FokusarkDescription from "./FokusarkDescription";
 import ProjectsTable from "./ProjectsTable";
 
 const FokusarkContent: React.FC = () => {
   const [isUpdating, setIsUpdating] = useState(false);
+  const { toast } = useToast();
 
   const handleUpdate = async () => {
     if (isUpdating) return;
@@ -13,20 +16,28 @@ const FokusarkContent: React.FC = () => {
     setIsUpdating(true);
     
     try {
-      // Call the n8n webhook to trigger data synchronization
-      await fetch('https://teameasyai.app.n8n.cloud/webhook/6459958a-2e5b-450e-aa6f-a895721d3ac4', {
-        method: 'GET',
-      });
+      const { data, error } = await supabase.functions.invoke('sync-eregnskab');
       
-      console.log('Data update workflow triggered successfully');
-    } catch (error) {
-      console.error('Error triggering data update:', error);
-    }
+      if (error) throw error;
 
-    // Keep button disabled for 20 seconds as the data refresh takes time
-    setTimeout(() => {
-      setIsUpdating(false);
-    }, 20000);
+      console.log('Sync result:', data);
+      toast({
+        title: "Data synkroniseret",
+        description: `${data.projects_upserted} projekter opdateret fra e-regnskab.`,
+      });
+    } catch (error) {
+      console.error('Error syncing data:', error);
+      toast({
+        title: "Fejl ved synkronisering",
+        description: "Kunne ikke hente data fra e-regnskab.",
+        variant: "destructive",
+      });
+    } finally {
+      // Keep button disabled for a few seconds to let realtime update
+      setTimeout(() => {
+        setIsUpdating(false);
+      }, 3000);
+    }
   };
 
   return (
@@ -43,12 +54,12 @@ const FokusarkContent: React.FC = () => {
             {isUpdating ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Opdaterer...
+                Synkroniserer...
               </>
             ) : (
               <>
                 <RefreshCw className="h-4 w-4" />
-                Opdater
+                Opdater fra e-regnskab
               </>
             )}
           </Button>
