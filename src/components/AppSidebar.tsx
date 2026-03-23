@@ -14,6 +14,9 @@ const data = {
       title: "Fokusark",
       url: "/fokusark",
       isActive: true
+    }, {
+      title: "Produktionsark",
+      url: "/produktionsark"
     }]
   }]
 };
