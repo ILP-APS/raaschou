@@ -37,7 +37,7 @@ export const parseProjectHierarchy = (projects: Project[]): ProjectHierarchy[] =
   const subProjects: Project[] = [];
   
   // First pass: identify parent projects and collect sub-projects
-  projects.forEach(project => {
+  filtered.forEach(project => {
     if (isSubProject(project.id)) {
       subProjects.push(project);
     } else {
