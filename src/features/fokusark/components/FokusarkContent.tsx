@@ -29,7 +29,7 @@ const FokusarkContent: React.FC = () => {
   return (
     <div className="flex flex-col gap-4 p-4 md:p-6">
       <div className="flex flex-col gap-4 pb-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-start gap-4">
           <h2 className="text-2xl font-semibold tracking-tight">Fokusark</h2>
           <Button onClick={handleUpdate} disabled={isUpdating} variant="outline" className="gap-2">
             {isUpdating ? (

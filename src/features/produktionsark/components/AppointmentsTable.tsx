@@ -148,7 +148,7 @@ export function AppointmentsTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-start gap-2">
         <Button onClick={() => refetch()} variant="outline" disabled={isFetching}>
           <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
           {isFetching ? 'Opdaterer...' : 'Opdater data'}
