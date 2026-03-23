@@ -1,54 +1,32 @@
 
 
-## Plan: Tilføj Produktionsark som feature #2
+## Plan: Magic Link Authentication
 
 ### Overblik
-Produktionsark er en tabel der viser åbne aftaler (appointments) fra e-regnskab API'et, kategoriseret og farvekodet. Den inkluderer Excel-download funktionalitet.
+Tilføj Supabase magic link login, så alle sider kræver login. Ingen profil-tabel — kun `auth.users`.
 
-### Struktur (følger feature-arkitekturen)
+### Nye filer
 
-```text
-src/features/produktionsark/
-├── components/
-│   └── AppointmentsTable.tsx    ← Hovedtabel med Excel-download
-├── hooks/
-│   └── useAppointments.ts       ← React Query hook
-├── types/
-│   └── appointment.ts           ← Appointment interface
-├── utils/
-│   └── dateUtils.ts             ← formatWeekDay, getCategoryType, getCategoryRowColor
-└── pages/
-    └── ProduktionsarkPage.tsx   ← Side med sidebar-layout
-```
+1. **`src/pages/LoginPage.tsx`** — Login-side med email-input og "Send magic link"-knap. Bruger `supabase.auth.signInWithOtp({ email })`. Viser besked om at tjekke email efter afsendelse. Simpelt design med Raaschou-branding.
 
-### Nye edge functions
-
-```text
-supabase/functions/
-├── fetch-appointments/index.ts  ← Henter åbne aftaler fra 5 kategorier
-└── fetch-categories/index.ts    ← Henter kategori-liste (hjælpe-funktion)
-```
-
-Begge bruger den eksisterende `EREGNSKAB_API_KEY` secret (det andet projekt bruger `API_KEY` — vi tilpasser til vores navngivning).
+2. **`src/components/ProtectedRoute.tsx`** — Wrapper-komponent der tjekker auth-session via `onAuthStateChange` + `getSession`. Redirecter til `/login` hvis ikke logget ind. Viser loading-spinner under session-tjek.
 
 ### Ændringer i eksisterende filer
 
-1. **`package.json`** — tilføj `exceljs` dependency (date-fns er allerede installeret)
-2. **`src/App.tsx`** — tilføj route `/produktionsark`
-3. **`src/components/AppSidebar.tsx`** — tilføj "Produktionsark" menupunkt
+3. **`src/App.tsx`** — Wrap alle routes (undtagen `/login`) med `ProtectedRoute`. Tilføj `/login` route.
 
-### Tilpasninger fra det andet projekt
+4. **`src/components/AppSidebar.tsx`** — Tilføj logout-knap i bunden af sidebar. Kalder `supabase.auth.signOut()` og redirecter til `/login`.
 
-- Import-stier ændres til `@/features/produktionsark/...`
-- Edge functions bruger `EREGNSKAB_API_KEY` i stedet for `API_KEY`
-- ProduktionsarkPage wrapper med AppSidebar + SidebarProvider (som FokusarkPage)
-- Supabase client import fra `@/integrations/supabase/client`
+### Supabase konfiguration
+
+5. **Auth provider** — Supabase email auth er aktiveret som standard. Magic link virker out-of-the-box med `signInWithOtp`. Ingen ekstra edge functions eller database-ændringer nødvendige.
+
+### Redirect URL
+- `emailRedirectTo: window.location.origin` sikrer at brugeren lander tilbage i appen efter klik på magic link.
 
 ### Implementeringstrin
-
-1. Opret edge functions (`fetch-appointments`, `fetch-categories`) med tilpasset secret-navn
-2. Installer `exceljs` dependency
-3. Opret alle filer under `src/features/produktionsark/`
-4. Opdater App.tsx routing og AppSidebar navigation
-5. Deploy edge functions
+1. Opret `ProtectedRoute` komponent med session-håndtering
+2. Opret `LoginPage` med magic link flow
+3. Opdater `App.tsx` med login-route og beskyttede routes
+4. Tilføj logout i AppSidebar
 
