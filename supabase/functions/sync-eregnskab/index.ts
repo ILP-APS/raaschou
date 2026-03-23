@@ -152,7 +152,7 @@ serve(async (req) => {
         hours_remaining_production: 0,
         hours_remaining_assembly: 0,
         allocated_freight_amount: 0,
-        last_api_update: now,
+        last_api_update: nowISO,
         _is_sub: isSubAppointment(appointmentNumber),
       };
     });
