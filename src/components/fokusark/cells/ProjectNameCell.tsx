@@ -19,11 +19,12 @@ export const ProjectNameCell: React.FC<ProjectNameCellProps> = ({
   rowBgColor,
 }) => (
   <TableCell 
-    className={cn(
-      "sticky z-20",
-      rowBgColor,
-      isSubProject && "pl-8"
-    )}
+      className={cn(
+        "sticky z-20 transition-colors",
+        rowBgColor,
+        "group-hover:bg-muted/80",
+        isSubProject && "pl-8"
+      )}
     style={{ left: '150px', minWidth: '300px', width: '300px' }}
   >
     <span className={cn(

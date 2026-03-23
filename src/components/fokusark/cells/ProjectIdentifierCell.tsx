@@ -33,8 +33,9 @@ export const ProjectIdentifierCell: React.FC<ProjectIdentifierCellProps> = ({
   return (
     <TableCell 
       className={cn(
-        "sticky z-20 font-medium",
+        "sticky z-20 font-medium transition-colors",
         rowBgColor,
+        "group-hover:bg-muted/80",
         isSubProject && "pl-8"
       )}
       style={{ left: 0, minWidth: '150px', width: '150px' }}

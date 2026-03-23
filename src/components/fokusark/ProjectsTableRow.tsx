@@ -40,7 +40,7 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
   const rowBgColor = getRowBgColor(isSubProject, index);
 
   return (
-    <TableRow className={cn(rowBgColor)}>
+    <TableRow className={cn(rowBgColor, "group")}>
       {/* Aftale - Frozen columns */}
       <ProjectIdentifierCell
         projectId={project.id}
