@@ -12,30 +12,42 @@ export const useProjects = () => {
   // Fetch projects data
   const fetchProjects = async () => {
     try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*');
+      // Fetch all projects (Supabase default limit is 1000)
+      let allData: any[] = [];
+      let from = 0;
+      const pageSize = 1000;
+      let hasMore = true;
 
-      if (!error && data) {
-        data.sort((a, b) => {
-          const numA = parseInt(a.id.split('-')[0], 10) || 0;
-          const numB = parseInt(b.id.split('-')[0], 10) || 0;
-          if (numB !== numA) return numB - numA;
-          return b.id.localeCompare(a.id);
-        });
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('projects')
+          .select('*')
+          .range(from, from + pageSize - 1);
+
+        if (error) {
+          console.error('Error fetching projects:', error);
+          toast({
+            title: "Error fetching projects",
+            description: "There was a problem loading the project data.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        allData = allData.concat(data || []);
+        hasMore = (data?.length || 0) === pageSize;
+        from += pageSize;
       }
 
-      if (error) {
-        console.error('Error fetching projects:', error);
-        toast({
-          title: "Error fetching projects",
-          description: "There was a problem loading the project data.",
-          variant: "destructive",
-        });
-        return;
-      }
+      // Sort numerically by project ID (highest first)
+      allData.sort((a, b) => {
+        const numA = parseInt(a.id.split('-')[0], 10) || 0;
+        const numB = parseInt(b.id.split('-')[0], 10) || 0;
+        if (numB !== numA) return numB - numA;
+        return b.id.localeCompare(a.id);
+      });
 
-      setProjects(data || []);
+      setProjects(allData);
     } catch (error) {
       console.error('Error:', error);
     } finally {
