@@ -17,6 +17,21 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
+    // Check if email is on the allowlist
+    const { data: isAllowed, error: rpcError } = await supabase.rpc('is_email_allowed', { p_email: email });
+
+    if (rpcError) {
+      setLoading(false);
+      setError("Der opstod en fejl. Prøv igen.");
+      return;
+    }
+
+    if (!isAllowed) {
+      setLoading(false);
+      setError("Denne email har ikke adgang. Kontakt administrator.");
+      return;
+    }
+
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
