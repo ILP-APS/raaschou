@@ -22,7 +22,7 @@ export const ProjectNameCell: React.FC<ProjectNameCellProps> = ({
       className={cn(
         "sticky z-20 transition-colors",
         rowBgColor,
-        "group-hover:bg-muted/80",
+        "group-hover:bg-green-50",
         isSubProject && "pl-8"
       )}
     style={{ left: '150px', minWidth: '300px', width: '300px' }}
