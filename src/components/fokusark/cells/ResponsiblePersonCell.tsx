@@ -17,7 +17,7 @@ export const ResponsiblePersonCell: React.FC<ResponsiblePersonCellProps> = ({
       className={cn(
         "sticky z-20 text-center transition-colors",
         rowBgColor,
-        "group-hover:bg-muted/80"
+        "group-hover:bg-green-50"
       )}
     style={{ 
       left: '450px', 
