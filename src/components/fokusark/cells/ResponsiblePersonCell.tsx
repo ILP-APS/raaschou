@@ -14,10 +14,11 @@ export const ResponsiblePersonCell: React.FC<ResponsiblePersonCellProps> = ({
   rowBgColor,
 }) => (
   <TableCell 
-    className={cn(
-      "sticky z-20 text-center",
-      rowBgColor
-    )}
+      className={cn(
+        "sticky z-20 text-center transition-colors",
+        rowBgColor,
+        "group-hover:bg-muted/80"
+      )}
     style={{ 
       left: '450px', 
       minWidth: '100px', 
