@@ -1,0 +1,65 @@
+
+/* Basic DataGrid styles */
+.rdg {
+  --color: #000;
+  --border-color: #ddd;
+  --summary-border-color: #aaa;
+  --selection-color: #66afe9;
+  --background-color: #fff;
+  --header-background-color: #f7f7f7;
+  --row-hover-background-color: #f5f5f5;
+  --row-selected-background-color: #efefef;
+  --checkbox-color: #fff;
+  --checkbox-focus-color: #66afe9;
+  --checkbox-disabled-border-color: #999;
+  --checkbox-disabled-background-color: #e6e6e6;
+
+  box-sizing: border-box;
+  border: 1px solid var(--border-color);
+  color: var(--color);
+}
+
+.rdg *,
+.rdg *::before,
+.rdg *::after {
+  box-sizing: inherit;
+}
+
+.rdg-header-row,
+.rdg-filter-row,
+.rdg-row {
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  width: var(--row-width);
+  line-height: var(--row-height);
+}
+
+.rdg-header-row {
+  background-color: var(--header-background-color);
+}
+
+.rdg-cell {
+  display: flex;
+  align-items: center;
+  padding-block: 0;
+  padding-inline: 8px;
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rdg-header-cell {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.rdg-row:hover {
+  background-color: var(--row-hover-background-color);
+}
+
+.rdg-row[aria-selected='true'] {
+  background-color: var(--row-selected-background-color);
+}
