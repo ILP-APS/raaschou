@@ -91,10 +91,18 @@ export const parseProjectHierarchy = (projects: Project[]): ProjectHierarchy[] =
   
   // Sort children within each parent
   hierarchyMap.forEach(hierarchy => {
-    hierarchy.children.sort((a, b) => a.id.localeCompare(b.id));
+    hierarchy.children.sort((a, b) => {
+      const numA = parseInt(a.id.split('-')[1] || '0', 10);
+      const numB = parseInt(b.id.split('-')[1] || '0', 10);
+      return numA - numB;
+    });
   });
   
-  return Array.from(hierarchyMap.values()).sort((a, b) => a.parent.id.localeCompare(b.parent.id));
+  return Array.from(hierarchyMap.values()).sort((a, b) => {
+    const numA = parseInt(a.parent.id, 10) || 0;
+    const numB = parseInt(b.parent.id, 10) || 0;
+    return numB - numA;
+  });
 };
 
 /**
