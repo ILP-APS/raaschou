@@ -122,7 +122,7 @@ serve(async (req) => {
 
     console.log(`Item lines grouped for ${offerByAppointment.size} open appointments`);
 
-    const now = new Date().toISOString();
+    const nowISO = new Date().toISOString();
     const isSubAppointment = (id: string) => /^\d+-\d+$/.test(id);
 
     // 2. Build and FILTER project rows
