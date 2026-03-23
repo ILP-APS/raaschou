@@ -14,8 +14,16 @@ export const useProjects = () => {
     try {
       const { data, error } = await supabase
         .from('projects')
-        .select('*')
-        .order('id', { ascending: false });
+        .select('*');
+
+      if (!error && data) {
+        data.sort((a, b) => {
+          const numA = parseInt(a.id.split('-')[0], 10) || 0;
+          const numB = parseInt(b.id.split('-')[0], 10) || 0;
+          if (numB !== numA) return numB - numA;
+          return b.id.localeCompare(a.id);
+        });
+      }
 
       if (error) {
         console.error('Error fetching projects:', error);
