@@ -70,9 +70,13 @@ serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // 1. Fetch all data in parallel
-    console.log("Fetching data from e-regnskab...");
+    // Calculate date 24 months back for filtering
+    const now = new Date();
+    const fromDate = new Date(now.getFullYear() - 2, now.getMonth(), now.getDate());
+    const fromDateStr = fromDate.toISOString().split('T')[0];
+    console.log(`Fetching data from e-regnskab (from ${fromDateStr})...`);
     const [appointments, workLines, users, itemLines] = await Promise.all([
-      eregnskabFetch("/Appointment/Standard?open=true", EREGNSKAB_API_KEY),
+      eregnskabFetch(`/Appointment/Standard?open=true&from=${fromDateStr}`, EREGNSKAB_API_KEY),
       eregnskabFetch("/Appointment/Standard/Line/Work", EREGNSKAB_API_KEY),
       eregnskabFetch("/User", EREGNSKAB_API_KEY),
       fetchItemLinesInChunks(EREGNSKAB_API_KEY),
