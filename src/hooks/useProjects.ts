@@ -47,17 +47,7 @@ export const useProjects = () => {
         return b.id.localeCompare(a.id);
       });
 
-      if (error) {
-        console.error('Error fetching projects:', error);
-        toast({
-          title: "Error fetching projects",
-          description: "There was a problem loading the project data.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setProjects(data || []);
+      setProjects(allData);
     } catch (error) {
       console.error('Error:', error);
     } finally {
