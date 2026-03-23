@@ -1,8 +1,9 @@
 
 import * as React from "react";
-import { SearchForm } from "@/components/SearchForm";
-import { VersionSwitcher } from "@/components/VersionSwitcher";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from "@/components/ui/sidebar";
+import { useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from "@/components/ui/sidebar";
 
 // This is sample data.
 const data = {
