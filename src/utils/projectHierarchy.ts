@@ -27,9 +27,11 @@ export const getParentProjectId = (projectId: string): string => {
  * Groups sub-projects under their parent projects
  */
 export const parseProjectHierarchy = (projects: Project[]): ProjectHierarchy[] => {
-  // Filter out parent projects with offer_amount < 25000 (sub-projects always included)
+  // Filter: exclude internal projects (ID < 10000) and projects with offer_amount < 25000
   const filtered = projects.filter(p => {
     if (isSubProject(p.id)) return true;
+    const numId = parseInt(p.id, 10) || 0;
+    if (numId < 10000) return false;
     return (p.offer_amount ?? 0) >= 25000;
   });
 
