@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      allowed_emails: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       offer_line_items: {
         Row: {
           description: string | null
@@ -174,6 +192,7 @@ export type Database = {
         Returns: undefined
       }
       get_setting: { Args: { p_key: string }; Returns: number }
+      is_email_allowed: { Args: { p_email: string }; Returns: boolean }
       upsert_offer_line_item: {
         Args: {
           p_description: string
