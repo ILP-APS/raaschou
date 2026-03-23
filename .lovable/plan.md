@@ -1,72 +1,54 @@
 
 
-## Refaktorering: Feature-baseret mappestruktur
+## Plan: Tilføj Produktionsark som feature #2
 
-### Hvad der flyttes til `src/features/fokusark/`
+### Overblik
+Produktionsark er en tabel der viser åbne aftaler (appointments) fra e-regnskab API'et, kategoriseret og farvekodet. Den inkluderer Excel-download funktionalitet.
+
+### Struktur (følger feature-arkitekturen)
 
 ```text
-src/features/fokusark/
+src/features/produktionsark/
 ├── components/
-│   ├── buttons/RefreshRealizedHoursButton.tsx
-│   ├── cells/ (7 filer)
-│   ├── utils/rowStyleUtils.ts
-│   ├── DataGridStyles.css
-│   ├── EditableCurrencyCell.tsx
-│   ├── EditablePercentageCell.tsx
-│   ├── FokusarkContent.tsx
-│   ├── FokusarkDataGrid.tsx
-│   ├── FokusarkDataGridStyles.css
-│   ├── FokusarkDescription.tsx
-│   ├── FokusarkHeader.tsx
-│   ├── ProjectsTable.tsx
-│   ├── ProjectsTableHeaders.tsx
-│   ├── ProjectsTableRow.tsx
-│   └── ShadcnFokusarkTable.tsx
+│   └── AppointmentsTable.tsx    ← Hovedtabel med Excel-download
 ├── hooks/
-│   ├── useProjects.ts
-│   ├── useAppointments.ts
-│   └── useUsers.ts
-├── services/
-│   └── appointmentDbService.ts
-├── api/
-│   └── fokusarkAppointmentsApi.ts
+│   └── useAppointments.ts       ← React Query hook
 ├── types/
-│   ├── project.ts
-│   ├── appointment.ts
-│   └── user.ts
+│   └── appointment.ts           ← Appointment interface
 ├── utils/
-│   ├── apiUtils.ts
-│   ├── appointmentUtils.ts
-│   ├── formatUtils.ts
-│   ├── projectHierarchy.ts
-│   ├── tableData.ts
-│   ├── userUtils.ts
-│   └── workTypeMapping.ts
-├── contexts/
-│   └── FokusarkDataContext.tsx
+│   └── dateUtils.ts             ← formatWeekDay, getCategoryType, getCategoryRowColor
 └── pages/
-    └── FokusarkPage.tsx
+    └── ProduktionsarkPage.tsx   ← Side med sidebar-layout
 ```
 
-### Hvad der forbliver på plads
-- `src/components/ui/` — delte UI-komponenter
-- `src/components/AppSidebar.tsx` — delt navigation
-- `src/integrations/supabase/` — delt Supabase client
-- `src/lib/utils.ts` — delt utility
-- `src/hooks/use-toast.ts`, `use-mobile.tsx`, `useHoldScroll.ts` — delte hooks
-- `src/pages/Index.tsx`, `NotFound.tsx` — globale sider
-- `src/App.tsx` — routing
+### Nye edge functions
 
-### Import-opdateringer
-Alle interne imports i de flyttede filer ændres fra `@/components/fokusark/`, `@/utils/`, `@/types/`, `@/hooks/useProjects` osv. til relative stier eller `@/features/fokusark/...`.
+```text
+supabase/functions/
+├── fetch-appointments/index.ts  ← Henter åbne aftaler fra 5 kategorier
+└── fetch-categories/index.ts    ← Henter kategori-liste (hjælpe-funktion)
+```
 
-`App.tsx` opdateres til at importere FokusarkPage fra `@/features/fokusark/pages/FokusarkPage`.
+Begge bruger den eksisterende `EREGNSKAB_API_KEY` secret (det andet projekt bruger `API_KEY` — vi tilpasser til vores navngivning).
+
+### Ændringer i eksisterende filer
+
+1. **`package.json`** — tilføj `exceljs` dependency (date-fns er allerede installeret)
+2. **`src/App.tsx`** — tilføj route `/produktionsark`
+3. **`src/components/AppSidebar.tsx`** — tilføj "Produktionsark" menupunkt
+
+### Tilpasninger fra det andet projekt
+
+- Import-stier ændres til `@/features/produktionsark/...`
+- Edge functions bruger `EREGNSKAB_API_KEY` i stedet for `API_KEY`
+- ProduktionsarkPage wrapper med AppSidebar + SidebarProvider (som FokusarkPage)
+- Supabase client import fra `@/integrations/supabase/client`
 
 ### Implementeringstrin
-1. Opret alle mapper under `src/features/fokusark/`
-2. Genskab hver fil i den nye placering med opdaterede imports
-3. Opdater `App.tsx` import
-4. Slet de gamle filer (de tomme mapper)
 
-Ca. 30 filer skal flyttes og have imports opdateret. Ingen funktionalitet ændres.
+1. Opret edge functions (`fetch-appointments`, `fetch-categories`) med tilpasset secret-navn
+2. Installer `exceljs` dependency
+3. Opret alle filer under `src/features/produktionsark/`
+4. Opdater App.tsx routing og AppSidebar navigation
+5. Deploy edge functions
 
