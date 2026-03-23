@@ -8,6 +8,8 @@ import Index from "./pages/Index";
 import FokusarkPage from "./features/fokusark/pages/FokusarkPage";
 import ProduktionsarkPage from "./features/produktionsark/pages/ProduktionsarkPage";
 import NotFound from "./pages/NotFound";
+import LoginPage from "./pages/LoginPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -18,9 +20,10 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/fokusark" element={<FokusarkPage />} />
-          <Route path="/produktionsark" element={<ProduktionsarkPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/fokusark" element={<ProtectedRoute><FokusarkPage /></ProtectedRoute>} />
+          <Route path="/produktionsark" element={<ProtectedRoute><ProduktionsarkPage /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

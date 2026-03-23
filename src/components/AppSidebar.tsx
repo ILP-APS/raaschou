@@ -1,8 +1,9 @@
 
 import * as React from "react";
-import { SearchForm } from "@/components/SearchForm";
-import { VersionSwitcher } from "@/components/VersionSwitcher";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from "@/components/ui/sidebar";
+import { useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from "@/components/ui/sidebar";
 
 // This is sample data.
 const data = {
@@ -24,9 +25,15 @@ const data = {
 export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+  };
+
   return <Sidebar {...props} className="animate-fade-in">
       <SidebarContent>
-        {/* We create a SidebarGroup for each parent. */}
         {data.navMain.map(item => <SidebarGroup key={item.title}>
             <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -42,6 +49,16 @@ export function AppSidebar({
             </SidebarGroupContent>
           </SidebarGroup>)}
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={handleLogout} className="text-muted-foreground hover:text-foreground transition-colors">
+              <LogOut className="h-4 w-4" />
+              <span>Log ud</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>;
 }
