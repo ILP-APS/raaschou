@@ -43,7 +43,7 @@ export function AppSidebar({
             <SidebarGroupContent>
               <SidebarMenu>
                 {item.items.map(item => <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={item.isActive} className="transition-all duration-200">
+                    <SidebarMenuButton asChild isActive={location.pathname === item.url} className="transition-all duration-200">
                       <a href={item.url}>
                         {item.title}
                       </a>
