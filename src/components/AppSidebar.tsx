@@ -29,6 +29,7 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
