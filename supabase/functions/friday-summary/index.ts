@@ -205,14 +205,12 @@ serve(async (req) => {
       const userId = emp.hn_user_id;
       const schedule = scheduleMap.get(userId);
       const fridayHours = schedule ? (schedule.friday ?? DEFAULT_HOURS.friday) : DEFAULT_HOURS.friday;
-      const schedule = scheduleMap.get(userId);
-      const fridayHours = schedule ? (schedule.friday ?? DEFAULT_HOURS.friday) : DEFAULT_HOURS.friday;
 
       // Check Friday registration
       let fridayMissing = false;
       if (fridayHours > 0) {
         const fridayReg = await checkRegistrations(userId, todayStr, EREGNSKAB_API_KEY);
-        if (!fridayReg.found) {
+        if (fridayReg.totalHours < fridayHours) {
           fridayMissing = true;
           // Create case for Friday
           await supabase.from("sms_reminder_cases").upsert({
