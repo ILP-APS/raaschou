@@ -74,11 +74,12 @@ const CaseOverview: React.FC = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Medarbejder</TableHead>
-              <TableHead>Dato</TableHead>
+              <TableHead>Dato mangler</TableHead>
               <TableHead>Uge</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Forventet timer</TableHead>
               <TableHead>SMS'er</TableHead>
+              <TableHead>SMS sendt</TableHead>
               <TableHead>Resolved efter</TableHead>
             </TableRow>
           </TableHeader>
