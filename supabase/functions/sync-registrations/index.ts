@@ -197,24 +197,30 @@ serve(async (req) => {
         const userId = batch[j];
         const lines = batchResults[j];
 
-        // Delete existing registrations for this user+week, then insert fresh
-        await supabase
-          .from("daily_time_registrations")
-          .delete()
-          .eq("hn_user_id", userId)
-          .gte("date", weekStart)
-          .lte("date", weekEnd);
-
         if (lines.length === 0) continue;
+
+        // Aggregate lines with same key (hn_user_id, date, category, hn_appointment_id)
+        // to avoid "cannot affect row a second time" errors
+        const keyMap = new Map<string, RegLine>();
+        for (const line of lines) {
+          const key = `${line.hn_user_id}|${line.date}|${line.category}|${line.hn_appointment_id ?? "null"}`;
+          const existing = keyMap.get(key);
+          if (existing) {
+            existing.duration += line.duration;
+          } else {
+            keyMap.set(key, { ...line });
+          }
+        }
+        const dedupedLines = Array.from(keyMap.values());
 
         const { error } = await supabase
           .from("daily_time_registrations")
-          .insert(lines);
+          .upsert(dedupedLines, { onConflict: "hn_user_id,date,category,hn_appointment_id" });
 
         if (error) {
-          console.error(`Insert error for user ${userId}:`, error.message);
+          console.error(`Upsert error for user ${userId}:`, error.message);
         } else {
-          totalLines += lines.length;
+          totalLines += dedupedLines.length;
         }
       }
     }
