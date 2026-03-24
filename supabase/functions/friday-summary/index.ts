@@ -247,12 +247,11 @@ serve(async (req) => {
 
       if (stillOpen.length === 0) continue;
 
-      // Build SMS
-      const userInfo = await eregnskabFetch(`/User/Info/${userId}`, EREGNSKAB_API_KEY);
-      const phone = userInfo?.cellphone;
+      // Use phone and name from sms_automation_employees table
+      const phone = emp.phone_number;
       if (!phone) { console.error(`No phone for user ${userId}`); continue; }
 
-      const name = firstName(userMap.get(userId) || "");
+      const name = firstName(emp.employee_name || "");
       const formattedPhone = formatPhone(phone);
 
       let message: string;
