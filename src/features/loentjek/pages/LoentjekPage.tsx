@@ -6,6 +6,7 @@ import { RefreshCw } from "lucide-react";
 import LoentjekHeader from "../components/LoentjekHeader";
 import WeekSelector from "../components/WeekSelector";
 import WeekOverviewTable from "../components/WeekOverviewTable";
+import ScheduleDialog from "../components/ScheduleDialog";
 import { useWeekData } from "../hooks/useWeekData";
 import { getCurrentWeekRange, shiftWeek, formatDateStr } from "../utils/weekUtils";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +32,6 @@ export default function LoentjekPage() {
         title: "Synkroniseret",
         description: `${data.lines_synced} registreringer hentet for ${data.employees} medarbejdere`,
       });
-      // Refresh registrations data
       queryClient.invalidateQueries({ queryKey: ["loentjek-registrations"] });
     } catch (e: any) {
       toast({ title: "Sync fejlede", description: e.message, variant: "destructive" });
@@ -63,6 +63,7 @@ export default function LoentjekPage() {
                   <RefreshCw className={`h-4 w-4 mr-1 ${syncing ? "animate-spin" : ""}`} />
                   {syncing ? "Synkroniserer..." : "Opdater fra e-regnskab"}
                 </Button>
+                <ScheduleDialog employees={employees} schedules={schedules} />
               </div>
               {isLoading ? (
                 <p className="text-muted-foreground">Indlæser...</p>
