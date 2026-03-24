@@ -21,6 +21,9 @@ const data = {
     }, {
       title: "Tidsregistrering",
       url: "/tidsregistrering"
+    }, {
+      title: "Løntjek",
+      url: "/loentjek"
     }]
   }]
 };

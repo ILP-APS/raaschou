@@ -27,6 +27,7 @@ const App = () => (
           <Route path="/fokusark" element={<ProtectedRoute><FokusarkPage /></ProtectedRoute>} />
           <Route path="/produktionsark" element={<ProtectedRoute><ProduktionsarkPage /></ProtectedRoute>} />
           <Route path="/tidsregistrering" element={<ProtectedRoute><TidsregistreringPage /></ProtectedRoute>} />
+          <Route path="/loentjek" element={<ProtectedRoute><LoentjekPage /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
