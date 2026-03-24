@@ -1,5 +1,5 @@
-
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UserResponse {
   hnUserID: number;
@@ -11,30 +11,11 @@ const userCache = new Map<number, string>();
 
 export async function fetchUserById(userId: number): Promise<UserResponse | null> {
   try {
-    const apiUrl = `https://publicapi.e-regnskab.dk/User/${userId}`;
-    const apiKey = 'w9Jq5NiTeOIpXfovZ0Hf1jLnM:pGwZ';
-    
-    console.log(`Fetching user with ID: ${userId}`);
-    
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'accept': 'text/plain',
-        'ApiKey': apiKey
-      },
-      cache: 'no-store'
+    const { data, error } = await supabase.functions.invoke("fetch-user-by-id", {
+      body: { user_ids: [userId] },
     });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`API Error: ${response.status}`, errorText);
-      throw new Error(`API responded with status: ${response.status}`);
-    }
-    
-    const userData = await response.json();
-    console.log(`Successfully fetched user: ${userData.name} (ID: ${userData.hnUserID})`);
-    
-    return userData;
+    if (error) throw error;
+    return data?.[userId] || null;
   } catch (error) {
     console.error(`Error fetching user with ID ${userId}:`, error);
     return null;
@@ -45,7 +26,7 @@ export async function getUserName(userId: number): Promise<string> {
   if (userCache.has(userId)) {
     return userCache.get(userId) as string;
   }
-  
+
   try {
     const user = await fetchUserById(userId);
     if (user && user.name) {
@@ -61,27 +42,23 @@ export async function getUserName(userId: number): Promise<string> {
 
 export async function preloadUsers(userIds: number[]): Promise<void> {
   const uniqueIds = [...new Set(userIds)].filter(id => !userCache.has(id));
-  
-  if (uniqueIds.length === 0) {
-    console.log("No new users to preload, all in cache");
-    return;
-  }
-  
-  console.log(`Preloading ${uniqueIds.length} users...`);
-  
+
+  if (uniqueIds.length === 0) return;
+
   try {
-    const fetchPromises = uniqueIds.map(id => fetchUserById(id));
-    const results = await Promise.allSettled(fetchPromises);
-    
+    const { data, error } = await supabase.functions.invoke("fetch-user-by-id", {
+      body: { user_ids: uniqueIds },
+    });
+    if (error) throw error;
+
     let loaded = 0;
-    results.forEach((result, index) => {
-      if (result.status === 'fulfilled' && result.value) {
-        userCache.set(uniqueIds[index], result.value.name);
+    for (const id of uniqueIds) {
+      if (data?.[id]?.name) {
+        userCache.set(id, data[id].name);
         loaded++;
       }
-    });
-    
-    console.log(`Successfully preloaded ${loaded} out of ${uniqueIds.length} users`);
+    }
+    console.log(`Preloaded ${loaded}/${uniqueIds.length} users`);
   } catch (error) {
     console.error("Error preloading users:", error);
     toast("Failed to load some user information");
