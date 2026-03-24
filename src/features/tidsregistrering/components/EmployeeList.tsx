@@ -3,8 +3,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Settings2 } from "lucide-react";
-import { useAutomationEmployees, useToggleEmployeeActive, useEmployeeSchedules } from "../hooks/useEmployees";
+import { Settings2, Trash2 } from "lucide-react";
+import { useAutomationEmployees, useToggleEmployeeActive, useRemoveEmployee, useEmployeeSchedules } from "../hooks/useEmployees";
 import EmployeeScheduleDialog from "./EmployeeScheduleDialog";
 import AddEmployeeDialog from "./AddEmployeeDialog";
 
@@ -14,6 +14,7 @@ const EmployeeList: React.FC = () => {
   const { data: employees, isLoading } = useAutomationEmployees();
   const { data: schedules } = useEmployeeSchedules();
   const toggleActive = useToggleEmployeeActive();
+  const removeEmployee = useRemoveEmployee();
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
 
   const scheduleMap = new Map<number, any>();
@@ -69,13 +70,26 @@ const EmployeeList: React.FC = () => {
                     />
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setEditingUserId(emp.hn_user_id)}
-                    >
-                      <Settings2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setEditingUserId(emp.hn_user_id)}
+                      >
+                        <Settings2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          if (confirm(`Fjern ${emp.employee_name} fra SMS-automation?`)) {
+                            removeEmployee.mutate(emp.hn_user_id);
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               );
