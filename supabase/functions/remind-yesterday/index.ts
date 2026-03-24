@@ -219,19 +219,28 @@ serve(async (req) => {
         continue;
       }
 
-      // Still not registered — send reminder
+      // Insufficient hours — send reminder
       const phone = empData.phone_number;
       if (!phone) { console.error(`No phone for user ${c.hn_user_id}`); continue; }
 
       const name = firstName(empData.employee_name || "");
       const dateFormatted = formatDateDa(yesterdayStr);
       const formattedPhone = formatPhone(phone);
+      const hasPartial = reg.totalHours > 0;
 
       let message: string;
       if (reminderType === "next_morning") {
-        message = `Godmorgen ${name}, du mangler stadig at registrere dine timer for ${dateFormatted} i e-regnskab. Kan du nå det her til morgen?${SMS_SIGNATURE}`;
+        if (hasPartial) {
+          message = `Godmorgen ${name}, du har registreret ${reg.totalHours.toFixed(1)} timer for ${dateFormatted}, men der forventes ${expectedHours.toFixed(1)}. Kan du opdatere i e-regnskab?${SMS_SIGNATURE}`;
+        } else {
+          message = `Godmorgen ${name}, du mangler stadig at registrere dine timer for ${dateFormatted} i e-regnskab. Kan du nå det her til morgen?${SMS_SIGNATURE}`;
+        }
       } else {
-        message = `Hej ${name}, bare en påmindelse — der mangler stadig timeregistrering for ${dateFormatted} i e-regnskab.${SMS_SIGNATURE}`;
+        if (hasPartial) {
+          message = `Hej ${name}, du har kun ${reg.totalHours.toFixed(1)} af ${expectedHours.toFixed(1)} timer registreret for ${dateFormatted}. Husk at opdatere i e-regnskab.${SMS_SIGNATURE}`;
+        } else {
+          message = `Hej ${name}, bare en påmindelse — der mangler stadig timeregistrering for ${dateFormatted} i e-regnskab.${SMS_SIGNATURE}`;
+        }
       }
 
       const smsStatus = await sendSms(formattedPhone, message, CLOUDTALK_API_ID, CLOUDTALK_API_KEY, CLOUDTALK_SENDER);
