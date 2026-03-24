@@ -32,6 +32,93 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_time_registrations: {
+        Row: {
+          appointment_project: string | null
+          appointment_subject: string | null
+          category: string
+          date: string
+          description: string | null
+          duration: number
+          hn_appointment_id: number | null
+          hn_user_id: number
+          id: string
+          synced_at: string | null
+        }
+        Insert: {
+          appointment_project?: string | null
+          appointment_subject?: string | null
+          category: string
+          date: string
+          description?: string | null
+          duration: number
+          hn_appointment_id?: number | null
+          hn_user_id: number
+          id?: string
+          synced_at?: string | null
+        }
+        Update: {
+          appointment_project?: string | null
+          appointment_subject?: string | null
+          category?: string
+          date?: string
+          description?: string | null
+          duration?: number
+          hn_appointment_id?: number | null
+          hn_user_id?: number
+          id?: string
+          synced_at?: string | null
+        }
+        Relationships: []
+      }
+      employee_work_schedules: {
+        Row: {
+          created_at: string | null
+          employee_name: string
+          friday: number | null
+          hn_user_id: number
+          id: string
+          is_custom: boolean | null
+          monday: number | null
+          saturday: number | null
+          sunday: number | null
+          thursday: number | null
+          tuesday: number | null
+          updated_at: string | null
+          wednesday: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          employee_name: string
+          friday?: number | null
+          hn_user_id: number
+          id?: string
+          is_custom?: boolean | null
+          monday?: number | null
+          saturday?: number | null
+          sunday?: number | null
+          thursday?: number | null
+          tuesday?: number | null
+          updated_at?: string | null
+          wednesday?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          employee_name?: string
+          friday?: number | null
+          hn_user_id?: number
+          id?: string
+          is_custom?: boolean | null
+          monday?: number | null
+          saturday?: number | null
+          sunday?: number | null
+          thursday?: number | null
+          tuesday?: number | null
+          updated_at?: string | null
+          wednesday?: number | null
+        }
+        Relationships: []
+      }
       offer_line_items: {
         Row: {
           description: string | null
@@ -177,6 +264,80 @@ export type Database = {
           value?: number | null
         }
         Relationships: []
+      }
+      sms_reminder_cases: {
+        Row: {
+          created_at: string | null
+          hn_user_id: number
+          hours_expected: number
+          hours_registered_at_resolution: number | null
+          id: string
+          missing_date: string
+          resolved_after_reminder: string | null
+          resolved_at: string | null
+          status: string
+          week_number: number
+        }
+        Insert: {
+          created_at?: string | null
+          hn_user_id: number
+          hours_expected: number
+          hours_registered_at_resolution?: number | null
+          id?: string
+          missing_date: string
+          resolved_after_reminder?: string | null
+          resolved_at?: string | null
+          status?: string
+          week_number: number
+        }
+        Update: {
+          created_at?: string | null
+          hn_user_id?: number
+          hours_expected?: number
+          hours_registered_at_resolution?: number | null
+          id?: string
+          missing_date?: string
+          resolved_after_reminder?: string | null
+          resolved_at?: string | null
+          status?: string
+          week_number?: number
+        }
+        Relationships: []
+      }
+      sms_reminder_logs: {
+        Row: {
+          case_id: string
+          id: string
+          phone_number: string
+          reminder_type: string
+          sent_at: string | null
+          sms_status: string | null
+        }
+        Insert: {
+          case_id: string
+          id?: string
+          phone_number: string
+          reminder_type: string
+          sent_at?: string | null
+          sms_status?: string | null
+        }
+        Update: {
+          case_id?: string
+          id?: string
+          phone_number?: string
+          reminder_type?: string
+          sent_at?: string | null
+          sms_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_reminder_logs_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "sms_reminder_cases"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
