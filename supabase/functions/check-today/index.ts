@@ -156,6 +156,14 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Auth: require service_role key (cron-invoked)
+  const authHeader = req.headers.get("Authorization") || "";
+  const token = authHeader.replace("Bearer ", "");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!serviceRoleKey || token !== serviceRoleKey) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+  }
+
   try {
     const EREGNSKAB_API_KEY = Deno.env.get("EREGNSKAB_API_KEY");
     const CLOUDTALK_API_ID = Deno.env.get("CLOUDTALK_API_ID");
