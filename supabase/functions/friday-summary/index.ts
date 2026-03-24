@@ -112,6 +112,9 @@ async function checkRegistrations(hnUserId: number, dateStr: string, apiKey: str
 }
 
 async function sendSms(phone: string, message: string, apiId: string, apiKey: string, sender: string): Promise<string> {
+  // SMS DISABLED - re-enable when logic is verified
+  console.log(`[SMS DISABLED] Would send to ${phone}: ${message.substring(0, 80)}...`);
+  return "disabled";
   const auth = btoa(`${apiId}:${apiKey}`);
   try {
     const res = await fetch(CLOUDTALK_SMS_URL, {
