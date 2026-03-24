@@ -1,0 +1,1 @@
+INSERT INTO allowed_emails (email) VALUES ('kar@raaschou.as')
