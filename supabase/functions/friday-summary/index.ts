@@ -262,6 +262,18 @@ serve(async (req) => {
       const phone = emp.phone_number;
       if (!phone) { console.error(`No phone for user ${userId}`); continue; }
 
+      // Duplicate protection: skip if friday_summary SMS already sent for any of these cases
+      const caseIds = stillOpen.map(c => c.id);
+      const { data: existingLogs } = await supabase
+        .from("sms_reminder_logs")
+        .select("case_id")
+        .in("case_id", caseIds)
+        .eq("reminder_type", "friday_summary");
+      if (existingLogs && existingLogs.length > 0) {
+        console.log(`User ${userId} already received friday_summary SMS, skipping`);
+        continue;
+      }
+
       const name = firstName(emp.employee_name || "");
       const formattedPhone = formatPhone(phone);
 

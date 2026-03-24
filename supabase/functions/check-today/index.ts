@@ -300,6 +300,20 @@ serve(async (req) => {
         continue;
       }
 
+      // Duplicate protection: skip if same_day SMS already sent today for this case
+      if (caseId) {
+        const { data: existingLog } = await supabase
+          .from("sms_reminder_logs")
+          .select("id")
+          .eq("case_id", caseId)
+          .eq("reminder_type", "same_day")
+          .maybeSingle();
+        if (existingLog) {
+          console.log(`User ${userId} already received same_day SMS for today, skipping`);
+          continue;
+        }
+      }
+
       const name = firstName(emp.employee_name || "");
       let message: string;
       if (isMissing) {

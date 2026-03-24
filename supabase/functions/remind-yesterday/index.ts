@@ -224,6 +224,18 @@ serve(async (req) => {
       const phone = empData.phone_number;
       if (!phone) { console.error(`No phone for user ${c.hn_user_id}`); continue; }
 
+      // Duplicate protection: skip if this reminder_type already sent for this case
+      const { data: existingLog } = await supabase
+        .from("sms_reminder_logs")
+        .select("id")
+        .eq("case_id", c.id)
+        .eq("reminder_type", reminderType)
+        .maybeSingle();
+      if (existingLog) {
+        console.log(`User ${c.hn_user_id} already received ${reminderType} SMS for case ${c.id}, skipping`);
+        continue;
+      }
+
       const name = firstName(empData.employee_name || "");
       const dateFormatted = formatDateDa(yesterdayStr);
       const formattedPhone = formatPhone(phone);
