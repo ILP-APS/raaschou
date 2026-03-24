@@ -45,12 +45,13 @@ function sundayOfWeek(d: Date): string {
 }
 
 async function checkRegistrations(hnUserId: number, dateStr: string, apiKey: string): Promise<{ found: boolean; totalHours: number }> {
+  // IMPORTANT: e-regnskab API requires full week range (mon-sun) for reliable results.
   const weekMon = mondayOfWeek(new Date(dateStr));
   const weekSun = sundayOfWeek(new Date(dateStr));
 
   const [workLines, internalLines, sickness, vacation, privateDays] = await Promise.all([
-    eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${dateStr}&to=${dateStr}`, apiKey),
-    eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${dateStr}&to=${dateStr}`, apiKey),
+    eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
+    eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
     eregnskabFetch(`/WorkTime/Sickness?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
     eregnskabFetch(`/WorkTime/Vacation?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
     eregnskabFetch(`/WorkTime/Private?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
@@ -62,26 +63,26 @@ async function checkRegistrations(hnUserId: number, dateStr: string, apiKey: str
   const addWork = (arr: any[] | null) => {
     if (!arr || !Array.isArray(arr)) return;
     for (const l of arr) {
-      if (l.date?.startsWith(dateStr)) { found = true; totalHours += l.units || 0; }
+      if (l.date?.split("T")[0] === dateStr) { found = true; totalHours += l.units || 0; }
     }
   };
   addWork(workLines);
   addWork(internalLines);
 
-  const filterRange = (arr: any[] | null) => {
+  // WorkTime endpoints use "start" field, not "from"
+  const filterByDate = (arr: any[] | null) => {
     if (!arr || !Array.isArray(arr)) return;
     for (const item of arr) {
-      const from = item.from?.split("T")[0];
-      const to = item.to?.split("T")[0];
-      if (from && to && from <= dateStr && to >= dateStr) {
+      const itemDate = item.start?.split("T")[0];
+      if (itemDate === dateStr) {
         found = true;
-        totalHours += item.duration || item.hours || 0;
+        totalHours += item.duration || 0;
       }
     }
   };
-  filterRange(sickness);
-  filterRange(vacation);
-  filterRange(privateDays);
+  filterByDate(sickness);
+  filterByDate(vacation);
+  filterByDate(privateDays);
 
   return { found, totalHours };
 }
