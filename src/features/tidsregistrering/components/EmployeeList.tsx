@@ -3,8 +3,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Settings2 } from "lucide-react";
-import { useAutomationEmployees, useToggleEmployeeActive, useEmployeeSchedules } from "../hooks/useEmployees";
+import { Settings2, Trash2 } from "lucide-react";
+import { useAutomationEmployees, useToggleEmployeeActive, useRemoveEmployee, useEmployeeSchedules } from "../hooks/useEmployees";
 import EmployeeScheduleDialog from "./EmployeeScheduleDialog";
 import AddEmployeeDialog from "./AddEmployeeDialog";
 
