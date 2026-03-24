@@ -66,12 +66,15 @@ async function fetchAppointmentDetails(
 async function fetchWeekRegistrations(
   hnUserId: number, weekStart: string, weekEnd: string, apiKey: string
 ): Promise<RegLine[]> {
+  // WorkTime endpoints need full week range (mon-sun) for reliable results
+  const weekEndSunday = addDays(weekStart, 6);
+
   const [workLines, internalLines, sickness, vacation, privateDays] = await Promise.all([
     eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEnd}`, apiKey),
     eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEnd}`, apiKey),
-    eregnskabFetch(`/WorkTime/Sickness?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEnd}`, apiKey),
-    eregnskabFetch(`/WorkTime/Vacation?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEnd}`, apiKey),
-    eregnskabFetch(`/WorkTime/Private?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEnd}`, apiKey),
+    eregnskabFetch(`/WorkTime/Sickness?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
+    eregnskabFetch(`/WorkTime/Vacation?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
+    eregnskabFetch(`/WorkTime/Private?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
   ]);
 
   const lines: RegLine[] = [];
@@ -109,37 +112,31 @@ async function fetchWeekRegistrations(
   await addWork(workLines, "work");
   await addWork(internalLines, "internal");
 
-  const filterRange = (arr: any[] | null, category: string) => {
+  // WorkTime endpoints return: { hnWorkTimeID, hnUserID, start, duration, description, created }
+  const addWorkTime = (arr: any[] | null, category: string) => {
     if (!arr || !Array.isArray(arr)) return;
     for (const item of arr) {
-      const from = item.from?.split("T")[0];
-      const to = item.to?.split("T")[0];
-      if (!from || !to) continue;
-      const rangeStart = from < weekStart ? weekStart : from;
-      const rangeEnd = to > weekEnd ? weekEnd : to;
-      let current = rangeStart;
-      while (current <= rangeEnd) {
-        const dayOfWeek = new Date(current).getDay();
-        if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-          lines.push({
-            hn_user_id: hnUserId,
-            date: current,
-            category,
-            duration: item.duration || item.hours || 0,
-            hn_appointment_id: null,
-            appointment_subject: null,
-            appointment_project: null,
-            description: null,
-          });
-        }
-        current = addDays(current, 1);
-      }
+      const dateStr = item.start?.split("T")[0];
+      if (!dateStr) continue;
+      // Only include dates within the requested work week (mon-fri)
+      if (dateStr < weekStart || dateStr > weekEnd) continue;
+
+      lines.push({
+        hn_user_id: hnUserId,
+        date: dateStr,
+        category,
+        duration: item.duration || 0,
+        hn_appointment_id: null,
+        appointment_subject: null,
+        appointment_project: null,
+        description: item.description || null,
+      });
     }
   };
 
-  filterRange(sickness, "sickness");
-  filterRange(vacation, "vacation");
-  filterRange(privateDays, "private");
+  addWorkTime(sickness, "sickness");
+  addWorkTime(vacation, "vacation");
+  addWorkTime(privateDays, "private");
 
   return lines;
 }
