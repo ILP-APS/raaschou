@@ -1,27 +1,29 @@
 
+# Refactor: Cron-funktioner bruger sync-registrations som single source of truth
 
-# Deaktiver SMS-afsendelse i alle edge functions
+## Status: ✅ Implementeret
 
-Simpelt fix: ændre `sendSms`-funktionen i alle 3 edge functions til at returnere "disabled" uden at kalde CloudTalk. Alt andet logik (cases, logs, registreringstjek) kører stadig, så vi kan debugge uden at sende SMS.
+## Arkitektur
+
+```text
+┌─────────────────┐     HTTP POST      ┌──────────────────────┐
+│  check-today    │ ──────────────────> │  sync-registrations  │
+│  friday-summary │                     │  (single source)     │
+│  remind-yesterday│                    │  → e-regnskab API    │
+└────────┬────────┘                     │  → daily_time_regs   │
+         │                              └──────────────────────┘
+         │ SELECT fra DB
+         v
+┌─────────────────────────┐
+│ daily_time_registrations │
+└─────────────────────────┘
+```
 
 ## Ændringer
 
-**3 filer** — samme ændring i hver:
+1. **sync-registrations** — accepterer nu både JWT og `x-cron-secret` auth + valgfri `hn_user_ids` filter
+2. **check-today** — kalder sync-registrations → læser DB → opretter cases. Beholder holiday-check.
+3. **friday-summary** — kalder sync-registrations → læser DB for hele ugen → resolver/sender SMS. Beholder holiday-check.
+4. **remind-yesterday** — kalder sync-registrations → læser DB → resolver/sender SMS. Ingen API-logik/holiday-check.
 
-1. `supabase/functions/check-today/index.ts`
-2. `supabase/functions/remind-yesterday/index.ts`
-3. `supabase/functions/friday-summary/index.ts`
-
-I hver fil tilføjes én linje øverst i `sendSms`-funktionen:
-
-```typescript
-async function sendSms(...): Promise<string> {
-  // SMS DISABLED - re-enable when logic is verified
-  console.log(`[SMS DISABLED] Would send to ${phone}: ${message.substring(0, 80)}...`);
-  return "disabled";
-  // ... rest of function unchanged
-}
-```
-
-SMS-logs gemmes stadig med status "disabled" så vi kan se hvad der *ville* være sendt.
-
+## SMS status: Disabled (alle 4 funktioner)
