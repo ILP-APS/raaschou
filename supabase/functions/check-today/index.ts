@@ -240,6 +240,7 @@ serve(async (req) => {
 
       // Check registrations
       const reg = await checkRegistrations(userId, todayStr, EREGNSKAB_API_KEY);
+      console.log(`User ${userId}: found=${reg.found}, totalHours=${reg.totalHours}, lines=${reg.lines.length}, expected=${expectedHours}`);
 
       // Sync registrations to DB
       if (reg.lines.length > 0) {
