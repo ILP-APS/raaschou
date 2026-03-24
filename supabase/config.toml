@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.fetch-hourly-employees]
 verify_jwt = false
+
+[functions.sync-registrations]
+verify_jwt = false
