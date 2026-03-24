@@ -104,12 +104,14 @@ interface RegistrationResult {
 async function checkRegistrations(
   hnUserId: number, dateStr: string, apiKey: string
 ): Promise<RegistrationResult> {
+  // IMPORTANT: e-regnskab API requires full week range (mon-sun) for reliable results.
+  // Single-day filtering returns empty data for many users.
   const weekMon = mondayOfWeek(new Date(dateStr));
   const weekSun = sundayOfWeek(new Date(dateStr));
 
   const [workLines, internalLines, sickness, vacation, privateDays] = await Promise.all([
-    eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${dateStr}&to=${dateStr}`, apiKey),
-    eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${dateStr}&to=${dateStr}`, apiKey),
+    eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
+    eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
     eregnskabFetch(`/WorkTime/Sickness?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
     eregnskabFetch(`/WorkTime/Vacation?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
     eregnskabFetch(`/WorkTime/Private?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
@@ -117,28 +119,29 @@ async function checkRegistrations(
 
   const lines: RegistrationResult["lines"] = [];
 
+  // Work and internal lines: filter locally by date
   if (workLines && Array.isArray(workLines)) {
     for (const l of workLines) {
-      if (l.date?.startsWith(dateStr)) {
+      if (l.date?.split("T")[0] === dateStr) {
         lines.push({ category: "work", duration: l.units || 0, hnAppointmentId: l.hnAppointmentID, description: l.description });
       }
     }
   }
   if (internalLines && Array.isArray(internalLines)) {
     for (const l of internalLines) {
-      if (l.date?.startsWith(dateStr)) {
+      if (l.date?.split("T")[0] === dateStr) {
         lines.push({ category: "internal", duration: l.units || 0, hnAppointmentId: l.hnAppointmentID, description: l.description });
       }
     }
   }
 
+  // WorkTime endpoints (sickness/vacation/private) use "start" field, not "from"
   const filterByDate = (arr: any[] | null, cat: string) => {
     if (!arr || !Array.isArray(arr)) return;
     for (const item of arr) {
-      const from = item.from?.split("T")[0];
-      const to = item.to?.split("T")[0];
-      if (from && to && from <= dateStr && to >= dateStr) {
-        lines.push({ category: cat, duration: item.duration || item.hours || 0 });
+      const itemDate = item.start?.split("T")[0];
+      if (itemDate === dateStr) {
+        lines.push({ category: cat, duration: item.duration || 0 });
       }
     }
   };
