@@ -40,13 +40,32 @@ interface RegLine {
   duration: number;
   hn_appointment_id: number | null;
   appointment_subject: string | null;
+  appointment_project: string | null;
   description: string | null;
+}
+
+// Cache for appointment details to avoid duplicate API calls
+const appointmentCache = new Map<number, { subject: string | null; project: string | null }>();
+
+async function fetchAppointmentDetails(
+  hnAppointmentId: number, apiKey: string
+): Promise<{ subject: string | null; project: string | null }> {
+  if (appointmentCache.has(hnAppointmentId)) {
+    return appointmentCache.get(hnAppointmentId)!;
+  }
+
+  const data = await eregnskabFetch(`/Appointment/Standard/${hnAppointmentId}`, apiKey);
+  const result = {
+    subject: data?.subject || null,
+    project: data?.project || null,
+  };
+  appointmentCache.set(hnAppointmentId, result);
+  return result;
 }
 
 async function fetchWeekRegistrations(
   hnUserId: number, weekStart: string, weekEnd: string, apiKey: string
 ): Promise<RegLine[]> {
-  // Fetch entire week range at once (single-day queries return 0 in this API)
   const [workLines, internalLines, sickness, vacation, privateDays] = await Promise.all([
     eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEnd}`, apiKey),
     eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEnd}`, apiKey),
@@ -57,25 +76,38 @@ async function fetchWeekRegistrations(
 
   const lines: RegLine[] = [];
 
-  const addWork = (arr: any[] | null, category: string) => {
+  // Process work lines — fetch appointment details per punkt 2.6
+  const addWork = async (arr: any[] | null, category: string) => {
     if (!arr || !Array.isArray(arr)) return;
     for (const l of arr) {
       const dateStr = l.date?.split("T")[0];
       if (!dateStr) continue;
+
+      let appointmentSubject = l.subject || null;
+      let appointmentProject: string | null = null;
+
+      // For standard work lines with hnAppointmentID, fetch appointment details
+      if (category === "work" && l.hnAppointmentID) {
+        const details = await fetchAppointmentDetails(l.hnAppointmentID, apiKey);
+        appointmentSubject = details.subject || appointmentSubject;
+        appointmentProject = details.project;
+      }
+
       lines.push({
         hn_user_id: hnUserId,
         date: dateStr,
         category,
         duration: l.units || 0,
         hn_appointment_id: l.hnAppointmentID || null,
-        appointment_subject: l.subject || null,
+        appointment_subject: appointmentSubject,
+        appointment_project: appointmentProject,
         description: l.description || null,
       });
     }
   };
 
-  addWork(workLines, "work");
-  addWork(internalLines, "internal");
+  await addWork(workLines, "work");
+  await addWork(internalLines, "internal");
 
   const filterRange = (arr: any[] | null, category: string) => {
     if (!arr || !Array.isArray(arr)) return;
@@ -83,13 +115,11 @@ async function fetchWeekRegistrations(
       const from = item.from?.split("T")[0];
       const to = item.to?.split("T")[0];
       if (!from || !to) continue;
-      // Expand range into individual days within our week
       const rangeStart = from < weekStart ? weekStart : from;
       const rangeEnd = to > weekEnd ? weekEnd : to;
       let current = rangeStart;
       while (current <= rangeEnd) {
         const dayOfWeek = new Date(current).getDay();
-        // Only include weekdays (Mon-Fri)
         if (dayOfWeek >= 1 && dayOfWeek <= 5) {
           lines.push({
             hn_user_id: hnUserId,
@@ -98,6 +128,7 @@ async function fetchWeekRegistrations(
             duration: item.duration || item.hours || 0,
             hn_appointment_id: null,
             appointment_subject: null,
+            appointment_project: null,
             description: null,
           });
         }
@@ -129,7 +160,6 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Parse optional week_start param, default to current week
     let weekStart: string;
     try {
       const body = await req.json();
@@ -141,7 +171,6 @@ serve(async (req) => {
     const weekEnd = addDays(weekStart, 4); // Friday
     console.log(`sync-registrations: syncing ${weekStart} to ${weekEnd}`);
 
-    // Get all active hourly employees from e-regnskab
     const workHours = await eregnskabFetch("/WorkTime/WorkHours", EREGNSKAB_API_KEY);
     if (!workHours || !Array.isArray(workHours)) {
       throw new Error("Failed to fetch WorkHours from e-regnskab");
@@ -153,9 +182,11 @@ serve(async (req) => {
 
     console.log(`Found ${hourlyEmployees.length} active hourly employees`);
 
+    // Clear appointment cache for each run
+    appointmentCache.clear();
+
     let totalLines = 0;
 
-    // Process employees in batches of 5 to avoid overloading the API
     for (let i = 0; i < hourlyEmployees.length; i += 5) {
       const batch = hourlyEmployees.slice(i, i + 5);
       const batchResults = await Promise.all(
@@ -166,7 +197,7 @@ serve(async (req) => {
         const userId = batch[j];
         const lines = batchResults[j];
 
-        // Delete existing registrations for this user+week
+        // Delete existing registrations for this user+week, then insert fresh
         await supabase
           .from("daily_time_registrations")
           .delete()
