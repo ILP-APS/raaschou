@@ -1,6 +1,6 @@
 
 import * as React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from "@/components/ui/sidebar";
@@ -29,6 +29,7 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -42,7 +43,7 @@ export function AppSidebar({
             <SidebarGroupContent>
               <SidebarMenu>
                 {item.items.map(item => <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={item.isActive} className="transition-all duration-200">
+                    <SidebarMenuButton asChild isActive={location.pathname === item.url} className="transition-all duration-200">
                       <a href={item.url}>
                         {item.title}
                       </a>
