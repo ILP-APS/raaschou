@@ -157,17 +157,27 @@ serve(async (req) => {
       });
     }
 
-    // Get users for names
-    const users = await eregnskabFetch("/User", EREGNSKAB_API_KEY);
-    const userMap = new Map<number, string>();
-    if (users && Array.isArray(users)) {
-      for (const u of users) userMap.set(u.hnUserID, u.name || "");
+    // Get active employees for name/phone lookup
+    const { data: activeEmployees } = await supabase
+      .from("sms_automation_employees")
+      .select("*")
+      .eq("is_active", true);
+    const empMap = new Map<number, any>();
+    if (activeEmployees) {
+      for (const e of activeEmployees) empMap.set(e.hn_user_id, e);
     }
 
     let resolved = 0;
     let smsSent = 0;
 
     for (const c of openCases) {
+      // Skip if employee is no longer active
+      const empData = empMap.get(c.hn_user_id);
+      if (!empData) {
+        console.log(`User ${c.hn_user_id} not in active employees, skipping`);
+        continue;
+      }
+
       const reg = await checkRegistrations(c.hn_user_id, yesterdayStr, EREGNSKAB_API_KEY);
 
       if (reg.found) {
@@ -184,11 +194,10 @@ serve(async (req) => {
       }
 
       // Still not registered — send reminder
-      const userInfo = await eregnskabFetch(`/User/Info/${c.hn_user_id}`, EREGNSKAB_API_KEY);
-      const phone = userInfo?.cellphone;
+      const phone = empData.phone_number;
       if (!phone) { console.error(`No phone for user ${c.hn_user_id}`); continue; }
 
-      const name = firstName(userMap.get(c.hn_user_id) || "");
+      const name = firstName(empData.employee_name || "");
       const dateFormatted = formatDateDa(yesterdayStr);
       const formattedPhone = formatPhone(phone);
 
