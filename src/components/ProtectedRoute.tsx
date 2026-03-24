@@ -3,11 +3,15 @@ import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
 
+const isDev = import.meta.env.DEV;
+
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!isDev);
 
   useEffect(() => {
+    if (isDev) return;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setLoading(false);
@@ -20,6 +24,10 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
     return () => subscription.unsubscribe();
   }, []);
+
+  if (isDev) {
+    return <>{children}</>;
+  }
 
   if (loading) {
     return (
