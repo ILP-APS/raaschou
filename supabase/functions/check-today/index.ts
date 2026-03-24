@@ -8,9 +8,8 @@ const corsHeaders = {
 
 const EREGNSKAB_BASE = "https://publicapi.e-regnskab.dk";
 const CLOUDTALK_SMS_URL = "https://my.cloudtalk.io/api/sms/send.json";
-const HOLIDAY_REF_USER = 14302; // Mads Raaschou — salaried reference for holiday detection
+const HOLIDAY_REF_USER = 14302;
 const SMS_SIGNATURE = "\n\nMed venlig hilsen\nRaaschou Administration\n\nNB: Denne besked kan ikke besvares";
-const DAY_NAMES = ["søndag", "mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag"];
 const DEFAULT_HOURS: Record<string, number> = {
   monday: 7.5, tuesday: 7.5, wednesday: 7.5, thursday: 7.5, friday: 7.0, saturday: 0, sunday: 0,
 };
@@ -53,26 +52,25 @@ function mondayOfWeek(d: Date): string {
   return date.toISOString().split("T")[0];
 }
 
-function sundayOfWeek(d: Date): string {
-  const date = new Date(d);
-  const day = date.getDay();
-  const diff = day === 0 ? 0 : 7 - day;
-  date.setDate(date.getDate() + diff);
-  return date.toISOString().split("T")[0];
-}
-
 async function isHoliday(dateStr: string, apiKey: string): Promise<boolean> {
-  const data = await eregnskabFetch(
-    `/WorkTime/Schedule/${HOLIDAY_REF_USER}?from=${dateStr}&to=${dateStr}`, apiKey
-  );
+  const data = await eregnskabFetch(`/WorkTime/Schedule/${HOLIDAY_REF_USER}?from=${dateStr}&to=${dateStr}`, apiKey);
   if (!data || !Array.isArray(data) || data.length === 0) return false;
   return data[0].duration === 0 || data[0].duration === 0.0;
 }
 
-async function getHourlyEmployees(apiKey: string): Promise<any[]> {
-  const data = await eregnskabFetch("/WorkTime/WorkHours", apiKey);
-  if (!data || !Array.isArray(data)) return [];
-  return data.filter((e: any) => e.name === "Timelønnet" && e.to === null);
+async function triggerSync(supabaseUrl: string, cronSecret: string, weekStart: string, hnUserIds: number[]): Promise<boolean> {
+  const res = await fetch(`${supabaseUrl}/functions/v1/sync-registrations`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-cron-secret": cronSecret },
+    body: JSON.stringify({ week_start: weekStart, hn_user_ids: hnUserIds }),
+  });
+  if (!res.ok) {
+    console.error(`sync-registrations call failed [${res.status}]`);
+    return false;
+  }
+  const result = await res.json();
+  console.log(`sync-registrations result:`, JSON.stringify(result));
+  return result.success === true;
 }
 
 async function sendSms(phone: string, message: string, apiId: string, apiKey: string, sender: string): Promise<string> {
@@ -83,78 +81,15 @@ async function sendSms(phone: string, message: string, apiId: string, apiKey: st
   try {
     const res = await fetch(CLOUDTALK_SMS_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Basic ${auth}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
       body: JSON.stringify({ recipient: phone, message, sender }),
     });
     const data = await res.json();
-    const success = data?.responseData?.[0]?.success;
-    return success ? "delivered" : "failed";
+    return data?.responseData?.[0]?.success ? "delivered" : "failed";
   } catch (e) {
     console.error("SMS send error:", e);
     return "error";
   }
-}
-
-interface RegistrationResult {
-  found: boolean;
-  totalHours: number;
-  lines: Array<{ category: string; duration: number; hnAppointmentId?: number; description?: string }>;
-}
-
-async function checkRegistrations(
-  hnUserId: number, dateStr: string, apiKey: string
-): Promise<RegistrationResult> {
-  // IMPORTANT: e-regnskab API requires full week range (mon-sun) for reliable results.
-  // Single-day filtering returns empty data for many users.
-  const weekMon = mondayOfWeek(new Date(dateStr));
-  const weekSun = sundayOfWeek(new Date(dateStr));
-
-  const [workLines, internalLines, sickness, vacation, privateDays] = await Promise.all([
-    eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
-    eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
-    eregnskabFetch(`/WorkTime/Sickness?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
-    eregnskabFetch(`/WorkTime/Vacation?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
-    eregnskabFetch(`/WorkTime/Private?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
-  ]);
-
-  const lines: RegistrationResult["lines"] = [];
-
-  // Work and internal lines: filter locally by date
-  if (workLines && Array.isArray(workLines)) {
-    for (const l of workLines) {
-      if (l.date?.split("T")[0] === dateStr) {
-        lines.push({ category: "work", duration: l.units || 0, hnAppointmentId: l.hnAppointmentID, description: l.description });
-      }
-    }
-  }
-  if (internalLines && Array.isArray(internalLines)) {
-    for (const l of internalLines) {
-      if (l.date?.split("T")[0] === dateStr) {
-        lines.push({ category: "internal", duration: l.units || 0, hnAppointmentId: l.hnAppointmentID, description: l.description });
-      }
-    }
-  }
-
-  // WorkTime endpoints (sickness/vacation/private) use "start" field, not "from"
-  const filterByDate = (arr: any[] | null, cat: string) => {
-    if (!arr || !Array.isArray(arr)) return;
-    for (const item of arr) {
-      const itemDate = item.start?.split("T")[0];
-      if (itemDate === dateStr) {
-        lines.push({ category: cat, duration: item.duration || 0 });
-      }
-    }
-  };
-
-  filterByDate(sickness, "sickness");
-  filterByDate(vacation, "vacation");
-  filterByDate(privateDays, "private");
-
-  const totalHours = lines.reduce((s, l) => s + l.duration, 0);
-  return { found: lines.length > 0, totalHours, lines };
 }
 
 serve(async (req) => {
@@ -162,7 +97,6 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Auth: require CRON_SECRET (cron-invoked)
   const cronSecret = Deno.env.get("CRON_SECRET");
   const providedSecret = req.headers.get("x-cron-secret");
   if (!cronSecret || providedSecret !== cronSecret) {
@@ -183,11 +117,10 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Determine today in Copenhagen timezone
     const now = new Date();
     const cph = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Copenhagen" }));
     const todayStr = cph.toISOString().split("T")[0];
-    const dayOfWeek = cph.getDay(); // 0=Sun, 1=Mon...
+    const dayOfWeek = cph.getDay();
 
     console.log(`check-today running for ${todayStr} (day ${dayOfWeek})`);
 
@@ -198,7 +131,7 @@ serve(async (req) => {
       });
     }
 
-    // Holiday check
+    // Holiday check (only API call kept — uses e-regnskab schedule endpoint)
     if (await isHoliday(todayStr, EREGNSKAB_API_KEY)) {
       console.log("Holiday detected, skipping");
       return new Response(JSON.stringify({ skipped: true, reason: "Holiday" }), {
@@ -206,7 +139,7 @@ serve(async (req) => {
       });
     }
 
-    // Get active employees from sms_automation_employees table
+    // Get active employees from DB
     const { data: activeEmployees, error: empError } = await supabase
       .from("sms_automation_employees")
       .select("*")
@@ -222,6 +155,29 @@ serve(async (req) => {
 
     console.log(`Found ${activeEmployees.length} active automation employees`);
 
+    // Step 1: Trigger sync-registrations for all active employees
+    const weekMonday = mondayOfWeek(cph);
+    const hnUserIds = activeEmployees.map(e => e.hn_user_id);
+    const syncOk = await triggerSync(SUPABASE_URL, cronSecret, weekMonday, hnUserIds);
+    if (!syncOk) {
+      console.error("sync-registrations failed, continuing with existing DB data");
+    }
+
+    // Step 2: Read from DB — get today's registrations
+    const { data: todayRegs } = await supabase
+      .from("daily_time_registrations")
+      .select("hn_user_id, duration")
+      .eq("date", todayStr)
+      .in("hn_user_id", hnUserIds);
+
+    // Aggregate hours per user from DB
+    const hoursMap = new Map<number, number>();
+    if (todayRegs) {
+      for (const r of todayRegs) {
+        hoursMap.set(r.hn_user_id, (hoursMap.get(r.hn_user_id) || 0) + Number(r.duration));
+      }
+    }
+
     // Get custom schedules
     const { data: customSchedules } = await supabase.from("employee_work_schedules").select("*");
     const scheduleMap = new Map<number, any>();
@@ -234,6 +190,7 @@ serve(async (req) => {
     let smsSent = 0;
     let casesCreated = 0;
 
+    // Step 3: Compare DB data with expected hours
     for (const emp of activeEmployees) {
       const userId = emp.hn_user_id;
       const schedule = scheduleMap.get(userId);
@@ -244,34 +201,15 @@ serve(async (req) => {
         continue;
       }
 
-      // Check registrations
-      const reg = await checkRegistrations(userId, todayStr, EREGNSKAB_API_KEY);
-      console.log(`User ${userId}: found=${reg.found}, totalHours=${reg.totalHours}, lines=${reg.lines.length}, expected=${expectedHours}`);
+      const registeredHours = hoursMap.get(userId) || 0;
+      console.log(`User ${userId}: registered=${registeredHours}h, expected=${expectedHours}h`);
 
-      // Sync registrations to DB
-      if (reg.lines.length > 0) {
-        for (const line of reg.lines) {
-          await supabase.from("daily_time_registrations").upsert({
-            hn_user_id: userId,
-            date: todayStr,
-            category: line.category,
-            duration: line.duration,
-            hn_appointment_id: line.hnAppointmentId || null,
-            description: line.description || null,
-          }, { onConflict: "hn_user_id,date,category,hn_appointment_id" });
-        }
-      }
-
-      if (reg.found && reg.totalHours >= expectedHours) {
-        console.log(`User ${userId} has sufficient registrations (${reg.totalHours}h >= ${expectedHours}h), OK`);
+      if (registeredHours >= expectedHours) {
+        console.log(`User ${userId} has sufficient registrations, OK`);
         continue;
       }
 
-      // Determine if missing entirely or partial
-      const isMissing = !reg.found || reg.totalHours === 0;
-      const isPartial = reg.found && reg.totalHours > 0 && reg.totalHours < expectedHours;
-
-      // No registration — create case and send SMS
+      // Insufficient hours — create case
       const { data: existingCase } = await supabase
         .from("sms_reminder_cases")
         .select("id")
@@ -296,14 +234,10 @@ serve(async (req) => {
         casesCreated++;
       }
 
-      // Use phone and name from sms_automation_employees table
       const phone = emp.phone_number;
-      if (!phone) {
-        console.error(`No phone for user ${userId}`);
-        continue;
-      }
+      if (!phone) { console.error(`No phone for user ${userId}`); continue; }
 
-      // Duplicate protection: skip if same_day SMS already sent today for this case
+      // Duplicate protection
       if (caseId) {
         const { data: existingLogs } = await supabase
           .from("sms_reminder_logs")
@@ -318,11 +252,12 @@ serve(async (req) => {
       }
 
       const name = firstName(emp.employee_name || "");
+      const isMissing = registeredHours === 0;
       let message: string;
       if (isMissing) {
         message = `Hej ${name}, du mangler at registrere dine timer for i dag i e-regnskab. Husk det inden du går hjem.${SMS_SIGNATURE}`;
       } else {
-        message = `Hej ${name}, du har kun registreret ${reg.totalHours.toFixed(1)} timer i dag, men der forventes ${expectedHours.toFixed(1)} timer. Husk at opdatere i e-regnskab inden du går hjem.${SMS_SIGNATURE}`;
+        message = `Hej ${name}, du har kun registreret ${registeredHours.toFixed(1)} timer i dag, men der forventes ${expectedHours.toFixed(1)} timer. Husk at opdatere i e-regnskab inden du går hjem.${SMS_SIGNATURE}`;
       }
       const formattedPhone = formatPhone(phone);
 

@@ -66,8 +66,6 @@ async function fetchAppointmentDetails(
 async function fetchWeekRegistrations(
   hnUserId: number, weekStart: string, weekEnd: string, apiKey: string
 ): Promise<RegLine[]> {
-  // All endpoints need full week range (mon-sun) for reliable results
-  // Even /Appointment/*/Line/Work can miss Friday entries with narrow date filtering
   const weekEndSunday = addDays(weekStart, 6);
 
   const [workLines, internalLines, sickness, vacation, privateDays] = await Promise.all([
@@ -80,7 +78,6 @@ async function fetchWeekRegistrations(
 
   const lines: RegLine[] = [];
 
-  // Process work lines — fetch appointment details per punkt 2.6
   const addWork = async (arr: any[] | null, category: string) => {
     if (!arr || !Array.isArray(arr)) return;
     for (const l of arr) {
@@ -90,7 +87,6 @@ async function fetchWeekRegistrations(
       let appointmentSubject = l.subject || null;
       let appointmentProject: string | null = null;
 
-      // For standard work lines with hnAppointmentID, fetch appointment details
       if (category === "work" && l.hnAppointmentID) {
         const details = await fetchAppointmentDetails(l.hnAppointmentID, apiKey);
         appointmentSubject = details.subject || appointmentSubject;
@@ -113,13 +109,11 @@ async function fetchWeekRegistrations(
   await addWork(workLines, "work");
   await addWork(internalLines, "internal");
 
-  // WorkTime endpoints return: { hnWorkTimeID, hnUserID, start, duration, description, created }
   const addWorkTime = (arr: any[] | null, category: string) => {
     if (!arr || !Array.isArray(arr)) return;
     for (const item of arr) {
       const dateStr = item.start?.split("T")[0];
       if (!dateStr) continue;
-      // Only include dates within the requested work week (mon-fri)
       if (dateStr < weekStart || dateStr > weekEnd) continue;
 
       lines.push({
@@ -147,16 +141,29 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Auth: require valid JWT
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+  // Auth: accept EITHER valid JWT OR x-cron-secret header
+  let authenticated = false;
+
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  const providedCronSecret = req.headers.get("x-cron-secret");
+  if (cronSecret && providedCronSecret === cronSecret) {
+    authenticated = true;
   }
-  const sbAuth = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
-    global: { headers: { Authorization: authHeader } },
-  });
-  const { data: { user }, error: authError } = await sbAuth.auth.getUser();
-  if (authError || !user) {
+
+  if (!authenticated) {
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const sbAuth = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: { user }, error: authError } = await sbAuth.auth.getUser();
+      if (!authError && user) {
+        authenticated = true;
+      }
+    }
+  }
+
+  if (!authenticated) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
   }
 
@@ -172,34 +179,46 @@ serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     let weekStart: string;
+    let filterUserIds: number[] | null = null;
+
     try {
       const body = await req.json();
       weekStart = body.week_start || mondayOfWeek(new Date());
+      if (body.hn_user_ids && Array.isArray(body.hn_user_ids) && body.hn_user_ids.length > 0) {
+        filterUserIds = body.hn_user_ids;
+      }
     } catch {
       weekStart = mondayOfWeek(new Date());
     }
 
     const weekEnd = addDays(weekStart, 4); // Friday
-    console.log(`sync-registrations: syncing ${weekStart} to ${weekEnd}`);
+    console.log(`sync-registrations: syncing ${weekStart} to ${weekEnd}${filterUserIds ? ` for ${filterUserIds.length} specific users` : " for all hourly employees"}`);
 
-    const workHours = await eregnskabFetch("/WorkTime/WorkHours", EREGNSKAB_API_KEY);
-    if (!workHours || !Array.isArray(workHours)) {
-      throw new Error("Failed to fetch WorkHours from e-regnskab");
+    let employeeIds: number[];
+
+    if (filterUserIds) {
+      // Use provided user IDs directly (called from cron functions)
+      employeeIds = filterUserIds;
+    } else {
+      // Fetch all hourly employees from e-regnskab (UI-triggered full sync)
+      const workHours = await eregnskabFetch("/WorkTime/WorkHours", EREGNSKAB_API_KEY);
+      if (!workHours || !Array.isArray(workHours)) {
+        throw new Error("Failed to fetch WorkHours from e-regnskab");
+      }
+      employeeIds = workHours
+        .filter((e: any) => e.name === "Timelønnet" && e.to === null)
+        .map((e: any) => e.hnUserID as number);
     }
 
-    const hourlyEmployees = workHours
-      .filter((e: any) => e.name === "Timelønnet" && e.to === null)
-      .map((e: any) => e.hnUserID as number);
-
-    console.log(`Found ${hourlyEmployees.length} active hourly employees`);
+    console.log(`Syncing ${employeeIds.length} employees`);
 
     // Clear appointment cache for each run
     appointmentCache.clear();
 
     let totalLines = 0;
 
-    for (let i = 0; i < hourlyEmployees.length; i += 5) {
-      const batch = hourlyEmployees.slice(i, i + 5);
+    for (let i = 0; i < employeeIds.length; i += 5) {
+      const batch = employeeIds.slice(i, i + 5);
       const batchResults = await Promise.all(
         batch.map((userId) => fetchWeekRegistrations(userId, weekStart, weekEnd, EREGNSKAB_API_KEY))
       );
@@ -210,8 +229,6 @@ serve(async (req) => {
 
         if (lines.length === 0) continue;
 
-        // Separate work/internal lines (have appointment_id, can upsert) from
-        // WorkTime lines (null appointment_id — NULL!=NULL breaks upsert)
         const workLines: RegLine[] = [];
         const workTimeLines: RegLine[] = [];
         for (const line of lines) {
@@ -222,7 +239,7 @@ serve(async (req) => {
           }
         }
 
-        // Aggregate work lines with same key to avoid duplicate-row errors
+        // Aggregate work lines with same key
         const keyMap = new Map<string, RegLine>();
         for (const line of workLines) {
           const key = `${line.hn_user_id}|${line.date}|${line.category}|${line.hn_appointment_id}`;
@@ -235,7 +252,6 @@ serve(async (req) => {
         }
         const dedupedWorkLines = Array.from(keyMap.values());
 
-        // Upsert work/internal lines (they have a real appointment_id)
         if (dedupedWorkLines.length > 0) {
           const { error } = await supabase
             .from("daily_time_registrations")
@@ -244,8 +260,6 @@ serve(async (req) => {
           else totalLines += dedupedWorkLines.length;
         }
 
-        // For WorkTime lines (sickness/vacation/private): delete-then-insert
-        // because NULL appointment_id can't match in unique constraint
         if (workTimeLines.length > 0) {
           const categories = [...new Set(workTimeLines.map(l => l.category))];
           const { error: delError } = await supabase
@@ -267,14 +281,14 @@ serve(async (req) => {
       }
     }
 
-    console.log(`sync-registrations done: ${totalLines} lines synced for ${hourlyEmployees.length} employees`);
+    console.log(`sync-registrations done: ${totalLines} lines synced for ${employeeIds.length} employees`);
 
     return new Response(
       JSON.stringify({
         success: true,
         week_start: weekStart,
         week_end: weekEnd,
-        employees: hourlyEmployees.length,
+        employees: employeeIds.length,
         lines_synced: totalLines,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
