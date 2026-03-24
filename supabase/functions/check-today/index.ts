@@ -193,16 +193,21 @@ serve(async (req) => {
       });
     }
 
-    // Get hourly employees
-    const hourlyEmployees = await getHourlyEmployees(EREGNSKAB_API_KEY);
-    console.log(`Found ${hourlyEmployees.length} hourly employees`);
+    // Get active employees from sms_automation_employees table
+    const { data: activeEmployees, error: empError } = await supabase
+      .from("sms_automation_employees")
+      .select("*")
+      .eq("is_active", true);
 
-    // Get users for names
-    const users = await eregnskabFetch("/User", EREGNSKAB_API_KEY);
-    const userMap = new Map<number, string>();
-    if (users && Array.isArray(users)) {
-      for (const u of users) userMap.set(u.hnUserID, u.name || "");
+    if (empError) throw new Error(`DB error: ${empError.message}`);
+    if (!activeEmployees || activeEmployees.length === 0) {
+      console.log("No active employees in sms_automation_employees");
+      return new Response(JSON.stringify({ success: true, message: "No active employees" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
+
+    console.log(`Found ${activeEmployees.length} active automation employees`);
 
     // Get custom schedules
     const { data: customSchedules } = await supabase.from("employee_work_schedules").select("*");
@@ -216,8 +221,8 @@ serve(async (req) => {
     let smsSent = 0;
     let casesCreated = 0;
 
-    for (const emp of hourlyEmployees) {
-      const userId = emp.hnUserID;
+    for (const emp of activeEmployees) {
+      const userId = emp.hn_user_id;
       const schedule = scheduleMap.get(userId);
       const expectedHours = schedule ? (schedule[dayCol] ?? DEFAULT_HOURS[dayCol]) : (DEFAULT_HOURS[dayCol] ?? 0);
 
