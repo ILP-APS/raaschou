@@ -225,13 +225,13 @@ serve(async (req) => {
       if (!phone) { console.error(`No phone for user ${c.hn_user_id}`); continue; }
 
       // Duplicate protection: skip if this reminder_type already sent for this case
-      const { data: existingLog } = await supabase
+      const { data: existingLogs } = await supabase
         .from("sms_reminder_logs")
         .select("id")
         .eq("case_id", c.id)
         .eq("reminder_type", reminderType)
-        .maybeSingle();
-      if (existingLog) {
+        .limit(1);
+      if (existingLogs && existingLogs.length > 0) {
         console.log(`User ${c.hn_user_id} already received ${reminderType} SMS for case ${c.id}, skipping`);
         continue;
       }
