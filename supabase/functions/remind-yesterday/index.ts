@@ -149,6 +149,18 @@ serve(async (req) => {
 
     console.log(`remind-yesterday running for ${yesterdayStr}, type=${reminderType}`);
 
+    // Get custom schedules for hours comparison
+    const { data: customSchedules } = await supabase.from("employee_work_schedules").select("*");
+    const scheduleMap = new Map<number, any>();
+    if (customSchedules) {
+      for (const s of customSchedules) scheduleMap.set(s.hn_user_id, s);
+    }
+
+    const DAY_COLUMNS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    const DEFAULT_HOURS: Record<string, number> = {
+      monday: 7.5, tuesday: 7.5, wednesday: 7.5, thursday: 7.5, friday: 7.0, saturday: 0, sunday: 0,
+    };
+
     // Get open cases from yesterday
     const { data: openCases, error: casesError } = await supabase
       .from("sms_reminder_cases")
