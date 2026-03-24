@@ -1,0 +1,1 @@
+GRANT SELECT ON public.daily_time_registrations TO anon;
