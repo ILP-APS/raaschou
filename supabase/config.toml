@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.friday-summary]
 verify_jwt = false
+
+[functions.fetch-hourly-employees]
+verify_jwt = false
