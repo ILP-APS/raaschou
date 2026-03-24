@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import FokusarkPage from "./features/fokusark/pages/FokusarkPage";
 import ProduktionsarkPage from "./features/produktionsark/pages/ProduktionsarkPage";
+import TidsregistreringPage from "./features/tidsregistrering/pages/TidsregistreringPage";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/fokusark" element={<ProtectedRoute><FokusarkPage /></ProtectedRoute>} />
           <Route path="/produktionsark" element={<ProtectedRoute><ProduktionsarkPage /></ProtectedRoute>} />
+          <Route path="/tidsregistrering" element={<ProtectedRoute><TidsregistreringPage /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
