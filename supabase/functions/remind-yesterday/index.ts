@@ -199,8 +199,15 @@ serve(async (req) => {
 
       const reg = await checkRegistrations(c.hn_user_id, yesterdayStr, EREGNSKAB_API_KEY);
 
-      if (reg.found) {
-        // Resolve case
+      // Determine expected hours for the case's date
+      const caseDate = new Date(c.missing_date);
+      const caseDayOfWeek = caseDate.getDay();
+      const caseDayCol = DAY_COLUMNS[caseDayOfWeek];
+      const caseSchedule = scheduleMap.get(c.hn_user_id);
+      const expectedHours = caseSchedule ? (caseSchedule[caseDayCol] ?? DEFAULT_HOURS[caseDayCol]) : (DEFAULT_HOURS[caseDayCol] ?? 0);
+
+      if (reg.totalHours >= expectedHours) {
+        // Sufficient hours — resolve case
         await supabase.from("sms_reminder_cases").update({
           status: "resolved",
           resolved_at: new Date().toISOString(),
@@ -208,7 +215,7 @@ serve(async (req) => {
           resolved_after_reminder: reminderType === "next_morning" ? "same_day" : "next_morning",
         }).eq("id", c.id);
         resolved++;
-        console.log(`Case ${c.id} resolved (user ${c.hn_user_id})`);
+        console.log(`Case ${c.id} resolved (user ${c.hn_user_id}, ${reg.totalHours}h >= ${expectedHours}h)`);
         continue;
       }
 
