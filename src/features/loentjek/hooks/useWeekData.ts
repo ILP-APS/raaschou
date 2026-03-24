@@ -21,17 +21,19 @@ export function useWeekData(weekRange: WeekRange) {
   const startStr = formatDateStr(weekRange.start);
   const endStr = formatDateStr(weekRange.end);
 
+  // Fetch active hourly employees from e-regnskab via edge function
   const employeesQuery = useQuery({
-    queryKey: ["loentjek-employees"],
+    queryKey: ["loentjek-hourly-employees"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("sms_automation_employees")
-        .select("hn_user_id, employee_name")
-        .eq("is_active", true)
-        .order("employee_name");
+      const { data, error } = await supabase.functions.invoke("fetch-hourly-employees");
       if (error) throw error;
-      return data as EmployeeInfo[];
+      const employees = data as Array<{ hn_user_id: number; name: string; cellphone: string }>;
+      return employees.map((e) => ({
+        hn_user_id: e.hn_user_id,
+        employee_name: e.name,
+      })) as EmployeeInfo[];
     },
+    staleTime: 1000 * 60 * 30, // Cache 30 min — changes rarely
   });
 
   const registrationsQuery = useQuery({
