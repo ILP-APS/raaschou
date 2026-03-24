@@ -14,6 +14,7 @@ const EmployeeList: React.FC = () => {
   const { data: employees, isLoading } = useAutomationEmployees();
   const { data: schedules } = useEmployeeSchedules();
   const toggleActive = useToggleEmployeeActive();
+  const removeEmployee = useRemoveEmployee();
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
 
   const scheduleMap = new Map<number, any>();
