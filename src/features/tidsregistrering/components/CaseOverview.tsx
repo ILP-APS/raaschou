@@ -98,6 +98,11 @@ const CaseOverview: React.FC = () => {
                 </TableCell>
                 <TableCell>{c.hours_expected}</TableCell>
                 <TableCell>{smsCountByCase.get(c.id) || 0}</TableCell>
+                <TableCell className="text-muted-foreground text-sm">
+                  {smsSentAtByCase.get(c.id)
+                    ? new Date(smsSentAtByCase.get(c.id)!).toLocaleString("da-DK", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
+                    : "—"}
+                </TableCell>
                 <TableCell className="text-muted-foreground">
                   {c.resolved_after_reminder || "—"}
                 </TableCell>
