@@ -8,3 +8,12 @@ verify_jwt = false
 
 [functions.fetch-categories]
 verify_jwt = false
+
+[functions.check-today]
+verify_jwt = false
+
+[functions.remind-yesterday]
+verify_jwt = false
+
+[functions.friday-summary]
+verify_jwt = false
