@@ -197,22 +197,15 @@ serve(async (req) => {
         const userId = batch[j];
         const lines = batchResults[j];
 
-        // Delete existing registrations for this user+week, then insert fresh
-        await supabase
-          .from("daily_time_registrations")
-          .delete()
-          .eq("hn_user_id", userId)
-          .gte("date", weekStart)
-          .lte("date", weekEnd);
-
         if (lines.length === 0) continue;
 
+        // Upsert to handle both new and existing registrations
         const { error } = await supabase
           .from("daily_time_registrations")
-          .insert(lines);
+          .upsert(lines, { onConflict: "hn_user_id,date,category,hn_appointment_id" });
 
         if (error) {
-          console.error(`Insert error for user ${userId}:`, error.message);
+          console.error(`Upsert error for user ${userId}:`, error.message);
         } else {
           totalLines += lines.length;
         }
