@@ -265,6 +265,30 @@ export type Database = {
         }
         Relationships: []
       }
+      sms_automation_employees: {
+        Row: {
+          added_at: string | null
+          employee_name: string
+          hn_user_id: number
+          is_active: boolean | null
+          phone_number: string
+        }
+        Insert: {
+          added_at?: string | null
+          employee_name: string
+          hn_user_id: number
+          is_active?: boolean | null
+          phone_number: string
+        }
+        Update: {
+          added_at?: string | null
+          employee_name?: string
+          hn_user_id?: number
+          is_active?: boolean | null
+          phone_number?: string
+        }
+        Relationships: []
+      }
       sms_reminder_cases: {
         Row: {
           created_at: string | null
