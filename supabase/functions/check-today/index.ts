@@ -302,13 +302,13 @@ serve(async (req) => {
 
       // Duplicate protection: skip if same_day SMS already sent today for this case
       if (caseId) {
-        const { data: existingLog } = await supabase
+        const { data: existingLogs } = await supabase
           .from("sms_reminder_logs")
           .select("id")
           .eq("case_id", caseId)
           .eq("reminder_type", "same_day")
-          .maybeSingle();
-        if (existingLog) {
+          .limit(1);
+        if (existingLogs && existingLogs.length > 0) {
           console.log(`User ${userId} already received same_day SMS for today, skipping`);
           continue;
         }
