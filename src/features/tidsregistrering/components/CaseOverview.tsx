@@ -23,11 +23,16 @@ const CaseOverview: React.FC = () => {
     for (const e of employees) employeeNames.set(e.hn_user_id, e.employee_name);
   }
 
-  // Count SMS per case
+  // Count SMS per case and find latest sent_at
   const smsCountByCase = new Map<string, number>();
+  const smsSentAtByCase = new Map<string, string>();
   if (logs) {
     for (const log of logs) {
       smsCountByCase.set(log.case_id, (smsCountByCase.get(log.case_id) || 0) + 1);
+      const existing = smsSentAtByCase.get(log.case_id);
+      if (!existing || (log.sent_at && log.sent_at > existing)) {
+        if (log.sent_at) smsSentAtByCase.set(log.case_id, log.sent_at);
+      }
     }
   }
 
