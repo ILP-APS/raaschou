@@ -27,14 +27,6 @@ function mondayOfWeek(d: Date): string {
   return date.toISOString().split("T")[0];
 }
 
-function sundayOfWeek(d: Date): string {
-  const date = new Date(d);
-  const day = date.getDay();
-  const diff = day === 0 ? 0 : 7 - day;
-  date.setDate(date.getDate() + diff);
-  return date.toISOString().split("T")[0];
-}
-
 function addDays(dateStr: string, days: number): string {
   const d = new Date(dateStr);
   d.setDate(d.getDate() + days);
@@ -51,15 +43,16 @@ interface RegLine {
   description: string | null;
 }
 
-async function fetchRegistrationsForDate(
-  hnUserId: number, dateStr: string, weekMon: string, weekSun: string, apiKey: string
+async function fetchWeekRegistrations(
+  hnUserId: number, weekStart: string, weekEnd: string, apiKey: string
 ): Promise<RegLine[]> {
+  // Fetch entire week range at once (single-day queries return 0 in this API)
   const [workLines, internalLines, sickness, vacation, privateDays] = await Promise.all([
-    eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${dateStr}&to=${dateStr}`, apiKey),
-    eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${dateStr}&to=${dateStr}`, apiKey),
-    eregnskabFetch(`/WorkTime/Sickness?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
-    eregnskabFetch(`/WorkTime/Vacation?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
-    eregnskabFetch(`/WorkTime/Private?hnUserID=${hnUserId}&from=${weekMon}&to=${weekSun}`, apiKey),
+    eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEnd}`, apiKey),
+    eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEnd}`, apiKey),
+    eregnskabFetch(`/WorkTime/Sickness?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEnd}`, apiKey),
+    eregnskabFetch(`/WorkTime/Vacation?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEnd}`, apiKey),
+    eregnskabFetch(`/WorkTime/Private?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEnd}`, apiKey),
   ]);
 
   const lines: RegLine[] = [];
@@ -67,17 +60,17 @@ async function fetchRegistrationsForDate(
   const addWork = (arr: any[] | null, category: string) => {
     if (!arr || !Array.isArray(arr)) return;
     for (const l of arr) {
-      if (l.date?.startsWith(dateStr)) {
-        lines.push({
-          hn_user_id: hnUserId,
-          date: dateStr,
-          category,
-          duration: l.units || 0,
-          hn_appointment_id: l.hnAppointmentID || null,
-          appointment_subject: l.appointmentSubject || l.subject || null,
-          description: l.description || null,
-        });
-      }
+      const dateStr = l.date?.split("T")[0];
+      if (!dateStr) continue;
+      lines.push({
+        hn_user_id: hnUserId,
+        date: dateStr,
+        category,
+        duration: l.units || 0,
+        hn_appointment_id: l.hnAppointmentID || null,
+        appointment_subject: l.subject || null,
+        description: l.description || null,
+      });
     }
   };
 
@@ -89,16 +82,26 @@ async function fetchRegistrationsForDate(
     for (const item of arr) {
       const from = item.from?.split("T")[0];
       const to = item.to?.split("T")[0];
-      if (from && to && from <= dateStr && to >= dateStr) {
-        lines.push({
-          hn_user_id: hnUserId,
-          date: dateStr,
-          category,
-          duration: item.duration || item.hours || 0,
-          hn_appointment_id: null,
-          appointment_subject: null,
-          description: null,
-        });
+      if (!from || !to) continue;
+      // Expand range into individual days within our week
+      const rangeStart = from < weekStart ? weekStart : from;
+      const rangeEnd = to > weekEnd ? weekEnd : to;
+      let current = rangeStart;
+      while (current <= rangeEnd) {
+        const dayOfWeek = new Date(current).getDay();
+        // Only include weekdays (Mon-Fri)
+        if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+          lines.push({
+            hn_user_id: hnUserId,
+            date: current,
+            category,
+            duration: item.duration || item.hours || 0,
+            hn_appointment_id: null,
+            appointment_subject: null,
+            description: null,
+          });
+        }
+        current = addDays(current, 1);
       }
     }
   };
@@ -135,7 +138,7 @@ serve(async (req) => {
       weekStart = mondayOfWeek(new Date());
     }
 
-    const weekEnd = addDays(weekStart, 6);
+    const weekEnd = addDays(weekStart, 4); // Friday
     console.log(`sync-registrations: syncing ${weekStart} to ${weekEnd}`);
 
     // Get all active hourly employees from e-regnskab
@@ -150,48 +153,38 @@ serve(async (req) => {
 
     console.log(`Found ${hourlyEmployees.length} active hourly employees`);
 
-    // Generate weekdays (Mon-Fri)
-    const weekdays: string[] = [];
-    for (let i = 0; i < 5; i++) {
-      weekdays.push(addDays(weekStart, i));
-    }
-
     let totalLines = 0;
 
-    // Process each employee
-    for (const userId of hourlyEmployees) {
-      const allLines: RegLine[] = [];
-
-      // Fetch all 5 days in parallel for this employee
-      const dayResults = await Promise.all(
-        weekdays.map((dateStr) =>
-          fetchRegistrationsForDate(userId, dateStr, weekStart, weekEnd, EREGNSKAB_API_KEY)
-        )
+    // Process employees in batches of 5 to avoid overloading the API
+    for (let i = 0; i < hourlyEmployees.length; i += 5) {
+      const batch = hourlyEmployees.slice(i, i + 5);
+      const batchResults = await Promise.all(
+        batch.map((userId) => fetchWeekRegistrations(userId, weekStart, weekEnd, EREGNSKAB_API_KEY))
       );
 
-      for (const dayLines of dayResults) {
-        allLines.push(...dayLines);
-      }
+      for (let j = 0; j < batch.length; j++) {
+        const userId = batch[j];
+        const lines = batchResults[j];
 
-      if (allLines.length === 0) continue;
+        // Delete existing registrations for this user+week
+        await supabase
+          .from("daily_time_registrations")
+          .delete()
+          .eq("hn_user_id", userId)
+          .gte("date", weekStart)
+          .lte("date", weekEnd);
 
-      // Delete existing registrations for this user+week, then insert fresh
-      await supabase
-        .from("daily_time_registrations")
-        .delete()
-        .eq("hn_user_id", userId)
-        .gte("date", weekStart)
-        .lte("date", addDays(weekStart, 4));
+        if (lines.length === 0) continue;
 
-      // Insert in batches
-      const { error } = await supabase
-        .from("daily_time_registrations")
-        .insert(allLines);
+        const { error } = await supabase
+          .from("daily_time_registrations")
+          .insert(lines);
 
-      if (error) {
-        console.error(`Insert error for user ${userId}:`, error.message);
-      } else {
-        totalLines += allLines.length;
+        if (error) {
+          console.error(`Insert error for user ${userId}:`, error.message);
+        } else {
+          totalLines += lines.length;
+        }
       }
     }
 
@@ -201,6 +194,7 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         week_start: weekStart,
+        week_end: weekEnd,
         employees: hourlyEmployees.length,
         lines_synced: totalLines,
       }),
