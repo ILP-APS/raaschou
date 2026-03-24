@@ -255,10 +255,14 @@ serve(async (req) => {
         }
       }
 
-      if (reg.found) {
-        console.log(`User ${userId} has registrations (${reg.totalHours}h), OK`);
+      if (reg.found && reg.totalHours >= expectedHours) {
+        console.log(`User ${userId} has sufficient registrations (${reg.totalHours}h >= ${expectedHours}h), OK`);
         continue;
       }
+
+      // Determine if missing entirely or partial
+      const isMissing = !reg.found || reg.totalHours === 0;
+      const isPartial = reg.found && reg.totalHours > 0 && reg.totalHours < expectedHours;
 
       // No registration — create case and send SMS
       const { data: existingCase } = await supabase
