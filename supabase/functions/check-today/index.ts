@@ -297,7 +297,12 @@ serve(async (req) => {
       }
 
       const name = firstName(emp.employee_name || "");
-      const message = `Hej ${name}, du mangler at registrere dine timer for i dag i e-regnskab. Husk det inden du går hjem.${SMS_SIGNATURE}`;
+      let message: string;
+      if (isMissing) {
+        message = `Hej ${name}, du mangler at registrere dine timer for i dag i e-regnskab. Husk det inden du går hjem.${SMS_SIGNATURE}`;
+      } else {
+        message = `Hej ${name}, du har kun registreret ${reg.totalHours.toFixed(1)} timer i dag, men der forventes ${expectedHours.toFixed(1)} timer. Husk at opdatere i e-regnskab inden du går hjem.${SMS_SIGNATURE}`;
+      }
       const formattedPhone = formatPhone(phone);
 
       const smsStatus = await sendSms(formattedPhone, message, CLOUDTALK_API_ID, CLOUDTALK_API_KEY, CLOUDTALK_SENDER);

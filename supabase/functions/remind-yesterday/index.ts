@@ -149,6 +149,18 @@ serve(async (req) => {
 
     console.log(`remind-yesterday running for ${yesterdayStr}, type=${reminderType}`);
 
+    // Get custom schedules for hours comparison
+    const { data: customSchedules } = await supabase.from("employee_work_schedules").select("*");
+    const scheduleMap = new Map<number, any>();
+    if (customSchedules) {
+      for (const s of customSchedules) scheduleMap.set(s.hn_user_id, s);
+    }
+
+    const DAY_COLUMNS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    const DEFAULT_HOURS: Record<string, number> = {
+      monday: 7.5, tuesday: 7.5, wednesday: 7.5, thursday: 7.5, friday: 7.0, saturday: 0, sunday: 0,
+    };
+
     // Get open cases from yesterday
     const { data: openCases, error: casesError } = await supabase
       .from("sms_reminder_cases")
@@ -187,8 +199,15 @@ serve(async (req) => {
 
       const reg = await checkRegistrations(c.hn_user_id, yesterdayStr, EREGNSKAB_API_KEY);
 
-      if (reg.found) {
-        // Resolve case
+      // Determine expected hours for the case's date
+      const caseDate = new Date(c.missing_date);
+      const caseDayOfWeek = caseDate.getDay();
+      const caseDayCol = DAY_COLUMNS[caseDayOfWeek];
+      const caseSchedule = scheduleMap.get(c.hn_user_id);
+      const expectedHours = caseSchedule ? (caseSchedule[caseDayCol] ?? DEFAULT_HOURS[caseDayCol]) : (DEFAULT_HOURS[caseDayCol] ?? 0);
+
+      if (reg.totalHours >= expectedHours) {
+        // Sufficient hours — resolve case
         await supabase.from("sms_reminder_cases").update({
           status: "resolved",
           resolved_at: new Date().toISOString(),
@@ -196,23 +215,32 @@ serve(async (req) => {
           resolved_after_reminder: reminderType === "next_morning" ? "same_day" : "next_morning",
         }).eq("id", c.id);
         resolved++;
-        console.log(`Case ${c.id} resolved (user ${c.hn_user_id})`);
+        console.log(`Case ${c.id} resolved (user ${c.hn_user_id}, ${reg.totalHours}h >= ${expectedHours}h)`);
         continue;
       }
 
-      // Still not registered — send reminder
+      // Insufficient hours — send reminder
       const phone = empData.phone_number;
       if (!phone) { console.error(`No phone for user ${c.hn_user_id}`); continue; }
 
       const name = firstName(empData.employee_name || "");
       const dateFormatted = formatDateDa(yesterdayStr);
       const formattedPhone = formatPhone(phone);
+      const hasPartial = reg.totalHours > 0;
 
       let message: string;
       if (reminderType === "next_morning") {
-        message = `Godmorgen ${name}, du mangler stadig at registrere dine timer for ${dateFormatted} i e-regnskab. Kan du nå det her til morgen?${SMS_SIGNATURE}`;
+        if (hasPartial) {
+          message = `Godmorgen ${name}, du har registreret ${reg.totalHours.toFixed(1)} timer for ${dateFormatted}, men der forventes ${expectedHours.toFixed(1)}. Kan du opdatere i e-regnskab?${SMS_SIGNATURE}`;
+        } else {
+          message = `Godmorgen ${name}, du mangler stadig at registrere dine timer for ${dateFormatted} i e-regnskab. Kan du nå det her til morgen?${SMS_SIGNATURE}`;
+        }
       } else {
-        message = `Hej ${name}, bare en påmindelse — der mangler stadig timeregistrering for ${dateFormatted} i e-regnskab.${SMS_SIGNATURE}`;
+        if (hasPartial) {
+          message = `Hej ${name}, du har kun ${reg.totalHours.toFixed(1)} af ${expectedHours.toFixed(1)} timer registreret for ${dateFormatted}. Husk at opdatere i e-regnskab.${SMS_SIGNATURE}`;
+        } else {
+          message = `Hej ${name}, bare en påmindelse — der mangler stadig timeregistrering for ${dateFormatted} i e-regnskab.${SMS_SIGNATURE}`;
+        }
       }
 
       const smsStatus = await sendSms(formattedPhone, message, CLOUDTALK_API_ID, CLOUDTALK_API_KEY, CLOUDTALK_SENDER);
