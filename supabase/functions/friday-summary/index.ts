@@ -238,7 +238,12 @@ serve(async (req) => {
       const stillOpen: typeof weekCases = [];
       for (const c of weekCases) {
         const reg = await checkRegistrations(userId, c.missing_date, EREGNSKAB_API_KEY);
-        if (reg.found) {
+        // Determine expected hours for this case's day
+        const caseDate = new Date(c.missing_date);
+        const caseDayCol = DAY_COLUMNS[caseDate.getDay()];
+        const caseExpected = schedule ? (schedule[caseDayCol] ?? DEFAULT_HOURS[caseDayCol]) : (DEFAULT_HOURS[caseDayCol] ?? 0);
+
+        if (reg.totalHours >= caseExpected) {
           await supabase.from("sms_reminder_cases").update({
             status: "resolved",
             resolved_at: new Date().toISOString(),
