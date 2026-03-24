@@ -196,11 +196,22 @@ serve(async (req) => {
 
         if (lines.length === 0) continue;
 
-        // Aggregate lines with same key (hn_user_id, date, category, hn_appointment_id)
-        // to avoid "cannot affect row a second time" errors
-        const keyMap = new Map<string, RegLine>();
+        // Separate work/internal lines (have appointment_id, can upsert) from
+        // WorkTime lines (null appointment_id — NULL!=NULL breaks upsert)
+        const workLines: RegLine[] = [];
+        const workTimeLines: RegLine[] = [];
         for (const line of lines) {
-          const key = `${line.hn_user_id}|${line.date}|${line.category}|${line.hn_appointment_id ?? "null"}`;
+          if (line.hn_appointment_id != null) {
+            workLines.push(line);
+          } else {
+            workTimeLines.push(line);
+          }
+        }
+
+        // Aggregate work lines with same key to avoid duplicate-row errors
+        const keyMap = new Map<string, RegLine>();
+        for (const line of workLines) {
+          const key = `${line.hn_user_id}|${line.date}|${line.category}|${line.hn_appointment_id}`;
           const existing = keyMap.get(key);
           if (existing) {
             existing.duration += line.duration;
@@ -208,16 +219,36 @@ serve(async (req) => {
             keyMap.set(key, { ...line });
           }
         }
-        const dedupedLines = Array.from(keyMap.values());
+        const dedupedWorkLines = Array.from(keyMap.values());
 
-        const { error } = await supabase
-          .from("daily_time_registrations")
-          .upsert(dedupedLines, { onConflict: "hn_user_id,date,category,hn_appointment_id" });
+        // Upsert work/internal lines (they have a real appointment_id)
+        if (dedupedWorkLines.length > 0) {
+          const { error } = await supabase
+            .from("daily_time_registrations")
+            .upsert(dedupedWorkLines, { onConflict: "hn_user_id,date,category,hn_appointment_id" });
+          if (error) console.error(`Upsert work error for user ${userId}:`, error.message);
+          else totalLines += dedupedWorkLines.length;
+        }
 
-        if (error) {
-          console.error(`Upsert error for user ${userId}:`, error.message);
-        } else {
-          totalLines += dedupedLines.length;
+        // For WorkTime lines (sickness/vacation/private): delete-then-insert
+        // because NULL appointment_id can't match in unique constraint
+        if (workTimeLines.length > 0) {
+          const categories = [...new Set(workTimeLines.map(l => l.category))];
+          const { error: delError } = await supabase
+            .from("daily_time_registrations")
+            .delete()
+            .eq("hn_user_id", userId)
+            .gte("date", weekStart)
+            .lte("date", weekEnd)
+            .in("category", categories)
+            .is("hn_appointment_id", null);
+          if (delError) console.error(`Delete worktime error for user ${userId}:`, delError.message);
+
+          const { error: insError } = await supabase
+            .from("daily_time_registrations")
+            .insert(workTimeLines);
+          if (insError) console.error(`Insert worktime error for user ${userId}:`, insError.message);
+          else totalLines += workTimeLines.length;
         }
       }
     }
