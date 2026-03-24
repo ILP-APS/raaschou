@@ -199,15 +199,28 @@ serve(async (req) => {
 
         if (lines.length === 0) continue;
 
-        // Upsert to handle both new and existing registrations
+        // Aggregate lines with same key (hn_user_id, date, category, hn_appointment_id)
+        // to avoid "cannot affect row a second time" errors
+        const keyMap = new Map<string, RegLine>();
+        for (const line of lines) {
+          const key = `${line.hn_user_id}|${line.date}|${line.category}|${line.hn_appointment_id ?? "null"}`;
+          const existing = keyMap.get(key);
+          if (existing) {
+            existing.duration += line.duration;
+          } else {
+            keyMap.set(key, { ...line });
+          }
+        }
+        const dedupedLines = Array.from(keyMap.values());
+
         const { error } = await supabase
           .from("daily_time_registrations")
-          .upsert(lines, { onConflict: "hn_user_id,date,category,hn_appointment_id" });
+          .upsert(dedupedLines, { onConflict: "hn_user_id,date,category,hn_appointment_id" });
 
         if (error) {
           console.error(`Upsert error for user ${userId}:`, error.message);
         } else {
-          totalLines += lines.length;
+          totalLines += dedupedLines.length;
         }
       }
     }
