@@ -23,11 +23,16 @@ const CaseOverview: React.FC = () => {
     for (const e of employees) employeeNames.set(e.hn_user_id, e.employee_name);
   }
 
-  // Count SMS per case
+  // Count SMS per case and find latest sent_at
   const smsCountByCase = new Map<string, number>();
+  const smsSentAtByCase = new Map<string, string>();
   if (logs) {
     for (const log of logs) {
       smsCountByCase.set(log.case_id, (smsCountByCase.get(log.case_id) || 0) + 1);
+      const existing = smsSentAtByCase.get(log.case_id);
+      if (!existing || (log.sent_at && log.sent_at > existing)) {
+        if (log.sent_at) smsSentAtByCase.set(log.case_id, log.sent_at);
+      }
     }
   }
 
@@ -69,11 +74,12 @@ const CaseOverview: React.FC = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Medarbejder</TableHead>
-              <TableHead>Dato</TableHead>
+              <TableHead>Dato mangler</TableHead>
               <TableHead>Uge</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Forventet timer</TableHead>
               <TableHead>SMS'er</TableHead>
+              <TableHead>SMS sendt</TableHead>
               <TableHead>Resolved efter</TableHead>
             </TableRow>
           </TableHeader>
@@ -92,6 +98,11 @@ const CaseOverview: React.FC = () => {
                 </TableCell>
                 <TableCell>{c.hours_expected}</TableCell>
                 <TableCell>{smsCountByCase.get(c.id) || 0}</TableCell>
+                <TableCell className="text-muted-foreground text-sm">
+                  {smsSentAtByCase.get(c.id)
+                    ? new Date(smsSentAtByCase.get(c.id)!).toLocaleString("da-DK", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
+                    : "—"}
+                </TableCell>
                 <TableCell className="text-muted-foreground">
                   {c.resolved_after_reminder || "—"}
                 </TableCell>
