@@ -66,12 +66,13 @@ async function fetchAppointmentDetails(
 async function fetchWeekRegistrations(
   hnUserId: number, weekStart: string, weekEnd: string, apiKey: string
 ): Promise<RegLine[]> {
-  // WorkTime endpoints need full week range (mon-sun) for reliable results
+  // All endpoints need full week range (mon-sun) for reliable results
+  // Even /Appointment/*/Line/Work can miss Friday entries with narrow date filtering
   const weekEndSunday = addDays(weekStart, 6);
 
   const [workLines, internalLines, sickness, vacation, privateDays] = await Promise.all([
-    eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEnd}`, apiKey),
-    eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEnd}`, apiKey),
+    eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
+    eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
     eregnskabFetch(`/WorkTime/Sickness?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
     eregnskabFetch(`/WorkTime/Vacation?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
     eregnskabFetch(`/WorkTime/Private?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
