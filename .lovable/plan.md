@@ -1,27 +1,39 @@
 
 
-## Plan: Aktiver SMS-afsendelse i alle tre Edge Functions
+## Plan: "Opdater fra e-regnskab" sync-knap med telefonnummer-fallback
 
-### Hvad sker der
-De tre edge functions (`check-today`, `remind-yesterday`, `friday-summary`) har alle en `sendSms`-funktion hvor de to første linjer er en early-return der forhindrer faktisk SMS-afsendelse. Disse skal fjernes.
+### Hvad ændres
 
-### Sikkerhed mod uønsket afsendelse
-Ingen SMS sendes ved denne ændring alene. Edge functions kører kun når de bliver kaldt af cron-jobbet eller manuelt. Deployment af koden udløser ikke et funktionskald.
+Erstatter "Tilføj medarbejder"-dialogen med en "Opdater fra e-regnskab"-knap. Alle medarbejdere (ikke kun timelønnede) hentes. Nye medarbejdere importeres med `is_active: false`. Eksisterende medarbejdere beholder deres nuværende `is_active`-status.
 
-### Ændringer (3 filer, identisk ændring)
+### Ændringer
 
-I hver af disse filer fjernes de 3 "disabled"-linjer fra `sendSms`:
+**1. `supabase/functions/fetch-hourly-employees/index.ts`** — Hent ALLE medarbejdere
+- Fjern `Timelønnet`-filteret så alle aktive medarbejdere returneres
+- Telefonnummer-fallback: `userInfo?.cellphone || userInfo?.phone || ""`
 
-1. **`supabase/functions/check-today/index.ts`** (linje 77-80)
-2. **`supabase/functions/remind-yesterday/index.ts`** (linje 58-61)  
-3. **`supabase/functions/friday-summary/index.ts`** (linje 78-81)
+**2. `src/features/tidsregistrering/hooks/useEmployees.ts`** — Tilføj `useSyncEmployees` mutation
+- Kalder `fetch-hourly-employees` edge function
+- For **nye** medarbejdere: INSERT med `is_active: false`
+- For **eksisterende** medarbejdere: kun opdater `employee_name` og `phone_number` (is_active røres IKKE)
+- Implementeres med Supabase upsert hvor `is_active` udelades fra upsert-data (DB default er `true`, men vi sætter explicit `false` for nye via en to-trins logik: først hent eksisterende IDs, derefter upsert med korrekt `is_active`)
 
-Fjernes:
-```typescript
-  // SMS DISABLED - re-enable when logic is verified
-  console.log(`[SMS DISABLED] Would send to ${phone}: ${message.substring(0, 80)}...`);
-  return "disabled";
+**3. `src/features/tidsregistrering/components/EmployeeList.tsx`** — Ny UI
+- Erstatter `AddEmployeeDialog` med "Opdater fra e-regnskab"-knap med loading-spinner
+- Fjerner trash-ikon
+- Toggle disabled + advarsel "Mangler telefonnummer" for medarbejdere uden `phone_number`
+
+**4. `src/features/tidsregistrering/components/AddEmployeeDialog.tsx`** — Fjernes
+
+### Upsert-strategi (bevarer is_active)
+
+```text
+1. Hent alle eksisterende hn_user_ids fra sms_automation_employees
+2. For hver medarbejder fra API:
+   - Hvis hn_user_id IKKE findes i DB → insert med is_active: false
+   - Hvis hn_user_id FINDES → update kun employee_name + phone_number
 ```
 
-Funktionen vil herefter gå direkte videre til det eksisterende CloudTalk API-kald.
+### Ingen database-ændringer
+Eksisterende tabelstruktur er tilstrækkelig.
 
