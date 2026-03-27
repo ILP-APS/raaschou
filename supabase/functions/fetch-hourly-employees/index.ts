@@ -41,37 +41,26 @@ serve(async (req) => {
     const EREGNSKAB_API_KEY = Deno.env.get("EREGNSKAB_API_KEY");
     if (!EREGNSKAB_API_KEY) throw new Error("EREGNSKAB_API_KEY is not configured");
 
-    // 1. Get all hourly employees (Timelønnet, active)
-    const workHours = await eregnskabFetch("/WorkTime/WorkHours", EREGNSKAB_API_KEY);
-    if (!workHours || !Array.isArray(workHours)) {
-      throw new Error("Failed to fetch WorkHours");
-    }
-
-    const hourlyEmployees = workHours.filter(
-      (e: any) => e.name === "Timelønnet" && e.to === null
-    );
-
-    // 2. Get all users for names
+    // 1. Get all active employees (not just hourly)
     const users = await eregnskabFetch("/User", EREGNSKAB_API_KEY);
-    const userMap = new Map<number, string>();
-    if (users && Array.isArray(users)) {
-      for (const u of users) {
-        userMap.set(u.hnUserID, u.name || "");
-      }
+    if (!users || !Array.isArray(users)) {
+      throw new Error("Failed to fetch Users");
     }
 
-    // 3. Fetch phone numbers for each hourly employee in parallel
+    // Filter to active users only (no end date)
+    const activeUsers = users.filter((u: any) => u.isActive !== false);
+
+    // 2. Fetch phone numbers for each employee in parallel
     const employeeDetails = await Promise.all(
-      hourlyEmployees.map(async (emp: any) => {
-        const userId = emp.hnUserID;
+      activeUsers.map(async (u: any) => {
+        const userId = u.hnUserID;
         const userInfo = await eregnskabFetch(`/User/Info/${userId}`, EREGNSKAB_API_KEY);
-        const cellphone = userInfo?.cellphone || "";
-        const name = userMap.get(userId) || `User ${userId}`;
+        const phone = userInfo?.cellphone || userInfo?.phone || "";
 
         return {
           hn_user_id: userId,
-          name,
-          cellphone,
+          name: u.name || `User ${userId}`,
+          cellphone: phone,
         };
       })
     );
@@ -79,7 +68,7 @@ serve(async (req) => {
     // Sort by name
     employeeDetails.sort((a, b) => a.name.localeCompare(b.name, "da"));
 
-    console.log(`Fetched ${employeeDetails.length} hourly employees with phone numbers`);
+    console.log(`Fetched ${employeeDetails.length} employees with phone numbers`);
 
     return new Response(JSON.stringify(employeeDetails), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
