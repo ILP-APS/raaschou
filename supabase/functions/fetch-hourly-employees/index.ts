@@ -7,12 +7,21 @@ const corsHeaders = {
 
 const EREGNSKAB_BASE = "https://publicapi.e-regnskab.dk";
 
+function logKeyInfo(label: string, raw: string | undefined) {
+  if (!raw) { console.log(`${label}: NOT SET`); return; }
+  const hasWhitespace = /\s/.test(raw);
+  const hasQuotes = /["']/.test(raw);
+  const prefix = raw.substring(0, 4);
+  console.log(`${label}: length=${raw.length}, prefix="${prefix}...", hasWhitespace=${hasWhitespace}, hasQuotes=${hasQuotes}`);
+}
+
 async function eregnskabFetch(path: string, apiKey: string) {
   const res = await fetch(`${EREGNSKAB_BASE}${path}`, {
     headers: { accept: "application/json", ApiKey: apiKey },
   });
   if (!res.ok) {
-    console.error(`e-regnskab ${path} failed [${res.status}]`);
+    const body = await res.text();
+    console.error(`e-regnskab ${path} failed [${res.status}]: ${body}`);
     return null;
   }
   return res.json();
@@ -65,8 +74,14 @@ serve(async (req) => {
   }
 
   try {
-    const apiKey1 = Deno.env.get("EREGNSKAB_API_KEY");
-    const apiKey2 = Deno.env.get("EREGNSKAB_API_KEY_2");
+    const rawKey1 = Deno.env.get("EREGNSKAB_API_KEY");
+    const rawKey2 = Deno.env.get("EREGNSKAB_API_KEY_2");
+
+    logKeyInfo("Konto 1 key", rawKey1);
+    logKeyInfo("Konto 2 key", rawKey2);
+
+    const apiKey1 = rawKey1?.trim();
+    const apiKey2 = rawKey2?.trim();
 
     if (!apiKey1) throw new Error("EREGNSKAB_API_KEY is not configured");
 
