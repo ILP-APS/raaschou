@@ -74,8 +74,14 @@ serve(async (req) => {
   }
 
   try {
-    const apiKey1 = Deno.env.get("EREGNSKAB_API_KEY");
-    const apiKey2 = Deno.env.get("EREGNSKAB_API_KEY_2");
+    const rawKey1 = Deno.env.get("EREGNSKAB_API_KEY");
+    const rawKey2 = Deno.env.get("EREGNSKAB_API_KEY_2");
+
+    logKeyInfo("Konto 1 key", rawKey1);
+    logKeyInfo("Konto 2 key", rawKey2);
+
+    const apiKey1 = rawKey1?.trim();
+    const apiKey2 = rawKey2?.trim();
 
     if (!apiKey1) throw new Error("EREGNSKAB_API_KEY is not configured");
 
