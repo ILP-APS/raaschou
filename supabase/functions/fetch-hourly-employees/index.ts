@@ -7,12 +7,21 @@ const corsHeaders = {
 
 const EREGNSKAB_BASE = "https://publicapi.e-regnskab.dk";
 
+function logKeyInfo(label: string, raw: string | undefined) {
+  if (!raw) { console.log(`${label}: NOT SET`); return; }
+  const hasWhitespace = /\s/.test(raw);
+  const hasQuotes = /["']/.test(raw);
+  const prefix = raw.substring(0, 4);
+  console.log(`${label}: length=${raw.length}, prefix="${prefix}...", hasWhitespace=${hasWhitespace}, hasQuotes=${hasQuotes}`);
+}
+
 async function eregnskabFetch(path: string, apiKey: string) {
   const res = await fetch(`${EREGNSKAB_BASE}${path}`, {
     headers: { accept: "application/json", ApiKey: apiKey },
   });
   if (!res.ok) {
-    console.error(`e-regnskab ${path} failed [${res.status}]`);
+    const body = await res.text();
+    console.error(`e-regnskab ${path} failed [${res.status}]: ${body}`);
     return null;
   }
   return res.json();
