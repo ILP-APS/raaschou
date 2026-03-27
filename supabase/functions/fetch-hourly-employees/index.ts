@@ -18,6 +18,33 @@ async function eregnskabFetch(path: string, apiKey: string) {
   return res.json();
 }
 
+async function fetchEmployeesFromAccount(apiKey: string, accountLabel: string) {
+  const users = await eregnskabFetch("/User", apiKey);
+  if (!users || !Array.isArray(users)) {
+    console.error(`Failed to fetch Users from ${accountLabel}`);
+    return [];
+  }
+
+  const activeUsers = users.filter((u: any) => u.isActive !== false);
+
+  const employeeDetails = await Promise.all(
+    activeUsers.map(async (u: any) => {
+      const userId = u.hnUserID;
+      const userInfo = await eregnskabFetch(`/User/Info/${userId}`, apiKey);
+      const phone = userInfo?.cellphone || userInfo?.phone || "";
+
+      return {
+        hn_user_id: userId,
+        name: u.name || `User ${userId}`,
+        cellphone: phone,
+      };
+    })
+  );
+
+  console.log(`Fetched ${employeeDetails.length} employees from ${accountLabel}`);
+  return employeeDetails;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -38,39 +65,28 @@ serve(async (req) => {
   }
 
   try {
-    const EREGNSKAB_API_KEY = Deno.env.get("EREGNSKAB_API_KEY");
-    if (!EREGNSKAB_API_KEY) throw new Error("EREGNSKAB_API_KEY is not configured");
+    const apiKey1 = Deno.env.get("EREGNSKAB_API_KEY");
+    const apiKey2 = Deno.env.get("EREGNSKAB_API_KEY_2");
 
-    // 1. Get all active employees (not just hourly)
-    const users = await eregnskabFetch("/User", EREGNSKAB_API_KEY);
-    if (!users || !Array.isArray(users)) {
-      throw new Error("Failed to fetch Users");
+    if (!apiKey1) throw new Error("EREGNSKAB_API_KEY is not configured");
+
+    // Build list of accounts to fetch from
+    const fetchTasks: Promise<any[]>[] = [
+      fetchEmployeesFromAccount(apiKey1, "Konto 1"),
+    ];
+    if (apiKey2) {
+      fetchTasks.push(fetchEmployeesFromAccount(apiKey2, "Konto 2"));
     }
 
-    // Filter to active users only (no end date)
-    const activeUsers = users.filter((u: any) => u.isActive !== false);
+    const results = await Promise.all(fetchTasks);
+    const allEmployees = results.flat();
 
-    // 2. Fetch phone numbers for each employee in parallel
-    const employeeDetails = await Promise.all(
-      activeUsers.map(async (u: any) => {
-        const userId = u.hnUserID;
-        const userInfo = await eregnskabFetch(`/User/Info/${userId}`, EREGNSKAB_API_KEY);
-        const phone = userInfo?.cellphone || userInfo?.phone || "";
+    // Sort combined list by name
+    allEmployees.sort((a, b) => a.name.localeCompare(b.name, "da"));
 
-        return {
-          hn_user_id: userId,
-          name: u.name || `User ${userId}`,
-          cellphone: phone,
-        };
-      })
-    );
+    console.log(`Total employees from all accounts: ${allEmployees.length}`);
 
-    // Sort by name
-    employeeDetails.sort((a, b) => a.name.localeCompare(b.name, "da"));
-
-    console.log(`Fetched ${employeeDetails.length} employees with phone numbers`);
-
-    return new Response(JSON.stringify(employeeDetails), {
+    return new Response(JSON.stringify(allEmployees), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
