@@ -53,30 +53,59 @@ export function useToggleEmployeeActive() {
   });
 }
 
-export function useAddEmployee() {
+export function useSyncEmployees() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (employee: Omit<AutomationEmployee, "added_at">) => {
-      const { error } = await supabase
-        .from("sms_automation_employees")
-        .upsert(employee, { onConflict: "hn_user_id" });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sms-automation-employees"] });
-    },
-  });
-}
+    mutationFn: async () => {
+      // 1. Fetch all employees from e-regnskab
+      const { data: apiEmployees, error: fetchError } = await supabase.functions.invoke("fetch-hourly-employees");
+      if (fetchError) throw fetchError;
+      if (!apiEmployees || !Array.isArray(apiEmployees)) throw new Error("Invalid response");
 
-export function useRemoveEmployee() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (hn_user_id: number) => {
-      const { error } = await supabase
+      // 2. Get existing hn_user_ids from DB
+      const { data: existing, error: dbError } = await supabase
         .from("sms_automation_employees")
-        .delete()
-        .eq("hn_user_id", hn_user_id);
-      if (error) throw error;
+        .select("hn_user_id");
+      if (dbError) throw dbError;
+      const existingIds = new Set((existing || []).map((e: any) => e.hn_user_id));
+
+      // 3. Split into new vs existing
+      const newEmployees = apiEmployees.filter((e: any) => !existingIds.has(e.hn_user_id));
+      const existingEmployees = apiEmployees.filter((e: any) => existingIds.has(e.hn_user_id));
+
+      // 4. Insert new employees with is_active: false
+      if (newEmployees.length > 0) {
+        const { error: insertError } = await supabase
+          .from("sms_automation_employees")
+          .insert(
+            newEmployees.map((e: any) => {
+              const phone = e.cellphone
+                ? (e.cellphone.startsWith("+45") ? e.cellphone : `+45${e.cellphone.replace(/\D/g, "")}`)
+                : "";
+              return {
+                hn_user_id: e.hn_user_id,
+                employee_name: e.name,
+                phone_number: phone,
+                is_active: false,
+              };
+            })
+          );
+        if (insertError) throw insertError;
+      }
+
+      // 5. Update existing employees (name + phone only, NOT is_active)
+      for (const e of existingEmployees) {
+        const phone = e.cellphone
+          ? (e.cellphone.startsWith("+45") ? e.cellphone : `+45${e.cellphone.replace(/\D/g, "")}`)
+          : "";
+        const { error: updateError } = await supabase
+          .from("sms_automation_employees")
+          .update({ employee_name: e.name, phone_number: phone })
+          .eq("hn_user_id", e.hn_user_id);
+        if (updateError) throw updateError;
+      }
+
+      return { added: newEmployees.length, updated: existingEmployees.length };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sms-automation-employees"] });
