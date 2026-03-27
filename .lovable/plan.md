@@ -1,39 +1,27 @@
 
 
-## Plan: "Opdater fra e-regnskab" sync-knap med telefonnummer-fallback
+## Plan: Hent medarbejdere fra to e-regnskab konti
 
 ### Hvad ændres
 
-Erstatter "Tilføj medarbejder"-dialogen med en "Opdater fra e-regnskab"-knap. Alle medarbejdere (ikke kun timelønnede) hentes. Nye medarbejdere importeres med `is_active: false`. Eksisterende medarbejdere beholder deres nuværende `is_active`-status.
+Edge function `fetch-hourly-employees` udvides til at hente medarbejdere fra **begge** e-regnskab konti parallelt og returnere én samlet liste. Ingen ændringer i frontend eller database.
 
-### Ændringer
+### Trin
 
-**1. `supabase/functions/fetch-hourly-employees/index.ts`** — Hent ALLE medarbejdere
-- Fjern `Timelønnet`-filteret så alle aktive medarbejdere returneres
-- Telefonnummer-fallback: `userInfo?.cellphone || userInfo?.phone || ""`
+**1. Tilføj secret `EREGNSKAB_API_KEY_2`**
+- Gem den nye API-nøgle som Supabase secret
 
-**2. `src/features/tidsregistrering/hooks/useEmployees.ts`** — Tilføj `useSyncEmployees` mutation
-- Kalder `fetch-hourly-employees` edge function
-- For **nye** medarbejdere: INSERT med `is_active: false`
-- For **eksisterende** medarbejdere: kun opdater `employee_name` og `phone_number` (is_active røres IKKE)
-- Implementeres med Supabase upsert hvor `is_active` udelades fra upsert-data (DB default er `true`, men vi sætter explicit `false` for nye via en to-trins logik: først hent eksisterende IDs, derefter upsert med korrekt `is_active`)
+**2. Opdater `supabase/functions/fetch-hourly-employees/index.ts`**
+- Læs `EREGNSKAB_API_KEY_2` fra env (fejl IKKE hvis den mangler — gør den optional så det ikke bryder noget hvis den ikke er sat)
+- Hent `/User` fra begge konti parallelt med `Promise.all`
+- For hver konto: filtrer aktive brugere, hent telefonnumre via `/User/Info/{id}`
+- Merge begge lister til én, sorter samlet efter navn
+- Da der ikke er overlap, er der ingen deduplikerings-logik nødvendig
 
-**3. `src/features/tidsregistrering/components/EmployeeList.tsx`** — Ny UI
-- Erstatter `AddEmployeeDialog` med "Opdater fra e-regnskab"-knap med loading-spinner
-- Fjerner trash-ikon
-- Toggle disabled + advarsel "Mangler telefonnummer" for medarbejdere uden `phone_number`
+**3. Deploy edge function**
 
-**4. `src/features/tidsregistrering/components/AddEmployeeDialog.tsx`** — Fjernes
-
-### Upsert-strategi (bevarer is_active)
-
-```text
-1. Hent alle eksisterende hn_user_ids fra sms_automation_employees
-2. For hver medarbejder fra API:
-   - Hvis hn_user_id IKKE findes i DB → insert med is_active: false
-   - Hvis hn_user_id FINDES → update kun employee_name + phone_number
-```
-
-### Ingen database-ændringer
-Eksisterende tabelstruktur er tilstrækkelig.
+### Ingen andre ændringer
+- Frontend (`EmployeeList`, `useEmployees`) kalder allerede `fetch-hourly-employees` og upsert'er resultatet — dette virker uændret
+- Database `sms_automation_employees` kræver ingen ændringer
+- `useSyncEmployees` håndterer allerede nye vs eksisterende medarbejdere korrekt
 
