@@ -1,27 +1,44 @@
 
 
-## Plan: Tilføj debug-logging til fetch-hourly-employees
+## Plan: Opdater cron-jobs til sommertid (CEST/UTC+2)
 
-### Problem
-API-nøgle 2 virker i Swagger (inkl. datahentning), men fejler med 401 i edge function. Da koden behandler begge nøgler identisk, peger det på et problem med selve secret-værdien (skjulte tegn, whitespace, quotes).
+### Baggrund
+Danmark skiftede til sommertid den 29. marts. Migrationen indeholder allerede kommentarer med de korrekte sommertid-værdier.
 
 ### Ændring
 
-**`supabase/functions/fetch-hourly-employees/index.ts`**
+**Ny migration** — Opdaterer alle 4 cron-jobs:
 
-1. Log nøgle-metadata (IKKE selve nøglen) for debugging:
-   - Længde af hver nøgle
-   - Første 4 tegn (maskeret)
-   - Om den indeholder whitespace, newlines eller quotes
-2. Log den fulde response body ved fejl (ikke kun statuskode)
-3. Trim nøglerne med `.trim()` før brug for at fjerne evt. whitespace/newlines
+```sql
+-- Sommertid-rettelse (CEST/UTC+2) fra 29. marts 2026
 
-### Eksempel på debug-output
-```text
-Konto 2 key info: length=36, prefix="abc1...", hasWhitespace=true
-e-regnskab /User failed [401]: "Invalid API key"
+SELECT cron.unschedule('check-today-mon-thu');
+SELECT cron.unschedule('remind-yesterday-morning');
+SELECT cron.unschedule('remind-yesterday-midday');
+SELECT cron.unschedule('friday-summary');
+
+-- check-today: 15:10 dansk tid = 13:10 UTC (sommertid)
+SELECT cron.schedule('check-today-mon-thu', '10 13 * * 1-4', ...);
+
+-- remind-yesterday morgen: 07:00 dansk tid = 05:00 UTC
+SELECT cron.schedule('remind-yesterday-morning', '0 5 * * 2-5', ...);
+
+-- remind-yesterday middag: 11:50 dansk tid = 09:50 UTC
+SELECT cron.schedule('remind-yesterday-midday', '50 9 * * 2-5', ...);
+
+-- friday-summary: 14:40 dansk tid = 12:40 UTC
+SELECT cron.schedule('friday-summary', '40 12 * * 5', ...);
 ```
 
-### Deploy
-Edge function deployes automatisk. Herefter trykker du "Opdater fra e-regnskab" igen, og vi tjekker logs.
+Selve `net.http_post`-kaldene forbliver identiske — kun schedule-strengen ændres.
+
+| Job | Vintertid (UTC) | Sommertid (UTC) | Dansk tid |
+|-----|----------------|-----------------|-----------|
+| check-today | 14:10 | **13:10** | 15:10 |
+| remind-yesterday morgen | 06:00 | **05:00** | 07:00 |
+| remind-yesterday middag | 10:50 | **09:50** | 11:50 |
+| friday-summary | 13:40 | **12:40** | 14:40 |
+
+### Ingen andre ændringer
+Ingen kode- eller frontend-ændringer.
 
