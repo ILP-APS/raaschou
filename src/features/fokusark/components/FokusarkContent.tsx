@@ -6,10 +6,13 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import FokusarkDescription from "./FokusarkDescription";
 import ProjectsTable from "./ProjectsTable";
+import { useSettings } from "../hooks/useSettings";
+import { SettingsPanel } from "./SettingsPanel";
 
 const FokusarkContent: React.FC = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
+  const { settings, updateSetting } = useSettings();
 
   const handleUpdate = async () => {
     if (isUpdating) return;
@@ -38,6 +41,7 @@ const FokusarkContent: React.FC = () => {
               <><RefreshCw className="h-4 w-4" />Opdater fra e-regnskab</>
             )}
           </Button>
+          <SettingsPanel settings={settings} onUpdateSetting={updateSetting} />
         </div>
         <FokusarkDescription />
       </div>
