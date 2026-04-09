@@ -19,6 +19,12 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({ refreshKey }) => {
   const { state } = useSidebar();
   const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(new Set());
 
+  useEffect(() => {
+    if (refreshKey && refreshKey > 0) {
+      fetchProjects();
+    }
+  }, [refreshKey]);
+
   const projectHierarchies = useMemo(() => {
       const hierarchies = parseProjectHierarchy(projects);
       return hierarchies.map(hierarchy => ({
