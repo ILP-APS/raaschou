@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useProjects } from "../hooks/useProjects";
 import { useHoldScroll } from "@/hooks/useHoldScroll";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -9,8 +9,12 @@ import { ProjectsTableRow } from "./ProjectsTableRow";
 import { Project } from "../types/project";
 import { parseProjectHierarchy, flattenHierarchy, ProjectHierarchy } from "../utils/projectHierarchy";
 
-const ProjectsTable: React.FC = () => {
-  const { projects, loading, updateCompletionPercentage, updateManualAssemblyAmount, updateManualSubcontractorAmount } = useProjects();
+interface ProjectsTableProps {
+  refreshKey?: number;
+}
+
+const ProjectsTable: React.FC<ProjectsTableProps> = ({ refreshKey }) => {
+  const { projects, loading, fetchProjects, updateCompletionPercentage, updateManualAssemblyAmount, updateManualSubcontractorAmount } = useProjects();
   const { containerRef, isDragging, handleMouseDown } = useHoldScroll();
   const { state } = useSidebar();
   const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(new Set());

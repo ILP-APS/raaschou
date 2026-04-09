@@ -8,13 +8,12 @@ import FokusarkDescription from "./FokusarkDescription";
 import ProjectsTable from "./ProjectsTable";
 import { useSettings } from "../hooks/useSettings";
 import { SettingsPanel } from "./SettingsPanel";
-import { useProjects } from "../hooks/useProjects";
 
 const FokusarkContent: React.FC = () => {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
   const { settings, updateSetting } = useSettings();
-  const { fetchProjects } = useProjects();
 
   const handleUpdate = async () => {
     if (isUpdating) return;
@@ -45,13 +44,13 @@ const FokusarkContent: React.FC = () => {
           </Button>
           <SettingsPanel settings={settings} onUpdateSetting={async (key, value) => {
             await updateSetting(key, value);
-            fetchProjects();
+            setRefreshKey((k) => k + 1);
           }} />
         </div>
         <FokusarkDescription />
       </div>
       <div className="flex-1">
-        <ProjectsTable />
+        <ProjectsTable refreshKey={refreshKey} />
       </div>
     </div>
   );
