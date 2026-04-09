@@ -18,13 +18,17 @@ const ProjectsTable: React.FC = () => {
   const { state } = useSidebar();
   const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(new Set());
 
+  const calculatedProjects = useMemo(() => {
+    return calculateAllProjects(projects, settings);
+  }, [projects, settings]);
+
   const projectHierarchies = useMemo(() => {
-    const hierarchies = parseProjectHierarchy(projects);
+    const hierarchies = parseProjectHierarchy(calculatedProjects);
     return hierarchies.map(hierarchy => ({
       ...hierarchy,
       isExpanded: !collapsedProjects.has(hierarchy.parent.id)
     }));
-  }, [projects, collapsedProjects]);
+  }, [calculatedProjects, collapsedProjects]);
 
   const displayProjects = useMemo(() => {
     return flattenHierarchy(projectHierarchies);
