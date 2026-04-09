@@ -2,6 +2,8 @@ import React, { useMemo, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Eye, EyeOff } from "lucide-react";
 import { getWeekDays, getExpectedHours, formatDateStr, type WeekRange } from "../utils/weekUtils";
 import { format } from "date-fns";
 import { da } from "date-fns/locale";
@@ -9,6 +11,7 @@ import DayCell from "./DayCell";
 import DeviationBadge from "./DeviationBadge";
 import EmployeeDetailSheet from "./EmployeeDetailSheet";
 import type { DayRegistration, EmployeeInfo } from "../hooks/useWeekData";
+import type { HiddenFilter } from "../hooks/useHiddenEmployees";
 
 const ABSENCE_CATS = new Set(["sickness", "vacation", "private"]);
 
@@ -17,9 +20,17 @@ interface Props {
   registrations: DayRegistration[];
   schedules: any[];
   weekRange: WeekRange;
+  activeFilter: HiddenFilter | null;
+  showHidden: boolean;
+  isHidden: (hn_user_id: number, filter: HiddenFilter) => boolean;
+  onHide: (params: { hn_user_id: number; filter: HiddenFilter }) => void;
+  onUnhide: (params: { hn_user_id: number; filter: HiddenFilter }) => void;
 }
 
-const WeekOverviewTable: React.FC<Props> = ({ employees, registrations, schedules, weekRange }) => {
+const WeekOverviewTable: React.FC<Props> = ({
+  employees, registrations, schedules, weekRange,
+  activeFilter, showHidden, isHidden, onHide, onUnhide,
+}) => {
   const [onlyDeviations, setOnlyDeviations] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeInfo | null>(null);
 
@@ -90,40 +101,65 @@ const WeekOverviewTable: React.FC<Props> = ({ employees, registrations, schedule
               <TableHead className="text-center">Total</TableHead>
               <TableHead className="text-center">Forventet</TableHead>
               <TableHead className="text-center">Afvigelse</TableHead>
+              {activeFilter && <TableHead className="w-[40px]" />}
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredRows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={activeFilter ? 9 : 8} className="text-center text-muted-foreground py-8">
                   {onlyDeviations ? "Ingen afvigelser denne uge 🎉" : "Ingen data"}
                 </TableCell>
               </TableRow>
             ) : (
-              filteredRows.map(({ emp, daySummaries, totalRegistered, totalExpected }) => (
-                <TableRow
-                  key={emp.hn_user_id}
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => setSelectedEmployee(emp)}
-                >
-                  <TableCell className="font-medium">{emp.employee_name}</TableCell>
-                  {daySummaries.map((ds) => (
-                    <TableCell key={ds.dateStr} className="p-1 text-center">
-                      <DayCell
-                        registered={ds.registered}
-                        expected={ds.expected}
-                        categories={ds.categories}
-                        hasAbsence={ds.hasAbsence}
-                      />
+              filteredRows.map(({ emp, daySummaries, totalRegistered, totalExpected }) => {
+                const hidden = activeFilter ? isHidden(emp.hn_user_id, activeFilter) : false;
+
+                return (
+                  <TableRow
+                    key={emp.hn_user_id}
+                    className={`cursor-pointer hover:bg-muted/50 ${hidden ? "opacity-50" : ""}`}
+                    onClick={() => setSelectedEmployee(emp)}
+                  >
+                    <TableCell className="font-medium">{emp.employee_name}</TableCell>
+                    {daySummaries.map((ds) => (
+                      <TableCell key={ds.dateStr} className="p-1 text-center">
+                        <DayCell
+                          registered={ds.registered}
+                          expected={ds.expected}
+                          categories={ds.categories}
+                          hasAbsence={ds.hasAbsence}
+                        />
+                      </TableCell>
+                    ))}
+                    <TableCell className="text-center font-medium">{totalRegistered.toFixed(1)}</TableCell>
+                    <TableCell className="text-center text-muted-foreground">{totalExpected.toFixed(1)}</TableCell>
+                    <TableCell className="text-center">
+                      <DeviationBadge total={totalRegistered} expected={totalExpected} />
                     </TableCell>
-                  ))}
-                  <TableCell className="text-center font-medium">{totalRegistered.toFixed(1)}</TableCell>
-                  <TableCell className="text-center text-muted-foreground">{totalExpected.toFixed(1)}</TableCell>
-                  <TableCell className="text-center">
-                    <DeviationBadge total={totalRegistered} expected={totalExpected} />
-                  </TableCell>
-                </TableRow>
-              ))
+                    {activeFilter && (
+                      <TableCell className="p-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          title={hidden ? "Vis igen" : "Skjul"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (hidden) {
+                              onUnhide({ hn_user_id: emp.hn_user_id, filter: activeFilter });
+                            } else {
+                              onHide({ hn_user_id: emp.hn_user_id, filter: activeFilter });
+                            }
+                          }}
+                        >
+                          {hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4 opacity-40" />}
+                        </Button>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
