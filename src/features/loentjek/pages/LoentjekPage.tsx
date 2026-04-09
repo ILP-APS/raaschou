@@ -9,24 +9,36 @@ import WeekOverviewTable from "../components/WeekOverviewTable";
 import ScheduleDialog from "../components/ScheduleDialog";
 import AccountFilter, { type AccountFilterValue } from "@/components/AccountFilter";
 import { useWeekData } from "../hooks/useWeekData";
+import { useHiddenEmployees, type HiddenFilter } from "../hooks/useHiddenEmployees";
 import { getCurrentWeekRange, shiftWeek, formatDateStr } from "../utils/weekUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export default function LoentjekPage() {
   const [weekRange, setWeekRange] = useState(getCurrentWeekRange);
   const [syncing, setSyncing] = useState(false);
   const [accountFilter, setAccountFilter] = useState<AccountFilterValue>("alle");
+  const [showHidden, setShowHidden] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { employees, registrations, schedules, isLoading } = useWeekData(weekRange);
+  const { isHidden, hiddenCountForFilter, hide, unhide } = useHiddenEmployees();
+
+  const activeFilter = accountFilter !== "alle" ? (accountFilter as HiddenFilter) : null;
+  const hiddenCount = activeFilter ? hiddenCountForFilter(activeFilter) : 0;
 
   const filteredEmployees = employees.filter((emp) => {
     if (accountFilter === "alle") return true;
-    if (accountFilter === "inventar") return emp.accounts.includes("Konto 1");
-    if (accountFilter === "byg") return emp.accounts.includes("Konto 2");
+    if (accountFilter === "inventar" && !emp.accounts.includes("Konto 1")) return false;
+    if (accountFilter === "byg" && !emp.accounts.includes("Konto 2")) return false;
+
+    // Apply hidden filter
+    if (activeFilter && !showHidden && isHidden(emp.hn_user_id, activeFilter)) return false;
+
     return true;
   });
 
@@ -64,6 +76,18 @@ export default function LoentjekPage() {
                   onNext={() => setWeekRange((w) => shiftWeek(w, 1))}
                 />
                 <AccountFilter value={accountFilter} onChange={setAccountFilter} />
+                {activeFilter && hiddenCount > 0 && (
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="show-hidden"
+                      checked={showHidden}
+                      onCheckedChange={setShowHidden}
+                    />
+                    <Label htmlFor="show-hidden" className="text-sm text-muted-foreground">
+                      Vis skjulte ({hiddenCount})
+                    </Label>
+                  </div>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
@@ -83,6 +107,11 @@ export default function LoentjekPage() {
                   registrations={registrations}
                   schedules={schedules}
                   weekRange={weekRange}
+                  activeFilter={activeFilter}
+                  showHidden={showHidden}
+                  isHidden={isHidden}
+                  onHide={hide}
+                  onUnhide={unhide}
                 />
               )}
             </div>
