@@ -236,8 +236,9 @@ serve(async (req) => {
 
     for (let i = 0; i < employeeIds.length; i += 5) {
       const batch = employeeIds.slice(i, i + 5);
+      const apiKeys = [EREGNSKAB_API_KEY, ...(EREGNSKAB_API_KEY_2 ? [EREGNSKAB_API_KEY_2] : [])];
       const batchResults = await Promise.all(
-        batch.map((userId) => fetchWeekRegistrations(userId, weekStart, weekEnd, EREGNSKAB_API_KEY))
+        batch.map((userId) => fetchWeekRegistrations(userId, weekStart, weekEnd, apiKeys))
       );
 
       for (let j = 0; j < batch.length; j++) {
