@@ -1,13 +1,19 @@
 project_id = "femtmeufuuwrwachkjux"
 
 [functions.sync-eregnskab]
-verify_jwt = false
+verify_jwt = true
 
 [functions.fetch-appointments]
-verify_jwt = false
+verify_jwt = true
 
 [functions.fetch-categories]
-verify_jwt = false
+verify_jwt = true
+
+[functions.fetch-hourly-employees]
+verify_jwt = true
+
+[functions.fetch-user-by-id]
+verify_jwt = true
 
 [functions.check-today]
 verify_jwt = false
@@ -16,9 +22,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.friday-summary]
-verify_jwt = false
-
-[functions.fetch-hourly-employees]
 verify_jwt = false
 
 [functions.sync-registrations]
