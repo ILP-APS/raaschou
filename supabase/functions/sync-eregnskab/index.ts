@@ -78,8 +78,27 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // 0. Fetch calculation settings
+    const { data: settingsRows, error: settingsError } = await supabase
+      .from("settings")
+      .select("key, value");
+    if (settingsError) throw new Error("Failed to fetch settings: " + settingsError.message);
+
+    const settingsMap: Record<string, number> = {};
+    for (const row of settingsRows || []) {
+      settingsMap[row.key] = Number(row.value);
+    }
+    const S = {
+      material_share: settingsMap.material_share ?? 0.25,
+      average_hourly_rate: settingsMap.average_hourly_rate ?? 750,
+      assembly_hourly_rate: settingsMap.assembly_hourly_rate ?? 630,
+      projecting_share: settingsMap.projecting_share ?? 0.10,
+      projecting_hourly_rate: settingsMap.projecting_hourly_rate ?? 830,
+      freight_share: settingsMap.freight_share ?? 0.08,
+    };
+    console.log("Settings loaded:", S);
+
     // 1. Fetch all data in parallel
-    // Calculate date 24 months back for filtering
     const now = new Date();
     const fromDate = new Date(now.getFullYear() - 2, now.getMonth(), now.getDate());
     const fromDateStr = fromDate.toISOString().split('T')[0];
@@ -147,6 +166,28 @@ serve(async (req) => {
 
     console.log(`Offer line items grouped for ${offerByAppointment.size} open appointments`);
 
+    // Fetch existing manual values (these are user-entered and must be preserved)
+    const { data: existingManualData } = await supabase
+      .from("projects")
+      .select("id, manual_assembly_amount, manual_subcontractor_amount, completion_percentage_manual, completion_percentage_previous");
+
+    const manualDataMap = new Map<string, {
+      manual_assembly_amount: number | null;
+      manual_subcontractor_amount: number | null;
+      completion_percentage_manual: number | null;
+      completion_percentage_previous: number | null;
+    }>();
+    if (existingManualData) {
+      for (const row of existingManualData) {
+        manualDataMap.set(row.id, {
+          manual_assembly_amount: row.manual_assembly_amount,
+          manual_subcontractor_amount: row.manual_subcontractor_amount,
+          completion_percentage_manual: row.completion_percentage_manual,
+          completion_percentage_previous: row.completion_percentage_previous,
+        });
+      }
+    }
+
     const nowISO = new Date().toISOString();
     const isSubAppointment = (id: string) => /^\d+-\d+$/.test(id);
 
@@ -158,25 +199,53 @@ serve(async (req) => {
       const initials = userMap.get(apt.responsibleHnUserID) || `${apt.responsibleHnUserID}`;
       const appointmentNumber = String(apt.appointmentNumber);
 
+      // Get existing manual values for this project
+      const manual = manualDataMap.get(appointmentNumber);
+
+      // Effective values: manual override ?? API value ?? 0
+      const D = offerData.total;
+      const E = manual?.manual_assembly_amount ?? offerData.assembly ?? 0;
+      const F = manual?.manual_subcontractor_amount ?? offerData.subcontractor ?? 0;
+      const K = hours.projektering;
+      const M = hours.montage;
+      const N = hours.total;
+      const Q = manual?.completion_percentage_manual ?? 0;
+
+      // Calculated columns
+      const G = (D - E - F) * S.material_share;
+      const H = (D - E) * S.projecting_share / S.projecting_hourly_rate;
+      const I_val = (D - E - G - F) / S.average_hourly_rate - H;
+      const J = (E - E * S.freight_share) / S.assembly_hourly_rate;
+      const L = N - M - K;
+      const O_val = H - K;
+      const P = I_val - L;
+      const S_val = I_val * Q;
+      const T = -L + S_val;
+      const U = J - M;
+      const V = S.freight_share * E;
+
       return {
         id: appointmentNumber,
         name: apt.subject || "",
         responsible_person_initials: initials,
-        offer_amount: offerData.total,
+        offer_amount: D,
         assembly_amount: offerData.assembly,
         subcontractor_amount: offerData.subcontractor,
-        hours_used_projecting: hours.projektering,
-        hours_used_production: hours.produktion,
-        hours_used_assembly: hours.montage,
-        materials_amount: 0,
-        hours_estimated_projecting: 0,
-        hours_estimated_production: 0,
-        hours_estimated_assembly: 0,
-        hours_used_total: hours.total,
-        hours_remaining_projecting: 0,
-        hours_remaining_production: 0,
-        hours_remaining_assembly: 0,
-        allocated_freight_amount: 0,
+        hours_used_projecting: K,
+        hours_used_assembly: M,
+        hours_used_total: N,
+        // Calculated fields
+        materials_amount: G,
+        hours_estimated_projecting: H,
+        hours_estimated_production: I_val,
+        hours_estimated_assembly: J,
+        hours_used_production: L,
+        hours_remaining_projecting: O_val,
+        hours_remaining_production: P,
+        hours_estimated_by_completion: S_val,
+        plus_minus_hours: T,
+        hours_remaining_assembly: U,
+        allocated_freight_amount: V,
         last_api_update: nowISO,
         _is_sub: isSubAppointment(appointmentNumber),
       };
@@ -222,7 +291,6 @@ serve(async (req) => {
       const toDelete = existingProjects
         .filter((p) => !validIds.has(p.id))
         .filter((p) => {
-          // Only delete if it was API-synced and doesn't match new criteria
           if (isSubAppointment(p.id)) return false;
           if ((p.offer_amount || 0) <= 0) return true;
           if ((p.offer_amount || 0) < 25000) return true;
