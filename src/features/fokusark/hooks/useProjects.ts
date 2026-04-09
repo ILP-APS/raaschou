@@ -112,5 +112,5 @@ export const useProjects = () => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  return { projects, loading, updateCompletionPercentage, updateManualAssemblyAmount, updateManualSubcontractorAmount };
+  return { projects, loading, fetchProjects, updateCompletionPercentage, updateManualAssemblyAmount, updateManualSubcontractorAmount };
 };
