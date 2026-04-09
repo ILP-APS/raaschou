@@ -30,20 +30,16 @@ async function eregnskabFetch(path: string, apiKey: string) {
   return res.json();
 }
 
-async function fetchItemLinesInChunks(apiKey: string): Promise<any[]> {
+async function fetchOfferLineItems(apiKey: string): Promise<any[]> {
   const allLines: any[] = [];
   const currentYear = new Date().getFullYear();
-  // Use 6-month chunks for recent years to avoid API timeouts
   const chunks: string[] = [];
   for (let year = currentYear; year >= currentYear - 2; year--) {
-    chunks.push(`from=${year}-01-01&to=${year}-06-30`);
-    chunks.push(`from=${year}-07-01&to=${year}-12-31`);
+    chunks.push(`from=${year}-01-01&to=${year}-12-31`);
   }
-  
   const results = await Promise.allSettled(
-    chunks.map(q => eregnskabFetch(`/Appointment/Standard/Line/Item?${q}`, apiKey))
+    chunks.map(q => eregnskabFetch(`/Offer/Standard/Line/Item?${q}`, apiKey))
   );
-  
   for (const r of results) {
     if (r.status === "fulfilled" && r.value) {
       allLines.push(...r.value);
@@ -88,15 +84,15 @@ serve(async (req) => {
     const fromDate = new Date(now.getFullYear() - 2, now.getMonth(), now.getDate());
     const fromDateStr = fromDate.toISOString().split('T')[0];
     console.log(`Fetching data from e-regnskab (from ${fromDateStr})...`);
-    const [appointments, workLines, users, itemLines] = await Promise.all([
+    const [appointments, workLines, users, offerLineItems] = await Promise.all([
       eregnskabFetch(`/Appointment/Standard?open=true&from=${fromDateStr}`, EREGNSKAB_API_KEY),
       eregnskabFetch("/Appointment/Standard/Line/Work", EREGNSKAB_API_KEY),
       eregnskabFetch("/User", EREGNSKAB_API_KEY),
-      fetchItemLinesInChunks(EREGNSKAB_API_KEY),
+      fetchOfferLineItems(EREGNSKAB_API_KEY),
     ]);
 
     if (!appointments) throw new Error("Failed to fetch appointments");
-    console.log(`Fetched ${appointments.length} appointments, ${workLines?.length || 0} work lines, ${itemLines.length} item lines`);
+    console.log(`Fetched ${appointments.length} appointments, ${workLines?.length || 0} work lines, ${offerLineItems.length} offer line items`);
 
     // Build user initials map
     const userMap = new Map<number, string>();
@@ -125,15 +121,31 @@ serve(async (req) => {
       }
     }
 
-    // Group item lines by appointment ID → offer_amount
-    const offerByAppointment = new Map<number, number>();
-    for (const line of itemLines) {
-      const appId = line.hnAppointmentID;
-      if (!appId || !openAppointmentIds.has(appId)) continue;
-      offerByAppointment.set(appId, (offerByAppointment.get(appId) || 0) + (line.totalPriceStandardCurrency || 0));
+    // Build hnOfferID → appointmentID map
+    const offerToAppointment = new Map<number, number>();
+    for (const apt of appointments) {
+      if (apt.hnOfferID) {
+        offerToAppointment.set(apt.hnOfferID, apt.hnAppointmentID);
+      }
     }
 
-    console.log(`Item lines grouped for ${offerByAppointment.size} open appointments`);
+    // Group offer line items by appointment → offer_amount, assembly_amount, subcontractor_amount
+    const offerByAppointment = new Map<number, { total: number; assembly: number; subcontractor: number }>();
+    for (const line of offerLineItems) {
+      const offerID = line.hnOfferID;
+      const appId = offerToAppointment.get(offerID);
+      if (!appId || !openAppointmentIds.has(appId)) continue;
+      if (!offerByAppointment.has(appId)) {
+        offerByAppointment.set(appId, { total: 0, assembly: 0, subcontractor: 0 });
+      }
+      const bucket = offerByAppointment.get(appId)!;
+      const amount = line.totalPriceStandardCurrency || 0;
+      bucket.total += amount;
+      if (line.itemNumber === "Montage") bucket.assembly += amount;
+      if (line.itemNumber === "UE") bucket.subcontractor += amount;
+    }
+
+    console.log(`Offer line items grouped for ${offerByAppointment.size} open appointments`);
 
     const nowISO = new Date().toISOString();
     const isSubAppointment = (id: string) => /^\d+-\d+$/.test(id);
@@ -142,7 +154,7 @@ serve(async (req) => {
     const allProjectRows = appointments.map((apt: any) => {
       const appId = apt.hnAppointmentID;
       const hours = workByAppointment.get(appId) || { projektering: 0, produktion: 0, montage: 0, total: 0 };
-      const offerAmount = offerByAppointment.get(appId) || 0;
+      const offerData = offerByAppointment.get(appId) || { total: 0, assembly: 0, subcontractor: 0 };
       const initials = userMap.get(apt.responsibleHnUserID) || `${apt.responsibleHnUserID}`;
       const appointmentNumber = String(apt.appointmentNumber);
 
@@ -150,9 +162,9 @@ serve(async (req) => {
         id: appointmentNumber,
         name: apt.subject || "",
         responsible_person_initials: initials,
-        offer_amount: offerAmount,
-        assembly_amount: 0,
-        subcontractor_amount: 0,
+        offer_amount: offerData.total,
+        assembly_amount: offerData.assembly,
+        subcontractor_amount: offerData.subcontractor,
         hours_used_projecting: hours.projektering,
         hours_used_production: hours.produktion,
         hours_used_assembly: hours.montage,
@@ -238,7 +250,7 @@ serve(async (req) => {
         success: true,
         appointments_fetched: appointments.length,
         projects_upserted: upserted,
-        item_lines_fetched: itemLines.length,
+        offer_line_items_fetched: offerLineItems.length,
         errors,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
