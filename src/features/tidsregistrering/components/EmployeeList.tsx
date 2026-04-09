@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Settings2, RefreshCw, Loader2, AlertTriangle } from "lucide-react";
 import { useAutomationEmployees, useToggleEmployeeActive, useEmployeeSchedules, useSyncEmployees } from "../hooks/useEmployees";
 import EmployeeScheduleDialog from "./EmployeeScheduleDialog";
+import AccountFilter, { type AccountFilterValue } from "@/components/AccountFilter";
 import { useToast } from "@/hooks/use-toast";
 
 const EmployeeList: React.FC = () => {
@@ -15,11 +16,19 @@ const EmployeeList: React.FC = () => {
   const syncEmployees = useSyncEmployees();
   const { toast } = useToast();
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const [accountFilter, setAccountFilter] = useState<AccountFilterValue>("alle");
 
   const scheduleMap = new Map<number, any>();
   if (schedules) {
     for (const s of schedules) scheduleMap.set(s.hn_user_id, s);
   }
+
+  const filteredEmployees = (employees || []).filter((emp) => {
+    if (accountFilter === "alle") return true;
+    if (accountFilter === "inventar") return (emp.accounts || []).includes("Konto 1");
+    if (accountFilter === "byg") return (emp.accounts || []).includes("Konto 2");
+    return true;
+  });
 
   const handleSync = async () => {
     try {
@@ -55,10 +64,15 @@ const EmployeeList: React.FC = () => {
           )}
           Opdater fra e-regnskab
         </Button>
+        <AccountFilter value={accountFilter} onChange={setAccountFilter} />
       </div>
 
-      {(!employees || employees.length === 0) ? (
-        <p className="text-muted-foreground">Ingen medarbejdere endnu. Tryk "Opdater fra e-regnskab" for at hente medarbejdere.</p>
+      {filteredEmployees.length === 0 ? (
+        <p className="text-muted-foreground">
+          {(!employees || employees.length === 0)
+            ? 'Ingen medarbejdere endnu. Tryk "Opdater fra e-regnskab" for at hente medarbejdere.'
+            : "Ingen medarbejdere matcher det valgte filter."}
+        </p>
       ) : (
         <Table>
           <TableHeader>
@@ -66,13 +80,14 @@ const EmployeeList: React.FC = () => {
               <TableHead>Navn</TableHead>
               <TableHead>hnUserID</TableHead>
               <TableHead>Telefon</TableHead>
+              <TableHead>Konto</TableHead>
               <TableHead>Skema</TableHead>
               <TableHead>Aktiv</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {employees.map((emp) => {
+            {filteredEmployees.map((emp) => {
               const schedule = scheduleMap.get(emp.hn_user_id);
               const hasCustom = !!schedule?.is_custom;
               const missingPhone = !emp.phone_number || emp.phone_number === "" || emp.phone_number === "+45";
@@ -90,6 +105,13 @@ const EmployeeList: React.FC = () => {
                     ) : (
                       emp.phone_number
                     )}
+                  </TableCell>
+                  <TableCell>
+                    {(emp.accounts || []).map((a) => (
+                      <Badge key={a} variant="outline" className="mr-1">
+                        {a === "Konto 1" ? "Inventar" : a === "Konto 2" ? "Byg" : a}
+                      </Badge>
+                    ))}
                   </TableCell>
                   <TableCell>
                     {hasCustom ? (
