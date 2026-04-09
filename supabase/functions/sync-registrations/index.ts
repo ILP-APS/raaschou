@@ -192,7 +192,7 @@ serve(async (req) => {
     }
 
     const weekEnd = addDays(weekStart, 4); // Friday
-    console.log(`sync-registrations: syncing ${weekStart} to ${weekEnd}${filterUserIds ? ` for ${filterUserIds.length} specific users` : " for all hourly employees"}`);
+    console.log(`sync-registrations: syncing ${weekStart} to ${weekEnd}${filterUserIds ? ` for ${filterUserIds.length} specific users` : " for all active employees"}`);
 
     let employeeIds: number[];
 
@@ -206,7 +206,7 @@ serve(async (req) => {
         throw new Error("Failed to fetch WorkHours from e-regnskab");
       }
       employeeIds = workHours
-        .filter((e: any) => e.name === "Timelønnet" && e.to === null)
+        .filter((e: any) => e.to === null && e.name !== "Fratrådt")
         .map((e: any) => e.hnUserID as number);
     }
 
