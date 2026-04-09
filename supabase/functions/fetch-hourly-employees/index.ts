@@ -94,7 +94,15 @@ serve(async (req) => {
     }
 
     const results = await Promise.all(fetchTasks);
-    const allEmployees = results.flat();
+    const merged = results.flat();
+
+    // Deduplicate by hn_user_id (keep first occurrence)
+    const seen = new Set<number>();
+    const allEmployees = merged.filter((e) => {
+      if (seen.has(e.hn_user_id)) return false;
+      seen.add(e.hn_user_id);
+      return true;
+    });
 
     // Sort combined list by name
     allEmployees.sort((a, b) => a.name.localeCompare(b.name, "da"));
