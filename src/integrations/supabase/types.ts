@@ -267,6 +267,7 @@ export type Database = {
       }
       sms_automation_employees: {
         Row: {
+          accounts: string[] | null
           added_at: string | null
           employee_name: string
           hn_user_id: number
@@ -274,6 +275,7 @@ export type Database = {
           phone_number: string
         }
         Insert: {
+          accounts?: string[] | null
           added_at?: string | null
           employee_name: string
           hn_user_id: number
@@ -281,6 +283,7 @@ export type Database = {
           phone_number: string
         }
         Update: {
+          accounts?: string[] | null
           added_at?: string | null
           employee_name?: string
           hn_user_id?: number

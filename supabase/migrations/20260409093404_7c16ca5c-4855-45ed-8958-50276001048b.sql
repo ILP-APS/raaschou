@@ -1,0 +1,1 @@
+ALTER TABLE public.sms_automation_employees ADD COLUMN accounts TEXT[] DEFAULT '{}';
