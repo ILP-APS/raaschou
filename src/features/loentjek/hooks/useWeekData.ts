@@ -15,6 +15,7 @@ export interface DayRegistration {
 export interface EmployeeInfo {
   hn_user_id: number;
   employee_name: string;
+  accounts: string[];
 }
 
 export function useWeekData(weekRange: WeekRange) {
@@ -27,10 +28,11 @@ export function useWeekData(weekRange: WeekRange) {
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("fetch-hourly-employees");
       if (error) throw error;
-      const employees = data as Array<{ hn_user_id: number; name: string; cellphone: string }>;
+      const employees = data as Array<{ hn_user_id: number; name: string; cellphone: string; accounts: string[] }>;
       return employees.map((e) => ({
         hn_user_id: e.hn_user_id,
         employee_name: e.name,
+        accounts: e.accounts || [],
       })) as EmployeeInfo[];
     },
     staleTime: 1000 * 60 * 30, // Cache 30 min — changes rarely

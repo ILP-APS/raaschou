@@ -7,6 +7,7 @@ import LoentjekHeader from "../components/LoentjekHeader";
 import WeekSelector from "../components/WeekSelector";
 import WeekOverviewTable from "../components/WeekOverviewTable";
 import ScheduleDialog from "../components/ScheduleDialog";
+import AccountFilter, { type AccountFilterValue } from "@/components/AccountFilter";
 import { useWeekData } from "../hooks/useWeekData";
 import { getCurrentWeekRange, shiftWeek, formatDateStr } from "../utils/weekUtils";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,10 +17,18 @@ import { useQueryClient } from "@tanstack/react-query";
 export default function LoentjekPage() {
   const [weekRange, setWeekRange] = useState(getCurrentWeekRange);
   const [syncing, setSyncing] = useState(false);
+  const [accountFilter, setAccountFilter] = useState<AccountFilterValue>("alle");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { employees, registrations, schedules, isLoading } = useWeekData(weekRange);
+
+  const filteredEmployees = employees.filter((emp) => {
+    if (accountFilter === "alle") return true;
+    if (accountFilter === "inventar") return emp.accounts.includes("Konto 1");
+    if (accountFilter === "byg") return emp.accounts.includes("Konto 2");
+    return true;
+  });
 
   const handleSync = async () => {
     setSyncing(true);
@@ -54,6 +63,7 @@ export default function LoentjekPage() {
                   onPrev={() => setWeekRange((w) => shiftWeek(w, -1))}
                   onNext={() => setWeekRange((w) => shiftWeek(w, 1))}
                 />
+                <AccountFilter value={accountFilter} onChange={setAccountFilter} />
                 <Button
                   variant="outline"
                   size="sm"
@@ -69,7 +79,7 @@ export default function LoentjekPage() {
                 <p className="text-muted-foreground">Indlæser...</p>
               ) : (
                 <WeekOverviewTable
-                  employees={employees}
+                  employees={filteredEmployees}
                   registrations={registrations}
                   schedules={schedules}
                   weekRange={weekRange}

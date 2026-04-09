@@ -46,6 +46,7 @@ async function fetchEmployeesFromAccount(apiKey: string, accountLabel: string) {
         hn_user_id: userId,
         name: u.name || `User ${userId}`,
         cellphone: phone,
+        account: accountLabel,
       };
     })
   );
@@ -96,13 +97,19 @@ serve(async (req) => {
     const results = await Promise.all(fetchTasks);
     const merged = results.flat();
 
-    // Deduplicate by hn_user_id (keep first occurrence)
-    const seen = new Set<number>();
-    const allEmployees = merged.filter((e) => {
-      if (seen.has(e.hn_user_id)) return false;
-      seen.add(e.hn_user_id);
-      return true;
-    });
+    // Deduplicate by hn_user_id, merge accounts
+    const employeeMap = new Map<number, any>();
+    for (const e of merged) {
+      const existing = employeeMap.get(e.hn_user_id);
+      if (existing) {
+        if (!existing.accounts.includes(e.account)) {
+          existing.accounts.push(e.account);
+        }
+      } else {
+        employeeMap.set(e.hn_user_id, { ...e, accounts: [e.account] });
+      }
+    }
+    const allEmployees = Array.from(employeeMap.values());
 
     // Sort combined list by name
     allEmployees.sort((a, b) => a.name.localeCompare(b.name, "da"));

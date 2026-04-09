@@ -7,6 +7,7 @@ export interface AutomationEmployee {
   phone_number: string;
   is_active: boolean;
   added_at: string;
+  accounts: string[];
 }
 
 export interface EmployeeSchedule {
@@ -87,6 +88,7 @@ export function useSyncEmployees() {
                 employee_name: e.name,
                 phone_number: phone,
                 is_active: false,
+                accounts: e.accounts || [],
               };
             })
           );
@@ -100,7 +102,7 @@ export function useSyncEmployees() {
           : "";
         const { error: updateError } = await supabase
           .from("sms_automation_employees")
-          .update({ employee_name: e.name, phone_number: phone })
+          .update({ employee_name: e.name, phone_number: phone, accounts: e.accounts || [] })
           .eq("hn_user_id", e.hn_user_id);
         if (updateError) throw updateError;
       }
