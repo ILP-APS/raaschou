@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo } from "react";
 import { useProjects } from "../hooks/useProjects";
+import { useSettings } from "../hooks/useSettings";
 import { useHoldScroll } from "@/hooks/useHoldScroll";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Table, TableBody } from "@/components/ui/table";
@@ -8,20 +9,26 @@ import { ProjectsTableHeaders } from "./ProjectsTableHeaders";
 import { ProjectsTableRow } from "./ProjectsTableRow";
 import { Project } from "../types/project";
 import { parseProjectHierarchy, flattenHierarchy, ProjectHierarchy } from "../utils/projectHierarchy";
+import { calculateAllProjects } from "../utils/projectCalculations";
 
 const ProjectsTable: React.FC = () => {
   const { projects, loading, updateCompletionPercentage, updateManualAssemblyAmount, updateManualSubcontractorAmount } = useProjects();
+  const { settings } = useSettings();
   const { containerRef, isDragging, handleMouseDown } = useHoldScroll();
   const { state } = useSidebar();
   const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(new Set());
 
+  const calculatedProjects = useMemo(() => {
+    return calculateAllProjects(projects, settings);
+  }, [projects, settings]);
+
   const projectHierarchies = useMemo(() => {
-    const hierarchies = parseProjectHierarchy(projects);
+    const hierarchies = parseProjectHierarchy(calculatedProjects);
     return hierarchies.map(hierarchy => ({
       ...hierarchy,
       isExpanded: !collapsedProjects.has(hierarchy.parent.id)
     }));
-  }, [projects, collapsedProjects]);
+  }, [calculatedProjects, collapsedProjects]);
 
   const displayProjects = useMemo(() => {
     return flattenHierarchy(projectHierarchies);
