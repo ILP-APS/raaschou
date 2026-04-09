@@ -119,6 +119,27 @@ export type Database = {
         }
         Relationships: []
       }
+      hidden_employees: {
+        Row: {
+          filter: string
+          hidden_at: string | null
+          hn_user_id: number
+          id: string
+        }
+        Insert: {
+          filter: string
+          hidden_at?: string | null
+          hn_user_id: number
+          id?: string
+        }
+        Update: {
+          filter?: string
+          hidden_at?: string | null
+          hn_user_id?: number
+          id?: string
+        }
+        Relationships: []
+      }
       offer_line_items: {
         Row: {
           description: string | null
