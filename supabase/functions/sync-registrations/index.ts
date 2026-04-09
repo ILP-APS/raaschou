@@ -64,76 +64,80 @@ async function fetchAppointmentDetails(
 }
 
 async function fetchWeekRegistrations(
-  hnUserId: number, weekStart: string, weekEnd: string, apiKey: string
+  hnUserId: number, weekStart: string, weekEnd: string, apiKeys: string[]
 ): Promise<RegLine[]> {
-  const weekEndSunday = addDays(weekStart, 6);
+  const allLines: RegLine[] = [];
+  for (const apiKey of apiKeys) {
+    const weekEndSunday = addDays(weekStart, 6);
 
-  const [workLines, internalLines, sickness, vacation, privateDays] = await Promise.all([
-    eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
-    eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
-    eregnskabFetch(`/WorkTime/Sickness?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
-    eregnskabFetch(`/WorkTime/Vacation?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
-    eregnskabFetch(`/WorkTime/Private?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
-  ]);
+    const [workLines, internalLines, sickness, vacation, privateDays] = await Promise.all([
+      eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
+      eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
+      eregnskabFetch(`/WorkTime/Sickness?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
+      eregnskabFetch(`/WorkTime/Vacation?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
+      eregnskabFetch(`/WorkTime/Private?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
+    ]);
 
-  const lines: RegLine[] = [];
+    const lines: RegLine[] = [];
 
-  const addWork = async (arr: any[] | null, category: string) => {
-    if (!arr || !Array.isArray(arr)) return;
-    for (const l of arr) {
-      const dateStr = l.date?.split("T")[0];
-      if (!dateStr) continue;
+    const addWork = async (arr: any[] | null, category: string) => {
+      if (!arr || !Array.isArray(arr)) return;
+      for (const l of arr) {
+        const dateStr = l.date?.split("T")[0];
+        if (!dateStr) continue;
 
-      let appointmentSubject = l.subject || null;
-      let appointmentProject: string | null = null;
+        let appointmentSubject = l.subject || null;
+        let appointmentProject: string | null = null;
 
-      if (category === "work" && l.hnAppointmentID) {
-        const details = await fetchAppointmentDetails(l.hnAppointmentID, apiKey);
-        appointmentSubject = details.subject || appointmentSubject;
-        appointmentProject = details.project;
+        if (category === "work" && l.hnAppointmentID) {
+          const details = await fetchAppointmentDetails(l.hnAppointmentID, apiKey);
+          appointmentSubject = details.subject || appointmentSubject;
+          appointmentProject = details.project;
+        }
+
+        lines.push({
+          hn_user_id: hnUserId,
+          date: dateStr,
+          category,
+          duration: l.units || 0,
+          hn_appointment_id: l.hnAppointmentID || null,
+          appointment_subject: appointmentSubject,
+          appointment_project: appointmentProject,
+          description: l.description || null,
+        });
       }
+    };
 
-      lines.push({
-        hn_user_id: hnUserId,
-        date: dateStr,
-        category,
-        duration: l.units || 0,
-        hn_appointment_id: l.hnAppointmentID || null,
-        appointment_subject: appointmentSubject,
-        appointment_project: appointmentProject,
-        description: l.description || null,
-      });
-    }
-  };
+    await addWork(workLines, "work");
+    await addWork(internalLines, "internal");
 
-  await addWork(workLines, "work");
-  await addWork(internalLines, "internal");
+    const addWorkTime = (arr: any[] | null, category: string) => {
+      if (!arr || !Array.isArray(arr)) return;
+      for (const item of arr) {
+        const dateStr = item.start?.split("T")[0];
+        if (!dateStr) continue;
+        if (dateStr < weekStart || dateStr > weekEnd) continue;
 
-  const addWorkTime = (arr: any[] | null, category: string) => {
-    if (!arr || !Array.isArray(arr)) return;
-    for (const item of arr) {
-      const dateStr = item.start?.split("T")[0];
-      if (!dateStr) continue;
-      if (dateStr < weekStart || dateStr > weekEnd) continue;
+        lines.push({
+          hn_user_id: hnUserId,
+          date: dateStr,
+          category,
+          duration: item.duration || 0,
+          hn_appointment_id: null,
+          appointment_subject: null,
+          appointment_project: null,
+          description: item.description || null,
+        });
+      }
+    };
 
-      lines.push({
-        hn_user_id: hnUserId,
-        date: dateStr,
-        category,
-        duration: item.duration || 0,
-        hn_appointment_id: null,
-        appointment_subject: null,
-        appointment_project: null,
-        description: item.description || null,
-      });
-    }
-  };
+    addWorkTime(sickness, "sickness");
+    addWorkTime(vacation, "vacation");
+    addWorkTime(privateDays, "private");
 
-  addWorkTime(sickness, "sickness");
-  addWorkTime(vacation, "vacation");
-  addWorkTime(privateDays, "private");
-
-  return lines;
+    allLines.push(...lines);
+  }
+  return allLines;
 }
 
 serve(async (req) => {
@@ -169,6 +173,7 @@ serve(async (req) => {
 
   try {
     const EREGNSKAB_API_KEY = Deno.env.get("EREGNSKAB_API_KEY");
+    const EREGNSKAB_API_KEY_2 = Deno.env.get("EREGNSKAB_API_KEY_2")?.trim();
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
@@ -200,14 +205,26 @@ serve(async (req) => {
       // Use provided user IDs directly (called from cron functions)
       employeeIds = filterUserIds;
     } else {
-      // Fetch all hourly employees from e-regnskab (UI-triggered full sync)
-      const workHours = await eregnskabFetch("/WorkTime/WorkHours", EREGNSKAB_API_KEY);
-      if (!workHours || !Array.isArray(workHours)) {
+      // Fetch all active employees from both e-regnskab accounts
+      const workHours1 = await eregnskabFetch("/WorkTime/WorkHours", EREGNSKAB_API_KEY);
+      if (!workHours1 || !Array.isArray(workHours1)) {
         throw new Error("Failed to fetch WorkHours from e-regnskab");
       }
-      employeeIds = workHours
+      const ids1 = workHours1
         .filter((e: any) => e.to === null && e.name !== "Fratrådt")
         .map((e: any) => e.hnUserID as number);
+
+      let ids2: number[] = [];
+      if (EREGNSKAB_API_KEY_2) {
+        const workHours2 = await eregnskabFetch("/WorkTime/WorkHours", EREGNSKAB_API_KEY_2);
+        if (workHours2 && Array.isArray(workHours2)) {
+          ids2 = workHours2
+            .filter((e: any) => e.to === null && e.name !== "Fratrådt")
+            .map((e: any) => e.hnUserID as number);
+        }
+        console.log(`BYG account: ${ids2.length} active employees`);
+      }
+      employeeIds = [...new Set([...ids1, ...ids2])];
     }
 
     console.log(`Syncing ${employeeIds.length} employees`);
@@ -219,8 +236,9 @@ serve(async (req) => {
 
     for (let i = 0; i < employeeIds.length; i += 5) {
       const batch = employeeIds.slice(i, i + 5);
+      const apiKeys = [EREGNSKAB_API_KEY, ...(EREGNSKAB_API_KEY_2 ? [EREGNSKAB_API_KEY_2] : [])];
       const batchResults = await Promise.all(
-        batch.map((userId) => fetchWeekRegistrations(userId, weekStart, weekEnd, EREGNSKAB_API_KEY))
+        batch.map((userId) => fetchWeekRegistrations(userId, weekStart, weekEnd, apiKeys))
       );
 
       for (let j = 0; j < batch.length; j++) {
