@@ -1,0 +1,1 @@
+INSERT INTO public.allowed_emails (email) VALUES ('ume@raaschou.as');
