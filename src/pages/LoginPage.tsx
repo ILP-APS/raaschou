@@ -125,7 +125,7 @@ export default function LoginPage() {
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  maxLength={6}
+                  maxLength={8}
                   placeholder="123456"
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
@@ -134,7 +134,7 @@ export default function LoginPage() {
                   className="text-center text-2xl tracking-widest font-mono"
                 />
               </div>
-              <Button type="submit" className="w-full" variant="blue" disabled={loading || code.length !== 6}>
+              <Button type="submit" className="w-full" variant="blue" disabled={loading || code.length !== 8}>
                 <KeyRound className="mr-2 h-4 w-4" />
                 {loading ? "Verificerer..." : "Log ind"}
               </Button>
