@@ -1,7 +1,7 @@
 project_id = "femtmeufuuwrwachkjux"
 
 [functions.sync-eregnskab]
-verify_jwt = true
+verify_jwt = false
 
 [functions.fetch-appointments]
 verify_jwt = true
