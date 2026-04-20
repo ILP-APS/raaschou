@@ -12,7 +12,7 @@ interface BasicValueCellProps {
 export const BasicValueCell: React.FC<BasicValueCellProps> = ({
   value,
   isNumber = false,
-  className = "text-right border-r",
+  className = "text-right border-r px-2 py-2",
 }) => {
   const formatValue = (value: number | null, isNumber = false): string => {
     if (value === null || value === undefined) return "-";

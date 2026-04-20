@@ -71,7 +71,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({ refreshKey }) => {
         }}
         onMouseDown={handleMouseDown}
       >
-        <Table style={{ minWidth: '2000px', width: 'max-content' }}>
+        <Table style={{ minWidth: '2350px', width: 'max-content', tableLayout: 'fixed' }}>
           <ProjectsTableHeaders />
           <TableBody>
             {displayProjects.map((project: Project, index) => {

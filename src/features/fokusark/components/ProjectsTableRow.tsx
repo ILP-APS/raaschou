@@ -70,7 +70,7 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
       <ConditionalValueCell value={project.plus_minus_hours} />
       
       <ConditionalValueCell value={project.hours_remaining_assembly} />
-      <BasicValueCell value={project.allocated_freight_amount} className="text-right" />
+      <BasicValueCell value={project.allocated_freight_amount} className="text-right px-2 py-2" />
     </TableRow>
   );
 };

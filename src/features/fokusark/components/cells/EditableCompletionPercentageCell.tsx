@@ -17,7 +17,7 @@ export const EditableCompletionPercentageCell: React.FC<EditableCompletionPercen
   isSubProject,
   onUpdate,
 }) => (
-  <TableCell className="text-right border-r">
+  <TableCell className="text-right border-r px-2 py-2">
     {isSubProject ? (
       <div className="p-2 -m-2 text-right">
         {value !== null ? formatDanishNumber(value) + '%' : "-"}

@@ -15,14 +15,15 @@ export const ResponsiblePersonCell: React.FC<ResponsiblePersonCellProps> = ({
 }) => (
   <TableCell 
       className={cn(
-        "sticky z-20 text-center transition-colors",
+        "sticky z-20 text-center transition-colors px-2 py-2",
         rowBgColor,
         "group-hover:bg-green-50"
       )}
     style={{ 
-      left: '450px', 
-      minWidth: '100px', 
-      width: '100px',
+      left: '350px', 
+      minWidth: '80px', 
+      width: '80px',
+      maxWidth: '80px',
       boxShadow: '2px 0 0 0 hsl(var(--border))'
     }}
   >

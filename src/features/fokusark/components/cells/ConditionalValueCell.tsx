@@ -22,7 +22,7 @@ export const ConditionalValueCell: React.FC<ConditionalValueCellProps> = ({
   };
 
   return (
-    <TableCell className={cn("text-right border-r", getConditionalCellClass(value), className)}>
+    <TableCell className={cn("text-right border-r px-2 py-2", getConditionalCellClass(value), className)}>
       {value !== null && value !== undefined ? formatDanishNumber(value) : "-"}
     </TableCell>
   );
