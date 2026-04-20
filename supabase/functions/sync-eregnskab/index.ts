@@ -140,6 +140,36 @@ serve(async (req) => {
       }
     }
 
+    const isSubAppointment = (num: string) => /^\d+-\d+$/.test(num);
+
+    // Map appointmentNumber → hnAppointmentID for parent-lookup.
+    // Only open appointments are in this map; subs whose parent is closed (not in set)
+    // are handled as orphans — frontend already generates a placeholder parent row.
+    const numberToAppointmentId = new Map<string, number>();
+    for (const apt of appointments) {
+      numberToAppointmentId.set(String(apt.appointmentNumber), apt.hnAppointmentID);
+    }
+
+    // Roll sub-hours up into parent when parent is open. Sub's own bucket is untouched
+    // so the sub row can still render its individual hours below.
+    for (const apt of appointments) {
+      const num = String(apt.appointmentNumber);
+      if (!isSubAppointment(num)) continue;
+      const parentNum = num.split("-")[0];
+      const parentApptId = numberToAppointmentId.get(parentNum);
+      if (!parentApptId) continue; // orphan — no parent to roll up into
+      const subHours = workByAppointment.get(apt.hnAppointmentID);
+      if (!subHours) continue;
+      if (!workByAppointment.has(parentApptId)) {
+        workByAppointment.set(parentApptId, { projektering: 0, produktion: 0, montage: 0, total: 0 });
+      }
+      const p = workByAppointment.get(parentApptId)!;
+      p.projektering += subHours.projektering;
+      p.produktion += subHours.produktion;
+      p.montage += subHours.montage;
+      p.total += subHours.total;
+    }
+
     // Build hnOfferID → appointmentID map
     const offerToAppointment = new Map<number, number>();
     for (const apt of appointments) {
@@ -189,20 +219,51 @@ serve(async (req) => {
     }
 
     const nowISO = new Date().toISOString();
-    const isSubAppointment = (id: string) => /^\d+-\d+$/.test(id);
 
     // 2. Build and FILTER project rows
     const allProjectRows = appointments.map((apt: any) => {
       const appId = apt.hnAppointmentID;
-      const hours = workByAppointment.get(appId) || { projektering: 0, produktion: 0, montage: 0, total: 0 };
-      const offerData = offerByAppointment.get(appId) || { total: 0, assembly: 0, subcontractor: 0 };
       const initials = userMap.get(apt.responsibleHnUserID) || `${apt.responsibleHnUserID}`;
       const appointmentNumber = String(apt.appointmentNumber);
+      const isSub = isSubAppointment(appointmentNumber);
 
-      // Get existing manual values for this project
+      if (isSub) {
+        // Sub rows: own hours only (K/L/M/N). All other numeric fields null so the UI
+        // renders "-" and conditional colors are suppressed. Hours were rolled up into
+        // the parent bucket above; the sub's own bucket was not mutated.
+        const hours = workByAppointment.get(appId) || { projektering: 0, produktion: 0, montage: 0, total: 0 };
+        const L = hours.total - hours.montage - hours.projektering;
+        return {
+          id: appointmentNumber,
+          name: apt.subject || "",
+          responsible_person_initials: initials,
+          offer_amount: null,
+          assembly_amount: null,
+          subcontractor_amount: null,
+          materials_amount: null,
+          hours_estimated_projecting: null,
+          hours_estimated_production: null,
+          hours_estimated_assembly: null,
+          hours_used_projecting: hours.projektering,
+          hours_used_production: L,
+          hours_used_assembly: hours.montage,
+          hours_used_total: hours.total,
+          hours_remaining_projecting: null,
+          hours_remaining_production: null,
+          hours_remaining_assembly: null,
+          hours_estimated_by_completion: null,
+          plus_minus_hours: null,
+          allocated_freight_amount: null,
+          last_api_update: nowISO,
+          _is_sub: true,
+        };
+      }
+
+      // Parent row — workByAppointment[appId] now includes rolled-up sub hours.
+      const hours = workByAppointment.get(appId) || { projektering: 0, produktion: 0, montage: 0, total: 0 };
+      const offerData = offerByAppointment.get(appId) || { total: 0, assembly: 0, subcontractor: 0 };
       const manual = manualDataMap.get(appointmentNumber);
 
-      // Effective values: manual override ?? API value ?? 0
       const D = offerData.total;
       const E = manual?.manual_assembly_amount ?? offerData.assembly ?? 0;
       const F = manual?.manual_subcontractor_amount ?? offerData.subcontractor ?? 0;
@@ -211,7 +272,6 @@ serve(async (req) => {
       const N = hours.total;
       const Q = manual?.completion_percentage_manual ?? 0;
 
-      // Calculated columns
       const G = (D - E - F) * S.material_share;
       const H = (D - E) * S.projecting_share / S.projecting_hourly_rate;
       const I_val = (D - E - G - F) / S.average_hourly_rate - H;
@@ -234,7 +294,6 @@ serve(async (req) => {
         hours_used_projecting: K,
         hours_used_assembly: M,
         hours_used_total: N,
-        // Calculated fields
         materials_amount: G,
         hours_estimated_projecting: H,
         hours_estimated_production: I_val,
@@ -247,7 +306,7 @@ serve(async (req) => {
         hours_remaining_assembly: U,
         allocated_freight_amount: V,
         last_api_update: nowISO,
-        _is_sub: isSubAppointment(appointmentNumber),
+        _is_sub: false,
       };
     });
 
