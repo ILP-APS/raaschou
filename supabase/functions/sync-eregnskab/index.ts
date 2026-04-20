@@ -281,43 +281,42 @@ serve(async (req) => {
       }
     }
 
-    // 4. Clean up projects that no longer match filter criteria
+    // 4. Delete rows for appointments that no longer qualify:
+    //    - lukkede aftaler (ikke længere returneret af ?open=true)
+    //    - aftaler uden linket tilbud (offer_amount = 0)
+    //    - aftaler med tilbud under 25.000 kr
     const validIds = new Set(projectRows.map((r) => r.id));
-    const { data: existingProjects } = await supabase
+    const { data: existingRows } = await supabase
       .from("projects")
-      .select("id, offer_amount");
-    
-    if (existingProjects) {
-      const toDelete = existingProjects
-        .filter((p) => !validIds.has(p.id))
-        .filter((p) => {
-          if (isSubAppointment(p.id)) return false;
-          if ((p.offer_amount || 0) <= 0) return true;
-          if ((p.offer_amount || 0) < 25000) return true;
-          return false;
-        })
-        .map((p) => p.id);
+      .select("id");
 
-      if (toDelete.length > 0) {
-        const { error: delError } = await supabase
-          .from("projects")
-          .delete()
-          .in("id", toDelete);
-        if (delError) {
-          console.error("Cleanup delete error:", delError);
-        } else {
-          console.log(`Cleaned up ${toDelete.length} projects below filter threshold`);
-        }
+    const idsToDelete = (existingRows ?? [])
+      .map((r) => r.id)
+      .filter((id) => !validIds.has(id));
+
+    let deleted = 0;
+    if (idsToDelete.length > 0) {
+      const { error: deleteError } = await supabase
+        .from("projects")
+        .delete()
+        .in("id", idsToDelete);
+
+      if (deleteError) {
+        console.error("Delete stale rows error:", deleteError);
+      } else {
+        deleted = idsToDelete.length;
+        console.log(`Deleted ${deleted} stale project(s): ${idsToDelete.join(", ")}`);
       }
     }
 
-    console.log(`Sync complete: ${upserted} upserted, ${errors} errors`);
+    console.log(`Sync complete: ${upserted} upserted, ${deleted} deleted, ${errors} errors`);
 
     return new Response(
       JSON.stringify({
         success: true,
         appointments_fetched: appointments.length,
         projects_upserted: upserted,
+        projects_deleted: deleted,
         offer_line_items_fetched: offerLineItems.length,
         errors,
       }),
