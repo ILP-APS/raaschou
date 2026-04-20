@@ -83,11 +83,11 @@ export const ProjectsTableHeaders: React.FC = () => {
 
           <HeaderCell width={95} className="bg-indigo-50/50 text-right border-r-2 border-r-border/60" tooltip="Est. timer design − Brugte timer design">Timer tilbage Design</HeaderCell>
 
-          <HeaderCell width={95} className="bg-violet-50/50 text-right border-r" tooltip="Est. timer prod − Brugte timer prod">Timer tilbage Prod</HeaderCell>
+          <HeaderCell width={95} className="bg-violet-50/50 text-right border-r" tooltip="Est. timer prod − Brugte timer prod. Viser hvor meget af det oprindelige tids-budget der ikke er brugt endnu (uden færdighedsjustering).">Rest af budget</HeaderCell>
           <HeaderCell width={85} className="bg-violet-50/50 text-right border-r" tooltip="Estimeret færdiggørelsesgrad lige nu. Redigerbar — opdaterer beregninger automatisk.">Færdig% (NU)</HeaderCell>
           <HeaderCell width={85} className="bg-violet-50/50 text-right border-r" tooltip="Tidligere registreret færdiggørelsesgrad til sammenligning.">Færdig% (FØR)</HeaderCell>
           <HeaderCell width={100} className="bg-violet-50/50 text-right border-r" tooltip="Est. timer prod × Færdig% (NU)">Est. timer ift. Færdig%</HeaderCell>
-          <HeaderCell width={85} className="bg-violet-50/50 text-right border-r-2 border-r-border/60" tooltip="−Brugte timer prod + Est. timer ift. Færdig%. Positivt = foran plan, negativt = bagud.">+/- Timer</HeaderCell>
+          <HeaderCell width={85} className="bg-violet-50/50 text-right border-r-2 border-r-border/60" tooltip="Est. timer ift. Færdig% − Brugte timer prod. Hvor mange produktionstimer der reelt er tilbage baseret på nuværende færdiggørelsesgrad. Positivt = foran plan (grøn), negativt = bagud (rød).">Timer tilbage Prod</HeaderCell>
 
           <HeaderCell width={95} className="bg-sky-50/50 text-right border-r" tooltip="Est. timer mont. − Brugte timer mont.">Timer tilbage Mont.</HeaderCell>
           <HeaderCell width={100} className="bg-sky-50/50 text-right" tooltip="Fragtandel% × Montagebeløb">Afsat Fragt</HeaderCell>
