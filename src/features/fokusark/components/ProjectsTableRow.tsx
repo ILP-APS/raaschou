@@ -65,7 +65,7 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
       
       <BasicValueCell value={project.hours_remaining_production} isNumber />
       <EditableCompletionPercentageCell value={project.completion_percentage_manual} projectId={project.id} isSubProject={isSubProject} onUpdate={onUpdateCompletionPercentage} />
-      <BasicValueCell value={project.completion_percentage_previous} isNumber />
+      <BasicValueCell value={project.completion_percentage_previous} isNumber suffix="%" />
       <BasicValueCell value={project.hours_estimated_by_completion} isNumber />
       <ConditionalValueCell value={project.plus_minus_hours} />
       

@@ -63,7 +63,7 @@ export const EditablePercentageCell: React.FC<EditablePercentageCellProps> = ({
       onMouseDown={handleMouseDown}
       className="cursor-pointer hover:bg-muted/50 p-2 -m-2 rounded text-right"
     >
-      {value !== null ? formatDanishNumber(value) : "-"}
+      {value !== null ? formatDanishNumber(value) + '%' : "-"}
     </div>
   );
 };
