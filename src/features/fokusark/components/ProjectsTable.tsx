@@ -17,7 +17,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({ refreshKey }) => {
   const { projects, loading, fetchProjects, updateCompletionPercentage, updateManualAssemblyAmount, updateManualSubcontractorAmount } = useProjects();
   const { containerRef, isDragging, handleMouseDown } = useHoldScroll();
   const { state } = useSidebar();
-  const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(new Set());
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (refreshKey && refreshKey > 0) {
@@ -29,16 +29,16 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({ refreshKey }) => {
       const hierarchies = parseProjectHierarchy(projects);
       return hierarchies.map(hierarchy => ({
         ...hierarchy,
-        isExpanded: !collapsedProjects.has(hierarchy.parent.id)
+        isExpanded: expandedProjects.has(hierarchy.parent.id)
       }));
-    }, [projects, collapsedProjects]);
+    }, [projects, expandedProjects]);
 
   const displayProjects = useMemo(() => {
     return flattenHierarchy(projectHierarchies);
   }, [projectHierarchies]);
 
-  const toggleProjectCollapse = (parentId: string) => {
-    setCollapsedProjects(prev => {
+  const toggleProjectExpansion = (parentId: string) => {
+    setExpandedProjects(prev => {
       const newSet = new Set(prev);
       if (newSet.has(parentId)) newSet.delete(parentId);
       else newSet.add(parentId);
@@ -95,7 +95,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({ refreshKey }) => {
                   onUpdateCompletionPercentage={updateCompletionPercentage}
                   onUpdateManualAssemblyAmount={updateManualAssemblyAmount}
                   onUpdateManualSubcontractorAmount={updateManualSubcontractorAmount}
-                  onToggleCollapse={() => toggleProjectCollapse(project.id)}
+                  onToggleCollapse={() => toggleProjectExpansion(project.id)}
                 />
               );
             })}
