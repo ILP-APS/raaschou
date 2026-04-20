@@ -7,16 +7,19 @@ interface BasicValueCellProps {
   value: number | null;
   isNumber?: boolean;
   className?: string;
+  suffix?: string;
 }
 
 export const BasicValueCell: React.FC<BasicValueCellProps> = ({
   value,
   isNumber = false,
   className = "text-right border-r px-2 py-2",
+  suffix = "",
 }) => {
   const formatValue = (value: number | null, isNumber = false): string => {
     if (value === null || value === undefined) return "-";
-    return isNumber ? formatDanishNumber(value) : formatDanishCurrency(value);
+    const formatted = isNumber ? formatDanishNumber(value) : formatDanishCurrency(value);
+    return formatted + suffix;
   };
 
   return (
