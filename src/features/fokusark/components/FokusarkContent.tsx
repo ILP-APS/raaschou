@@ -21,6 +21,7 @@ const FokusarkContent: React.FC = () => {
     try {
       const { data, error } = await supabase.functions.invoke('sync-eregnskab');
       if (error) throw error;
+      setRefreshKey((k) => k + 1);
       toast({ title: "Data synkroniseret", description: `${data.projects_upserted} projekter opdateret fra e-regnskab.` });
     } catch (error) {
       console.error('Error syncing data:', error);
