@@ -4,16 +4,16 @@ project_id = "femtmeufuuwrwachkjux"
 verify_jwt = false
 
 [functions.fetch-appointments]
-verify_jwt = true
+verify_jwt = false
 
 [functions.fetch-categories]
-verify_jwt = true
+verify_jwt = false
 
 [functions.fetch-hourly-employees]
-verify_jwt = true
+verify_jwt = false
 
 [functions.fetch-user-by-id]
-verify_jwt = true
+verify_jwt = false
 
 [functions.check-today]
 verify_jwt = false
