@@ -31,12 +31,12 @@ export const ProjectIdentifierCell: React.FC<ProjectIdentifierCellProps> = ({
   return (
     <TableCell 
       className={cn(
-        "sticky z-20 font-medium transition-colors",
+        "sticky z-20 font-medium transition-colors px-2 py-2",
         rowBgColor,
         "group-hover:bg-green-50",
         isSubProject && "pl-8"
       )}
-      style={{ left: 0, minWidth: '150px', width: '150px' }}
+      style={{ left: 0, minWidth: '130px', width: '130px', maxWidth: '130px' }}
     >
       <div className="flex items-center gap-2">
         {isParent && hasChildren && (
