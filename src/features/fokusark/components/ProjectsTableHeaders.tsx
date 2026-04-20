@@ -44,7 +44,7 @@ export const ProjectsTableHeaders: React.FC = () => {
   return (
     <TooltipProvider delayDuration={200}>
       <TableHeader className="sticky top-0 z-40 bg-background">
-        <TableRow className="bg-muted/30">
+        <TableRow>
           <TableHead 
             className="sticky z-30 bg-muted text-center font-semibold" 
             colSpan={3}
@@ -52,45 +52,45 @@ export const ProjectsTableHeaders: React.FC = () => {
           >
             Aftale
           </TableHead>
-          <TableHead className="text-center font-semibold border-r" colSpan={6}>Tilbud</TableHead>
-          <TableHead className="text-center font-semibold border-r" colSpan={3}>Estimeret</TableHead>
-          <TableHead className="text-center font-semibold border-r" colSpan={4}>Realiseret</TableHead>
-          <TableHead className="text-center font-semibold border-r" colSpan={1}>Projektering</TableHead>
-          <TableHead className="text-center font-semibold border-r" colSpan={5}>Produktions stadie</TableHead>
-          <TableHead className="text-center font-semibold" colSpan={2}>Montage</TableHead>
+          <TableHead className="bg-slate-100 text-center font-semibold border-r-2 border-r-border/60" colSpan={6}>Tilbud</TableHead>
+          <TableHead className="bg-amber-50 text-center font-semibold border-r-2 border-r-border/60" colSpan={3}>Estimeret</TableHead>
+          <TableHead className="bg-emerald-50 text-center font-semibold border-r-2 border-r-border/60" colSpan={4}>Realiseret</TableHead>
+          <TableHead className="bg-indigo-50 text-center font-semibold border-r-2 border-r-border/60" colSpan={1}>Projektering</TableHead>
+          <TableHead className="bg-violet-50 text-center font-semibold border-r-2 border-r-border/60" colSpan={5}>Produktions stadie</TableHead>
+          <TableHead className="bg-sky-50 text-center font-semibold" colSpan={2}>Montage</TableHead>
         </TableRow>
 
-        <TableRow className="bg-muted/30">
+        <TableRow>
           <TableHead className="sticky z-30 bg-muted px-2 py-2 leading-tight whitespace-normal align-middle" style={{ left: 0, minWidth: '130px', width: '130px', maxWidth: '130px' }}>Projekt ID</TableHead>
           <TableHead className="sticky z-30 bg-muted px-2 py-2 leading-tight whitespace-normal align-middle" style={{ left: '130px', minWidth: '220px', width: '220px', maxWidth: '220px' }}>Projekt Navn/Emne</TableHead>
           <TableHead className="sticky z-30 bg-muted text-center px-2 py-2 leading-tight whitespace-normal align-middle" style={{ left: '350px', minWidth: '80px', width: '80px', maxWidth: '80px', boxShadow: '1px 0 0 0 hsl(var(--border))' }}>Ansvarlig</TableHead>
 
-          <HeaderCell width={110} className="text-right border-r" tooltip="Samlet tilbudsbeløb fra e-regnskab tilbud (offer line items)">Tilbudsbeløb i alt</HeaderCell>
-          <HeaderCell width={100} className="text-right border-r" tooltip="Montagebeløb fra tilbud (offer lines med varenr. 'Montage')">Heraf Montage</HeaderCell>
-          <HeaderCell width={110} className="text-right border-r" tooltip="Underleverandørbeløb fra tilbud (offer lines med varenr. 'UE')">Heraf Underlev.</HeaderCell>
+          <HeaderCell width={110} className="bg-slate-50 text-right border-r" tooltip="Samlet tilbudsbeløb fra e-regnskab tilbud (offer line items)">Tilbudsbeløb i alt</HeaderCell>
+          <HeaderCell width={100} className="bg-slate-50 text-right border-r" tooltip="Montagebeløb fra tilbud (offer lines med varenr. 'Montage')">Heraf Montage</HeaderCell>
+          <HeaderCell width={110} className="bg-slate-50 text-right border-r" tooltip="Underleverandørbeløb fra tilbud (offer lines med varenr. 'UE')">Heraf Underlev.</HeaderCell>
           <HeaderCell width={100} className="text-right border-r bg-blue-50" tooltip="Manuel overstyring af montagebeløb. Bruges hvis montage ikke er registreret i tilbuddet. Redigerbar.">Manuel Montage</HeaderCell>
           <HeaderCell width={100} className="text-right border-r bg-blue-50" tooltip="Manuel overstyring af underleverandørbeløb. Bruges hvis UE ikke er registreret i tilbuddet. Redigerbar.">Manuel Underlev.</HeaderCell>
-          <HeaderCell width={110} className="text-right border-r" tooltip="(Tilbud − Montage − Underlev.) × Materialeandel%">Beregnet Materiale</HeaderCell>
+          <HeaderCell width={110} className="bg-slate-50 text-right border-r-2 border-r-border/60" tooltip="(Tilbud − Montage − Underlev.) × Materialeandel%">Beregnet Materiale</HeaderCell>
 
-          <HeaderCell width={90} className="text-right border-r" tooltip="(Tilbud − Montage) × Projekteringsandel% / Projektering timepris">Est. timer Proj</HeaderCell>
-          <HeaderCell width={90} className="text-right border-r" tooltip="(Tilbud − Montage − Materialer − Underlev.) / Gns. timepris − Est. timer proj">Est. timer Design</HeaderCell>
-          <HeaderCell width={90} className="text-right border-r" tooltip="(Montage − Montage × Fragtandel%) / Montage timepris">Est. timer Mont.</HeaderCell>
+          <HeaderCell width={90} className="bg-amber-50/50 text-right border-r" tooltip="(Tilbud − Montage) × Projekteringsandel% / Projektering timepris">Est. timer Proj</HeaderCell>
+          <HeaderCell width={90} className="bg-amber-50/50 text-right border-r" tooltip="(Tilbud − Montage − Materialer − Underlev.) / Gns. timepris − Est. timer proj">Est. timer Design</HeaderCell>
+          <HeaderCell width={90} className="bg-amber-50/50 text-right border-r-2 border-r-border/60" tooltip="(Montage − Montage × Fragtandel%) / Montage timepris">Est. timer Mont.</HeaderCell>
 
-          <HeaderCell width={95} className="text-right border-r" tooltip="Timer registreret på projekteringsarbejdstyper i e-regnskab">Brugte timer Proj</HeaderCell>
-          <HeaderCell width={95} className="text-right border-r" tooltip="Total timer − Brugte montage − Brugte projektering">Brugte timer Design</HeaderCell>
-          <HeaderCell width={95} className="text-right border-r" tooltip="Timer registreret på montagearbejdstyper i e-regnskab">Brugte timer Mont.</HeaderCell>
-          <HeaderCell width={95} className="text-right border-r" tooltip="Sum af alle registrerede timer på aftalen i e-regnskab">Total timer brugt</HeaderCell>
+          <HeaderCell width={95} className="bg-emerald-50/50 text-right border-r" tooltip="Timer registreret på projekteringsarbejdstyper i e-regnskab">Brugte timer Proj</HeaderCell>
+          <HeaderCell width={95} className="bg-emerald-50/50 text-right border-r" tooltip="Total timer − Brugte montage − Brugte projektering">Brugte timer Design</HeaderCell>
+          <HeaderCell width={95} className="bg-emerald-50/50 text-right border-r" tooltip="Timer registreret på montagearbejdstyper i e-regnskab">Brugte timer Mont.</HeaderCell>
+          <HeaderCell width={95} className="bg-emerald-50/50 text-right border-r-2 border-r-border/60" tooltip="Sum af alle registrerede timer på aftalen i e-regnskab">Total timer brugt</HeaderCell>
 
-          <HeaderCell width={95} className="text-right border-r" tooltip="Est. timer proj − Brugte timer proj">Timer tilbage Proj</HeaderCell>
+          <HeaderCell width={95} className="bg-indigo-50/50 text-right border-r-2 border-r-border/60" tooltip="Est. timer proj − Brugte timer proj">Timer tilbage Proj</HeaderCell>
 
-          <HeaderCell width={95} className="text-right border-r" tooltip="Est. timer design − Brugte timer design">Timer tilbage Design</HeaderCell>
-          <HeaderCell width={85} className="text-right border-r" tooltip="Estimeret færdiggørelsesgrad lige nu. Redigerbar — opdaterer beregninger automatisk.">Færdig% (NU)</HeaderCell>
-          <HeaderCell width={85} className="text-right border-r" tooltip="Tidligere registreret færdiggørelsesgrad til sammenligning.">Færdig% (FØR)</HeaderCell>
-          <HeaderCell width={100} className="text-right border-r" tooltip="Est. timer design × Færdig% (NU)">Est. timer ift. Færdig%</HeaderCell>
-          <HeaderCell width={85} className="text-right border-r" tooltip="−Brugte timer design + Est. timer ift. Færdig%. Positivt = foran plan, negativt = bagud.">+/- Timer</HeaderCell>
+          <HeaderCell width={95} className="bg-violet-50/50 text-right border-r" tooltip="Est. timer design − Brugte timer design">Timer tilbage Design</HeaderCell>
+          <HeaderCell width={85} className="bg-violet-50/50 text-right border-r" tooltip="Estimeret færdiggørelsesgrad lige nu. Redigerbar — opdaterer beregninger automatisk.">Færdig% (NU)</HeaderCell>
+          <HeaderCell width={85} className="bg-violet-50/50 text-right border-r" tooltip="Tidligere registreret færdiggørelsesgrad til sammenligning.">Færdig% (FØR)</HeaderCell>
+          <HeaderCell width={100} className="bg-violet-50/50 text-right border-r" tooltip="Est. timer design × Færdig% (NU)">Est. timer ift. Færdig%</HeaderCell>
+          <HeaderCell width={85} className="bg-violet-50/50 text-right border-r-2 border-r-border/60" tooltip="−Brugte timer design + Est. timer ift. Færdig%. Positivt = foran plan, negativt = bagud.">+/- Timer</HeaderCell>
 
-          <HeaderCell width={95} className="text-right border-r" tooltip="Est. timer mont. − Brugte timer mont.">Timer tilbage Mont.</HeaderCell>
-          <HeaderCell width={100} className="text-right" tooltip="Fragtandel% × Montagebeløb">Afsat Fragt</HeaderCell>
+          <HeaderCell width={95} className="bg-sky-50/50 text-right border-r" tooltip="Est. timer mont. − Brugte timer mont.">Timer tilbage Mont.</HeaderCell>
+          <HeaderCell width={100} className="bg-sky-50/50 text-right" tooltip="Fragtandel% × Montagebeløb">Afsat Fragt</HeaderCell>
         </TableRow>
       </TableHeader>
     </TooltipProvider>
