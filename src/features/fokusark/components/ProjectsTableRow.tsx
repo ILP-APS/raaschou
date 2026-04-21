@@ -45,30 +45,36 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
       <ProjectNameCell projectName={project.name} isSubProject={isSubProject} isParent={isParent} hasChildren={hasChildren} rowBgColor={rowBgColor} />
       <ResponsiblePersonCell responsiblePersonInitials={project.responsible_person_initials} rowBgColor={rowBgColor} />
       
+      {/* Tilbud */}
       <BasicValueCell value={project.offer_amount} />
       <BasicValueCell value={project.assembly_amount} />
       <BasicValueCell value={project.subcontractor_amount} />
       <EditableManualAmountCell value={project.manual_assembly_amount} projectId={project.id} fieldType="assembly" isSubProject={isSubProject} onUpdate={onUpdateManualAssemblyAmount} />
       <EditableManualAmountCell value={project.manual_subcontractor_amount} projectId={project.id} fieldType="subcontractor" isSubProject={isSubProject} onUpdate={onUpdateManualSubcontractorAmount} />
-      <BasicValueCell value={project.materials_amount} />
+      <BasicValueCell value={project.materials_amount} className="text-right border-r-4 border-r-border px-2 py-2" />
       
+      {/* Estimeret */}
       <BasicValueCell value={project.hours_estimated_projecting} isNumber />
       <BasicValueCell value={project.hours_estimated_production} isNumber />
-      <BasicValueCell value={project.hours_estimated_assembly} isNumber />
+      <BasicValueCell value={project.hours_estimated_assembly} isNumber className="text-right border-r-4 border-r-border px-2 py-2" />
       
+      {/* Realiseret */}
       <BasicValueCell value={project.hours_used_projecting} isNumber />
       <BasicValueCell value={project.hours_used_production} isNumber />
       <BasicValueCell value={project.hours_used_assembly} isNumber />
-      <BasicValueCell value={project.hours_used_total} isNumber />
+      <BasicValueCell value={project.hours_used_total} isNumber className="text-right border-r-4 border-r-border px-2 py-2" />
       
-      <ConditionalValueCell value={project.hours_remaining_projecting} />
+      {/* Design */}
+      <ConditionalValueCell value={project.hours_remaining_projecting} className="border-r-4 border-r-border" />
       
+      {/* Produktions stadie */}
       <BasicValueCell value={project.hours_remaining_production} isNumber />
       <EditableCompletionPercentageCell value={project.completion_percentage_manual} projectId={project.id} isSubProject={isSubProject} onUpdate={onUpdateCompletionPercentage} />
       <BasicValueCell value={project.completion_percentage_previous} isNumber suffix="%" />
       <BasicValueCell value={project.hours_estimated_by_completion} isNumber />
-      <ConditionalValueCell value={project.plus_minus_hours} />
+      <ConditionalValueCell value={project.plus_minus_hours} className="border-r-4 border-r-border" />
       
+      {/* Montage */}
       <ConditionalValueCell value={project.hours_remaining_assembly} />
       <BasicValueCell value={project.allocated_freight_amount} className="text-right px-2 py-2" />
     </TableRow>
