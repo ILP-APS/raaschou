@@ -39,17 +39,23 @@ interface RegLine {
   category: string;
   duration: number;
   hn_appointment_id: number | null;
+  hn_appointment_category_id: number | null;
+  hn_work_type_id: number | null;
   appointment_subject: string | null;
   appointment_project: string | null;
   description: string | null;
 }
 
 // Cache for appointment details to avoid duplicate API calls
-const appointmentCache = new Map<number, { subject: string | null; project: string | null }>();
+const appointmentCache = new Map<number, {
+  subject: string | null;
+  project: string | null;
+  hn_appointment_category_id: number | null;
+}>();
 
 async function fetchAppointmentDetails(
   hnAppointmentId: number, apiKey: string
-): Promise<{ subject: string | null; project: string | null }> {
+): Promise<{ subject: string | null; project: string | null; hn_appointment_category_id: number | null }> {
   if (appointmentCache.has(hnAppointmentId)) {
     return appointmentCache.get(hnAppointmentId)!;
   }
@@ -58,24 +64,23 @@ async function fetchAppointmentDetails(
   const result = {
     subject: data?.subject || null,
     project: data?.project || null,
+    hn_appointment_category_id: data?.hnAppointmentCategoryID ?? null,
   };
   appointmentCache.set(hnAppointmentId, result);
   return result;
 }
 
 async function fetchWeekRegistrations(
-  hnUserId: number, weekStart: string, weekEnd: string, apiKeys: string[]
+  hnUserId: number, rangeStart: string, rangeEnd: string, apiKeys: string[]
 ): Promise<RegLine[]> {
   const allLines: RegLine[] = [];
   for (const apiKey of apiKeys) {
-    const weekEndSunday = addDays(weekStart, 6);
-
     const [workLines, internalLines, sickness, vacation, privateDays] = await Promise.all([
-      eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
-      eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
-      eregnskabFetch(`/WorkTime/Sickness?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
-      eregnskabFetch(`/WorkTime/Vacation?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
-      eregnskabFetch(`/WorkTime/Private?hnUserID=${hnUserId}&from=${weekStart}&to=${weekEndSunday}`, apiKey),
+      eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${rangeStart}&to=${rangeEnd}`, apiKey),
+      eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${rangeStart}&to=${rangeEnd}`, apiKey),
+      eregnskabFetch(`/WorkTime/Sickness?hnUserID=${hnUserId}&from=${rangeStart}&to=${rangeEnd}`, apiKey),
+      eregnskabFetch(`/WorkTime/Vacation?hnUserID=${hnUserId}&from=${rangeStart}&to=${rangeEnd}`, apiKey),
+      eregnskabFetch(`/WorkTime/Private?hnUserID=${hnUserId}&from=${rangeStart}&to=${rangeEnd}`, apiKey),
     ]);
 
     const lines: RegLine[] = [];
@@ -88,11 +93,13 @@ async function fetchWeekRegistrations(
 
         let appointmentSubject = l.subject || null;
         let appointmentProject: string | null = null;
+        let appointmentCategoryId: number | null = null;
 
         if (category === "work" && l.hnAppointmentID) {
           const details = await fetchAppointmentDetails(l.hnAppointmentID, apiKey);
           appointmentSubject = details.subject || appointmentSubject;
           appointmentProject = details.project;
+          appointmentCategoryId = details.hn_appointment_category_id;
         }
 
         lines.push({
@@ -101,6 +108,8 @@ async function fetchWeekRegistrations(
           category,
           duration: l.units || 0,
           hn_appointment_id: l.hnAppointmentID || null,
+          hn_appointment_category_id: appointmentCategoryId,
+          hn_work_type_id: l.hnWorkTypeID ?? null,
           appointment_subject: appointmentSubject,
           appointment_project: appointmentProject,
           description: l.description || null,
@@ -116,7 +125,7 @@ async function fetchWeekRegistrations(
       for (const item of arr) {
         const dateStr = item.start?.split("T")[0];
         if (!dateStr) continue;
-        if (dateStr < weekStart || dateStr > weekEnd) continue;
+        if (dateStr < rangeStart || dateStr > rangeEnd) continue;
 
         lines.push({
           hn_user_id: hnUserId,
@@ -124,6 +133,8 @@ async function fetchWeekRegistrations(
           category,
           duration: item.duration || 0,
           hn_appointment_id: null,
+          hn_appointment_category_id: null,
+          hn_work_type_id: null,
           appointment_subject: null,
           appointment_project: null,
           description: item.description || null,
