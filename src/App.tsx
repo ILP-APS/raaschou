@@ -9,6 +9,7 @@ import FokusarkPage from "./features/fokusark/pages/FokusarkPage";
 import ProduktionsarkPage from "./features/produktionsark/pages/ProduktionsarkPage";
 import TidsregistreringPage from "./features/tidsregistrering/pages/TidsregistreringPage";
 import LoentjekPage from "./features/loentjek/pages/LoentjekPage";
+import TimeUtilizationSettingsPage from "./features/time-utilization/pages/TimeUtilizationSettingsPage";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/produktionsark" element={<ProtectedRoute><ProduktionsarkPage /></ProtectedRoute>} />
           <Route path="/tidsregistrering" element={<ProtectedRoute><TidsregistreringPage /></ProtectedRoute>} />
           <Route path="/loentjek" element={<ProtectedRoute><LoentjekPage /></ProtectedRoute>} />
+          <Route path="/time-utilization/settings" element={<ProtectedRoute><TimeUtilizationSettingsPage /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
