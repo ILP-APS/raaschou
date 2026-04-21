@@ -30,6 +30,7 @@ const App = () => (
           <Route path="/produktionsark" element={<ProtectedRoute><ProduktionsarkPage /></ProtectedRoute>} />
           <Route path="/tidsregistrering" element={<ProtectedRoute><TidsregistreringPage /></ProtectedRoute>} />
           <Route path="/loentjek" element={<ProtectedRoute><LoentjekPage /></ProtectedRoute>} />
+          <Route path="/time-utilization" element={<ProtectedRoute><TimeUtilizationPage /></ProtectedRoute>} />
           <Route path="/time-utilization/settings" element={<ProtectedRoute><TimeUtilizationSettingsPage /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
