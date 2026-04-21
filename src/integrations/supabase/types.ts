@@ -458,18 +458,21 @@ export type Database = {
           id: string
           intern_appointment_category_ids: number[]
           intern_work_type_ids: number[]
+          target_utilization: number
           updated_at: string | null
         }
         Insert: {
           id?: string
           intern_appointment_category_ids?: number[]
           intern_work_type_ids?: number[]
+          target_utilization?: number
           updated_at?: string | null
         }
         Update: {
           id?: string
           intern_appointment_category_ids?: number[]
           intern_work_type_ids?: number[]
+          target_utilization?: number
           updated_at?: string | null
         }
         Relationships: []
