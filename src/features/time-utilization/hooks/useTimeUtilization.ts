@@ -9,6 +9,7 @@ export interface Registration {
   hn_appointment_id: number | null;
   hn_appointment_category_id: number | null;
   hn_work_type_id: number | null;
+  appointment_subject: string | null;
 }
 
 export interface UtilizationEmployee {
@@ -99,7 +100,7 @@ export function useRegistrationsInRange(fromDate: string, toDate: string, hnUser
       if (hnUserIds.length === 0) return [];
       const { data, error } = await supabase
         .from("daily_time_registrations")
-        .select("hn_user_id, date, category, duration, hn_appointment_id, hn_appointment_category_id, hn_work_type_id")
+        .select("hn_user_id, date, category, duration, hn_appointment_id, hn_appointment_category_id, hn_work_type_id, appointment_subject")
         .gte("date", fromDate)
         .lte("date", toDate)
         .in("hn_user_id", hnUserIds);
