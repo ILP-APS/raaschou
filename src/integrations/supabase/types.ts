@@ -32,6 +32,48 @@ export type Database = {
         }
         Relationships: []
       }
+      appointment_categories: {
+        Row: {
+          hn_appointment_category_id: number
+          name: string
+          synced_at: string | null
+        }
+        Insert: {
+          hn_appointment_category_id: number
+          name: string
+          synced_at?: string | null
+        }
+        Update: {
+          hn_appointment_category_id?: number
+          name?: string
+          synced_at?: string | null
+        }
+        Relationships: []
+      }
+      appointment_worktypes: {
+        Row: {
+          api_internal: boolean
+          hidden: boolean
+          hn_work_type_id: number
+          name: string
+          synced_at: string | null
+        }
+        Insert: {
+          api_internal?: boolean
+          hidden?: boolean
+          hn_work_type_id: number
+          name: string
+          synced_at?: string | null
+        }
+        Update: {
+          api_internal?: boolean
+          hidden?: boolean
+          hn_work_type_id?: number
+          name?: string
+          synced_at?: string | null
+        }
+        Relationships: []
+      }
       daily_time_registrations: {
         Row: {
           appointment_project: string | null
@@ -40,8 +82,10 @@ export type Database = {
           date: string
           description: string | null
           duration: number
+          hn_appointment_category_id: number | null
           hn_appointment_id: number | null
           hn_user_id: number
+          hn_work_type_id: number | null
           id: string
           synced_at: string | null
         }
@@ -52,8 +96,10 @@ export type Database = {
           date: string
           description?: string | null
           duration: number
+          hn_appointment_category_id?: number | null
           hn_appointment_id?: number | null
           hn_user_id: number
+          hn_work_type_id?: number | null
           id?: string
           synced_at?: string | null
         }
@@ -64,8 +110,10 @@ export type Database = {
           date?: string
           description?: string | null
           duration?: number
+          hn_appointment_category_id?: number | null
           hn_appointment_id?: number | null
           hn_user_id?: number
+          hn_work_type_id?: number | null
           id?: string
           synced_at?: string | null
         }
@@ -386,6 +434,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      time_utilization_employees: {
+        Row: {
+          added_at: string | null
+          employee_name: string
+          hn_user_id: number
+        }
+        Insert: {
+          added_at?: string | null
+          employee_name: string
+          hn_user_id: number
+        }
+        Update: {
+          added_at?: string | null
+          employee_name?: string
+          hn_user_id?: number
+        }
+        Relationships: []
+      }
+      time_utilization_settings: {
+        Row: {
+          id: string
+          intern_appointment_category_ids: number[]
+          intern_work_type_ids: number[]
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          intern_appointment_category_ids?: number[]
+          intern_work_type_ids?: number[]
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          intern_appointment_category_ids?: number[]
+          intern_work_type_ids?: number[]
+          updated_at?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
