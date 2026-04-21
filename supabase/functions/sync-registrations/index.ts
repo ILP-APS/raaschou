@@ -195,19 +195,20 @@ serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     let weekStart: string;
+    let weekEnd: string;
     let filterUserIds: number[] | null = null;
 
     try {
       const body = await req.json();
       weekStart = body.week_start || mondayOfWeek(new Date());
+      weekEnd = body.week_end || addDays(weekStart, 4);
       if (body.hn_user_ids && Array.isArray(body.hn_user_ids) && body.hn_user_ids.length > 0) {
         filterUserIds = body.hn_user_ids;
       }
     } catch {
       weekStart = mondayOfWeek(new Date());
+      weekEnd = addDays(weekStart, 4);
     }
-
-    const weekEnd = addDays(weekStart, 4); // Friday
     console.log(`sync-registrations: syncing ${weekStart} to ${weekEnd}${filterUserIds ? ` for ${filterUserIds.length} specific users` : " for all active employees"}`);
 
     let employeeIds: number[];
