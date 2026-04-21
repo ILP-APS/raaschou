@@ -9,6 +9,7 @@ import FokusarkPage from "./features/fokusark/pages/FokusarkPage";
 import ProduktionsarkPage from "./features/produktionsark/pages/ProduktionsarkPage";
 import TidsregistreringPage from "./features/tidsregistrering/pages/TidsregistreringPage";
 import LoentjekPage from "./features/loentjek/pages/LoentjekPage";
+import TimeUtilizationPage from "./features/time-utilization/pages/TimeUtilizationPage";
 import TimeUtilizationSettingsPage from "./features/time-utilization/pages/TimeUtilizationSettingsPage";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/LoginPage";
