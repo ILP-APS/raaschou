@@ -92,6 +92,24 @@ export function useAppointmentWorktypes() {
   });
 }
 
+export function useRegistrationsInRange(fromDate: string, toDate: string, hnUserIds: number[]) {
+  return useQuery({
+    queryKey: ["utilization-regs", fromDate, toDate, hnUserIds.slice().sort().join(",")],
+    queryFn: async () => {
+      if (hnUserIds.length === 0) return [];
+      const { data, error } = await supabase
+        .from("daily_time_registrations")
+        .select("hn_user_id, date, category, duration, hn_appointment_id, hn_appointment_category_id, hn_work_type_id")
+        .gte("date", fromDate)
+        .lte("date", toDate)
+        .in("hn_user_id", hnUserIds);
+      if (error) throw error;
+      return data as Registration[];
+    },
+    enabled: hnUserIds.length > 0 && !!fromDate && !!toDate,
+  });
+}
+
 export function useHourlyEmployeesInventar() {
   return useQuery({
     queryKey: ["hourly-employees-inventar"],
