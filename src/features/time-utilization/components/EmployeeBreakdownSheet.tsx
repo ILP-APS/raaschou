@@ -3,6 +3,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { format } from "date-fns";
 import { da } from "date-fns/locale";
 import type { Breakdown } from "../utils/breakdown";
+import { getTargetStatus, statusTextClass, formatDeviation } from "../utils/targetStatus";
 
 interface Props {
   open: boolean;
@@ -11,15 +12,18 @@ interface Props {
   fromDate: Date;
   toDate: Date;
   breakdown: Breakdown | null;
+  target: number;
 }
 
 export default function EmployeeBreakdownSheet({
-  open, onClose, employeeName, fromDate, toDate, breakdown,
+  open, onClose, employeeName, fromDate, toDate, breakdown, target,
 }: Props) {
   if (!employeeName || !breakdown) return null;
 
   const { billable, internal, absence, totals } = breakdown;
-  const utilizationPct = totals.total > 0 ? (totals.billable / totals.total) * 100 : 0;
+  const utilization = totals.total > 0 ? totals.billable / totals.total : 0;
+  const utilizationPct = utilization * 100;
+  const status = getTargetStatus(utilization, target);
   const periodLabel = `${format(fromDate, "d. MMM", { locale: da })} – ${format(toDate, "d. MMM yyyy", { locale: da })}`;
 
   return (
@@ -28,7 +32,13 @@ export default function EmployeeBreakdownSheet({
         <SheetHeader>
           <SheetTitle>{employeeName}</SheetTitle>
           <p className="text-sm text-muted-foreground">
-            {periodLabel} · {totals.total.toFixed(1)} t total · Utilization {utilizationPct.toFixed(1)}%
+            {periodLabel} · {totals.total.toFixed(1)} t total · Utilization{" "}
+            <span className={`font-semibold ${statusTextClass(status)}`}>
+              {utilizationPct.toFixed(1)}%
+            </span>{" "}
+            <span className={statusTextClass(status)}>
+              ({formatDeviation(utilization, target)})
+            </span>
           </p>
         </SheetHeader>
 

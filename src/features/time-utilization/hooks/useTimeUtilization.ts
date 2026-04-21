@@ -21,6 +21,7 @@ export interface Settings {
   id: string;
   intern_appointment_category_ids: number[];
   intern_work_type_ids: number[];
+  target_utilization: number;
 }
 
 export interface AppointmentCategory {
@@ -55,7 +56,7 @@ export function useUtilizationSettings() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("time_utilization_settings")
-        .select("id, intern_appointment_category_ids, intern_work_type_ids")
+        .select("id, intern_appointment_category_ids, intern_work_type_ids, target_utilization")
         .limit(1)
         .single();
       if (error) throw error;

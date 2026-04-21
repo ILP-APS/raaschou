@@ -95,11 +95,19 @@ export default function TimeUtilizationPage() {
         <AppSidebar />
         <SidebarInset>
           <div className="flex flex-col h-full">
-            <div className="p-4 border-b">
-              <h1 className="text-2xl font-semibold">Time Utilization</h1>
-              <p className="text-sm text-muted-foreground">
-                Fakturerbare timer som % af totalt registrerede timer
-              </p>
+            <div className="p-4 border-b flex items-start justify-between">
+              <div>
+                <h1 className="text-2xl font-semibold">Time Utilization</h1>
+                <p className="text-sm text-muted-foreground">
+                  Fakturerbare timer som % af totalt registrerede timer
+                </p>
+              </div>
+              {settings && (
+                <div className="text-right">
+                  <div className="text-xs text-muted-foreground">Mål</div>
+                  <div className="text-lg font-semibold">{Math.round(settings.target_utilization * 100)}%</div>
+                </div>
+              )}
             </div>
             <div className="flex-1 overflow-auto p-4 space-y-4">
               <div className="flex items-center gap-3 flex-wrap">
@@ -130,7 +138,11 @@ export default function TimeUtilizationPage() {
               ) : isLoading ? (
                 <p className="text-muted-foreground">Indlæser...</p>
               ) : (
-                <UtilizationTable rows={rows} onSelectEmployee={setSelectedUserId} />
+                <UtilizationTable
+                  rows={rows}
+                  target={settings?.target_utilization ?? 0.85}
+                  onSelectEmployee={setSelectedUserId}
+                />
               )}
             </div>
           </div>
@@ -143,6 +155,7 @@ export default function TimeUtilizationPage() {
         fromDate={fromDate}
         toDate={toDate}
         breakdown={breakdown}
+        target={settings?.target_utilization ?? 0.85}
       />
     </SidebarProvider>
   );
