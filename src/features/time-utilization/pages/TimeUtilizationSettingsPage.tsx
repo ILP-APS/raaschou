@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { RefreshCw, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -30,6 +31,33 @@ export default function TimeUtilizationSettingsPage() {
   const { data: availableEmployees = [] } = useHourlyEmployeesInventar();
 
   const selectedIds = new Set(selectedEmployees.map((e) => e.hn_user_id));
+
+  const [targetInput, setTargetInput] = useState<string>("");
+
+  useEffect(() => {
+    if (settings) {
+      setTargetInput(Math.round(settings.target_utilization * 100).toString());
+    }
+  }, [settings?.target_utilization]);
+
+  const saveTarget = async () => {
+    if (!settings) return;
+    const parsed = parseFloat(targetInput);
+    if (isNaN(parsed) || parsed < 0 || parsed > 100) {
+      toast({ title: "Ugyldig værdi", description: "Skal være mellem 0 og 100", variant: "destructive" });
+      setTargetInput(Math.round(settings.target_utilization * 100).toString());
+      return;
+    }
+    const asFraction = parsed / 100;
+    if (Math.abs(asFraction - settings.target_utilization) < 0.001) return;
+    const { error } = await supabase
+      .from("time_utilization_settings")
+      .update({ target_utilization: asFraction, updated_at: new Date().toISOString() })
+      .eq("id", settings.id);
+    if (error) { toast({ title: "Fejl", description: error.message, variant: "destructive" }); return; }
+    queryClient.invalidateQueries({ queryKey: ["time-utilization-settings"] });
+    toast({ title: "Mål opdateret", description: `${parsed}%` });
+  };
 
   const toggleEmployee = async (emp: { hn_user_id: number; name: string }) => {
     const isSelected = selectedIds.has(emp.hn_user_id);
@@ -112,6 +140,30 @@ export default function TimeUtilizationSettingsPage() {
             </div>
 
             <div className="flex-1 overflow-auto p-4 space-y-6 max-w-4xl">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Utilization-mål</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-3">
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={targetInput}
+                      onChange={(e) => setTargetInput(e.target.value)}
+                      onBlur={saveTarget}
+                      className="w-24"
+                    />
+                    <span className="text-sm text-muted-foreground">%</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Utilization under målet markeres rødt, tæt på gult, på/over målet grønt.
+                  </p>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle>Medarbejdere ({selectedEmployees.length} valgt)</CardTitle>
