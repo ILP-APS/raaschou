@@ -4,9 +4,10 @@ import type { EmployeeSummary } from "../utils/classify";
 
 interface Props {
   rows: EmployeeSummary[];
+  onSelectEmployee?: (hnUserId: number) => void;
 }
 
-export default function UtilizationTable({ rows }: Props) {
+export default function UtilizationTable({ rows, onSelectEmployee }: Props) {
   const totals = rows.reduce(
     (acc, r) => ({
       fakturerbar: acc.fakturerbar + r.fakturerbar,
@@ -32,7 +33,11 @@ export default function UtilizationTable({ rows }: Props) {
       </TableHeader>
       <TableBody>
         {rows.map((r) => (
-          <TableRow key={r.hn_user_id}>
+          <TableRow
+            key={r.hn_user_id}
+            className={onSelectEmployee ? "cursor-pointer hover:bg-muted/50" : undefined}
+            onClick={() => onSelectEmployee?.(r.hn_user_id)}
+          >
             <TableCell>{r.employee_name}</TableCell>
             <TableCell className="text-right">{r.total.toFixed(1)}</TableCell>
             <TableCell className="text-right">{r.fakturerbar.toFixed(1)}</TableCell>

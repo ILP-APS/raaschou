@@ -11,10 +11,14 @@ import {
   useUtilizationEmployees,
   useUtilizationSettings,
   useRegistrationsInRange,
+  useAppointmentCategories,
+  useAppointmentWorktypes,
 } from "../hooks/useTimeUtilization";
 import { summarize } from "../utils/classify";
 import DateRangePicker from "../components/DateRangePicker";
 import UtilizationTable from "../components/UtilizationTable";
+import EmployeeBreakdownSheet from "../components/EmployeeBreakdownSheet";
+import { buildBreakdown } from "../utils/breakdown";
 
 function formatYMD(d: Date): string {
   const y = d.getFullYear();
@@ -42,6 +46,9 @@ export default function TimeUtilizationPage() {
     formatYMD(toDate),
     employees.map((e) => e.hn_user_id),
   );
+  const { data: categories = [] } = useAppointmentCategories();
+  const { data: worktypes = [] } = useAppointmentWorktypes();
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
   const handleSync = async () => {
     if (employees.length === 0) return;
@@ -68,6 +75,19 @@ export default function TimeUtilizationPage() {
   };
 
   const rows = settings ? summarize(registrations, employees, settings) : [];
+
+  const selectedEmployee = selectedUserId
+    ? employees.find((e) => e.hn_user_id === selectedUserId)
+    : null;
+
+  const breakdown = (settings && selectedUserId)
+    ? buildBreakdown(
+        registrations.filter((r) => r.hn_user_id === selectedUserId),
+        settings,
+        categories,
+        worktypes,
+      )
+    : null;
 
   return (
     <SidebarProvider>
@@ -110,12 +130,20 @@ export default function TimeUtilizationPage() {
               ) : isLoading ? (
                 <p className="text-muted-foreground">Indlæser...</p>
               ) : (
-                <UtilizationTable rows={rows} />
+                <UtilizationTable rows={rows} onSelectEmployee={setSelectedUserId} />
               )}
             </div>
           </div>
         </SidebarInset>
       </div>
+      <EmployeeBreakdownSheet
+        open={!!selectedUserId}
+        onClose={() => setSelectedUserId(null)}
+        employeeName={selectedEmployee?.employee_name ?? null}
+        fromDate={fromDate}
+        toDate={toDate}
+        breakdown={breakdown}
+      />
     </SidebarProvider>
   );
 }
