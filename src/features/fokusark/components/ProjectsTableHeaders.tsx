@@ -72,7 +72,7 @@ export const ProjectsTableHeaders: React.FC = () => {
           <HeaderCell width={100} className="text-right border-r bg-blue-50" tooltip="Manuelt tillæg til underleverandørbeløb. Lægges oven i 'Heraf Underlev.' fra tilbuddet (additiv). Brug til ekstra UE der ikke er på tilbuddet. Redigerbar.">Manuel Underlev.</HeaderCell>
           <HeaderCell width={110} className="bg-slate-50 text-right border-r-4 border-r-border" tooltip="(Tilbud − Montage − Underlev.) × Materialeandel%">Beregnet Materiale</HeaderCell>
 
-          <HeaderCell width={90} className="bg-amber-50/50 text-right border-r" tooltip="(Tilbud − Montage) × Projekteringsandel% / Projektering timepris">Est. timer Design</HeaderCell>
+          <HeaderCell width={90} className="bg-amber-50/50 text-right border-r" tooltip="(Tilbud − Montage − Underlev.) × Projekteringsandel% / Projektering timepris">Est. timer Design</HeaderCell>
           <HeaderCell width={90} className="bg-amber-50/50 text-right border-r" tooltip="(Tilbud − Montage − Materialer − Underlev.) / Gns. timepris − Est. timer design">Est. timer Prod</HeaderCell>
           <HeaderCell width={90} className="bg-amber-50/50 text-right border-r-4 border-r-border" tooltip="(Montage − Montage × Fragtandel%) / Montage timepris">Est. timer Mont.</HeaderCell>
 
