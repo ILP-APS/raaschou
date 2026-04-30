@@ -68,8 +68,8 @@ export const ProjectsTableHeaders: React.FC = () => {
           <HeaderCell width={110} className="bg-slate-50 text-right border-r" tooltip="Samlet tilbudsbeløb fra e-regnskab tilbud (offer line items)">Tilbudsbeløb i alt</HeaderCell>
           <HeaderCell width={100} className="bg-slate-50 text-right border-r" tooltip="Montagebeløb fra tilbud (offer lines med varenr. 'Montage')">Heraf Montage</HeaderCell>
           <HeaderCell width={110} className="bg-slate-50 text-right border-r" tooltip="Underleverandørbeløb fra tilbud (offer lines med varenr. 'UE')">Heraf Underlev.</HeaderCell>
-          <HeaderCell width={100} className="text-right border-r bg-blue-50" tooltip="Manuel overstyring af montagebeløb. Bruges hvis montage ikke er registreret i tilbuddet. Redigerbar.">Manuel Montage</HeaderCell>
-          <HeaderCell width={100} className="text-right border-r bg-blue-50" tooltip="Manuel overstyring af underleverandørbeløb. Bruges hvis UE ikke er registreret i tilbuddet. Redigerbar.">Manuel Underlev.</HeaderCell>
+          <HeaderCell width={100} className="text-right border-r bg-blue-50" tooltip="Manuelt tillæg til montagebeløb. Lægges oven i 'Heraf Montage' fra tilbuddet (additiv). Brug til ekstra montage der ikke er på tilbuddet. Redigerbar.">Manuel Montage</HeaderCell>
+          <HeaderCell width={100} className="text-right border-r bg-blue-50" tooltip="Manuelt tillæg til underleverandørbeløb. Lægges oven i 'Heraf Underlev.' fra tilbuddet (additiv). Brug til ekstra UE der ikke er på tilbuddet. Redigerbar.">Manuel Underlev.</HeaderCell>
           <HeaderCell width={110} className="bg-slate-50 text-right border-r-4 border-r-border" tooltip="(Tilbud − Montage − Underlev.) × Materialeandel%">Beregnet Materiale</HeaderCell>
 
           <HeaderCell width={90} className="bg-amber-50/50 text-right border-r" tooltip="(Tilbud − Montage) × Projekteringsandel% / Projektering timepris">Est. timer Design</HeaderCell>
