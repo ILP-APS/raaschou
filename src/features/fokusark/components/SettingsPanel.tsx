@@ -63,6 +63,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settings, onUpdate
           <SheetTitle>Fokusark indstillinger</SheetTitle>
           <SheetDescription>
             Konstanter brugt til beregning af estimerede timer og materialer.
+            <br />
+            <span className="mt-2 block font-medium text-foreground">
+              Tryk på "Opdater fra e-regnskab" efter ændringer for at synkronisere data.
+            </span>
           </SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-4 py-4">
