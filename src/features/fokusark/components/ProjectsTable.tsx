@@ -16,6 +16,7 @@ interface ProjectsTableProps {
 
 const ProjectsTable: React.FC<ProjectsTableProps> = ({ refreshKey }) => {
   const { projects, loading, fetchProjects, updateCompletionPercentage, updateManualAssemblyAmount, updateManualSubcontractorAmount } = useProjects();
+  const { settings } = useSettings();
   const { containerRef, isDragging, handleMouseDown } = useHoldScroll();
   const { state } = useSidebar();
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
@@ -27,12 +28,12 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({ refreshKey }) => {
   }, [refreshKey]);
 
   const projectHierarchies = useMemo(() => {
-      const hierarchies = parseProjectHierarchy(projects);
+      const hierarchies = parseProjectHierarchy(projects, settings.min_offer_amount);
       return hierarchies.map(hierarchy => ({
         ...hierarchy,
         isExpanded: expandedProjects.has(hierarchy.parent.id)
       }));
-    }, [projects, expandedProjects]);
+    }, [projects, expandedProjects, settings.min_offer_amount]);
 
   const displayProjects = useMemo(() => {
     return flattenHierarchy(projectHierarchies);
