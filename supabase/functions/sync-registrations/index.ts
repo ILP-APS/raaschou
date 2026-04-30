@@ -93,6 +93,7 @@ async function fetchWeekRegistrations(
       for (const l of arr) {
         const dateStr = l.date?.split("T")[0];
         if (!dateStr) continue;
+        if (dateStr < rangeStart || dateStr > rangeEnd) continue;
 
         let appointmentSubject = l.subject || null;
         let appointmentProject: string | null = null;
