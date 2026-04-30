@@ -96,9 +96,9 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
                   isParent={isParent}
                   hasChildren={hasChildren}
                   isExpanded={isExpanded}
-                  onUpdateCompletionPercentage={updateCompletionPercentage}
-                  onUpdateManualAssemblyAmount={updateManualAssemblyAmount}
-                  onUpdateManualSubcontractorAmount={updateManualSubcontractorAmount}
+                  onUpdateCompletionPercentage={onUpdateCompletionPercentage}
+                  onUpdateManualAssemblyAmount={onUpdateManualAssemblyAmount}
+                  onUpdateManualSubcontractorAmount={onUpdateManualSubcontractorAmount}
                   onToggleCollapse={() => toggleProjectExpansion(project.id)}
                 />
               );
