@@ -105,7 +105,7 @@ serve(async (req) => {
     console.log(`Fetching data from e-regnskab (from ${fromDateStr})...`);
     const [appointments, workLines, users, offerLineItems] = await Promise.all([
       eregnskabFetch(`/Appointment/Standard?open=true&from=${fromDateStr}`, EREGNSKAB_API_KEY),
-      eregnskabFetch("/Appointment/Standard/Line/Work", EREGNSKAB_API_KEY),
+      eregnskabFetch(`/Appointment/Standard/Line/Work?from=${fromDateStr}`, EREGNSKAB_API_KEY),
       eregnskabFetch("/User", EREGNSKAB_API_KEY),
       fetchOfferLineItems(EREGNSKAB_API_KEY),
     ]);
