@@ -265,8 +265,8 @@ serve(async (req) => {
       const manual = manualDataMap.get(appointmentNumber);
 
       const D = offerData.total;
-      const E = manual?.manual_assembly_amount ?? offerData.assembly ?? 0;
-      const F = manual?.manual_subcontractor_amount ?? offerData.subcontractor ?? 0;
+      const E = (offerData.assembly ?? 0) + (manual?.manual_assembly_amount ?? 0);
+      const F = (offerData.subcontractor ?? 0) + (manual?.manual_subcontractor_amount ?? 0);
       const K = hours.projektering;
       const M = hours.montage;
       const N = hours.total;
