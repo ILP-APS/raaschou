@@ -14,10 +14,9 @@ import { exportFokusarkToExcel } from "../utils/exportToExcel";
 const FokusarkContent: React.FC = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
   const { settings, updateSetting } = useSettings();
-  const { projects } = useProjects();
+  const { projects, loading, fetchProjects, updateCompletionPercentage, updateManualAssemblyAmount, updateManualSubcontractorAmount } = useProjects();
 
   const handleUpdate = async () => {
     if (isUpdating) return;
@@ -25,7 +24,7 @@ const FokusarkContent: React.FC = () => {
     try {
       const { data, error } = await supabase.functions.invoke('sync-eregnskab');
       if (error) throw error;
-      setRefreshKey((k) => k + 1);
+      await fetchProjects();
       toast({ title: "Data synkroniseret", description: `${data.projects_upserted} projekter opdateret fra e-regnskab.` });
     } catch (error) {
       console.error('Error syncing data:', error);
@@ -70,13 +69,19 @@ const FokusarkContent: React.FC = () => {
           </Button>
           <SettingsPanel settings={settings} onUpdateSetting={async (key, value) => {
             await updateSetting(key, value);
-            setRefreshKey((k) => k + 1);
+            await fetchProjects();
           }} />
         </div>
         <FokusarkDescription />
       </div>
       <div className="flex-1">
-        <ProjectsTable refreshKey={refreshKey} />
+        <ProjectsTable
+          projects={projects}
+          loading={loading}
+          onUpdateCompletionPercentage={updateCompletionPercentage}
+          onUpdateManualAssemblyAmount={updateManualAssemblyAmount}
+          onUpdateManualSubcontractorAmount={updateManualSubcontractorAmount}
+        />
       </div>
     </div>
   );

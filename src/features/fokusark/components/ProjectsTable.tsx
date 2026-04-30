@@ -1,6 +1,5 @@
 
-import React, { useState, useMemo, useEffect } from "react";
-import { useProjects } from "../hooks/useProjects";
+import React, { useState, useMemo } from "react";
 import { useSettings } from "../hooks/useSettings";
 import { useHoldScroll } from "@/hooks/useHoldScroll";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -11,21 +10,24 @@ import { Project } from "../types/project";
 import { parseProjectHierarchy, flattenHierarchy, ProjectHierarchy } from "../utils/projectHierarchy";
 
 interface ProjectsTableProps {
-  refreshKey?: number;
+  projects: Project[];
+  loading: boolean;
+  onUpdateCompletionPercentage: (projectId: string, value: number) => Promise<void> | void;
+  onUpdateManualAssemblyAmount: (projectId: string, value: number) => Promise<void> | void;
+  onUpdateManualSubcontractorAmount: (projectId: string, value: number) => Promise<void> | void;
 }
 
-const ProjectsTable: React.FC<ProjectsTableProps> = ({ refreshKey }) => {
-  const { projects, loading, fetchProjects, updateCompletionPercentage, updateManualAssemblyAmount, updateManualSubcontractorAmount } = useProjects();
+const ProjectsTable: React.FC<ProjectsTableProps> = ({
+  projects,
+  loading,
+  onUpdateCompletionPercentage,
+  onUpdateManualAssemblyAmount,
+  onUpdateManualSubcontractorAmount,
+}) => {
   const { settings } = useSettings();
   const { containerRef, isDragging, handleMouseDown } = useHoldScroll();
   const { state } = useSidebar();
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    if (refreshKey && refreshKey > 0) {
-      fetchProjects();
-    }
-  }, [refreshKey]);
 
   const projectHierarchies = useMemo(() => {
       const hierarchies = parseProjectHierarchy(projects, settings.min_offer_amount);
@@ -94,9 +96,9 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({ refreshKey }) => {
                   isParent={isParent}
                   hasChildren={hasChildren}
                   isExpanded={isExpanded}
-                  onUpdateCompletionPercentage={updateCompletionPercentage}
-                  onUpdateManualAssemblyAmount={updateManualAssemblyAmount}
-                  onUpdateManualSubcontractorAmount={updateManualSubcontractorAmount}
+                  onUpdateCompletionPercentage={onUpdateCompletionPercentage}
+                  onUpdateManualAssemblyAmount={onUpdateManualAssemblyAmount}
+                  onUpdateManualSubcontractorAmount={onUpdateManualSubcontractorAmount}
                   onToggleCollapse={() => toggleProjectExpansion(project.id)}
                 />
               );
