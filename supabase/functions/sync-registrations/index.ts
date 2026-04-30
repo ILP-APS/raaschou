@@ -73,14 +73,17 @@ async function fetchAppointmentDetails(
 async function fetchWeekRegistrations(
   hnUserId: number, rangeStart: string, rangeEnd: string, apiKeys: string[]
 ): Promise<RegLine[]> {
+  // e-regnskab's `to` parameter is EXCLUSIVE on these endpoints, so we add one day
+  // to make sure the last desired date (rangeEnd) is included in the response.
+  const apiTo = addDays(rangeEnd, 1);
   const allLines: RegLine[] = [];
   for (const apiKey of apiKeys) {
     const [workLines, internalLines, sickness, vacation, privateDays] = await Promise.all([
-      eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${rangeStart}&to=${rangeEnd}`, apiKey),
-      eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${rangeStart}&to=${rangeEnd}`, apiKey),
-      eregnskabFetch(`/WorkTime/Sickness?hnUserID=${hnUserId}&from=${rangeStart}&to=${rangeEnd}`, apiKey),
-      eregnskabFetch(`/WorkTime/Vacation?hnUserID=${hnUserId}&from=${rangeStart}&to=${rangeEnd}`, apiKey),
-      eregnskabFetch(`/WorkTime/Private?hnUserID=${hnUserId}&from=${rangeStart}&to=${rangeEnd}`, apiKey),
+      eregnskabFetch(`/Appointment/Standard/Line/Work?hnUserID=${hnUserId}&from=${rangeStart}&to=${apiTo}`, apiKey),
+      eregnskabFetch(`/Appointment/Internal/Line/Work?hnUserID=${hnUserId}&from=${rangeStart}&to=${apiTo}`, apiKey),
+      eregnskabFetch(`/WorkTime/Sickness?hnUserID=${hnUserId}&from=${rangeStart}&to=${apiTo}`, apiKey),
+      eregnskabFetch(`/WorkTime/Vacation?hnUserID=${hnUserId}&from=${rangeStart}&to=${apiTo}`, apiKey),
+      eregnskabFetch(`/WorkTime/Private?hnUserID=${hnUserId}&from=${rangeStart}&to=${apiTo}`, apiKey),
     ]);
 
     const lines: RegLine[] = [];
