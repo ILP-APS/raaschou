@@ -95,6 +95,7 @@ serve(async (req) => {
       projecting_share: settingsMap.projecting_share ?? 0.10,
       projecting_hourly_rate: settingsMap.projecting_hourly_rate ?? 830,
       freight_share: settingsMap.freight_share ?? 0.08,
+      min_offer_amount: settingsMap.min_offer_amount ?? 25000,
     };
     console.log("Settings loaded:", S);
 
@@ -310,12 +311,12 @@ serve(async (req) => {
       };
     });
 
-    // Filter: include sub-appointments always, otherwise require offer_amount > 25000
+    // Filter: include sub-appointments always, otherwise require offer_amount >= S.min_offer_amount
     const projectRows = allProjectRows
       .filter((row) => {
         if (row._is_sub) return true;
         if (row.offer_amount <= 0) return false;
-        if (row.offer_amount < 25000) return false;
+        if (row.offer_amount < S.min_offer_amount) return false;
         return true;
       })
       .map(({ _is_sub, ...rest }) => rest);

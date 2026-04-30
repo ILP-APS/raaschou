@@ -15,12 +15,12 @@ export const getParentProjectId = (projectId: string): string => {
   return projectId.split('-')[0];
 };
 
-export const parseProjectHierarchy = (projects: Project[]): ProjectHierarchy[] => {
+export const parseProjectHierarchy = (projects: Project[], minOfferAmount: number = 25000): ProjectHierarchy[] => {
   const filtered = projects.filter(p => {
     if (isSubProject(p.id)) return true;
     const numId = parseInt(p.id, 10) || 0;
     if (numId < 10000) return false;
-    return (p.offer_amount ?? 0) >= 25000;
+    return (p.offer_amount ?? 0) >= minOfferAmount;
   });
 
   const hierarchyMap = new Map<string, ProjectHierarchy>();
