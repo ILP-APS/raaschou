@@ -14,10 +14,9 @@ import { exportFokusarkToExcel } from "../utils/exportToExcel";
 const FokusarkContent: React.FC = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
   const { settings, updateSetting } = useSettings();
-  const { projects } = useProjects();
+  const { projects, loading, fetchProjects, updateCompletionPercentage, updateManualAssemblyAmount, updateManualSubcontractorAmount } = useProjects();
 
   const handleUpdate = async () => {
     if (isUpdating) return;
