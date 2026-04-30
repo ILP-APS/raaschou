@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { useProjects } from "../hooks/useProjects";
+import { useSettings } from "../hooks/useSettings";
 import { useHoldScroll } from "@/hooks/useHoldScroll";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Table, TableBody } from "@/components/ui/table";
