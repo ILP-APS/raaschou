@@ -95,6 +95,7 @@ serve(async (req) => {
       projecting_share: settingsMap.projecting_share ?? 0.10,
       projecting_hourly_rate: settingsMap.projecting_hourly_rate ?? 830,
       freight_share: settingsMap.freight_share ?? 0.08,
+      min_offer_amount: settingsMap.min_offer_amount ?? 25000,
     };
     console.log("Settings loaded:", S);
 
