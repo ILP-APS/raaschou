@@ -1,19 +1,23 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Loader2 } from "lucide-react";
+import { RefreshCw, Loader2, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import FokusarkDescription from "./FokusarkDescription";
 import ProjectsTable from "./ProjectsTable";
 import { useSettings } from "../hooks/useSettings";
+import { useProjects } from "../hooks/useProjects";
 import { SettingsPanel } from "./SettingsPanel";
+import { exportFokusarkToExcel } from "../utils/exportToExcel";
 
 const FokusarkContent: React.FC = () => {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
   const { settings, updateSetting } = useSettings();
+  const { projects } = useProjects();
 
   const handleUpdate = async () => {
     if (isUpdating) return;
@@ -31,6 +35,20 @@ const FokusarkContent: React.FC = () => {
     }
   };
 
+  const handleDownloadExcel = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      await exportFokusarkToExcel(projects, settings.min_offer_amount);
+      toast({ title: "Excel hentet", description: "Fokusark er downloadet." });
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      toast({ title: "Fejl ved eksport", description: "Kunne ikke generere Excel-fil.", variant: "destructive" });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4 p-4 md:p-6">
       <div className="flex flex-col gap-4 pb-4">
@@ -41,6 +59,13 @@ const FokusarkContent: React.FC = () => {
               <><Loader2 className="h-4 w-4 animate-spin" />Synkroniserer...</>
             ) : (
               <><RefreshCw className="h-4 w-4" />Opdater fra e-regnskab</>
+            )}
+          </Button>
+          <Button onClick={handleDownloadExcel} disabled={isExporting || projects.length === 0} variant="outline" className="gap-2">
+            {isExporting ? (
+              <><Loader2 className="h-4 w-4 animate-spin" />Eksporterer...</>
+            ) : (
+              <><Download className="h-4 w-4" />Download Excel</>
             )}
           </Button>
           <SettingsPanel settings={settings} onUpdateSetting={async (key, value) => {
