@@ -273,7 +273,7 @@ serve(async (req) => {
       const Q = manual?.completion_percentage_manual ?? 0;
 
       const G = (D - E - F) * S.material_share;
-      const H = (D - E) * S.projecting_share / S.projecting_hourly_rate;
+      const H = (D - E - F) * S.projecting_share / S.projecting_hourly_rate;
       const I_val = (D - E - G - F) / S.average_hourly_rate - H;
       const J = (E - E * S.freight_share) / S.assembly_hourly_rate;
       const L = N - M - K;
