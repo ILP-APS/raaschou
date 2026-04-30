@@ -68,11 +68,11 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
       <ConditionalValueCell value={project.hours_remaining_projecting} className="border-r-4 border-r-border" />
       
       {/* Produktions stadie */}
-      <BasicValueCell value={project.hours_remaining_production} isNumber />
       <EditableCompletionPercentageCell value={project.completion_percentage_manual} projectId={project.id} isSubProject={isSubProject} onUpdate={onUpdateCompletionPercentage} />
       <BasicValueCell value={project.completion_percentage_previous} isNumber suffix="%" />
       <BasicValueCell value={project.hours_estimated_by_completion} isNumber />
-      <ConditionalValueCell value={project.plus_minus_hours} className="border-r-4 border-r-border" />
+      <ConditionalValueCell value={project.plus_minus_hours} />
+      <BasicValueCell value={project.hours_remaining_production} isNumber className="text-right border-r-4 border-r-border px-2 py-2" />
       
       {/* Montage */}
       <ConditionalValueCell value={project.hours_remaining_assembly} />
