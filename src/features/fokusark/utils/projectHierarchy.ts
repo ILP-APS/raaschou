@@ -1,5 +1,5 @@
 import { Project } from "../types/project";
-import { FokusarkFilters, FremdriftBucket } from "../types/filters";
+import { FokusarkFilters, FremdriftBucket, OfferAmountBucket } from "../types/filters";
 
 export interface ProjectHierarchy {
   parent: Project;
