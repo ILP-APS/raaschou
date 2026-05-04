@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, X } from "lucide-react";
 import { MultiSelectFilter } from "./filters/MultiSelectFilter";
-import { FokusarkFilters, FremdriftBucket, isFilterActive } from "../types/filters";
+import { FokusarkFilters, FremdriftBucket, OfferAmountBucket, isFilterActive } from "../types/filters";
 import { Project } from "../types/project";
 
 interface FokusarkFilterBarProps {
