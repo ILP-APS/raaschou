@@ -1,15 +1,20 @@
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Loader2, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import FokusarkDescription from "./FokusarkDescription";
 import ProjectsTable from "./ProjectsTable";
+import { FokusarkFilterBar } from "./FokusarkFilterBar";
 import { useSettings } from "../hooks/useSettings";
 import { useProjects } from "../hooks/useProjects";
+import { useFokusarkFilters } from "../hooks/useFokusarkFilters";
+import { useAppointmentCategories } from "../hooks/useAppointmentCategories";
 import { SettingsPanel } from "./SettingsPanel";
 import { exportFokusarkToExcel } from "../utils/exportToExcel";
+import { parseProjectHierarchy } from "../utils/projectHierarchy";
+import { Project } from "../types/project";
 
 const FokusarkContent: React.FC = () => {
   const [isUpdating, setIsUpdating] = useState(false);
@@ -17,6 +22,17 @@ const FokusarkContent: React.FC = () => {
   const { toast } = useToast();
   const { settings, updateSetting } = useSettings();
   const { projects, loading, fetchProjects, updateCompletionPercentage, updateManualAssemblyAmount, updateManualSubcontractorAmount } = useProjects();
+  const { filters, update: updateFilter, clearAll: clearFilters } = useFokusarkFilters();
+  const { categories } = useAppointmentCategories();
+
+  const totalParents = useMemo(
+    () => parseProjectHierarchy(projects, settings.min_offer_amount).length,
+    [projects, settings.min_offer_amount],
+  );
+  const filteredParents = useMemo(
+    () => parseProjectHierarchy(projects, settings.min_offer_amount, filters).length,
+    [projects, settings.min_offer_amount, filters],
+  );
 
   const handleUpdate = async () => {
     if (isUpdating) return;
@@ -38,7 +54,13 @@ const FokusarkContent: React.FC = () => {
     if (isExporting) return;
     setIsExporting(true);
     try {
-      await exportFokusarkToExcel(projects, settings.min_offer_amount);
+      const hierarchies = parseProjectHierarchy(projects, settings.min_offer_amount, filters);
+      const visible: Project[] = [];
+      for (const h of hierarchies) {
+        visible.push(h.parent);
+        visible.push(...h.children);
+      }
+      await exportFokusarkToExcel(visible, settings.min_offer_amount);
       toast({ title: "Excel hentet", description: "Fokusark er downloadet." });
     } catch (error) {
       console.error('Error exporting to Excel:', error);
@@ -72,12 +94,23 @@ const FokusarkContent: React.FC = () => {
             await fetchProjects();
           }} />
         </div>
+        <FokusarkFilterBar
+          projects={projects}
+          categories={categories}
+          filters={filters}
+          onUpdate={updateFilter}
+          onClearAll={clearFilters}
+          filteredCount={filteredParents}
+          totalCount={totalParents}
+        />
         <FokusarkDescription />
       </div>
       <div className="flex-1">
         <ProjectsTable
           projects={projects}
           loading={loading}
+          filters={filters}
+          onClearFilters={clearFilters}
           onUpdateCompletionPercentage={updateCompletionPercentage}
           onUpdateManualAssemblyAmount={updateManualAssemblyAmount}
           onUpdateManualSubcontractorAmount={updateManualSubcontractorAmount}

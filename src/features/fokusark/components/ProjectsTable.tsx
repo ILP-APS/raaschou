@@ -5,14 +5,18 @@ import { useAppointmentCategories } from "../hooks/useAppointmentCategories";
 import { useHoldScroll } from "@/hooks/useHoldScroll";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Table, TableBody } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { ProjectsTableHeaders } from "./ProjectsTableHeaders";
 import { ProjectsTableRow } from "./ProjectsTableRow";
 import { Project } from "../types/project";
 import { parseProjectHierarchy, flattenHierarchy, ProjectHierarchy } from "../utils/projectHierarchy";
+import { FokusarkFilters, isFilterActive } from "../types/filters";
 
 interface ProjectsTableProps {
   projects: Project[];
   loading: boolean;
+  filters: FokusarkFilters;
+  onClearFilters: () => void;
   onUpdateCompletionPercentage: (projectId: string, value: number) => Promise<void> | void;
   onUpdateManualAssemblyAmount: (projectId: string, value: number) => Promise<void> | void;
   onUpdateManualSubcontractorAmount: (projectId: string, value: number) => Promise<void> | void;
@@ -21,6 +25,8 @@ interface ProjectsTableProps {
 const ProjectsTable: React.FC<ProjectsTableProps> = ({
   projects,
   loading,
+  filters,
+  onClearFilters,
   onUpdateCompletionPercentage,
   onUpdateManualAssemblyAmount,
   onUpdateManualSubcontractorAmount,
@@ -32,12 +38,12 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
 
   const projectHierarchies = useMemo(() => {
-      const hierarchies = parseProjectHierarchy(projects, settings.min_offer_amount);
+      const hierarchies = parseProjectHierarchy(projects, settings.min_offer_amount, filters);
       return hierarchies.map(hierarchy => ({
         ...hierarchy,
         isExpanded: expandedProjects.has(hierarchy.parent.id)
       }));
-    }, [projects, expandedProjects, settings.min_offer_amount]);
+    }, [projects, expandedProjects, settings.min_offer_amount, filters]);
 
   const displayProjects = useMemo(() => {
     return flattenHierarchy(projectHierarchies);
@@ -60,6 +66,15 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-lg text-muted-foreground">Loading projects...</div>
+      </div>
+    );
+  }
+
+  if (!loading && displayProjects.length === 0 && isFilterActive(filters)) {
+    return (
+      <div className="w-full border border-border rounded-lg p-12 flex flex-col items-center justify-center gap-3 text-center">
+        <p className="text-muted-foreground">Ingen projekter matcher de valgte filtre.</p>
+        <Button variant="outline" size="sm" onClick={onClearFilters}>Ryd alle filtre</Button>
       </div>
     );
   }
