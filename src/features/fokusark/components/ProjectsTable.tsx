@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo } from "react";
 import { useSettings } from "../hooks/useSettings";
+import { useAppointmentCategories } from "../hooks/useAppointmentCategories";
 import { useHoldScroll } from "@/hooks/useHoldScroll";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Table, TableBody } from "@/components/ui/table";
@@ -25,6 +26,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
   onUpdateManualSubcontractorAmount,
 }) => {
   const { settings } = useSettings();
+  const { categories } = useAppointmentCategories();
   const { containerRef, isDragging, handleMouseDown } = useHoldScroll();
   const { state } = useSidebar();
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
@@ -75,7 +77,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
         }}
         onMouseDown={handleMouseDown}
       >
-        <Table style={{ minWidth: '2350px', width: 'max-content', tableLayout: 'fixed' }}>
+        <Table style={{ minWidth: '2530px', width: 'max-content', tableLayout: 'fixed' }}>
           <ProjectsTableHeaders />
           <TableBody>
             {displayProjects.map((project: Project, index) => {
@@ -96,6 +98,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
                   isParent={isParent}
                   hasChildren={hasChildren}
                   isExpanded={isExpanded}
+                  categoryName={project.hn_appointment_category_id ? categories.get(project.hn_appointment_category_id) ?? null : null}
                   onUpdateCompletionPercentage={onUpdateCompletionPercentage}
                   onUpdateManualAssemblyAmount={onUpdateManualAssemblyAmount}
                   onUpdateManualSubcontractorAmount={onUpdateManualSubcontractorAmount}
