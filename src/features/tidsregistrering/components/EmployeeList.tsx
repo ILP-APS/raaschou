@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Settings2, RefreshCw, Loader2, AlertTriangle } from "lucide-react";
 import { useAutomationEmployees, useToggleEmployeeActive, useEmployeeSchedules, useSyncEmployees } from "../hooks/useEmployees";
 import EmployeeScheduleDialog from "./EmployeeScheduleDialog";
+import PhoneSourceDialog from "./PhoneSourceDialog";
 import AccountFilter, { type AccountFilterValue } from "@/components/AccountFilter";
 import { useToast } from "@/hooks/use-toast";
 
