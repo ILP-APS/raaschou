@@ -117,6 +117,14 @@ export const FokusarkFilterBar: React.FC<FokusarkFilterBarProps> = ({
         width={200}
       />
 
+      <MultiSelectFilter
+        label="Tilbudsbeløb"
+        options={OFFER_AMOUNT_OPTIONS}
+        selected={filters.offerAmount}
+        onChange={(next) => onUpdate("offerAmount", next as OfferAmountBucket[])}
+        width={200}
+      />
+
       {active && (
         <>
           <Button variant="ghost" size="sm" onClick={onClearAll} className="gap-1 text-muted-foreground">
