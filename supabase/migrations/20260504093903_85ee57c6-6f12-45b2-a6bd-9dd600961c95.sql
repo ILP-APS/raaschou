@@ -1,0 +1,1 @@
+DELETE FROM public.settings WHERE key = 'min_offer_amount';

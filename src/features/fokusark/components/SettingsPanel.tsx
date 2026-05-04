@@ -25,7 +25,6 @@ const SETTING_LABELS: Record<keyof FokusarkSettings, { label: string; suffix: st
   projecting_share:       { label: "Projekteringsandel",    suffix: "%",  isPercentage: true },
   projecting_hourly_rate: { label: "Projektering timepris", suffix: "kr", isPercentage: false },
   freight_share:          { label: "Fragtandel",            suffix: "%",  isPercentage: true },
-  min_offer_amount:       { label: "Vis kun tilbud over",   suffix: "kr", isPercentage: false },
 };
 
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settings, onUpdateSetting }) => {

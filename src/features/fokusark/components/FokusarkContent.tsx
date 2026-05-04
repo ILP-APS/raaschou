@@ -26,12 +26,12 @@ const FokusarkContent: React.FC = () => {
   const { categories } = useAppointmentCategories();
 
   const totalParents = useMemo(
-    () => parseProjectHierarchy(projects, settings.min_offer_amount).length,
-    [projects, settings.min_offer_amount],
+    () => parseProjectHierarchy(projects).length,
+    [projects],
   );
   const filteredParents = useMemo(
-    () => parseProjectHierarchy(projects, settings.min_offer_amount, filters).length,
-    [projects, settings.min_offer_amount, filters],
+    () => parseProjectHierarchy(projects, filters).length,
+    [projects, filters],
   );
 
   const handleUpdate = async () => {
@@ -54,13 +54,13 @@ const FokusarkContent: React.FC = () => {
     if (isExporting) return;
     setIsExporting(true);
     try {
-      const hierarchies = parseProjectHierarchy(projects, settings.min_offer_amount, filters);
+      const hierarchies = parseProjectHierarchy(projects, filters);
       const visible: Project[] = [];
       for (const h of hierarchies) {
         visible.push(h.parent);
         visible.push(...h.children);
       }
-      await exportFokusarkToExcel(visible, settings.min_offer_amount);
+      await exportFokusarkToExcel(visible);
       toast({ title: "Excel hentet", description: "Fokusark er downloadet." });
     } catch (error) {
       console.error('Error exporting to Excel:', error);

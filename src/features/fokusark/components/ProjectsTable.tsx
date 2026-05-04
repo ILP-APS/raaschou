@@ -38,12 +38,12 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
 
   const projectHierarchies = useMemo(() => {
-      const hierarchies = parseProjectHierarchy(projects, settings.min_offer_amount, filters);
+      const hierarchies = parseProjectHierarchy(projects, filters);
       return hierarchies.map(hierarchy => ({
         ...hierarchy,
         isExpanded: expandedProjects.has(hierarchy.parent.id)
       }));
-    }, [projects, expandedProjects, settings.min_offer_amount, filters]);
+    }, [projects, expandedProjects, filters]);
 
   const displayProjects = useMemo(() => {
     return flattenHierarchy(projectHierarchies);
