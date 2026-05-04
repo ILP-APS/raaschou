@@ -1,0 +1,1 @@
+ALTER VIEW public.sms_log_summary_per_case SET (security_invoker = on);
