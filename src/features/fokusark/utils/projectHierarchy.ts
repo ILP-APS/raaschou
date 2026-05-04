@@ -128,6 +128,9 @@ export const parseProjectHierarchy = (
       if (filters.fremdrift.length > 0) {
         if (!matchesFremdrift(p.plus_minus_hours, filters.fremdrift)) return false;
       }
+      if (filters.offerAmount.length > 0) {
+        if (!matchesOfferAmount(p.offer_amount, filters.offerAmount)) return false;
+      }
       if (filters.search.trim()) {
         const parentMatch = matchesSearch(p, filters.search);
         const childMatch = h.children.some(c => matchesSearch(c, filters.search));
