@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.sync-reference-data]
 verify_jwt = false
+
+[functions.cleanup-stale-cases]
+verify_jwt = false
