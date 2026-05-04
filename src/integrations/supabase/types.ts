@@ -494,7 +494,22 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      sms_log_summary_per_case: {
+        Row: {
+          case_id: string | null
+          last_sent_at: string | null
+          sms_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_reminder_logs_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "sms_reminder_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       calculate_completion_metrics: {
