@@ -19,6 +19,20 @@ const matchesFremdrift = (plusMinus: number | null, buckets: FremdriftBucket[]):
   return false;
 };
 
+const matchesOfferAmount = (offer: number | null, buckets: OfferAmountBucket[]): boolean => {
+  if (buckets.length === 0) return true;
+  if (offer == null) return false;
+  for (const b of buckets) {
+    if (b === "25_50k" && offer >= 25000 && offer < 50000) return true;
+    if (b === "50_100k" && offer >= 50000 && offer < 100000) return true;
+    if (b === "100_250k" && offer >= 100000 && offer < 250000) return true;
+    if (b === "250_500k" && offer >= 250000 && offer < 500000) return true;
+    if (b === "500k_1m" && offer >= 500000 && offer < 1000000) return true;
+    if (b === "1m_plus" && offer >= 1000000) return true;
+  }
+  return false;
+};
+
 const matchesSearch = (p: Project, query: string): boolean => {
   const q = query.toLowerCase().trim();
   if (!q) return true;
