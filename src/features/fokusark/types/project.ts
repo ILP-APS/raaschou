@@ -3,6 +3,7 @@ export interface Project {
   id: string;
   name: string | null;
   responsible_person_initials: string | null;
+  hn_appointment_category_id: number | null;
   offer_amount: number | null;
   assembly_amount: number | null;
   subcontractor_amount: number | null;
