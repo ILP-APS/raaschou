@@ -12,6 +12,7 @@ const loadFromStorage = (): FokusarkFilters => {
       responsible: Array.isArray(parsed.responsible) ? parsed.responsible : [],
       categoryIds: Array.isArray(parsed.categoryIds) ? parsed.categoryIds : [],
       fremdrift: Array.isArray(parsed.fremdrift) ? parsed.fremdrift : [],
+      offerAmount: Array.isArray(parsed.offerAmount) ? parsed.offerAmount : [],
       search: "",
     };
   } catch {
