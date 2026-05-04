@@ -9,7 +9,6 @@ export interface FokusarkSettings {
   projecting_share: number;
   projecting_hourly_rate: number;
   freight_share: number;
-  min_offer_amount: number;
 }
 
 const DEFAULTS: FokusarkSettings = {
@@ -19,7 +18,6 @@ const DEFAULTS: FokusarkSettings = {
   projecting_share: 0.10,
   projecting_hourly_rate: 830,
   freight_share: 0.08,
-  min_offer_amount: 25000,
 };
 
 export const useSettings = () => {

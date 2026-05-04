@@ -78,10 +78,9 @@ const thinBorder = { style: "thin" as const, color: { argb: "FFD1D5DB" } };
 const thickBorder = { style: "medium" as const, color: { argb: "FF6B7280" } };
 
 export const exportFokusarkToExcel = async (
-  projects: Project[],
-  minOfferAmount: number
+  projects: Project[]
 ): Promise<void> => {
-  const hierarchies = parseProjectHierarchy(projects, minOfferAmount).map((h) => ({
+  const hierarchies = parseProjectHierarchy(projects).map((h) => ({
     ...h,
     isExpanded: true,
   }));

@@ -41,16 +41,17 @@ const matchesSearch = (p: Project, query: string): boolean => {
   return false;
 };
 
+const DISPLAY_FLOOR = 25000;
+
 export const parseProjectHierarchy = (
   projects: Project[],
-  minOfferAmount: number = 25000,
   filters?: FokusarkFilters,
 ): ProjectHierarchy[] => {
   const baseFiltered = projects.filter(p => {
     if (isSubProject(p.id)) return true;
     const numId = parseInt(p.id, 10) || 0;
     if (numId < 10000) return false;
-    return (p.offer_amount ?? 0) >= minOfferAmount;
+    return (p.offer_amount ?? 0) >= DISPLAY_FLOOR;
   });
 
   const hierarchyMap = new Map<string, ProjectHierarchy>();
