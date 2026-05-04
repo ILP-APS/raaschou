@@ -256,6 +256,7 @@ serve(async (req) => {
           plus_minus_hours: null,
           allocated_freight_amount: null,
           last_api_update: nowISO,
+          hn_appointment_category_id: apt.hnAppointmentCategoryID ?? null,
           _is_sub: true,
         };
       }
