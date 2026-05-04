@@ -63,7 +63,8 @@ export const ProjectsTableHeaders: React.FC = () => {
         <TableRow>
           <TableHead className="sticky z-30 bg-muted px-2 py-2 leading-tight whitespace-normal align-middle" style={{ left: 0, minWidth: '130px', width: '130px', maxWidth: '130px' }}>Projekt ID</TableHead>
           <TableHead className="sticky z-30 bg-muted px-2 py-2 leading-tight whitespace-normal align-middle" style={{ left: '130px', minWidth: '220px', width: '220px', maxWidth: '220px' }}>Projekt Navn/Emne</TableHead>
-          <TableHead className="sticky z-30 bg-muted text-center px-2 py-2 leading-tight whitespace-normal align-middle" style={{ left: '350px', minWidth: '80px', width: '80px', maxWidth: '80px', boxShadow: '1px 0 0 0 hsl(var(--border))' }}>Ansvarlig</TableHead>
+          <TableHead className="sticky z-30 bg-muted text-center px-2 py-2 leading-tight whitespace-normal align-middle" style={{ left: '350px', minWidth: '80px', width: '80px', maxWidth: '80px' }}>Ansvarlig</TableHead>
+          <HeaderCell width={70} className="sticky z-30 bg-muted text-center" style={{ left: '430px', boxShadow: '1px 0 0 0 hsl(var(--border))' }} tooltip="Produktions-status fra e-regnskab (kategori). Tallet svarer til kategoriens nummer — hold musen over for fuldt navn.">Status</HeaderCell>
 
           <HeaderCell width={110} className="bg-slate-50 text-right border-r" tooltip="Samlet tilbudsbeløb fra e-regnskab tilbud (offer line items)">Tilbudsbeløb i alt</HeaderCell>
           <HeaderCell width={100} className="bg-slate-50 text-right border-r" tooltip="Montagebeløb fra tilbud (offer lines med varenr. 'Montage')">Heraf Montage</HeaderCell>
