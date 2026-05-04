@@ -91,20 +91,20 @@ export const FokusarkFilterBar: React.FC<FokusarkFilterBarProps> = ({
         width={240}
       />
 
-      <MultiSelectFilter<number>
+      <MultiSelectFilter
         label="Status"
         options={categoryOptions}
         selected={filters.categoryIds}
-        onChange={(next) => onUpdate("categoryIds", next)}
+        onChange={(next) => onUpdate("categoryIds", next as number[])}
         searchPlaceholder="Søg status..."
         width={320}
       />
 
-      <MultiSelectFilter<FremdriftBucket>
+      <MultiSelectFilter
         label="Fremdrift"
         options={FREMDRIFT_OPTIONS}
         selected={filters.fremdrift}
-        onChange={(next) => onUpdate("fremdrift", next)}
+        onChange={(next) => onUpdate("fremdrift", next as FremdriftBucket[])}
         width={200}
       />
 
