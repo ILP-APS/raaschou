@@ -24,7 +24,6 @@ export const ResponsiblePersonCell: React.FC<ResponsiblePersonCellProps> = ({
       minWidth: '80px', 
       width: '80px',
       maxWidth: '80px',
-      boxShadow: '2px 0 0 0 hsl(var(--border))'
     }}
   >
     {extractInitials(responsiblePersonInitials)}
