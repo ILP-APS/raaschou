@@ -1,5 +1,5 @@
 import { Project } from "../types/project";
-import { FokusarkFilters, FremdriftBucket } from "../types/filters";
+import { FokusarkFilters, FremdriftBucket, OfferAmountBucket } from "../types/filters";
 
 export interface ProjectHierarchy {
   parent: Project;
@@ -16,6 +16,20 @@ const matchesFremdrift = (plusMinus: number | null, buckets: FremdriftBucket[]):
   if (buckets.includes("behind") && v < 0) return true;
   if (buckets.includes("on_track") && v === 0) return true;
   if (buckets.includes("ahead") && v > 0) return true;
+  return false;
+};
+
+const matchesOfferAmount = (offer: number | null, buckets: OfferAmountBucket[]): boolean => {
+  if (buckets.length === 0) return true;
+  if (offer == null) return false;
+  for (const b of buckets) {
+    if (b === "25_50k" && offer >= 25000 && offer < 50000) return true;
+    if (b === "50_100k" && offer >= 50000 && offer < 100000) return true;
+    if (b === "100_250k" && offer >= 100000 && offer < 250000) return true;
+    if (b === "250_500k" && offer >= 250000 && offer < 500000) return true;
+    if (b === "500k_1m" && offer >= 500000 && offer < 1000000) return true;
+    if (b === "1m_plus" && offer >= 1000000) return true;
+  }
   return false;
 };
 
@@ -113,6 +127,9 @@ export const parseProjectHierarchy = (
       }
       if (filters.fremdrift.length > 0) {
         if (!matchesFremdrift(p.plus_minus_hours, filters.fremdrift)) return false;
+      }
+      if (filters.offerAmount.length > 0) {
+        if (!matchesOfferAmount(p.offer_amount, filters.offerAmount)) return false;
       }
       if (filters.search.trim()) {
         const parentMatch = matchesSearch(p, filters.search);
