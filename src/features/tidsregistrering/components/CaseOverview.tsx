@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCases } from "../hooks/useCases";
 import { useAutomationEmployees } from "../hooks/useEmployees";
-import { useSmsLogs } from "../hooks/useSmsLogs";
+import { useSmsLogSummary } from "../hooks/useSmsLogs";
 
 const CaseOverview: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -16,23 +16,20 @@ const CaseOverview: React.FC = () => {
   });
 
   const { data: employees } = useAutomationEmployees();
-  const { data: logs } = useSmsLogs();
+  const { data: smsSummary } = useSmsLogSummary();
 
   const employeeNames = new Map<number, string>();
   if (employees) {
     for (const e of employees) employeeNames.set(e.hn_user_id, e.employee_name);
   }
 
-  // Count SMS per case and find latest sent_at
+  // Server-side aggregering pr. case (uden alders-grænse)
   const smsCountByCase = new Map<string, number>();
   const smsSentAtByCase = new Map<string, string>();
-  if (logs) {
-    for (const log of logs) {
-      smsCountByCase.set(log.case_id, (smsCountByCase.get(log.case_id) || 0) + 1);
-      const existing = smsSentAtByCase.get(log.case_id);
-      if (!existing || (log.sent_at && log.sent_at > existing)) {
-        if (log.sent_at) smsSentAtByCase.set(log.case_id, log.sent_at);
-      }
+  if (smsSummary) {
+    for (const s of smsSummary) {
+      smsCountByCase.set(s.case_id, s.sms_count);
+      if (s.last_sent_at) smsSentAtByCase.set(s.case_id, s.last_sent_at);
     }
   }
 
