@@ -17,6 +17,7 @@ const EmployeeList: React.FC = () => {
   const syncEmployees = useSyncEmployees();
   const { toast } = useToast();
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const [editingPhoneUserId, setEditingPhoneUserId] = useState<number | null>(null);
   const [accountFilter, setAccountFilter] = useState<AccountFilterValue>("alle");
 
   const scheduleMap = new Map<number, any>();
