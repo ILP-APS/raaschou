@@ -169,6 +169,18 @@ const EmployeeList: React.FC = () => {
           onOpenChange={(open) => { if (!open) setEditingUserId(null); }}
         />
       )}
+
+      {editingPhoneUserId !== null && (() => {
+        const emp = employees?.find((e) => e.hn_user_id === editingPhoneUserId);
+        if (!emp) return null;
+        return (
+          <PhoneSourceDialog
+            employee={emp}
+            open={true}
+            onOpenChange={(open) => { if (!open) setEditingPhoneUserId(null); }}
+          />
+        );
+      })()}
     </div>
   );
 };
