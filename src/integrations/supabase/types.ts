@@ -342,25 +342,37 @@ export type Database = {
           accounts: string[] | null
           added_at: string | null
           employee_name: string
+          eregnskab_cellphone: string | null
+          eregnskab_phone: string | null
           hn_user_id: number
           is_active: boolean | null
+          manual_phone_number: string | null
           phone_number: string
+          phone_source: string
         }
         Insert: {
           accounts?: string[] | null
           added_at?: string | null
           employee_name: string
+          eregnskab_cellphone?: string | null
+          eregnskab_phone?: string | null
           hn_user_id: number
           is_active?: boolean | null
+          manual_phone_number?: string | null
           phone_number: string
+          phone_source?: string
         }
         Update: {
           accounts?: string[] | null
           added_at?: string | null
           employee_name?: string
+          eregnskab_cellphone?: string | null
+          eregnskab_phone?: string | null
           hn_user_id?: number
           is_active?: boolean | null
+          manual_phone_number?: string | null
           phone_number?: string
+          phone_source?: string
         }
         Relationships: []
       }
