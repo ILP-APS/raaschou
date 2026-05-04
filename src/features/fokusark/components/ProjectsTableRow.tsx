@@ -20,6 +20,7 @@ interface ProjectsTableRowProps {
   isParent?: boolean;
   hasChildren?: boolean;
   isExpanded?: boolean;
+  categoryName?: string | null;
   onUpdateCompletionPercentage: (projectId: string, value: number) => void;
   onUpdateManualAssemblyAmount: (projectId: string, value: number) => void;
   onUpdateManualSubcontractorAmount: (projectId: string, value: number) => void;
@@ -33,6 +34,7 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
   isParent = false,
   hasChildren = false,
   isExpanded = false,
+  categoryName = null,
   onUpdateCompletionPercentage,
   onUpdateManualAssemblyAmount,
   onUpdateManualSubcontractorAmount,
@@ -45,6 +47,7 @@ export const ProjectsTableRow: React.FC<ProjectsTableRowProps> = ({
       <ProjectIdentifierCell projectId={project.id} isSubProject={isSubProject} isParent={isParent} hasChildren={hasChildren} isExpanded={isExpanded} rowBgColor={rowBgColor} onToggleCollapse={onToggleCollapse} />
       <ProjectNameCell projectName={project.name} isSubProject={isSubProject} isParent={isParent} hasChildren={hasChildren} rowBgColor={rowBgColor} />
       <ResponsiblePersonCell responsiblePersonInitials={project.responsible_person_initials} rowBgColor={rowBgColor} />
+      <StatusCell categoryId={project.hn_appointment_category_id} categoryName={categoryName} rowBgColor={rowBgColor} />
       
       {/* Tilbud */}
       <BasicValueCell value={project.offer_amount} />
