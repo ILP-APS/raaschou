@@ -22,6 +22,15 @@ const FREMDRIFT_OPTIONS: { value: FremdriftBucket; label: string }[] = [
   { value: "ahead", label: "Foran plan" },
 ];
 
+const OFFER_AMOUNT_OPTIONS: { value: OfferAmountBucket; label: string }[] = [
+  { value: "25_50k", label: "25k – 50k" },
+  { value: "50_100k", label: "50k – 100k" },
+  { value: "100_250k", label: "100k – 250k" },
+  { value: "250_500k", label: "250k – 500k" },
+  { value: "500k_1m", label: "500k – 1M" },
+  { value: "1m_plus", label: "≥ 1M" },
+];
+
 export const FokusarkFilterBar: React.FC<FokusarkFilterBarProps> = ({
   projects,
   categories,
