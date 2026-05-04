@@ -308,6 +308,7 @@ serve(async (req) => {
         hours_remaining_assembly: U,
         allocated_freight_amount: V,
         last_api_update: nowISO,
+        hn_appointment_category_id: apt.hnAppointmentCategoryID ?? null,
         _is_sub: false,
       };
     });
