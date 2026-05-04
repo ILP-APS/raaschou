@@ -99,14 +99,27 @@ const EmployeeList: React.FC = () => {
                   <TableCell className="font-medium">{emp.employee_name}</TableCell>
                   <TableCell className="text-muted-foreground">{emp.hn_user_id}</TableCell>
                   <TableCell>
-                    {missingPhone ? (
-                      <span className="flex items-center gap-1 text-destructive text-sm">
-                        <AlertTriangle className="h-3.5 w-3.5" />
-                        Mangler telefonnummer
-                      </span>
-                    ) : (
-                      emp.phone_number
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => setEditingPhoneUserId(emp.hn_user_id)}
+                      className="flex items-center gap-2 text-left hover:underline"
+                    >
+                      {missingPhone ? (
+                        <span className="flex items-center gap-1 text-destructive text-sm">
+                          <AlertTriangle className="h-3.5 w-3.5" />
+                          Mangler telefonnummer
+                        </span>
+                      ) : (
+                        <>
+                          <span>{emp.phone_number}</span>
+                          <Badge variant="outline" className="text-xs">
+                            {emp.phone_source === "cellphone" && "mobil"}
+                            {emp.phone_source === "phone" && "fastnet"}
+                            {emp.phone_source === "manual" && "manuelt"}
+                          </Badge>
+                        </>
+                      )}
+                    </button>
                   </TableCell>
                   <TableCell>
                     {(emp.accounts || []).map((a) => (
