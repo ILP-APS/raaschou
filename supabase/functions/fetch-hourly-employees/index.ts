@@ -41,12 +41,12 @@ async function fetchEmployeesFromAccount(apiKey: string, accountLabel: string) {
     activeUsers.map(async (u: any) => {
       const userId = u.hnUserID;
       const userInfo = await eregnskabFetch(`/User/Info/${userId}`, apiKey);
-      const phone = userInfo?.cellphone || userInfo?.phone || "";
 
       return {
         hn_user_id: userId,
         name: u.name || `User ${userId}`,
-        cellphone: phone,
+        cellphone: userInfo?.cellphone || "",
+        phone: userInfo?.phone || "",
         account: accountLabel,
       };
     })

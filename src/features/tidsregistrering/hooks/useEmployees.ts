@@ -1,10 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+export type PhoneSource = "cellphone" | "phone" | "manual";
+
 export interface AutomationEmployee {
   hn_user_id: number;
   employee_name: string;
   phone_number: string;
+  eregnskab_cellphone: string | null;
+  eregnskab_phone: string | null;
+  manual_phone_number: string | null;
+  phone_source: PhoneSource;
   is_active: boolean;
   added_at: string;
   accounts: string[];
@@ -54,6 +60,9 @@ export function useToggleEmployeeActive() {
   });
 }
 
+const fmt = (n: string | null | undefined) =>
+  n ? (n.startsWith("+45") ? n : `+45${n.replace(/\D/g, "")}`) : "";
+
 export function useSyncEmployees() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -63,30 +72,37 @@ export function useSyncEmployees() {
       if (fetchError) throw fetchError;
       if (!apiEmployees || !Array.isArray(apiEmployees)) throw new Error("Invalid response");
 
-      // 2. Get existing hn_user_ids from DB
+      // 2. Get existing rows from DB (need phone_source + manual_phone_number)
       const { data: existing, error: dbError } = await supabase
         .from("sms_automation_employees")
-        .select("hn_user_id");
+        .select("hn_user_id, phone_source, manual_phone_number");
       if (dbError) throw dbError;
-      const existingIds = new Set((existing || []).map((e: any) => e.hn_user_id));
+      const existingMap = new Map<number, { phone_source: PhoneSource; manual_phone_number: string | null }>();
+      for (const e of existing || []) {
+        existingMap.set((e as any).hn_user_id, {
+          phone_source: (e as any).phone_source,
+          manual_phone_number: (e as any).manual_phone_number,
+        });
+      }
 
-      // 3. Split into new vs existing
-      const newEmployees = apiEmployees.filter((e: any) => !existingIds.has(e.hn_user_id));
-      const existingEmployees = apiEmployees.filter((e: any) => existingIds.has(e.hn_user_id));
+      const newEmployees = apiEmployees.filter((e: any) => !existingMap.has(e.hn_user_id));
+      const existingEmployees = apiEmployees.filter((e: any) => existingMap.has(e.hn_user_id));
 
-      // 4. Insert new employees with is_active: false
+      // 4. Insert new employees with default phone_source = 'cellphone'
       if (newEmployees.length > 0) {
         const { error: insertError } = await supabase
           .from("sms_automation_employees")
           .insert(
             newEmployees.map((e: any) => {
-              const phone = e.cellphone
-                ? (e.cellphone.startsWith("+45") ? e.cellphone : `+45${e.cellphone.replace(/\D/g, "")}`)
-                : "";
+              const cellphone = fmt(e.cellphone);
+              const phone = fmt(e.phone);
               return {
                 hn_user_id: e.hn_user_id,
                 employee_name: e.name,
-                phone_number: phone,
+                eregnskab_cellphone: cellphone,
+                eregnskab_phone: phone,
+                phone_source: "cellphone",
+                phone_number: cellphone,
                 is_active: false,
                 accounts: e.accounts || [],
               };
@@ -95,14 +111,31 @@ export function useSyncEmployees() {
         if (insertError) throw insertError;
       }
 
-      // 5. Update existing employees (name + phone only, NOT is_active)
+      // 5. Update existing — opdater rå felter, udregn phone_number ud fra valgt kilde.
+      //    Rør ALDRIG manual_phone_number ved sync.
       for (const e of existingEmployees) {
-        const phone = e.cellphone
-          ? (e.cellphone.startsWith("+45") ? e.cellphone : `+45${e.cellphone.replace(/\D/g, "")}`)
-          : "";
+        const cellphone = fmt(e.cellphone);
+        const phone = fmt(e.phone);
+        const current = existingMap.get(e.hn_user_id)!;
+
+        let effectivePhone: string;
+        if (current.phone_source === "manual") {
+          effectivePhone = current.manual_phone_number || "";
+        } else if (current.phone_source === "phone") {
+          effectivePhone = phone;
+        } else {
+          effectivePhone = cellphone;
+        }
+
         const { error: updateError } = await supabase
           .from("sms_automation_employees")
-          .update({ employee_name: e.name, phone_number: phone, accounts: e.accounts || [] })
+          .update({
+            employee_name: e.name,
+            eregnskab_cellphone: cellphone,
+            eregnskab_phone: phone,
+            phone_number: effectivePhone,
+            accounts: e.accounts || [],
+          })
           .eq("hn_user_id", e.hn_user_id);
         if (updateError) throw updateError;
       }
@@ -139,6 +172,48 @@ export function useUpsertSchedule() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employee-work-schedules"] });
+    },
+  });
+}
+
+export function useUpdatePhoneSource() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      hn_user_id,
+      phone_source,
+      manual_phone_number,
+    }: {
+      hn_user_id: number;
+      phone_source: PhoneSource;
+      manual_phone_number?: string | null;
+    }) => {
+      const { data: current, error: fetchErr } = await supabase
+        .from("sms_automation_employees")
+        .select("eregnskab_cellphone, eregnskab_phone")
+        .eq("hn_user_id", hn_user_id)
+        .single();
+      if (fetchErr) throw fetchErr;
+
+      const formattedManual = phone_source === "manual" ? fmt(manual_phone_number) : null;
+
+      let effectivePhone = "";
+      if (phone_source === "manual") effectivePhone = formattedManual || "";
+      else if (phone_source === "phone") effectivePhone = (current as any).eregnskab_phone || "";
+      else effectivePhone = (current as any).eregnskab_cellphone || "";
+
+      const { error } = await supabase
+        .from("sms_automation_employees")
+        .update({
+          phone_source,
+          manual_phone_number: formattedManual,
+          phone_number: effectivePhone,
+        })
+        .eq("hn_user_id", hn_user_id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sms-automation-employees"] });
     },
   });
 }

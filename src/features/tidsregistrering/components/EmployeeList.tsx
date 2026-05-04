@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Settings2, RefreshCw, Loader2, AlertTriangle } from "lucide-react";
 import { useAutomationEmployees, useToggleEmployeeActive, useEmployeeSchedules, useSyncEmployees } from "../hooks/useEmployees";
 import EmployeeScheduleDialog from "./EmployeeScheduleDialog";
+import PhoneSourceDialog from "./PhoneSourceDialog";
 import AccountFilter, { type AccountFilterValue } from "@/components/AccountFilter";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,6 +17,7 @@ const EmployeeList: React.FC = () => {
   const syncEmployees = useSyncEmployees();
   const { toast } = useToast();
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const [editingPhoneUserId, setEditingPhoneUserId] = useState<number | null>(null);
   const [accountFilter, setAccountFilter] = useState<AccountFilterValue>("alle");
 
   const scheduleMap = new Map<number, any>();
@@ -97,14 +99,27 @@ const EmployeeList: React.FC = () => {
                   <TableCell className="font-medium">{emp.employee_name}</TableCell>
                   <TableCell className="text-muted-foreground">{emp.hn_user_id}</TableCell>
                   <TableCell>
-                    {missingPhone ? (
-                      <span className="flex items-center gap-1 text-destructive text-sm">
-                        <AlertTriangle className="h-3.5 w-3.5" />
-                        Mangler telefonnummer
-                      </span>
-                    ) : (
-                      emp.phone_number
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => setEditingPhoneUserId(emp.hn_user_id)}
+                      className="flex items-center gap-2 text-left hover:underline"
+                    >
+                      {missingPhone ? (
+                        <span className="flex items-center gap-1 text-destructive text-sm">
+                          <AlertTriangle className="h-3.5 w-3.5" />
+                          Mangler telefonnummer
+                        </span>
+                      ) : (
+                        <>
+                          <span>{emp.phone_number}</span>
+                          <Badge variant="outline" className="text-xs">
+                            {emp.phone_source === "cellphone" && "mobil"}
+                            {emp.phone_source === "phone" && "fastnet"}
+                            {emp.phone_source === "manual" && "manuelt"}
+                          </Badge>
+                        </>
+                      )}
+                    </button>
                   </TableCell>
                   <TableCell>
                     {(emp.accounts || []).map((a) => (
@@ -154,6 +169,18 @@ const EmployeeList: React.FC = () => {
           onOpenChange={(open) => { if (!open) setEditingUserId(null); }}
         />
       )}
+
+      {editingPhoneUserId !== null && (() => {
+        const emp = employees?.find((e) => e.hn_user_id === editingPhoneUserId);
+        if (!emp) return null;
+        return (
+          <PhoneSourceDialog
+            employee={emp}
+            open={true}
+            onOpenChange={(open) => { if (!open) setEditingPhoneUserId(null); }}
+          />
+        );
+      })()}
     </div>
   );
 };
