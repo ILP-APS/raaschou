@@ -47,7 +47,7 @@ export const ProjectsTableHeaders: React.FC = () => {
         <TableRow>
           <TableHead 
             className="sticky z-30 bg-muted text-center font-semibold" 
-            colSpan={3}
+            colSpan={4}
             style={{ left: 0, boxShadow: '1px 0 0 0 hsl(var(--border))' }}
           >
             Aftale
