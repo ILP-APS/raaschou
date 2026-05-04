@@ -235,6 +235,7 @@ export type Database = {
           assembly_amount: number | null
           completion_percentage_manual: number | null
           completion_percentage_previous: number | null
+          hn_appointment_category_id: number | null
           hours_estimated_assembly: number | null
           hours_estimated_by_completion: number | null
           hours_estimated_production: number | null
@@ -263,6 +264,7 @@ export type Database = {
           assembly_amount?: number | null
           completion_percentage_manual?: number | null
           completion_percentage_previous?: number | null
+          hn_appointment_category_id?: number | null
           hours_estimated_assembly?: number | null
           hours_estimated_by_completion?: number | null
           hours_estimated_production?: number | null
@@ -291,6 +293,7 @@ export type Database = {
           assembly_amount?: number | null
           completion_percentage_manual?: number | null
           completion_percentage_previous?: number | null
+          hn_appointment_category_id?: number | null
           hours_estimated_assembly?: number | null
           hours_estimated_by_completion?: number | null
           hours_estimated_production?: number | null
