@@ -49,6 +49,7 @@ export const parseProjectHierarchy = (projects: Project[], minOfferAmount: numbe
         id: parentId,
         name: `Project ${parentId}`,
         responsible_person_initials: null,
+        hn_appointment_category_id: null,
         offer_amount: null,
         assembly_amount: null,
         subcontractor_amount: null,

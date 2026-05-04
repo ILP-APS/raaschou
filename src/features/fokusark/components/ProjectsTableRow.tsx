@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { ProjectIdentifierCell } from "./cells/ProjectIdentifierCell";
 import { ProjectNameCell } from "./cells/ProjectNameCell";
 import { ResponsiblePersonCell } from "./cells/ResponsiblePersonCell";
+import { StatusCell } from "./cells/StatusCell";
 import { EditableManualAmountCell } from "./cells/EditableManualAmountCell";
 import { EditableCompletionPercentageCell } from "./cells/EditableCompletionPercentageCell";
 import { ConditionalValueCell } from "./cells/ConditionalValueCell";
